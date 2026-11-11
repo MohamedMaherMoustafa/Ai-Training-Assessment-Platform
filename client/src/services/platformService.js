@@ -1,0 +1,944 @@
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut as firebaseSignOut,
+} from "firebase/auth";
+import { ref, get, set, update, remove, push, onValue } from "firebase/database";
+import { auth, rtdb, getSecondaryAuth } from "../lib/firebase";
+
+const normalizeKey = (value) => value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, "_");
+
+const VALID_EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+/**
+ * Ensures Firebase Auth receives a syntactically valid email even if an Admin
+ * enters a shorthand identifier like "teacher@123" or "ahmed1".
+ */
+function toFirebaseAuthEmail(rawInput) {
+  const clean = rawInput.trim().toLowerCase();
+  if (VALID_EMAIL_REGEX.test(clean)) {
+    return clean;
+  }
+  const safeLocal = clean.replace(/[^a-z0-9._-]/g, "_") || "user";
+  return `${safeLocal}@academy.local.com`;
+}
+
+/**
+ * Login Gate:
+ * 1) Admin login with admin@123 / admin@123
+ * 2) Instructor or Student login via email or username + password against Firebase Auth + RTDB
+ */
+export async function loginWithCredentials(identifier, password) {
+  const cleanId = identifier.trim();
+
+  if (cleanId === "admin@123" && password === "admin@123") {
+    const adminProfile = {
+      uid: "admin_123",
+      username: "admin@123",
+      email: "admin@123",
+      displayName: "System Administrator",
+      name: { en: "System Administrator", ar: "مدير النظام" },
+      role: "admin",
+      active: true,
+    };
+    try {
+      await set(ref(rtdb, "admins/admin_123"), {
+        ...adminProfile,
+        lastLoginAt: Date.now(),
+      });
+    } catch (e) {
+      console.warn("Admin RTDB sync note:", e.message);
+    }
+    return adminProfile;
+  }
+
+  let emailToUse = cleanId.toLowerCase();
+  const lookupKey = normalizeKey(cleanId);
+  const unameSnap = await get(ref(rtdb, `usernames/${lookupKey}`));
+  if (unameSnap.exists()) {
+    const entry = unameSnap.val();
+    emailToUse = entry.authEmail || entry.email;
+  } else if (!VALID_EMAIL_REGEX.test(emailToUse)) {
+    emailToUse = toFirebaseAuthEmail(emailToUse);
+  }
+
+  const cred = await signInWithEmailAndPassword(auth, emailToUse, password);
+  const userSnap = await get(ref(rtdb, `users/${cred.user.uid}`));
+  if (!userSnap.exists()) {
+    throw new Error("USER_PROFILE_MISSING");
+  }
+  const profile = userSnap.val();
+  if (profile.active === false) {
+    await firebaseSignOut(auth);
+    throw new Error("ACCOUNT_DISABLED");
+  }
+  if (profile.role === "student") {
+    if (profile.approvalStatus === "pending") {
+      await firebaseSignOut(auth);
+      throw new Error("PENDING_INSTRUCTOR_APPROVAL");
+    }
+    if (profile.approvalStatus === "rejected") {
+      await firebaseSignOut(auth);
+      throw new Error("REQUEST_REJECTED");
+    }
+  }
+  return { uid: cred.user.uid, ...profile };
+}
+
+export async function logoutAll() {
+  localStorage.removeItem("admin_session");
+  if (auth.currentUser) {
+    await firebaseSignOut(auth);
+  }
+}
+
+/**
+ * Admin creates an Instructor (Teacher) without signing out the Admin session.
+ */
+export async function createInstructorAccount({
+  nameEn,
+  nameAr,
+  username,
+  email,
+  password,
+  specEn,
+  specAr,
+}) {
+  const displayEmail = email.trim().toLowerCase();
+  const authEmail = toFirebaseAuthEmail(displayEmail);
+  const cleanUsername = normalizeKey(username || displayEmail.split("@")[0]);
+
+  const secondaryAuth = getSecondaryAuth();
+  const cred = await createUserWithEmailAndPassword(secondaryAuth, authEmail, password);
+  const uid = cred.user.uid;
+  await firebaseSignOut(secondaryAuth);
+
+  const instructorDoc = {
+    uid,
+    role: "instructor",
+    username: cleanUsername,
+    email: displayEmail,
+    authEmail,
+    displayName: nameEn || nameAr,
+    name: { en: nameEn, ar: nameAr || nameEn },
+    specialization: { en: specEn || "Technical Instructor", ar: specAr || specEn || "محاضر تقني" },
+    active: true,
+    createdAt: Date.now(),
+  };
+
+  await set(ref(rtdb, `users/${uid}`), instructorDoc);
+  await set(ref(rtdb, `usernames/${cleanUsername}`), { uid, email: displayEmail, authEmail, role: "instructor" });
+  await set(ref(rtdb, `usernames/${normalizeKey(displayEmail)}`), { uid, email: displayEmail, authEmail, role: "instructor" });
+
+  await pushNotification("admin_123", {
+    titleEn: "New Instructor Added",
+    titleAr: "تمت إضافة محاضر جديد",
+    bodyEn: `${nameEn} (@${cleanUsername}) is ready to create courses and quizzes.`,
+    bodyAr: `المحاضر ${nameAr || nameEn} جاهز الآن لإنشاء المقررات والاختبارات.`,
+    type: "success",
+    link: "/admin/instructors",
+  });
+
+  return instructorDoc;
+}
+
+/**
+ * Student Registration with single or multi-instructor selection.
+ * Account stays pending until at least one selected instructor approves the request.
+ */
+export async function registerStudentAccount({
+  fullName,
+  username,
+  email,
+  password,
+  instructorIds,
+  lang = "en",
+  theme = "light",
+}) {
+  const displayEmail = email.trim().toLowerCase();
+  const authEmail = toFirebaseAuthEmail(displayEmail);
+  const cleanUsername = normalizeKey(username || displayEmail.split("@")[0]);
+  const requested = Array.isArray(instructorIds) ? instructorIds : [];
+  const instructorRequests = requested.reduce((acc, id) => {
+    acc[id] = "pending";
+    return acc;
+  }, {});
+
+  const cred = await createUserWithEmailAndPassword(auth, authEmail, password);
+  const uid = cred.user.uid;
+
+  const studentDoc = {
+    uid,
+    role: "student",
+    username: cleanUsername,
+    email: displayEmail,
+    authEmail,
+    displayName: fullName,
+    name: { en: fullName, ar: fullName },
+    instructorIds: [],
+    requestedInstructorIds: requested,
+    instructorRequests,
+    approvalStatus: "pending",
+    enrolledCourseIds: [],
+    lang,
+    theme,
+    active: true,
+    createdAt: Date.now(),
+  };
+
+  await set(ref(rtdb, `users/${uid}`), studentDoc);
+  await set(ref(rtdb, `usernames/${cleanUsername}`), { uid, email: displayEmail, authEmail, role: "student" });
+  await set(ref(rtdb, `usernames/${normalizeKey(displayEmail)}`), { uid, email: displayEmail, authEmail, role: "student" });
+  await firebaseSignOut(auth);
+
+  // Notify Admin & each requested Instructor
+  await pushNotification("admin_123", {
+    titleEn: "New Student Registered",
+    titleAr: "تسجيل طالب جديد",
+    bodyEn: `${fullName} registered and requested ${requested.length} instructor(s).`,
+    bodyAr: `قام الطالب ${fullName} بالتسجيل واختيار ${requested.length} محاضر(ين).`,
+    type: "info",
+    link: "/admin",
+  });
+  await Promise.all(
+    requested.map((instId) =>
+      pushNotification(instId, {
+        titleEn: "New Student Join Request",
+        titleAr: "طلب انضمام طالب جديد",
+        bodyEn: `${fullName} requested to join your classes.`,
+        bodyAr: `طلب الطالب ${fullName} الانضمام إلى فصولك.`,
+        type: "info",
+        link: "/instructor/students",
+      })
+    )
+  );
+
+  return studentDoc;
+}
+
+export async function approveStudentRequest(studentUid, instructorUid) {
+  const snap = await get(ref(rtdb, `users/${studentUid}`));
+  if (!snap.exists()) return;
+  const student = snap.val();
+  const currentIds = Array.isArray(student.instructorIds) ? student.instructorIds : [];
+  const nextIds = currentIds.includes(instructorUid) ? currentIds : [...currentIds, instructorUid];
+  const nextRequests = { ...(student.instructorRequests || {}), [instructorUid]: "approved" };
+  await update(ref(rtdb, `users/${studentUid}`), {
+    instructorIds: nextIds,
+    instructorRequests: nextRequests,
+    approvalStatus: "approved",
+    updatedAt: Date.now(),
+  });
+
+  await pushNotification(studentUid, {
+    titleEn: "Registration Accepted!",
+    titleAr: "تم قبول طلب تسجيلك!",
+    bodyEn: "An instructor accepted your request. You can now access their courses, assignments, and quizzes.",
+    bodyAr: "وافق المحاضر على طلب انضمامك. يمكنك الآن الوصول إلى مقرراته وواجباته واختباراته.",
+    type: "success",
+    link: "/student",
+  });
+}
+
+export async function rejectStudentRequest(studentUid, instructorUid) {
+  const snap = await get(ref(rtdb, `users/${studentUid}`));
+  if (!snap.exists()) return;
+  const student = snap.val();
+  const currentIds = Array.isArray(student.instructorIds) ? student.instructorIds : [];
+  const nextRequests = { ...(student.instructorRequests || {}), [instructorUid]: "rejected" };
+  const hasPending = Object.values(nextRequests).some((v) => v === "pending");
+  const nextStatus =
+    currentIds.length > 0 ? "approved" : hasPending ? "pending" : "rejected";
+  await update(ref(rtdb, `users/${studentUid}`), {
+    instructorRequests: nextRequests,
+    approvalStatus: nextStatus,
+    updatedAt: Date.now(),
+  });
+
+  await pushNotification(studentUid, {
+    titleEn: "Registration Request Update",
+    titleAr: "تحديث طلب التسجيل",
+    bodyEn: "An instructor declined your join request.",
+    bodyAr: "رفض المحاضر طلب الانضمام الخاص بك.",
+    type: "warning",
+    link: "/student",
+  });
+}
+
+export async function requestAdditionalInstructor(studentUid, instructorUid) {
+  const snap = await get(ref(rtdb, `users/${studentUid}`));
+  if (!snap.exists()) return;
+  const student = snap.val();
+  const currentIds = Array.isArray(student.instructorIds) ? student.instructorIds : [];
+  if (currentIds.includes(instructorUid)) return;
+  const nextRequests = { ...(student.instructorRequests || {}), [instructorUid]: "pending" };
+  const requested = Array.isArray(student.requestedInstructorIds)
+    ? student.requestedInstructorIds
+    : [];
+  const nextRequested = requested.includes(instructorUid)
+    ? requested
+    : [...requested, instructorUid];
+  await update(ref(rtdb, `users/${studentUid}`), {
+    instructorRequests: nextRequests,
+    requestedInstructorIds: nextRequested,
+    updatedAt: Date.now(),
+  });
+
+  await pushNotification(instructorUid, {
+    titleEn: "New Student Join Request",
+    titleAr: "طلب انضمام طالب جديد",
+    bodyEn: `${student.displayName || student.email} requested to join your classes.`,
+    bodyAr: `طلب الطالب ${student.displayName || student.email} الانضمام إلى فصولك.`,
+    type: "info",
+    link: "/instructor/students",
+  });
+  await pushNotification("admin_123", {
+    titleEn: "Instructor Join Request",
+    titleAr: "طلب انضمام لمحاضر",
+    bodyEn: `${student.displayName || student.email} requested an additional instructor.`,
+    bodyAr: `طلب الطالب ${student.displayName || student.email} الانضمام إلى محاضر إضافي.`,
+    type: "info",
+    link: "/admin",
+  });
+}
+
+export async function listUsers(roleFilter = null) {
+  const snap = await get(ref(rtdb, "users"));
+  if (!snap.exists()) return [];
+  const val = snap.val();
+  const arr = Object.entries(val).map(([uid, data]) => ({ uid, ...data }));
+  const sorted = arr.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  return roleFilter ? sorted.filter((u) => u.role === roleFilter) : sorted;
+}
+
+export async function listActiveInstructors() {
+  const instructors = await listUsers("instructor");
+  return instructors.filter((i) => i.active !== false);
+}
+
+export async function updateUserRecord(uid, patch) {
+  await update(ref(rtdb, `users/${uid}`), { ...patch, updatedAt: Date.now() });
+}
+
+export async function deleteUserRecord(uid, username, email) {
+  await remove(ref(rtdb, `users/${uid}`));
+  if (username) {
+    await remove(ref(rtdb, `usernames/${normalizeKey(username)}`));
+  }
+  if (email) {
+    await remove(ref(rtdb, `usernames/${normalizeKey(email)}`));
+  }
+}
+
+/* ==================== ASSIGNMENTS ==================== */
+export async function listAssignments() {
+  const snap = await get(ref(rtdb, "assignments"));
+  if (!snap.exists()) return [];
+  return Object.entries(snap.val())
+    .map(([id, data]) => ({
+      id,
+      ...data,
+      submissions: data.submissions
+        ? Object.entries(data.submissions).map(([sid, sdata]) => ({ id: sid, ...sdata }))
+        : [],
+    }))
+    .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+}
+
+export async function createAssignment({
+  courseId,
+  instructorId,
+  title,
+  instructions,
+  dueDate,
+  dueTime = "23:59",
+  maxMarks = 10,
+  pdfName = "",
+  pdfPages = [],
+}) {
+  const newRef = push(ref(rtdb, "assignments"));
+  const doc = {
+    id: newRef.key,
+    courseId,
+    instructorId,
+    title,
+    instructions: instructions || "",
+    dueDate: dueDate || "",
+    dueTime: dueTime || "23:59",
+    maxMarks: Number(maxMarks) || 10,
+    pdfName: pdfName || "",
+    pdfPages: Array.isArray(pdfPages) ? pdfPages : [],
+    createdAt: Date.now(),
+  };
+  await set(newRef, doc);
+
+  await pushNotification("admin_123", {
+    titleEn: "New Assignment Created",
+    titleAr: "تم إنشاء واجب جديد",
+    bodyEn: `Assignment "${title}" (${doc.maxMarks} pts) was posted.`,
+    bodyAr: `تم نشر الواجب "${title}" (${doc.maxMarks} نقطة).`,
+    type: "info",
+    link: "/admin",
+  });
+  await notifyStudentsOfInstructor(instructorId, {
+    titleEn: "New Assignment Posted",
+    titleAr: "تم نشر واجب جديد",
+    bodyEn: `New assignment "${title}" (${doc.maxMarks} pts) is available.`,
+    bodyAr: `الواجب الجديد "${title}" (${doc.maxMarks} نقطة) متاح الآن.`,
+    type: "info",
+    link: "/student/assignments",
+  });
+
+  return doc;
+}
+
+export async function updateAssignment(assignmentId, patch) {
+  await update(ref(rtdb, `assignments/${assignmentId}`), {
+    ...patch,
+    updatedAt: Date.now(),
+  });
+}
+
+export async function deleteAssignment(assignmentId) {
+  await remove(ref(rtdb, `assignments/${assignmentId}`));
+}
+
+export async function submitAssignmentWork(
+  assignmentId,
+  { studentId, studentName, answerText, annotatedPages = [], instructorId = "", assignmentTitle = "" }
+) {
+  await set(ref(rtdb, `assignments/${assignmentId}/submissions/${studentId}`), {
+    studentId,
+    studentName,
+    answerText: answerText || "",
+    annotatedPages: Array.isArray(annotatedPages) ? annotatedPages : [],
+    submittedAt: Date.now(),
+  });
+  await pushNotification("admin_123", {
+    titleEn: "Assignment Submitted",
+    titleAr: "تم تسليم واجب",
+    bodyEn: `${studentName} submitted "${assignmentTitle || "an assignment"}".`,
+    bodyAr: `قام الطالب ${studentName} بتسليم الواجب "${assignmentTitle || ""}".`,
+    type: "info",
+    link: "/admin",
+  });
+  if (instructorId) {
+    await pushNotification(instructorId, {
+      titleEn: "Assignment Ready for Correction",
+      titleAr: "واجب جاهز للتصحيح",
+      bodyEn: `${studentName} submitted annotated work for "${assignmentTitle || "assignment"}".`,
+      bodyAr: `سلّم الطالب ${studentName} حله في "${assignmentTitle || "الواجب"}" للتصحيح.`,
+      type: "info",
+      link: "/instructor/assignments",
+    });
+  }
+}
+
+export async function gradeAssignmentSubmission(
+  assignmentId,
+  studentId,
+  score,
+  feedback = "",
+  correctedPages = null,
+  maxMarks = null
+) {
+  const patch = {
+    score: Number(score),
+    feedback,
+    gradedAt: Date.now(),
+  };
+  if (Array.isArray(correctedPages) && correctedPages.length > 0) {
+    patch.correctedPages = correctedPages;
+  }
+  await update(ref(rtdb, `assignments/${assignmentId}/submissions/${studentId}`), patch);
+
+  const ptsLabel = maxMarks ? `${score}/${maxMarks} pts` : `${score} pts`;
+  const ptsLabelAr = maxMarks ? `${score}/${maxMarks} نقطة` : `${score} نقطة`;
+
+  await pushNotification(studentId, {
+    titleEn: "Assignment Corrected & Graded",
+    titleAr: "تم تصحيح وتقييم الواجب",
+    bodyEn: `Your assignment was corrected — you earned ${ptsLabel}.`,
+    bodyAr: `تم تصحيح واجبك وحصلت على ${ptsLabelAr}.`,
+    type: "success",
+    link: "/student/assignments",
+  });
+  await pushNotification("admin_123", {
+    titleEn: "Assignment Marked",
+    titleAr: "تم رصد نقاط واجب",
+    bodyEn: `Student received ${ptsLabel} on an assignment.`,
+    bodyAr: `تم رصد ${ptsLabelAr} لطالب في الواجب.`,
+    type: "info",
+    link: "/admin/scoreboard",
+  });
+}
+
+/* ==================== COURSES & LESSONS ==================== */
+export async function listCourses(instructorId = null) {
+  const snap = await get(ref(rtdb, "courses"));
+  if (!snap.exists()) return [];
+  const arr = Object.entries(snap.val()).map(([id, data]) => ({
+    id,
+    ...data,
+    lessons: data.lessons
+      ? Object.entries(data.lessons).map(([lid, ldata]) => ({ id: lid, ...ldata }))
+      : [],
+    enrolledStudents: Array.isArray(data.enrolledStudents) ? data.enrolledStudents : [],
+  }));
+  const sorted = arr.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  return instructorId ? sorted.filter((c) => c.instructorId === instructorId) : sorted;
+}
+
+export async function createCourse({ titleEn, titleAr, descEn, descAr, instructorId, instructorName }) {
+  const newRef = push(ref(rtdb, "courses"));
+  const course = {
+    id: newRef.key,
+    title: { en: titleEn, ar: titleAr || titleEn },
+    description: { en: descEn || "", ar: descAr || descEn || "" },
+    instructorId,
+    instructorName: instructorName || "",
+    enrolledStudents: [],
+    createdAt: Date.now(),
+  };
+  await set(newRef, course);
+
+  await pushNotification("admin_123", {
+    titleEn: "New Course Created",
+    titleAr: "تم إنشاء مقرر جديد",
+    bodyEn: `Course "${titleEn}" added by ${instructorName || "Instructor"}.`,
+    bodyAr: `تمت إضافة المقرر "${titleAr || titleEn}".`,
+    type: "info",
+    link: "/admin",
+  });
+  await notifyStudentsOfInstructor(instructorId, {
+    titleEn: "New Course Available",
+    titleAr: "مقرر جديد متاح الآن",
+    bodyEn: `Your instructor published a new course: "${titleEn}".`,
+    bodyAr: `نشر المحاضر مقرراً جديداً: "${titleAr || titleEn}".`,
+    type: "success",
+    link: "/student/courses",
+  });
+
+  return course;
+}
+
+export async function deleteCourse(courseId) {
+  await remove(ref(rtdb, `courses/${courseId}`));
+}
+
+export async function addLessonToCourse(courseId, { titleEn, titleAr, content, fileUrl }) {
+  const lessonRef = push(ref(rtdb, `courses/${courseId}/lessons`));
+  const lesson = {
+    id: lessonRef.key,
+    title: { en: titleEn, ar: titleAr || titleEn },
+    content: content || "",
+    fileUrl: fileUrl || "",
+    createdAt: Date.now(),
+  };
+  await set(lessonRef, lesson);
+
+  const courseSnap = await get(ref(rtdb, `courses/${courseId}`));
+  if (courseSnap.exists()) {
+    const course = courseSnap.val();
+    await notifyStudentsOfInstructor(course.instructorId, {
+      titleEn: "New Lesson Added",
+      titleAr: "تمت إضافة درس جديد",
+      bodyEn: `New lesson "${titleEn}" added to ${course.title?.en || "your course"}.`,
+      bodyAr: `تمت إضافة درس جديد "${titleAr || titleEn}" في ${course.title?.ar || "مقررك"}.`,
+      type: "info",
+      link: "/student/courses",
+    });
+  }
+
+  return lesson;
+}
+
+export async function enrolStudentInCourse(courseId, studentId) {
+  const courseSnap = await get(ref(rtdb, `courses/${courseId}/enrolledStudents`));
+  const current = courseSnap.exists() ? courseSnap.val() : [];
+  if (!current.includes(studentId)) {
+    await set(ref(rtdb, `courses/${courseId}/enrolledStudents`), [...current, studentId]);
+  }
+  const userSnap = await get(ref(rtdb, `users/${studentId}/enrolledCourseIds`));
+  const userCourses = userSnap.exists() ? userSnap.val() : [];
+  if (!userCourses.includes(courseId)) {
+    await set(ref(rtdb, `users/${studentId}/enrolledCourseIds`), [...userCourses, courseId]);
+  }
+}
+
+/* ==================== QUIZZES & RESULTS ==================== */
+export async function listQuizzes() {
+  const snap = await get(ref(rtdb, "quizzes"));
+  if (!snap.exists()) return [];
+  return Object.entries(snap.val())
+    .map(([id, data]) => ({ id, ...data }))
+    .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+}
+
+export async function createQuiz({
+  courseId,
+  lessonId,
+  title,
+  instructorId,
+  questions,
+  durationMinutes = 10,
+  status = "draft",
+}) {
+  const quizRef = push(ref(rtdb, "quizzes"));
+  const quiz = {
+    id: quizRef.key,
+    courseId,
+    lessonId: lessonId || "",
+    title,
+    instructorId,
+    durationMinutes: Number(durationMinutes) || 10,
+    status,
+    questions,
+    createdAt: Date.now(),
+  };
+  await set(quizRef, quiz);
+  return quiz;
+}
+
+export async function updateQuiz(quizId, patch) {
+  await update(ref(rtdb, `quizzes/${quizId}`), { ...patch, updatedAt: Date.now() });
+  if (patch.status === "published") {
+    const snap = await get(ref(rtdb, `quizzes/${quizId}`));
+    if (snap.exists()) {
+      const qz = snap.val();
+      await pushNotification("admin_123", {
+        titleEn: "Quiz Published",
+        titleAr: "تم نشر اختبار",
+        bodyEn: `Quiz "${qz.title}" was approved and published.`,
+        bodyAr: `تم اعتماد ونشر الاختبار "${qz.title}".`,
+        type: "success",
+        link: "/admin",
+      });
+      await notifyStudentsOfInstructor(qz.instructorId, {
+        titleEn: "New Quiz Available",
+        titleAr: "اختبار جديد متاح الآن",
+        bodyEn: `Quiz "${qz.title}" (${qz.durationMinutes || 10} min) is now open.`,
+        bodyAr: `الاختبار "${qz.title}" (${qz.durationMinutes || 10} دقيقة) متاح الآن.`,
+        type: "success",
+        link: "/student/quizzes",
+      });
+    }
+  }
+}
+
+export async function deleteQuiz(quizId) {
+  await remove(ref(rtdb, `quizzes/${quizId}`));
+}
+
+/* ==================== QUIZ ENTRY LOCK & RETAKE REQUESTS ==================== */
+export async function listQuizAccess() {
+  const snap = await get(ref(rtdb, "quizAccess"));
+  if (!snap.exists()) return {};
+  return snap.val();
+}
+
+export async function markQuizEntered(quizId, studentId, meta = {}) {
+  await update(ref(rtdb, `quizAccess/${quizId}/${studentId}`), {
+    quizId,
+    studentId,
+    ...meta,
+    status: "entered",
+    retakeStatus: "none",
+    enteredAt: Date.now(),
+  });
+}
+
+export async function markQuizSubmitted(quizId, studentId) {
+  await update(ref(rtdb, `quizAccess/${quizId}/${studentId}`), {
+    status: "submitted",
+    retakeStatus: "none",
+    submittedAt: Date.now(),
+  });
+}
+
+export async function requestQuizRetake(quizId, studentId, meta = {}) {
+  await update(ref(rtdb, `quizAccess/${quizId}/${studentId}`), {
+    quizId,
+    studentId,
+    ...meta,
+    retakeStatus: "pending",
+    requestedAt: Date.now(),
+  });
+  if (meta.instructorId) {
+    await pushNotification(meta.instructorId, {
+      titleEn: "Quiz Retake Request",
+      titleAr: "طلب إعادة اختبار",
+      bodyEn: `${meta.studentName || "A student"} requested to retake "${meta.quizTitle || quizId}".`,
+      bodyAr: `طلب الطالب ${meta.studentName || ""} إعادة الاختبار "${meta.quizTitle || quizId}".`,
+      type: "warning",
+      link: "/instructor/quizzes",
+    });
+  }
+  await pushNotification("admin_123", {
+    titleEn: "Quiz Retake Requested",
+    titleAr: "طلب إعادة اختبار",
+    bodyEn: `${meta.studentName || "A student"} requested a retake for "${meta.quizTitle || quizId}".`,
+    bodyAr: `طلب الطالب ${meta.studentName || ""} إعادة الاختبار "${meta.quizTitle || quizId}".`,
+    type: "info",
+    link: "/admin",
+  });
+}
+
+export async function approveQuizRetake(quizId, studentId) {
+  await update(ref(rtdb, `quizAccess/${quizId}/${studentId}`), {
+    retakeStatus: "approved",
+    approvedAt: Date.now(),
+  });
+  const snap = await get(ref(rtdb, `quizAccess/${quizId}/${studentId}`));
+  const info = snap.exists() ? snap.val() : {};
+  await pushNotification(studentId, {
+    titleEn: "Quiz Retake Approved!",
+    titleAr: "تمت الموافقة على إعادة الاختبار!",
+    bodyEn: `Your instructor approved your retake for "${info.quizTitle || "the quiz"}".`,
+    bodyAr: `وافق المحاضر على طلب إعادة الاختبار "${info.quizTitle || ""}".`,
+    type: "success",
+    link: "/student/quizzes",
+  });
+}
+
+export async function rejectQuizRetake(quizId, studentId) {
+  await update(ref(rtdb, `quizAccess/${quizId}/${studentId}`), {
+    retakeStatus: "rejected",
+    rejectedAt: Date.now(),
+  });
+  const snap = await get(ref(rtdb, `quizAccess/${quizId}/${studentId}`));
+  const info = snap.exists() ? snap.val() : {};
+  await pushNotification(studentId, {
+    titleEn: "Quiz Retake Declined",
+    titleAr: "تم رفض طلب إعادة الاختبار",
+    bodyEn: `Your retake request for "${info.quizTitle || "the quiz"}" was declined.`,
+    bodyAr: `تم رفض طلب إعادة الاختبار "${info.quizTitle || ""}".`,
+    type: "warning",
+    link: "/student/quizzes",
+  });
+}
+
+export async function listResults() {
+  const snap = await get(ref(rtdb, "results"));
+  if (!snap.exists()) return [];
+  return Object.entries(snap.val())
+    .map(([id, data]) => ({ id, ...data }))
+    .sort((a, b) => (b.submittedAt || 0) - (a.submittedAt || 0));
+}
+
+export async function submitQuizAttempt({
+  studentId,
+  studentName,
+  quizId,
+  quizTitle,
+  courseId,
+  instructorId,
+  score,
+  points,
+  total,
+  answers,
+  aiFeedback,
+}) {
+  const earnedPoints =
+    points !== undefined
+      ? Number(points) || 0
+      : Math.round(((Number(score) || 0) / 100) * (Number(total) || 0));
+  const resRef = push(ref(rtdb, "results"));
+  const result = {
+    id: resRef.key,
+    studentId,
+    studentName,
+    quizId,
+    quizTitle,
+    courseId,
+    instructorId,
+    score,
+    points: earnedPoints,
+    total,
+    answers,
+    aiFeedback: aiFeedback || "",
+    submittedAt: Date.now(),
+  };
+  await set(resRef, result);
+
+  await pushNotification("admin_123", {
+    titleEn: "Quiz Submitted",
+    titleAr: "تم تسليم اختبار",
+    bodyEn: `${studentName} earned ${earnedPoints}/${total || earnedPoints} pts (${score}%) on "${quizTitle}".`,
+    bodyAr: `حصل الطالب ${studentName} على ${earnedPoints}/${total || earnedPoints} نقطة (${score}%) في "${quizTitle}".`,
+    type: score >= 60 ? "success" : "warning",
+    link: "/admin/grades",
+  });
+  if (instructorId) {
+    await pushNotification(instructorId, {
+      titleEn: "Student Completed Quiz",
+      titleAr: "أكمل طالب اختباراً",
+      bodyEn: `${studentName} earned ${earnedPoints}/${total || earnedPoints} pts (${score}%) on "${quizTitle}".`,
+      bodyAr: `حصل الطالب ${studentName} على ${earnedPoints}/${total || earnedPoints} نقطة (${score}%) في "${quizTitle}".`,
+      type: "info",
+      link: "/instructor/grades",
+    });
+  }
+
+  return result;
+}
+
+export async function checkRtdbHealth() {
+  try {
+    await set(ref(rtdb, "_health/lastPing"), Date.now());
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/* ==================== REAL-TIME NOTIFICATIONS ==================== */
+export async function pushNotification(recipientId, {
+  titleEn,
+  titleAr,
+  bodyEn,
+  bodyAr,
+  type = "info",
+  link = "",
+}) {
+  if (!recipientId) return;
+  try {
+    const notifRef = push(ref(rtdb, `notifications/${recipientId}`));
+    await set(notifRef, {
+      id: notifRef.key,
+      titleEn: titleEn || "",
+      titleAr: titleAr || titleEn || "",
+      bodyEn: bodyEn || "",
+      bodyAr: bodyAr || bodyEn || "",
+      type,
+      link,
+      read: false,
+      createdAt: Date.now(),
+    });
+  } catch (err) {
+    console.warn("Notification write skipped:", err.message);
+  }
+}
+
+export async function notifyStudentsOfInstructor(instructorId, payload) {
+  if (!instructorId) return;
+  try {
+    const students = await listUsers("student");
+    const linked = students.filter(
+      (s) => Array.isArray(s.instructorIds) && s.instructorIds.includes(instructorId)
+    );
+    await Promise.all(linked.map((s) => pushNotification(s.uid, payload)));
+  } catch (err) {
+    console.warn("Student broadcast skipped:", err.message);
+  }
+}
+
+export function subscribeNotifications(recipientId, callback) {
+  if (!recipientId) {
+    callback([]);
+    return () => {};
+  }
+  const notifRef = ref(rtdb, `notifications/${recipientId}`);
+  return onValue(notifRef, (snap) => {
+    if (!snap.exists()) {
+      callback([]);
+      return;
+    }
+    const list = Object.entries(snap.val())
+      .map(([id, data]) => ({ id, ...data }))
+      .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    callback(list);
+  });
+}
+
+export async function markNotificationRead(recipientId, notifId) {
+  if (!recipientId || !notifId) return;
+  await update(ref(rtdb, `notifications/${recipientId}/${notifId}`), { read: true });
+}
+
+export async function markAllNotificationsRead(recipientId, notifIds = []) {
+  if (!recipientId || notifIds.length === 0) return;
+  const updates = {};
+  notifIds.forEach((id) => {
+    updates[`notifications/${recipientId}/${id}/read`] = true;
+  });
+  await update(ref(rtdb), updates);
+}
+
+export async function clearNotifications(recipientId) {
+  if (!recipientId) return;
+  await remove(ref(rtdb, `notifications/${recipientId}`));
+}
+
+/* ==================== LESSON PDFs & PRIVATE STUDENT ANNOTATIONS ==================== */
+export async function listLessonMaterials() {
+  const snap = await get(ref(rtdb, "lessonMaterials"));
+  if (!snap.exists()) return [];
+  return Object.entries(snap.val())
+    .map(([id, data]) => ({
+      id,
+      ...data,
+      pdfPages: Array.isArray(data.pdfPages) ? data.pdfPages : [],
+    }))
+    .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+}
+
+export async function createLessonMaterial({
+  courseId,
+  instructorId,
+  title,
+  description = "",
+  pdfName = "",
+  pdfPages = [],
+  extractedText = "",
+}) {
+  const newRef = push(ref(rtdb, "lessonMaterials"));
+  const item = {
+    id: newRef.key,
+    courseId,
+    instructorId,
+    title,
+    description,
+    pdfName,
+    pdfPages: Array.isArray(pdfPages) ? pdfPages : [],
+    extractedText: String(extractedText || "").slice(0, 12000),
+    createdAt: Date.now(),
+  };
+  await set(newRef, item);
+
+  await notifyStudentsOfInstructor(instructorId, {
+    titleEn: "New Lesson PDF Uploaded",
+    titleAr: "تم رفع درس PDF جديد",
+    bodyEn: `Lesson "${title}" is ready to view and annotate privately.`,
+    bodyAr: `الدرس "${title}" متاح الآن للعرض والتدوين الخاص.`,
+    type: "info",
+    link: "/student/lesson-pdfs",
+  });
+  return item;
+}
+
+export async function deleteLessonMaterial(materialId) {
+  await remove(ref(rtdb, `lessonMaterials/${materialId}`));
+}
+
+export async function getStudentLessonAnnotation(materialId, studentId) {
+  if (!materialId || !studentId) return null;
+  const snap = await get(ref(rtdb, `lessonMaterials/${materialId}/annotations/${studentId}`));
+  if (!snap.exists()) return null;
+  return snap.val();
+}
+
+export async function saveStudentLessonAnnotation(
+  materialId,
+  studentId,
+  { inkSnapshots = {}, notes = "" }
+) {
+  if (!materialId || !studentId) return;
+  await set(ref(rtdb, `lessonMaterials/${materialId}/annotations/${studentId}`), {
+    studentId,
+    inkSnapshots,
+    notes,
+    updatedAt: Date.now(),
+  });
+}
+

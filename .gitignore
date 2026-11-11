@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+client/node_modules/
+llm-proxy/node_modules/
+
+# Build outputs
+client/dist/
+dist/
+
+# Environment & local secrets
+.env
+.env.local
+.env.*.local
+
+# Logs & OS files
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+__pycache__/
+*.pyc
+
