@@ -147,7 +147,7 @@ export default function AppLayout({ navItems, children }) {
             >
               <X className="h-4 w-4" />
             </button>
-            <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-indigo-50 to-purple-50 dark:bg-white/10 backdrop-blur-md p-1.5 border border-indigo-100 dark:border-white/20 shadow-md shadow-indigo-500/10 mx-auto mb-2.5 overflow-hidden flex items-center justify-center">
+            <div className="h-14 w-14 mx-auto mb-2.5 flex items-center justify-center">
               <img src="/Logo.png" alt="Platform Logo" className="w-full h-full object-contain drop-shadow-sm" />
             </div>
             <div className="font-extrabold text-sm sm:text-[14px] leading-snug tracking-tight text-slate-900 dark:text-white">
