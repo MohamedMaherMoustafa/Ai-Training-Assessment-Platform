@@ -676,7 +676,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
             </div>
             <div>
               <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                {editingId
+                {editingQuizId
                   ? lang === "ar"
                     ? "تعديل الاختبار"
                     : "Edit Quiz"
