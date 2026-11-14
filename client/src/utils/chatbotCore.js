@@ -29,7 +29,10 @@ function extractKeywords(str) {
     .filter((t) => t.length >= 2 && !STOP_WORDS.has(t));
 }
 
-const DIRECT_AI_KEY = import.meta.env.VITE_GEMINI_API_KEY || "";
+const DIRECT_AI_KEY =
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_GEMINI_API_KEY) ||
+  (typeof process !== "undefined" && process.env?.GEMINI_API_KEY) ||
+  "";
 const DIRECT_AI_PRIMARY = "gemini-3.5-flash";
 const DIRECT_AI_FALLBACK = "gemini-flash-latest";
 
