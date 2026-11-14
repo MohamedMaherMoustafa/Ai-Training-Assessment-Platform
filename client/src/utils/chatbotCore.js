@@ -497,7 +497,7 @@ export async function processChatbotMessageWithDataset({
   const canAuthorQuiz = role === "instructor" || role === "admin";
   const displayName = user?.displayName || user?.username || "";
 
-  // Multimodal file attachment handling: immediately route to proxy / Gemini
+  // Multimodal file attachment handling: immediately route to proxy / Multimodal AI
   if (Array.isArray(attachments) && attachments.length > 0 && useNetwork) {
     const contextSummary = buildContextSummaryText(dataset, lang);
     try {

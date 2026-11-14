@@ -281,8 +281,8 @@ router.post("/", async (req, res) => {
 
       if (geminiResult?.text) {
         return res.json({
-          model: geminiResult.model,
-          provider: "gemini",
+          model: "AI Assistant",
+          provider: "ai",
           reply: geminiResult.text,
           hasAttachments: attachments.length > 0,
         });

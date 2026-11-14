@@ -270,12 +270,12 @@ export default function PlatformChatbotWidget() {
   const welcomeText = (() => {
     if (user?.role === "instructor" || user?.role === "admin") {
       return lang === "ar"
-        ? "مرحباً! أنا المساعد الذكي للمنصة مدعوم بنموذج **Gemini 3.5 Flash** متعدد الوسائط.\n\nيمكنك الآن:\n• إرسال **صور ومخططات** أو **ملفات PDF** أو **تسجيلات صوتية** لتحليلها وشرحها فورا.\n• طلب إنشاء اختبار: *«اعمل اختبار للطلاب على درس ...»*\n• الاستفسار عن درجات ونقاط أي طالب أو ملخص المقررات.\n• طرح أي سؤال تعليمي أو أكاديمي عام."
-        : "Hi! I am the Platform AI Educational Assistant powered by **Gemini 3.5 Flash Multimodal**.\n\nYou can now:\n• Attach **photos & diagrams**, **PDF documents**, or record **voice queries** for instant multimodal analysis.\n• Author quizzes instantly: *\"Make a quiz for students on lesson ...\"*\n• Look up student points, scoreboard rankings, and course analytics.\n• Ask any educational, scientific, or programming questions.";
+        ? "مرحباً! أنا المساعد الذكي للمنصة متعدد الوسائط.\n\nيمكنك الآن:\n• إرسال **صور ومخططات** أو **ملفات PDF** أو **تسجيلات صوتية** لتحليلها وشرحها فورا.\n• طلب إنشاء اختبار: *«اعمل اختبار للطلاب على درس ...»*\n• الاستفسار عن درجات ونقاط أي طالب أو ملخص المقررات.\n• طرح أي سؤال تعليمي أو أكاديمي عام."
+        : "Hi! I am the Platform AI Educational Assistant.\n\nYou can now:\n• Attach **photos & diagrams**, **PDF documents**, or record **voice queries** for instant multimodal analysis.\n• Author quizzes instantly: *\"Make a quiz for students on lesson ...\"*\n• Look up student points, scoreboard rankings, and course analytics.\n• Ask any educational, scientific, or programming questions.";
     }
     return lang === "ar"
-      ? "مرحباً! أنا مساعدك التعليمي الذكي المدعوم بـ **Gemini 3.5 Flash** متعدد الوسائط.\n\nكيف يمكنني مساعدتك اليوم؟\n• أرسل **صورة مسألة أو مخطط** أو **ملف PDF** أو **سجل صوتك** وسأقوم بتحليله وشرحه لك خطوة بخطوة.\n• تلخيص أي درس أو مقرر دراسي.\n• مراجعة مجموع نقاطك ودرجاتك في الاختبارات والواجبات.\n• الإجابة على أي استفسار دراسي أو تقني."
-      : "Hi! I am your Smart AI Learning Assistant powered by **Gemini 3.5 Flash Multimodal**.\n\nHow can I help you today?\n• Upload **photos/diagrams**, **PDF lesson files**, or record **voice notes** for step-by-step analysis.\n• Summarize any course lesson or technical document.\n• Check your earned points, scoreboard ranking, and grades.\n• Ask any study, science, or programming question.";
+      ? "مرحباً! أنا مساعدك التعليمي الذكي متعدد الوسائط.\n\nكيف يمكنني مساعدتك اليوم؟\n• أرسل **صورة مسألة أو مخطط** أو **ملف PDF** أو **سجل صوتك** وسأقوم بتحليله وشرحه لك خطوة بخطوة.\n• تلخيص أي درس أو مقرر دراسي.\n• مراجعة مجموع نقاطك ودرجاتك في الاختبارات والواجبات.\n• الإجابة على أي استفسار دراسي أو تقني."
+      : "Hi! I am your Smart AI Learning Assistant.\n\nHow can I help you today?\n• Upload **photos/diagrams**, **PDF lesson files**, or record **voice notes** for step-by-step analysis.\n• Summarize any course lesson or technical document.\n• Check your earned points, scoreboard ranking, and grades.\n• Ask any study, science, or programming question.";
   })();
 
   const [messages, setMessages] = useState([
@@ -487,8 +487,8 @@ export default function PlatformChatbotWidget() {
           id: `b_${Date.now()}`,
           sender: "bot",
           text: result.reply,
-          provider: result.provider || "gemini",
-          model: result.model || "Gemini 3.5 Flash",
+          provider: "ai",
+          model: lang === "ar" ? "المساعد الذكي" : "AI Assistant",
           actionCard: result.actionCard || null,
           quickActions: result.quickActions || null,
           timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
@@ -538,7 +538,7 @@ export default function PlatformChatbotWidget() {
           type="button"
           onClick={() => setOpen(true)}
           className="robot-patrol-track group relative flex items-center gap-3 focus:outline-none cursor-pointer select-none"
-          title={lang === "ar" ? "اضغط للتحدث مع المساعد الذكي (Gemini)" : "Click to open Gemini AI Assistant"}
+          title={lang === "ar" ? "اضغط للتحدث مع المساعد الذكي" : "Click to open AI Assistant"}
           aria-label="Open AI Robot Chatbot"
         >
           {/* Floating Speech Bubble matching screenshot */}
@@ -644,7 +644,7 @@ export default function PlatformChatbotWidget() {
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
                   <span className="text-xs sm:text-sm font-extrabold truncate">
-                    {lang === "ar" ? "المساعد الذكي (Gemini)" : "Gemini AI Assistant"}
+                    {lang === "ar" ? "المساعد الذكي للمنصة" : "Platform AI Assistant"}
                   </span>
                   <span className="h-2 w-2 rounded-full bg-emerald-400 ring-4 ring-emerald-400/20 shrink-0" />
                 </div>
@@ -746,7 +746,7 @@ export default function PlatformChatbotWidget() {
                     <div className="mt-2.5 pt-2 border-t border-slate-200/60 dark:border-white/10 flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500">
                       <span className="flex items-center gap-1 font-semibold text-indigo-600 dark:text-cyan-400">
                         <Sparkles className="h-3 w-3" />
-                        {m.model || "Gemini 3.5 Flash"}
+                        {m.model || (lang === "ar" ? "المساعد الذكي" : "AI Assistant")}
                       </span>
                       <div className="flex items-center gap-2">
                         <button
@@ -815,8 +815,8 @@ export default function PlatformChatbotWidget() {
                 <Sparkles className="h-4 w-4 animate-spin text-indigo-500 dark:text-cyan-400" />
                 <span>
                   {lang === "ar"
-                    ? "Gemini يحلل البيانات ويصيغ الإجابة بدقة..."
-                    : "Gemini is analyzing input & preparing your response..."}
+                    ? "الذكاء الاصطناعي يحلل البيانات ويصيغ الإجابة بدقة..."
+                    : "AI Assistant is analyzing input & preparing your response..."}
                 </span>
               </div>
             )}
@@ -942,8 +942,8 @@ export default function PlatformChatbotWidget() {
               disabled={busy}
               placeholder={
                 lang === "ar"
-                  ? "اسأل Gemini، اطلب تلخيصاً، أو أرفق صورة/PDF..."
-                  : "Ask Gemini anything, request summaries, or attach photos/PDFs..."
+                  ? "اسأل المساعد الذكي، اطلب تلخيصاً، أو أرفق صورة/PDF..."
+                  : "Ask AI anything, request summaries, or attach photos/PDFs..."
               }
               className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder:text-slate-400 text-xs sm:text-[13px] outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all shadow-inner"
             />
