@@ -14,6 +14,7 @@ import {
   ArrowRight,
   RefreshCw,
   FileText,
+  CalendarCheck,
 } from "lucide-react";
 import AppLayout from "../../components/layout/AppLayout";
 import CoursesModule from "../courses/CoursesModule";
@@ -22,11 +23,13 @@ import AssignmentsModule from "../assignments/AssignmentsModule";
 import QuizzesModule from "../quiz/QuizzesModule";
 import GradesModule from "../grades/GradesModule";
 import ScoreboardModule from "../scoreboard/ScoreboardModule";
+import WeeklyReportsModule from "./WeeklyReportsModule";
 import { useAuth } from "../../context/AuthContext";
 import { useLang } from "../../context/LangContext";
 import {
   listActiveInstructors,
   requestAdditionalInstructor,
+  checkAndDispatchAutomatedWeeklyReports,
 } from "../../services/platformService";
 
 function StudentInstructorSelector({
@@ -286,6 +289,13 @@ export default function StudentDashboard() {
       .finally(() => setInstructorsLoading(false));
   }, [user?.uid, (user?.instructorIds || []).length]);
 
+  // Automatic 7-day performance check and notification dispatch
+  useEffect(() => {
+    if (user?.uid) {
+      checkAndDispatchAutomatedWeeklyReports(user.uid);
+    }
+  }, [user?.uid]);
+
   const handleSelectInstructor = (instUid) => {
     setActiveInstructorId(instUid);
     localStorage.setItem(storageKey, instUid);
@@ -314,6 +324,11 @@ export default function StudentDashboard() {
     { to: "/student/quizzes", label: t("nav.myQuizzes"), icon: ClipboardCheck },
     { to: "/student/scoreboard", label: t("nav.scoreboard"), icon: Trophy },
     { to: "/student/grades", label: t("nav.myResults"), icon: Award },
+    {
+      to: "/student/weekly-reports",
+      label: t("nav.weeklyReports") || (lang === "ar" ? "التقارير الأسبوعية" : "Weekly Reports"),
+      icon: CalendarCheck,
+    },
   ];
 
   const wrapFiltered = (node) => (
@@ -373,6 +388,12 @@ export default function StudentDashboard() {
           path="grades"
           element={wrapFiltered(
             <GradesModule mode="student" activeInstructorId={activeInstructorId} />
+          )}
+        />
+        <Route
+          path="weekly-reports"
+          element={wrapFiltered(
+            <WeeklyReportsModule mode="student" activeInstructorId={activeInstructorId} />
           )}
         />
         <Route path="*" element={<Navigate to="/student" replace />} />

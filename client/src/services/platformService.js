@@ -1060,3 +1060,291 @@ export async function saveStudentLessonAnnotation(
   });
 }
 
+/* ==================== AUTOMATED WEEKLY PERFORMANCE REPORTS (7-DAY CYCLES) ==================== */
+
+const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+
+/**
+ * Calculates structured 7-day performance reports for a student from registration to present.
+ * Arranged in weekly intervals with quizzes, assignments, total points, grade tier, and AI coaching.
+ */
+export function calculateStudentWeeklyReports(studentId, { user, results = [], assignments = [] }) {
+  if (!studentId) return [];
+
+  // Determine baseline start date
+  const studentResults = results.filter((r) => r.studentId === studentId);
+  const studentAssignments = assignments.filter((a) =>
+    a.submissions?.some((s) => s.id === studentId || s.studentId === studentId)
+  );
+
+  const activityTimestamps = [
+    user?.createdAt,
+    ...studentResults.map((r) => r.createdAt),
+    ...studentAssignments.map((a) => {
+      const s = a.submissions?.find((sub) => sub.id === studentId || sub.studentId === studentId);
+      return s?.submittedAt || s?.createdAt || a.createdAt;
+    }),
+  ].filter(Boolean);
+
+  const earliestTime =
+    activityTimestamps.length > 0
+      ? Math.min(...activityTimestamps)
+      : Date.now() - 14 * 24 * 60 * 60 * 1000;
+
+  // Round start to beginning of day
+  const startDate = new Date(earliestTime);
+  startDate.setHours(0, 0, 0, 0);
+  const startMs = startDate.getTime();
+  const nowMs = Date.now();
+
+  // Total weeks elapsed so far
+  const totalWeeksCount = Math.max(1, Math.ceil((nowMs - startMs) / SEVEN_DAYS_MS));
+  const weeklyReports = [];
+
+  for (let i = 0; i < totalWeeksCount; i += 1) {
+    const weekNumber = i + 1;
+    const weekStartMs = startMs + i * SEVEN_DAYS_MS;
+    const weekEndMs = weekStartMs + SEVEN_DAYS_MS;
+    const isCurrentWeek = nowMs >= weekStartMs && nowMs <= weekEndMs;
+    const isComplete = nowMs > weekEndMs;
+
+    const startDateStr = new Date(weekStartMs).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+    const endDateStr = new Date(weekEndMs).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+
+    // 1) Filter Quizzes within this 7-day window
+    const weekQuizzes = studentResults.filter(
+      (r) => (r.createdAt || 0) >= weekStartMs && (r.createdAt || 0) < weekEndMs
+    );
+    const quizzesCount = weekQuizzes.length;
+    const quizPoints = weekQuizzes.reduce((acc, r) => {
+      if (r.points !== undefined && r.points !== null) return acc + Number(r.points);
+      const totalQ = Number(r.total) || 1;
+      const pct = Number(r.score) || 0;
+      return acc + Math.round((pct / 100) * totalQ);
+    }, 0);
+    const quizMaxPoints = weekQuizzes.reduce((acc, r) => acc + (Number(r.total) || 1), 0);
+    const quizAvgScore =
+      quizzesCount > 0
+        ? Math.round(weekQuizzes.reduce((acc, r) => acc + (Number(r.score) || 0), 0) / quizzesCount)
+        : 0;
+
+    // 2) Filter Assignments within this 7-day window
+    const weekAssignments = [];
+    studentAssignments.forEach((a) => {
+      const sub = a.submissions?.find((s) => s.id === studentId || s.studentId === studentId);
+      if (!sub) return;
+      const subTime = sub.submittedAt || sub.createdAt || a.createdAt || 0;
+      if (subTime >= weekStartMs && subTime < weekEndMs) {
+        weekAssignments.push({
+          assignmentId: a.id,
+          title: a.title,
+          maxMarks: Number(a.maxMarks) || 10,
+          score: sub.score !== undefined && sub.score !== null ? Number(sub.score) : null,
+          feedback: sub.feedback || "",
+          submittedAt: subTime,
+        });
+      }
+    });
+
+    const assignmentsCount = weekAssignments.length;
+    const gradedAssignments = weekAssignments.filter((a) => a.score !== null);
+    const assignmentPoints = gradedAssignments.reduce((acc, a) => acc + a.score, 0);
+    const assignmentMaxMarks = weekAssignments.reduce((acc, a) => acc + a.maxMarks, 0);
+    const assignmentAvgScore =
+      assignmentMaxMarks > 0
+        ? Math.round((assignmentPoints / assignmentMaxMarks) * 100)
+        : 0;
+
+    // Combined Weekly Evaluation
+    const totalWeeklyPoints = quizPoints + assignmentPoints;
+    let overallScore = 0;
+    if (quizzesCount > 0 && assignmentsCount > 0) {
+      overallScore = Math.round(quizAvgScore * 0.5 + assignmentAvgScore * 0.5);
+    } else if (quizzesCount > 0) {
+      overallScore = quizAvgScore;
+    } else if (assignmentsCount > 0) {
+      overallScore = assignmentAvgScore;
+    }
+
+    // Performance Tier
+    let tier = {
+      grade: "A+",
+      labelEn: "Outstanding",
+      labelAr: "ممتاز",
+      colorClass:
+        "text-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-800",
+    };
+    if (overallScore >= 90) {
+      tier = {
+        grade: "A+",
+        labelEn: "Outstanding",
+        labelAr: "ممتاز",
+        colorClass:
+          "text-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-800",
+      };
+    } else if (overallScore >= 80) {
+      tier = {
+        grade: "A",
+        labelEn: "Very Good",
+        labelAr: "جيد جداً",
+        colorClass:
+          "text-indigo-600 bg-indigo-50 dark:bg-indigo-950/60 border-indigo-200 dark:border-indigo-800",
+      };
+    } else if (overallScore >= 70) {
+      tier = {
+        grade: "B",
+        labelEn: "Good",
+        labelAr: "جيد",
+        colorClass:
+          "text-cyan-600 bg-cyan-50 dark:bg-cyan-950/60 border-cyan-200 dark:border-cyan-800",
+      };
+    } else if (overallScore >= 60) {
+      tier = {
+        grade: "C",
+        labelEn: "Satisfactory",
+        labelAr: "مقبول",
+        colorClass:
+          "text-amber-600 bg-amber-50 dark:bg-amber-950/60 border-amber-200 dark:border-amber-800",
+      };
+    } else {
+      tier = {
+        grade: quizzesCount === 0 && assignmentsCount === 0 ? "—" : "D",
+        labelEn:
+          quizzesCount === 0 && assignmentsCount === 0
+            ? "Pending Activity"
+            : "Needs Improvement",
+        labelAr:
+          quizzesCount === 0 && assignmentsCount === 0 ? "في انتظار النشاط" : "يحتاج تحسين",
+        colorClass:
+          "text-slate-500 bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700",
+      };
+    }
+
+    // AI Coaching Recommendation
+    let aiFeedbackEn = "";
+    let aiFeedbackAr = "";
+    if (overallScore >= 90) {
+      aiFeedbackEn = `Outstanding performance during Week ${weekNumber}! You achieved a stellar ${overallScore}% accuracy across your assessments. Recommendation: keep exploring advanced technical worksheets to retain your Top-5 leaderboard placement.`;
+      aiFeedbackAr = `أداء استثنائي ومتميز في الأسبوع ${weekNumber}! حققت دقة مبهرة بلغت ${overallScore}% عبر اختباراتك وواجباتك. التوجيه: استمر في مراجعة الدروس المتقدمة للحفاظ على تصدرك في لوحة الشرف.`;
+    } else if (overallScore >= 75) {
+      aiFeedbackEn = `Great consistency in Week ${weekNumber} with ${overallScore}% overall score. You have strong grasp of core lessons. Tip for the upcoming week: review any missed quiz questions to elevate your grade into the 90%+ tier!`;
+      aiFeedbackAr = `استمرارية ممتازة وجهد رائع في الأسبوع ${weekNumber} بنسبة ${overallScore}%. لديك استيعاب قوي للمفاهيم الأساسية. نصيحة للأسبوع القادم: راجع الأسئلة التي تعثرت فيها لرفع معدلك فوق 90%!`;
+    } else if (quizzesCount > 0 || assignmentsCount > 0) {
+      aiFeedbackEn = `Good active participation this week (${quizzesCount} quiz${
+        quizzesCount > 1 ? "zes" : ""
+      }, ${assignmentsCount} assignment${
+        assignmentsCount > 1 ? "s" : ""
+      }). Recommendation: study the annotated Lesson PDFs thoroughly prior to testing to boost conceptual retention.`;
+      aiFeedbackAr = `مشاركة نشطة جيدة خلال هذا الأسبوع. التوجيه الدراسي: ركز على قراءة وتظليل ملفات الدروس (PDF) وتدوين الملاحظات قبل خوض الاختبارات لتعزيز الفهم وتثبيت المعلومات.`;
+    } else {
+      aiFeedbackEn = `No assessments recorded in this 7-day cycle. Jump back into your enrolled courses, open lesson PDFs, and take available quizzes to maintain your learning streak!`;
+      aiFeedbackAr = `لم تُسجل أي اختبارات أو واجبات في هذه الدورة (7 أيام). تفضل بفتح مقرراتك المتاحة وحل الواجبات والاختبارات للحفاظ على تقدمك الدراسي المستمر!`;
+    }
+
+    weeklyReports.push({
+      id: `week_${weekNumber}`,
+      weekNumber,
+      weekStartMs,
+      weekEndMs,
+      startDateStr,
+      endDateStr,
+      isCurrentWeek,
+      isComplete,
+      quizzesCount,
+      quizPoints,
+      quizMaxPoints,
+      quizAvgScore,
+      assignmentsCount,
+      assignmentPoints,
+      assignmentMaxMarks,
+      assignmentAvgScore,
+      totalWeeklyPoints,
+      overallScore,
+      tier,
+      aiFeedbackEn,
+      aiFeedbackAr,
+      quizzes: weekQuizzes.map((q) => ({
+        id: q.id,
+        quizTitle: q.quizTitle || "Technical Assessment",
+        score: Number(q.score) || 0,
+        points: q.points !== undefined ? Number(q.points) : 0,
+        createdAt: q.createdAt,
+        feedback: q.feedback || "",
+      })),
+      assignments: weekAssignments,
+    });
+  }
+
+  // Return sorted with the newest week first
+  return weeklyReports.sort((a, b) => b.weekNumber - a.weekNumber);
+}
+
+/**
+ * Automatically checks and sends weekly performance notifications every 7 days.
+ * Ensures the student receives their weekly report notification automatically.
+ */
+export async function checkAndDispatchAutomatedWeeklyReports(studentId) {
+  if (!studentId) return [];
+  try {
+    const [userSnap, resultsSnap, assignmentsSnap, sentSnap] = await Promise.all([
+      get(ref(rtdb, `users/${studentId}`)),
+      get(ref(rtdb, "results")),
+      get(ref(rtdb, "assignments")),
+      get(ref(rtdb, `weeklyReportsSent/${studentId}`)),
+    ]);
+
+    const user = userSnap.exists() ? userSnap.val() : {};
+    const allResults = resultsSnap.exists() ? Object.values(resultsSnap.val()) : [];
+    const allAssignments = assignmentsSnap.exists()
+      ? Object.entries(assignmentsSnap.val()).map(([id, a]) => ({
+          id,
+          ...a,
+          submissions: a.submissions ? Object.values(a.submissions) : [],
+        }))
+      : [];
+
+    const reports = calculateStudentWeeklyReports(studentId, {
+      user,
+      results: allResults,
+      assignments: allAssignments,
+    });
+
+    const sentMap = sentSnap.exists() ? sentSnap.val() : {};
+
+    // For any completed 7-day cycle that hasn't been notified yet:
+    for (const rep of reports) {
+      if (rep.isComplete && !sentMap[rep.weekNumber]) {
+        await pushNotification(studentId, {
+          titleEn: `Weekly Performance Report — Week ${rep.weekNumber}`,
+          titleAr: `تقرير الأداء الأسبوعي — الأسبوع ${rep.weekNumber}`,
+          bodyEn: `Your 7-day evaluation (${rep.startDateStr} – ${rep.endDateStr}) is ready! Overall score: ${rep.overallScore}%. Click to view your detailed report & AI coaching tips.`,
+          bodyAr: `تقرير أدائك الأسبوعي لفترة (${rep.startDateStr} – ${rep.endDateStr}) متاح الآن! المعدل: ${rep.overallScore}%. انقر لمشاهدة التقييم وإرشادات الذكاء الاصطناعي.`,
+          type: "award",
+          link: "/student/weekly-reports",
+        });
+
+        // Mark as sent in RTDB
+        await set(ref(rtdb, `weeklyReportsSent/${studentId}/${rep.weekNumber}`), {
+          sentAt: Date.now(),
+          weekNumber: rep.weekNumber,
+          overallScore: rep.overallScore,
+        });
+      }
+    }
+
+    return reports;
+  } catch (err) {
+    console.warn("Automated weekly report dispatch error:", err.message);
+    return [];
+  }
+}
+
+

@@ -89,7 +89,8 @@
     "availableCourses": "Courses",
     "myQuizzes": "Quizzes",
     "myResults": "Grades & Feedback",
-    "scoreboard": "Top 5 Scoreboard"
+    "scoreboard": "Top 5 Scoreboard",
+    "weeklyReports": "Weekly Reports"
   },
   "admin": {
     "title": "System Admin Control Center",
@@ -198,6 +199,39 @@
     "of": "of",
     "uploadingData": "Uploading data to database...",
     "cancel": "Cancel Upload"
+  },
+  "weeklyReports": {
+    "title": "Weekly Performance Reports",
+    "subtitle": "Automated 7-day performance evaluations, AI coaching tips, and weekly progress cards",
+    "week": "Week",
+    "currentWeek": "Current Week",
+    "completedWeek": "Completed Cycle",
+    "allTimeAvg": "All-Time Avg",
+    "totalWeeks": "Weeks Tracked",
+    "cycleEndsIn": "Cycle ends in",
+    "days": "days",
+    "quizzesAccuracy": "Quizzes Accuracy",
+    "quizzesCount": "Quizzes Completed",
+    "assignmentsMastery": "Worksheets & Tasks",
+    "assignmentsCount": "Submitted Tasks",
+    "totalPointsEarned": "Weekly Points Earned",
+    "overallScore": "Overall Week Score",
+    "aiCoachTitle": "AI Weekly Performance Coach",
+    "downloadPdf": "Download Weekly PDF Report",
+    "noActivity": "No assessments recorded in this 7-day period.",
+    "autoDispatchNote": "The system automatically evaluates your progress every 7 days and delivers your report directly to your notifications.",
+    "quizzesBreakdown": "Quizzes Completed This Week",
+    "assignmentsBreakdown": "Assignments Submitted This Week",
+    "points": "pts",
+    "score": "Score",
+    "date": "Date",
+    "teacherFeedback": "Instructor Feedback",
+    "aiTips": "AI Study Guidance",
+    "excellent": "Outstanding",
+    "veryGood": "Very Good",
+    "good": "Good",
+    "satisfactory": "Satisfactory",
+    "needsImprovement": "Needs Improvement"
   }
 }
 
