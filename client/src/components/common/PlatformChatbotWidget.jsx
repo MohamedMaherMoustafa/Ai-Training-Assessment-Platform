@@ -621,11 +621,6 @@ export default function PlatformChatbotWidget() {
             </div>
             <div className="w-12 h-2.5 -mt-1 rounded-full bg-slate-900/25 dark:bg-sky-400/20 blur-[2px]" />
           </div>
-
-          {/* Floating Purple Chat Icon Dock */}
-          <div className="h-11 w-11 rounded-2xl bg-gradient-to-tr from-[#4f3df7] to-[#703bf7] text-white flex items-center justify-center shadow-lg shadow-indigo-600/35 group-hover:scale-105 transition-transform shrink-0">
-            <Bot className="h-5 w-5 text-white" />
-          </div>
         </button>
       ) : (
         <div
