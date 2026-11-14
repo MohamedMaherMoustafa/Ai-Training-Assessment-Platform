@@ -342,22 +342,30 @@ export default function AppLayout({ navItems, children }) {
         </header>
 
         {/* Welcome Hero Banner with 3D Books Artwork */}
-        <div className="my-3 rounded-[26px] bg-gradient-to-r from-[#edf0fe] via-[#f2f4fe] to-[#e4e9fd] dark:from-slate-900 dark:via-indigo-950/30 dark:to-slate-900 border border-slate-200/80 dark:border-white/10 p-5 sm:p-6 shadow-sm relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="relative z-10">
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+        <div
+          className={`my-3 rounded-[26px] bg-gradient-to-r from-[#edf0fe] via-[#f2f4fe] to-[#e4e9fd] dark:from-slate-900 dark:via-indigo-950/30 dark:to-slate-900 border border-slate-200/80 dark:border-white/10 ${
+            user?.role === "instructor"
+              ? "py-6 px-6 sm:px-8 min-h-[96px] sm:min-h-[108px]"
+              : "p-5 sm:p-6 min-h-[96px] sm:min-h-[108px]"
+          } shadow-sm relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4`}
+        >
+          <div className="relative z-10 flex-1">
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-snug">
               {lang === "ar"
                 ? `مرحباً بعودتك، ${displayName || t(`roles.${user?.role || "student"}`)}!`
                 : `Welcome Back, ${displayName || t(`roles.${user?.role || "student"}`)}!`}
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 font-medium">
-              {lang === "ar"
-                ? "تابع رحلتك التعليمية وحقق أهدافك الدراسية 🚀"
-                : "Continue your learning journey and achieve your goals 🚀"}
-            </p>
+            {user?.role === "student" && (
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1.5 font-medium leading-relaxed">
+                {lang === "ar"
+                  ? "تابع رحلتك التعليمية وحقق أهدافك الدراسية 🚀"
+                  : "Continue your learning journey and achieve your goals 🚀"}
+              </p>
+            )}
           </div>
           {/* 3D Illustration of Graduation Cap & Books */}
-          <div className="hidden sm:block shrink-0">
-            <svg viewBox="0 0 180 110" className="w-32 h-auto drop-shadow-md select-none pointer-events-none" fill="none">
+          <div className="hidden sm:flex shrink-0 items-center justify-end">
+            <svg viewBox="15 22 150 90" className="w-28 sm:w-32 h-auto drop-shadow-md select-none pointer-events-none" fill="none">
               <defs>
                 <linearGradient id="wbBookGrad1" x1="0" y1="0" x2="1" y2="1">
                   <stop offset="0%" stopColor="#1e1b4b" />
