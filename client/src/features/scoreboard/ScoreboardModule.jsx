@@ -8,6 +8,7 @@ import {
   listAssignments,
   listCourses,
   listResults,
+  listUsers,
 } from "../../services/platformService";
 import { generateTop3CertificatePdf } from "../../utils/certificateGenerator";
 
@@ -88,15 +89,23 @@ export default function ScoreboardModule({ mode = "admin", activeInstructorId = 
   const [instructors, setInstructors] = useState([]);
   const [results, setResults] = useState([]);
   const [assignments, setAssignments] = useState([]);
+  const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([listCourses(), listActiveInstructors(), listResults(), listAssignments()])
-      .then(([crs, insts, res, assign]) => {
+    Promise.all([
+      listCourses(),
+      listActiveInstructors(),
+      listResults(),
+      listAssignments(),
+      listUsers("student"),
+    ])
+      .then(([crs, insts, res, assign, stList]) => {
         setCourses(crs);
         setInstructors(insts);
         setResults(res);
         setAssignments(assign);
+        setStudents(stList || []);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -131,6 +140,12 @@ export default function ScoreboardModule({ mode = "admin", activeInstructorId = 
         return studentMap[sid];
       };
 
+      // Also ensure all enrolled students are registered in the board
+      (course.enrolledStudents || []).forEach((sid) => {
+        const found = students.find((s) => s.uid === sid);
+        ensureStudent(sid, found?.displayName || found?.username || found?.email || sid);
+      });
+
       // Quiz results contribute integer earned points (1, 2, 3, 4, 5, 6...)
       results
         .filter((r) => r.courseId === course.id)
@@ -154,7 +169,7 @@ export default function ScoreboardModule({ mode = "admin", activeInstructorId = 
           });
         });
 
-      const ranked = Object.values(studentMap)
+      const allRanked = Object.values(studentMap)
         .map((st) => ({
           ...st,
           totalPoints: st.quizPoints + st.assignmentPoints,
@@ -164,8 +179,10 @@ export default function ScoreboardModule({ mode = "admin", activeInstructorId = 
           if (b.quizPoints !== a.quizPoints) return b.quizPoints - a.quizPoints;
           if (b.quizCount !== a.quizCount) return b.quizCount - a.quizCount;
           return a.studentName.localeCompare(b.studentName);
-        })
-        .slice(0, 5);
+        });
+
+      const top3 = allRanked.slice(0, 3);
+      const restOfStudents = allRanked.slice(3);
 
       const inst = instructors.find((i) => i.uid === course.instructorId);
       const instructorName =
@@ -174,10 +191,12 @@ export default function ScoreboardModule({ mode = "admin", activeInstructorId = 
       return {
         course,
         instructorName,
-        top5: ranked,
+        allRanked,
+        top3,
+        restOfStudents,
       };
     });
-  }, [visibleCourses, results, assignments, instructors]);
+  }, [visibleCourses, results, assignments, instructors, students]);
 
   const handleDownloadCertificate = (rank, entry, course, instructorName) => {
     if (!canPrintCertificates) return;
@@ -209,17 +228,17 @@ export default function ScoreboardModule({ mode = "admin", activeInstructorId = 
           <div className="min-w-0">
             <h1 className="text-lg sm:text-xl font-black truncate">
               {lang === "ar"
-                ? "لوحة المتصدرين (أفضل 5 طلاب)"
-                : "Course Score Board — Top 5"}
+                ? "لوحة المتصدرين وترتيب الطلاب"
+                : "Course Scoreboard & Student Standings"}
             </h1>
             <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
               {canPrintCertificates
                 ? lang === "ar"
-                  ? "الترتيب حسب مجموع النقاط (1، 2، 3...) في الاختبارات والواجبات — طباعة شهادات PDF للمراكز الثلاثة الأولى فقط"
-                  : "Ranked by total earned points (1, 2, 3...) across quizzes & assignments — Print PDF Certificates exclusively for Top 3"
+                  ? "الترتيب حسب مجموع النقاط — منصة تتويج Top 3 مع شهادات PDF، وجدول منظم لباقي طلاب المقرر"
+                  : "Ranked by total earned points — Top 3 podium with PDF certificates, and arranged standings table for the rest of students"
                 : lang === "ar"
-                ? "الترتيب حسب مجموع النقاط (1، 2، 3...) في الاختبارات والواجبات"
-                : "Ranked by total earned points (1, 2, 3...) across quizzes & assignments"}
+                ? "ترتيب الطلاب وفقاً لمجموع النقاط المكتسبة في الاختبارات والواجبات"
+                : "Learners ranked by earned points across quizzes and assignments"}
             </p>
           </div>
         </div>
@@ -245,9 +264,7 @@ export default function ScoreboardModule({ mode = "admin", activeInstructorId = 
         </div>
       ) : (
         <div className="space-y-8">
-          {courseBoards.map(({ course, instructorName, top5 }) => {
-            const top3 = top5.slice(0, 3);
-            const rest = top5.slice(3, 5);
+          {courseBoards.map(({ course, instructorName, allRanked, top3, restOfStudents }) => {
             const podiumOrder = [
               { rank: 2, entry: top3[1] || null },
               { rank: 1, entry: top3[0] || null },
@@ -273,11 +290,11 @@ export default function ScoreboardModule({ mode = "admin", activeInstructorId = 
                     </div>
                   </div>
                   <span className="px-3 py-1 rounded-full glass-subtle text-xs font-bold text-sky-700 dark:text-sky-300">
-                    {top5.length} / 5 {lang === "ar" ? "طلاب مصنفون" : "Ranked Learners"}
+                    {allRanked.length} {lang === "ar" ? "طلاب في الترتيب" : "Ranked Students"}
                   </span>
                 </div>
 
-                {top5.length === 0 ? (
+                {allRanked.length === 0 ? (
                   <div className="py-10 text-center text-xs text-slate-500">
                     {lang === "ar"
                       ? "لم يُسجل أي طالب نقاطاً في هذا المقرر بعد."
@@ -377,54 +394,134 @@ export default function ScoreboardModule({ mode = "admin", activeInstructorId = 
                       })}
                     </div>
 
-                    {/* #4 and #5 Runner-Up Rows (NO Certificate PDF Button — Top 3 Only) */}
-                    {rest.length > 0 && (
-                      <div className="space-y-2 pt-2 border-t border-white/40 dark:border-white/10">
-                        <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 px-1">
-                          {lang === "ar" ? "المراكز #4 و #5" : "Top 5 Runners-Up (#4 & #5)"}
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {rest.map((entry, idx) => {
-                            const rank = idx + 4;
-                            const isMe = user?.uid && entry.studentId === user.uid;
-                            return (
-                              <div
-                                key={entry.studentId}
-                                className={`glass-subtle rounded-2xl px-4 py-3 flex items-center justify-between gap-3 ${
-                                  isMe ? "ring-1 ring-sky-400" : ""
-                                }`}
-                              >
-                                <div className="flex items-center gap-3 min-w-0">
-                                  <span className="h-8 w-8 rounded-xl bg-slate-500/15 dark:bg-white/10 text-xs font-extrabold flex items-center justify-center text-slate-700 dark:text-slate-200 shrink-0">
-                                    #{rank}
-                                  </span>
-                                  <div className="h-9 w-9 rounded-full bg-gradient-to-br from-sky-500 to-indigo-500 text-white font-bold text-xs flex items-center justify-center shrink-0">
-                                    {getInitials(entry.studentName)}
-                                  </div>
-                                  <div className="min-w-0">
-                                    <div className="font-bold text-sm truncate text-slate-900 dark:text-white">
-                                      {entry.studentName}
-                                      {isMe && (
-                                        <span className="ms-1.5 px-1.5 py-0.5 rounded-full bg-sky-500/20 text-[10px] font-bold text-sky-600 dark:text-sky-300">
-                                          {lang === "ar" ? "أنت" : "YOU"}
-                                        </span>
-                                      )}
-                                    </div>
-                                    <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                                      {lang === "ar" ? "اختبارات" : "Quiz"}: {entry.quizPoints}{" "}
-                                      {lang === "ar" ? "ن" : "pts"} ·{" "}
-                                      {lang === "ar" ? "واجبات" : "Assign"}:{" "}
-                                      {entry.assignmentPoints} {lang === "ar" ? "ن" : "pts"}
-                                    </div>
-                                  </div>
-                                </div>
-                                <span className="px-3 py-1 rounded-full bg-sky-500/15 border border-sky-400/30 text-sky-700 dark:text-sky-300 text-xs font-extrabold shrink-0">
-                                  {entry.totalPoints} {lang === "ar" ? "نقطة" : "pts"}
-                                </span>
+                    {/* Rest of Students Standings Table (Rank #4 and below) */}
+                    {restOfStudents.length > 0 ? (
+                      <div className="space-y-3 pt-4 border-t border-white/40 dark:border-white/10">
+                        <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+                          <div className="flex items-center gap-2">
+                            <span className="h-6 px-2 rounded-lg bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 font-extrabold text-xs flex items-center justify-center">
+                              #4+
+                            </span>
+                            <div>
+                              <div className="font-extrabold text-sm text-slate-900 dark:text-white">
+                                {lang === "ar"
+                                  ? "جدول ترتيب باقي الطلاب (المركز الرابع فما فوق)"
+                                  : "Rest of Students Standings (Rank #4 & below)"}
                               </div>
-                            );
-                          })}
+                              <div className="text-[10.5px] text-slate-500 dark:text-slate-400">
+                                {lang === "ar"
+                                  ? `عرض ${restOfStudents.length} طلاب مرتبين حسب مجموع النقاط المكتسبة`
+                                  : `Arranged table of ${restOfStudents.length} learners ordered by total earned points`}
+                              </div>
+                            </div>
+                          </div>
+                          <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-white/70 dark:bg-slate-900/60 border border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-slate-300 shadow-sm">
+                            {restOfStudents.length} {lang === "ar" ? "طالب في الجدول" : "Students"}
+                          </span>
                         </div>
+
+                        {/* Arranged Table */}
+                        <div className="rounded-2xl border border-slate-200/90 dark:border-white/10 overflow-hidden bg-white/70 dark:bg-slate-900/50 shadow-sm">
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-xs text-start">
+                              <thead className="bg-slate-100/90 dark:bg-white/5 uppercase font-bold text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-white/10">
+                                <tr>
+                                  <th className="px-4 py-3 text-start w-16">
+                                    {lang === "ar" ? "الترتيب" : "Rank"}
+                                  </th>
+                                  <th className="px-4 py-3 text-start">
+                                    {lang === "ar" ? "الطالب" : "Student"}
+                                  </th>
+                                  <th className="px-4 py-3 text-center">
+                                    {lang === "ar" ? "نقاط الاختبارات" : "Quiz Pts"}
+                                  </th>
+                                  <th className="px-4 py-3 text-center">
+                                    {lang === "ar" ? "نقاط الواجبات" : "Assignment Pts"}
+                                  </th>
+                                  <th className="px-4 py-3 text-end">
+                                    {lang === "ar" ? "مجموع النقاط" : "Total Points"}
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+                                {restOfStudents.map((entry, idx) => {
+                                  const rank = idx + 4;
+                                  const isMe = user?.uid && entry.studentId === user.uid;
+                                  return (
+                                    <tr
+                                      key={entry.studentId}
+                                      className={`hover:bg-indigo-50/50 dark:hover:bg-white/5 transition-colors ${
+                                        isMe ? "bg-sky-50/80 dark:bg-sky-950/30 font-bold" : ""
+                                      }`}
+                                    >
+                                      {/* Rank */}
+                                      <td className="px-4 py-3">
+                                        <span className="inline-flex items-center justify-center h-7 w-7 rounded-xl bg-slate-200/90 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-extrabold text-xs shadow-sm">
+                                          #{rank}
+                                        </span>
+                                      </td>
+
+                                      {/* Student Identity */}
+                                      <td className="px-4 py-3">
+                                        <div className="flex items-center gap-2.5 min-w-0">
+                                          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-sky-500 text-white font-bold text-[11px] flex items-center justify-center shrink-0 shadow-sm">
+                                            {getInitials(entry.studentName)}
+                                          </div>
+                                          <div className="min-w-0">
+                                            <div className="font-bold text-slate-900 dark:text-white truncate flex items-center gap-1.5">
+                                              <span>{entry.studentName}</span>
+                                              {isMe && (
+                                                <span className="px-1.5 py-0.5 rounded-full bg-sky-500/20 text-[9.5px] font-extrabold text-sky-600 dark:text-sky-300">
+                                                  {lang === "ar" ? "أنت" : "YOU"}
+                                                </span>
+                                              )}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </td>
+
+                                      {/* Quiz Points */}
+                                      <td className="px-4 py-3 text-center text-slate-700 dark:text-slate-300">
+                                        <span className="font-bold">
+                                          {entry.quizPoints} {lang === "ar" ? "ن" : "pts"}
+                                        </span>
+                                        <span className="text-[10px] text-slate-400 ms-1">
+                                          ({entry.quizCount} {lang === "ar" ? "اختبار" : "quizzes"})
+                                        </span>
+                                      </td>
+
+                                      {/* Assignment Points */}
+                                      <td className="px-4 py-3 text-center text-slate-700 dark:text-slate-300">
+                                        <span className="font-bold">
+                                          {entry.assignmentPoints} {lang === "ar" ? "ن" : "pts"}
+                                        </span>
+                                        <span className="text-[10px] text-slate-400 ms-1">
+                                          ({entry.assignmentCount} {lang === "ar" ? "واجب" : "assign"})
+                                        </span>
+                                      </td>
+
+                                      {/* Total Points */}
+                                      <td className="px-4 py-3 text-end">
+                                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/60 dark:to-purple-950/60 border border-indigo-200/90 dark:border-indigo-800/80 font-extrabold text-xs text-indigo-700 dark:text-indigo-300 shadow-sm">
+                                          <Award className="h-3.5 w-3.5 text-indigo-500" />
+                                          <span>
+                                            {entry.totalPoints} {lang === "ar" ? "نقطة" : "pts"}
+                                          </span>
+                                        </span>
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="pt-3 border-t border-white/40 dark:border-white/10 text-center text-xs text-slate-400 py-3">
+                        {lang === "ar"
+                          ? "جميع طلاب هذا المقرر متواجدون في منصة التتويج الثلاثية أعلاه."
+                          : "All ranked students for this course are currently on the top 3 podium."}
                       </div>
                     )}
                   </>
