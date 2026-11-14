@@ -134,7 +134,7 @@ export default function AppLayout({ navItems, children }) {
 
       {/* Light Glassy Sidebar */}
       <aside
-        className={`fixed lg:static inset-y-0 start-0 z-40 h-screen lg:h-full shrink-0 w-[86vw] max-w-[310px] lg:w-[280px] xl:w-[290px] bg-white/80 dark:bg-slate-900/85 backdrop-blur-xl text-slate-800 dark:text-white lg:rounded-[28px] border border-slate-200/80 dark:border-white/10 flex flex-col justify-between overflow-hidden shadow-xl shadow-indigo-500/5 transition-transform duration-300 ${
+        className={`fixed lg:static inset-y-0 start-0 z-40 h-screen lg:h-full shrink-0 w-[86vw] max-w-[310px] lg:w-[280px] xl:w-[290px] bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl text-slate-800 dark:text-white lg:rounded-[28px] border border-slate-200/90 dark:border-white/10 flex flex-col justify-between overflow-hidden shadow-[0_12px_36px_rgba(30,41,59,0.08)] dark:shadow-[0_16px_40px_rgba(0,0,0,0.6)] transition-transform duration-300 ${
           sidebarOpen
             ? "translate-x-0"
             : "-translate-x-full rtl:translate-x-full lg:translate-x-0 lg:rtl:translate-x-0"
@@ -142,21 +142,37 @@ export default function AppLayout({ navItems, children }) {
       >
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Top Brand Section */}
-          <div className="pt-6 pb-4 px-4 text-center border-b border-slate-200/60 dark:border-white/10 relative">
+          <div className="pt-6 pb-4 px-4 text-center border-b border-slate-200/90 dark:border-white/10 relative bg-gradient-to-b from-indigo-50/40 via-white to-transparent dark:from-indigo-950/20 dark:via-slate-900/40 dark:to-transparent">
             <button
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden absolute top-4 end-4 p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-white transition-colors"
+              className="lg:hidden absolute top-4 end-4 p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-white transition-colors cursor-pointer"
             >
               <X className="h-4 w-4" />
             </button>
-            <div className="h-14 w-14 mx-auto mb-2.5 flex items-center justify-center">
-              <img src="/Logo.png" alt="Platform Logo" className="w-full h-full object-contain drop-shadow-sm" />
+
+            {/* Glowing Brand Logo Container */}
+            <div className="relative mx-auto mb-2.5 h-15 w-15 rounded-2xl bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-indigo-950/50 dark:via-slate-800/80 dark:to-purple-950/40 p-2.5 border border-indigo-150/80 dark:border-white/10 shadow-[0_4px_16px_rgba(79,70,229,0.12)] flex items-center justify-center transition-transform hover:scale-105 group">
+              <img
+                src="/Logo.png"
+                alt="Platform Logo"
+                className="w-full h-full object-contain filter drop-shadow-md group-hover:brightness-105 transition-all"
+              />
             </div>
-            <div className="font-extrabold text-sm sm:text-[14px] leading-snug tracking-tight text-slate-900 dark:text-white">
-              AI Training &<br />Assessment Platform
+
+            {/* Platform Title */}
+            <div className="font-black text-sm sm:text-[14.5px] leading-snug tracking-tight text-slate-900 dark:text-white">
+              AI Training &amp; Assessment
             </div>
-            <div className="text-[10.5px] font-semibold text-indigo-600 dark:text-indigo-300 mt-1">
-              {t("auth.learnTagline")}
+            <div className="text-[11px] font-extrabold text-slate-700 dark:text-slate-300 tracking-wider uppercase mt-0.5">
+              Platform
+            </div>
+
+            {/* Platform Slogan Badge */}
+            <div className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-indigo-50/95 to-purple-50/95 dark:from-indigo-950/60 dark:to-purple-950/60 border border-indigo-200/80 dark:border-indigo-800/60 shadow-xs max-w-full">
+              <span className="h-1.5 w-1.5 rounded-full bg-indigo-600 dark:bg-cyan-400 animate-pulse shrink-0" />
+              <span className="text-[10px] font-bold text-indigo-700 dark:text-indigo-300 truncate">
+                {t("auth.learnTagline")}
+              </span>
             </div>
           </div>
 
@@ -173,8 +189,8 @@ export default function AppLayout({ navItems, children }) {
                   className={({ isActive }) =>
                     `group relative flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-[12.5px] transition-all duration-200 ${
                       isActive
-                        ? "bg-gradient-to-r from-[#4f3df7] to-[#703bf7] text-white font-bold shadow-lg shadow-indigo-600/30"
-                        : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-white/5 font-semibold"
+                        ? "bg-gradient-to-r from-[#4f3df7] to-[#703bf7] text-white font-extrabold shadow-md shadow-indigo-600/30"
+                        : "text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white hover:bg-indigo-50/70 dark:hover:bg-white/5 font-bold"
                     }`
                   }
                 >
@@ -187,7 +203,7 @@ export default function AppLayout({ navItems, children }) {
                         className={`h-4 w-4 shrink-0 transition-colors ${
                           isActive
                             ? "text-white"
-                            : "text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-white"
+                            : "text-slate-500 group-hover:text-indigo-600 dark:group-hover:text-white"
                         }`}
                       />
                       <span className="truncate">{item.label}</span>
@@ -200,8 +216,8 @@ export default function AppLayout({ navItems, children }) {
         </div>
 
         {/* Bottom User Card */}
-        <div className="p-3 border-t border-slate-200/60 dark:border-white/10 bg-slate-50/70 dark:bg-slate-950/40 backdrop-blur-md">
-          <div className="bg-white/95 dark:bg-slate-800/80 rounded-2xl p-2.5 flex items-center justify-between border border-slate-200/80 dark:border-white/10 shadow-sm mb-2 group">
+        <div className="p-3 border-t border-slate-200/80 dark:border-white/10 bg-slate-50/80 dark:bg-slate-950/50 backdrop-blur-md">
+          <div className="bg-white dark:bg-slate-800/90 rounded-2xl p-2.5 flex items-center justify-between border border-slate-200/90 dark:border-white/10 shadow-xs mb-2 group hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors">
             <div
               onClick={() => setProfileModalOpen(true)}
               className="flex items-center gap-2.5 min-w-0 cursor-pointer flex-1"
@@ -211,10 +227,10 @@ export default function AppLayout({ navItems, children }) {
                 {String(displayName || "U").slice(0, 2).toUpperCase()}
               </div>
               <div className="min-w-0">
-                <div className="text-xs font-bold text-slate-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                <div className="text-xs font-black text-slate-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                   {displayName}
                 </div>
-                <div className="text-[10px] text-slate-500 dark:text-slate-400 capitalize truncate">
+                <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 capitalize truncate">
                   {t(`roles.${user?.role || "student"}`)}
                 </div>
               </div>
@@ -224,7 +240,7 @@ export default function AppLayout({ navItems, children }) {
               onClick={() => setProfileModalOpen(true)}
               title={t("profile.editTooltip") || "Edit Profile & Password"}
               aria-label="Edit Profile"
-              className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer shrink-0"
+              className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 cursor-pointer shrink-0"
             >
               <Settings className="h-4 w-4" />
             </button>
@@ -232,7 +248,7 @@ export default function AppLayout({ navItems, children }) {
 
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-950/60 border border-rose-200/60 dark:border-rose-900/40 transition-colors cursor-pointer shadow-sm"
+            className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50/90 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-950/60 border border-rose-200/80 dark:border-rose-900/40 transition-all cursor-pointer shadow-xs active:scale-[0.99]"
           >
             <LogOut className="h-3.5 w-3.5" />
             <span>{t("app.logout")}</span>
@@ -243,16 +259,16 @@ export default function AppLayout({ navItems, children }) {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 h-screen lg:h-full overflow-y-auto px-2 sm:px-4 lg:px-1">
         {/* Top Header Bar */}
-        <header className="min-h-[50px] shrink-0 bg-white/95 dark:bg-slate-900/90 backdrop-blur-md rounded-full mt-2 lg:mt-0 px-3 sm:px-5 py-1.5 flex items-center justify-between gap-2 shadow-sm border border-slate-200/80 dark:border-white/10 sticky top-2 lg:top-0 z-20">
+        <header className="min-h-[52px] shrink-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-full mt-2 lg:mt-0 px-3.5 sm:px-5 py-1.5 flex items-center justify-between gap-2 shadow-[0_4px_20px_rgba(30,41,59,0.06)] dark:shadow-xl border border-slate-200/90 dark:border-white/10 sticky top-2 lg:top-0 z-20">
           <div className="flex items-center gap-2 min-w-0">
             <button
               onClick={() => setSidebarOpen(true)}
               aria-label="Open menu"
-              className="lg:hidden p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0"
+              className="lg:hidden p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0 cursor-pointer"
             >
               <Menu className="h-5 w-5" />
             </button>
-            <div className="rounded-full border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-1 flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-100 shadow-sm">
+            <div className="rounded-full border border-slate-200/90 dark:border-slate-700 bg-slate-50/90 dark:bg-slate-800 px-3.5 py-1.5 flex items-center gap-2 text-xs font-black text-slate-900 dark:text-slate-100 shadow-xs">
               <GraduationCap className="h-3.5 w-3.5 text-indigo-600 dark:text-cyan-400" />
               <span>{t(`roles.${user?.role || "student"}`)}</span>
               <ChevronDown className="h-3 w-3 text-slate-400" />
@@ -265,7 +281,7 @@ export default function AppLayout({ navItems, children }) {
               <button
                 onClick={() => setNotifOpen((o) => !o)}
                 aria-label="Notifications"
-                className="h-8 w-8 sm:h-9 sm:w-9 rounded-full border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-all relative"
+                className="h-8 w-8 sm:h-9 sm:w-9 rounded-full border border-slate-200/90 dark:border-slate-700 bg-slate-50/90 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 shadow-xs hover:bg-indigo-50/70 dark:hover:bg-slate-700 hover:border-indigo-300 transition-all relative cursor-pointer"
               >
                 <Bell className="h-4 w-4" />
                 {unreadCount > 0 && (
@@ -363,7 +379,7 @@ export default function AppLayout({ navItems, children }) {
             <button
               onClick={toggleSound}
               aria-label="Toggle sound"
-              className="h-8 w-8 sm:h-9 sm:w-9 rounded-full border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
+              className="h-8 w-8 sm:h-9 sm:w-9 rounded-full border border-slate-200/90 dark:border-slate-700 bg-slate-50/90 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 shadow-xs hover:bg-indigo-50/70 dark:hover:bg-slate-700 hover:border-indigo-300 transition-all cursor-pointer"
             >
               {soundOn ? <Volume2 className="h-4 w-4 text-emerald-500" /> : <VolumeX className="h-4 w-4 text-slate-400" />}
             </button>
@@ -375,7 +391,7 @@ export default function AppLayout({ navItems, children }) {
             <button
               onClick={toggleTheme}
               aria-label="Toggle theme"
-              className="rounded-full border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 sm:px-3.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 shadow-sm flex items-center gap-1.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
+              className="rounded-full border border-slate-200/90 dark:border-slate-700 bg-slate-50/90 dark:bg-slate-800 px-3 sm:px-3.5 py-1.5 text-xs font-black text-slate-800 dark:text-slate-200 shadow-xs flex items-center gap-1.5 hover:bg-indigo-50/70 dark:hover:bg-slate-700 hover:border-indigo-300 transition-all cursor-pointer"
             >
               {theme === "dark" ? (
                 <>
