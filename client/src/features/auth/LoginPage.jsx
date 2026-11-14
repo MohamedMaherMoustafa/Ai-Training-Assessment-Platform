@@ -6,15 +6,21 @@ import {
   GraduationCap,
   Lock,
   User,
+  Mail,
   Sun,
   Moon,
-  Languages,
-  ShieldAlert,
+  Globe,
+  ChevronDown,
   ArrowRight,
   Eye,
   EyeOff,
   Sparkles,
-  CheckCircle2,
+  UserPlus,
+  ShieldCheck,
+  Laptop,
+  Bot,
+  Trophy,
+  BarChart3,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
@@ -23,7 +29,7 @@ import { usePopup } from "../../context/PopupContext";
 import { playLoginSuccessSound } from "../../utils/soundEffects";
 
 export default function LoginPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { login } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { toggleLang } = useLang();
@@ -33,12 +39,15 @@ export default function LoginPage() {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    setIdentifier("");
-    setPassword("");
-    setShowPass(false);
+    const saved = localStorage.getItem("platform_remember_user");
+    if (saved) {
+      setIdentifier(saved);
+      setRememberMe(true);
+    }
   }, []);
 
   const handleSubmit = async (e) => {
@@ -48,6 +57,13 @@ export default function LoginPage() {
     try {
       const profile = await login(identifier, password);
       playLoginSuccessSound();
+
+      if (rememberMe) {
+        localStorage.setItem("platform_remember_user", identifier);
+      } else {
+        localStorage.removeItem("platform_remember_user");
+      }
+
       setIdentifier("");
       setPassword("");
       setShowPass(false);
@@ -80,108 +96,230 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-between p-3 sm:p-4">
-      {/* Top Bar */}
-      <div className="max-w-5xl w-full mx-auto glass-panel rounded-[22px] px-3 sm:px-5 py-2.5 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-gradient-to-br from-cyan-500 via-violet-600 to-fuchsia-600 text-white flex items-center justify-center shadow-lg shadow-violet-500/30 shrink-0">
+    <div className="min-h-screen bg-gradient-to-br from-[#eef2fb] via-[#f4f3fe] to-[#ebeffc] dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex flex-col justify-between p-3 sm:p-6 transition-colors duration-300">
+      {/* Top Floating Pill Navigation Bar */}
+      <header className="max-w-5xl w-full mx-auto bg-white/95 dark:bg-slate-900/90 backdrop-blur-md rounded-full px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-3 shadow-md shadow-indigo-500/5 border border-slate-200/80 dark:border-white/10">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-2xl bg-gradient-to-tr from-[#5719bd] via-[#6a1ecf] to-[#8022d8] text-white flex items-center justify-center shadow-md shadow-purple-500/25 shrink-0">
             <GraduationCap className="h-5 w-5 sm:h-6 sm:w-6" />
           </div>
           <div className="min-w-0">
             <h1 className="font-extrabold text-xs sm:text-base text-slate-900 dark:text-white truncate">
               {t("app.title")}
             </h1>
-            <p className="hidden sm:block text-xs text-slate-500 dark:text-slate-400 truncate">
+            <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium truncate">
               {t("app.subtitle")}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+
+        <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={toggleLang}
             aria-label="Toggle language"
-            className="glass-btn-secondary flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold"
+            className="flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/60 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition-all"
           >
-            <Languages className="h-4 w-4 text-sky-600 dark:text-sky-400 shrink-0" />
-            <span className="hidden sm:inline">{t("app.lang")}</span>
+            <Globe className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400 shrink-0" />
+            <span className="hidden sm:inline">{i18n.language === "ar" ? "العربية" : "English"}</span>
+            <ChevronDown className="h-3 w-3 text-slate-400 shrink-0" />
           </button>
+
           <button
             onClick={toggleTheme}
             aria-label="Toggle theme"
-            className="glass-btn-secondary flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold"
+            className="flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/60 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition-all"
           >
             {theme === "dark" ? (
               <>
-                <Sun className="h-4 w-4 text-amber-400 shrink-0" />
+                <Sun className="h-3.5 w-3.5 text-amber-400 shrink-0" />
                 <span className="hidden sm:inline">{t("app.light")}</span>
               </>
             ) : (
               <>
-                <Moon className="h-4 w-4 text-indigo-600 shrink-0" />
+                <Moon className="h-3.5 w-3.5 text-indigo-600 shrink-0" />
                 <span className="hidden sm:inline">{t("app.dark")}</span>
               </>
             )}
           </button>
         </div>
-      </div>
+      </header>
 
-      {/* Asymmetric Split Showcase Login Card */}
-      <div className="max-w-5xl w-full mx-auto my-4">
-        <div className="glass-panel rounded-[34px] overflow-hidden grid grid-cols-1 lg:grid-cols-12 shadow-2xl">
-          {/* Colorful Aurora Left Hero Showcase */}
-          <div className="lg:col-span-5 relative p-7 sm:p-9 bg-gradient-to-br from-cyan-500 via-violet-600 to-fuchsia-600 text-white flex flex-col justify-between overflow-hidden">
-            <div className="pointer-events-none absolute -top-12 -end-12 h-44 w-44 rounded-full bg-white/15 blur-xl" />
-            <div className="pointer-events-none absolute -bottom-16 -start-10 h-48 w-48 rounded-full bg-amber-300/25 blur-2xl" />
+      {/* Main Split Showcase Login Card */}
+      <main className="max-w-5xl w-full mx-auto my-4 sm:my-6">
+        <div className="rounded-[30px] sm:rounded-[36px] overflow-hidden shadow-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-white/10 grid grid-cols-1 lg:grid-cols-12 transition-all">
+          {/* Left Column: Royal Purple Showcase Banner */}
+          <section className="lg:col-span-5 relative p-6 sm:p-8 lg:p-9 bg-gradient-to-b from-[#181580] via-[#3523b0] to-[#5a189a] text-white flex flex-col justify-between overflow-hidden">
+            {/* Ambient Radial Highlights */}
+            <div className="pointer-events-none absolute -top-16 -end-16 h-56 w-56 rounded-full bg-violet-400/20 blur-2xl" />
+            <div className="pointer-events-none absolute bottom-0 start-0 h-64 w-64 rounded-full bg-indigo-500/20 blur-3xl" />
 
-            <div className="relative space-y-4">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-bold border border-white/30">
-                <Sparkles className="h-3.5 w-3.5 text-amber-200" />
-                Smart AI Learning Workspace
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-black leading-tight">
+            <div className="relative z-10">
+              <h2 className="text-2xl sm:text-[30px] font-black leading-tight text-white tracking-tight">
                 {t("app.title")}
               </h2>
-              <p className="text-xs sm:text-sm text-white/85 leading-relaxed">
-                {t("app.subtitle")}
+              <div className="text-xs sm:text-sm font-semibold text-indigo-200 mt-2">
+                {t("auth.learnTagline")}
+              </div>
+              <p className="text-xs text-white/80 mt-3 leading-relaxed max-w-sm">
+                {t("auth.heroDesc")}
               </p>
-            </div>
 
-            <div className="relative mt-6 space-y-2.5">
-              {[
-                "Live PDF Annotation & Freehand Pen",
-                "AI Quiz Builder & Walking Robot Chatbot",
-                "Points Scoreboard & Top-3 Certificates",
-                "Student Progress Reports & Privacy Shield",
-              ].map((feat) => (
-                <div
-                  key={feat}
-                  className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-white/15 backdrop-blur-md border border-white/20 text-xs font-semibold"
-                >
-                  <CheckCircle2 className="h-4 w-4 text-emerald-200 shrink-0" />
-                  <span>{feat}</span>
+              {/* 4 Feature Pills */}
+              <div className="mt-6 sm:mt-7 space-y-3.5">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-full bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center shrink-0 text-white shadow-sm">
+                    <Laptop className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs sm:text-[13px] font-bold text-white">{t("auth.featPdf")}</div>
+                    <div className="text-[11px] text-indigo-200">{t("auth.featPdfDesc")}</div>
+                  </div>
                 </div>
-              ))}
-            </div>
-          </div>
 
-          {/* Right Form Side */}
-          <div className="lg:col-span-7 p-6 sm:p-9">
-            <div className="mb-6">
-              <h2 className="text-2xl font-black bg-gradient-to-r from-cyan-600 via-violet-600 to-fuchsia-600 dark:from-cyan-300 dark:via-violet-300 dark:to-fuchsia-300 bg-clip-text text-transparent">
-                {t("auth.loginTitle")}
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-full bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center shrink-0 text-white shadow-sm">
+                    <Bot className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs sm:text-[13px] font-bold text-white">{t("auth.featQuiz")}</div>
+                    <div className="text-[11px] text-indigo-200">{t("auth.featQuizDesc")}</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-full bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center shrink-0 text-white shadow-sm">
+                    <Trophy className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs sm:text-[13px] font-bold text-white">{t("auth.featPoints")}</div>
+                    <div className="text-[11px] text-indigo-200">{t("auth.featPointsDesc")}</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-full bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center shrink-0 text-white shadow-sm">
+                    <BarChart3 className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs sm:text-[13px] font-bold text-white">{t("auth.featReports")}</div>
+                    <div className="text-[11px] text-indigo-200">{t("auth.featReportsDesc")}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom 3D Artwork Composition: Books, Mortarboard & Laptop */}
+            <div className="relative mt-6 pt-4 flex justify-end">
+              <svg
+                viewBox="0 0 320 180"
+                className="w-48 sm:w-60 lg:w-64 h-auto drop-shadow-2xl select-none pointer-events-none"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <defs>
+                  <linearGradient id="book1Grad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#2e1065" />
+                    <stop offset="100%" stopColor="#4338ca" />
+                  </linearGradient>
+                  <linearGradient id="book2Grad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#3b0764" />
+                    <stop offset="100%" stopColor="#6366f1" />
+                  </linearGradient>
+                  <linearGradient id="capGrad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#0f172a" />
+                    <stop offset="100%" stopColor="#1e1b4b" />
+                  </linearGradient>
+                  <linearGradient id="laptopScreen" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#0b0f19" />
+                    <stop offset="100%" stopColor="#1e293b" />
+                  </linearGradient>
+                  <linearGradient id="goldTassel" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#fde047" />
+                    <stop offset="100%" stopColor="#f59e0b" />
+                  </linearGradient>
+                </defs>
+
+                {/* Ambient Floor Shadow */}
+                <ellipse cx="190" cy="165" rx="100" ry="12" fill="#09051d" fillOpacity="0.4" />
+
+                {/* Bottom Book */}
+                <path d="M 120 150 L 250 135 L 265 145 L 135 160 Z" fill="url(#book1Grad)" />
+                <path d="M 120 150 L 135 160 L 135 167 L 120 157 Z" fill="#1e1b4b" />
+                <path d="M 135 160 L 265 145 L 265 152 L 135 167 Z" fill="#e2e8f0" />
+
+                {/* Middle Book */}
+                <path d="M 130 135 L 255 120 L 268 128 L 143 143 Z" fill="url(#book2Grad)" />
+                <path d="M 130 135 L 143 143 L 143 150 L 130 142 Z" fill="#2e1065" />
+                <path d="M 143 143 L 268 128 L 268 135 L 143 150 Z" fill="#f8fafc" />
+
+                {/* Top Book */}
+                <path d="M 140 120 L 250 106 L 262 113 L 152 127 Z" fill="url(#book1Grad)" />
+                <path d="M 140 120 L 152 127 L 152 133 L 140 126 Z" fill="#1e1b4b" />
+                <path d="M 152 127 L 262 113 L 262 119 L 152 133 Z" fill="#f1f5f9" />
+
+                {/* Graduation Cap Base */}
+                <ellipse cx="198" cy="98" rx="26" ry="10" fill="#090d16" />
+
+                {/* Diamond Mortarboard Top */}
+                <polygon points="198,68 250,86 198,104 146,86" fill="url(#capGrad)" stroke="#475569" strokeWidth="1" />
+
+                {/* Cap Button */}
+                <circle cx="198" cy="86" r="3.5" fill="url(#goldTassel)" />
+
+                {/* Golden Hanging Tassel */}
+                <path d="M 198 86 Q 220 90 230 108 L 232 122" stroke="url(#goldTassel)" strokeWidth="2.5" strokeLinecap="round" />
+                <polygon points="230,122 234,122 235,130 229,130" fill="url(#goldTassel)" />
+
+                {/* Open Laptop In Front */}
+                <g transform="translate(10, 10)">
+                  {/* Laptop Base */}
+                  <polygon points="65,160 145,152 175,165 95,173" fill="#334155" />
+                  <polygon points="75,160 138,154 163,164 100,170" fill="#1e293b" />
+
+                  {/* Laptop Screen */}
+                  <polygon points="80,110 148,102 145,152 77,160" fill="#0f172a" stroke="#475569" strokeWidth="1.5" />
+                  <polygon points="83,113 145,106 142,149 80,156" fill="url(#laptopScreen)" />
+
+                  {/* Glowing Cap on Screen */}
+                  <path
+                    d="M 112 123 L 126 128 L 112 133 L 98 128 Z"
+                    fill="#38bdf8"
+                    opacity="0.9"
+                  />
+                  <path
+                    d="M 103 131 C 103 135 121 135 121 131"
+                    stroke="#38bdf8"
+                    strokeWidth="1.5"
+                    fill="none"
+                    strokeLinecap="round"
+                  />
+                  <line x1="123" y1="129" x2="125" y2="136" stroke="#fbbf24" strokeWidth="1" />
+                </g>
+              </svg>
+            </div>
+          </section>
+
+          {/* Right Column: Clean Authentication Form */}
+          <section className="lg:col-span-7 p-6 sm:p-10 lg:p-12 bg-white dark:bg-slate-900 flex flex-col justify-center transition-colors">
+            {/* Header */}
+            <div className="text-center mb-6">
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                {t("auth.welcomeBack")}
               </h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                {t("auth.loginDesc")}
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1.5">
+                {t("auth.welcomeDesc")}
               </p>
             </div>
 
             <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4">
+              {/* Username or Email */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                  {t("auth.identifier")}
+                <label className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
+                  <User className="h-3.5 w-3.5 text-blue-600 dark:text-cyan-400" />
+                  <span>{t("auth.identifier")}</span>
                 </label>
-                <div className="relative">
-                  <User className="h-4 w-4 text-cyan-600 dark:text-cyan-400 absolute top-3 start-3.5" />
+                <div className="relative flex items-center">
+                  <Mail className="h-4 w-4 text-slate-400 absolute start-3.5 pointer-events-none" />
                   <input
                     type="text"
                     name="platform_login_id"
@@ -190,17 +328,19 @@ export default function LoginPage() {
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
                     placeholder={t("auth.identifierPlaceholder")}
-                    className="w-full ps-10 pe-3 py-2.5 glass-input text-sm"
+                    className="w-full ps-10 pe-4 py-2.5 sm:py-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder:text-slate-400 text-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-sm"
                   />
                 </div>
               </div>
 
+              {/* Password */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                  {t("auth.password")}
+                <label className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
+                  <Lock className="h-3.5 w-3.5 text-blue-600 dark:text-cyan-400" />
+                  <span>{t("auth.password")}</span>
                 </label>
-                <div className="relative">
-                  <Lock className="h-4 w-4 text-violet-600 dark:text-violet-400 absolute top-3 start-3.5" />
+                <div className="relative flex items-center">
+                  <Lock className="h-4 w-4 text-slate-400 absolute start-3.5 pointer-events-none" />
                   <input
                     type={showPass ? "text" : "password"}
                     name="platform_login_pw"
@@ -209,63 +349,104 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder={t("auth.passwordPlaceholder")}
-                    className="w-full ps-10 pe-10 py-2.5 glass-input text-sm"
+                    className="w-full ps-10 pe-11 py-2.5 sm:py-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder:text-slate-400 text-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-sm"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPass((p) => !p)}
-                    className="absolute top-2.5 end-3.5 text-slate-400 hover:text-violet-600 dark:hover:text-cyan-300 transition-colors"
+                    aria-label="Toggle password visibility"
+                    className="absolute end-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1"
                   >
                     {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
               </div>
 
+              {/* Remember Me & Forgot Password */}
+              <div className="flex items-center justify-between pt-1 text-xs sm:text-sm">
+                <label className="flex items-center gap-2 cursor-pointer select-none text-slate-700 dark:text-slate-300 font-semibold">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="h-4 w-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 dark:border-slate-700 dark:bg-slate-800 cursor-pointer"
+                  />
+                  <span>{t("auth.rememberMe")}</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() =>
+                    showPopup({
+                      title: t("auth.forgotPassword"),
+                      message: t("auth.forgotPasswordHint"),
+                      type: "info",
+                    })
+                  }
+                  className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
+                >
+                  {t("auth.forgotPassword")}
+                </button>
+              </div>
+
+              {/* Gradient Sign In Button */}
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full py-3 px-4 glass-btn-primary text-sm flex items-center justify-center gap-2 disabled:opacity-60"
+                className="w-full mt-5 py-3 sm:py-3.5 px-6 rounded-2xl font-bold text-sm sm:text-base text-white bg-gradient-to-r from-[#2055d5] via-[#4834d4] to-[#8c25cf] hover:from-[#1b48b5] hover:to-[#7b20b6] shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2.5 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60 cursor-pointer"
               >
-                {submitting ? t("auth.signingIn") : t("auth.signIn")}
-                <ArrowRight className="h-4 w-4 rtl:rotate-180" />
+                <ArrowRight className="h-5 w-5 rtl:rotate-180" />
+                <span>{submitting ? t("auth.signingIn") : t("auth.signIn")}</span>
               </button>
             </form>
 
-            {/* Admin Quick Gate Info */}
-            <div className="mt-5 p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-rose-500/10 backdrop-blur-md border border-amber-400/45 transition-colors">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-start gap-2">
-                  <ShieldAlert className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
-                  <div className="text-xs text-amber-900 dark:text-amber-200">
-                    <div className="font-bold">{t("auth.adminHintTitle")}</div>
-                    <div className="opacity-90 mt-0.5">{t("auth.adminHintDesc")}</div>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={fillAdminDemo}
-                  className="shrink-0 px-3 py-1 rounded-xl text-[11px] font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 shadow-sm hover:-translate-y-0.5 transition-all"
-                >
-                  Fill
-                </button>
+            {/* Divider */}
+            <div className="relative my-5 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-200 dark:border-slate-800" />
               </div>
+              <span className="relative bg-white dark:bg-slate-900 px-3 text-xs font-semibold text-slate-400 dark:text-slate-500">
+                {t("auth.noAccount")}
+              </span>
             </div>
 
-            {/* Student Registration Link */}
-            <div className="mt-6 pt-5 border-t border-white/50 dark:border-white/10 text-center text-sm">
-              <span className="text-slate-500 dark:text-slate-400">{t("auth.noAccount")} </span>
-              <Link
-                to="/register"
-                className="font-extrabold text-violet-600 dark:text-cyan-300 hover:underline"
+            {/* Register Secondary Button */}
+            <Link
+              to="/register"
+              className="w-full py-2.5 sm:py-3 px-4 rounded-2xl border-2 border-indigo-200 dark:border-indigo-900/60 hover:border-indigo-500 dark:hover:border-indigo-400 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50/60 dark:hover:bg-indigo-950/30 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-sm group"
+            >
+              <UserPlus className="h-4 w-4 text-indigo-500 group-hover:scale-110 transition-transform" />
+              <span>{t("auth.registerAction")}</span>
+            </Link>
+
+            {/* Admin Quick Test Helper */}
+            <div className="mt-4 flex items-center justify-between px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-400/25 text-amber-800 dark:text-amber-200 text-xs">
+              <div className="flex items-center gap-1.5 truncate">
+                <Sparkles className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                <span className="truncate">
+                  {t("auth.adminHintTitle")}: <b>admin@123</b>
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={fillAdminDemo}
+                className="px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-amber-500 hover:bg-amber-600 text-white transition-colors shrink-0"
               >
-                {t("auth.registerLink")}
-              </Link>
+                Fill
+              </button>
             </div>
-          </div>
-        </div>
-      </div>
 
-      <div className="h-4" />
+            {/* Trust Footer Badge */}
+            <div className="mt-4 py-1.5 px-4 rounded-full bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800/80 flex items-center justify-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400 mx-auto w-fit">
+              <ShieldCheck className="h-3.5 w-3.5 text-blue-500" />
+              <span>{t("auth.trustBadge")}</span>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <footer className="text-center text-xs text-slate-400 dark:text-slate-500 py-1">
+        {t("app.title")} © {new Date().getFullYear()}
+      </footer>
     </div>
   );
 }

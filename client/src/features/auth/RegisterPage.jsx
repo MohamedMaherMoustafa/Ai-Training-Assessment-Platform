@@ -9,7 +9,8 @@ import {
   Circle,
   Sun,
   Moon,
-  Languages,
+  Globe,
+  ChevronDown,
   Users,
 } from "lucide-react";
 import {
@@ -140,47 +141,53 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen p-3 sm:p-4">
-      <div className="max-w-5xl mx-auto glass-panel rounded-[22px] px-3 sm:px-5 py-2.5 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600 text-white flex items-center justify-center shadow-lg shadow-teal-500/30 shrink-0">
+    <div className="min-h-screen bg-gradient-to-br from-[#eef2fb] via-[#f4f3fe] to-[#ebeffc] dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 p-3 sm:p-6 transition-colors duration-300">
+      {/* Top Floating Pill Navigation Bar */}
+      <header className="max-w-5xl w-full mx-auto bg-white/95 dark:bg-slate-900/90 backdrop-blur-md rounded-full px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-3 shadow-md shadow-indigo-500/5 border border-slate-200/80 dark:border-white/10">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-2xl bg-gradient-to-tr from-[#5719bd] via-[#6a1ecf] to-[#8022d8] text-white flex items-center justify-center shadow-md shadow-purple-500/25 shrink-0">
             <GraduationCap className="h-5 w-5 sm:h-6 sm:w-6" />
           </div>
           <div className="min-w-0">
-            <h1 className="font-extrabold text-xs sm:text-base truncate">{t("app.title")}</h1>
-            <p className="hidden sm:block text-xs text-slate-500 dark:text-slate-400 truncate">
+            <h1 className="font-extrabold text-xs sm:text-base text-slate-900 dark:text-white truncate">
+              {t("app.title")}
+            </h1>
+            <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium truncate">
               {t("app.subtitle")}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+
+        <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={toggleLang}
             aria-label="Toggle language"
-            className="glass-btn-secondary flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold"
+            className="flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/60 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition-all"
           >
-            <Languages className="h-4 w-4 text-sky-600 dark:text-sky-400 shrink-0" />
-            <span className="hidden sm:inline">{t("app.lang")}</span>
+            <Globe className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400 shrink-0" />
+            <span className="hidden sm:inline">{lang === "ar" ? "العربية" : "English"}</span>
+            <ChevronDown className="h-3 w-3 text-slate-400 shrink-0" />
           </button>
+
           <button
             onClick={toggleTheme}
             aria-label="Toggle theme"
-            className="glass-btn-secondary flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold"
+            className="flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/60 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition-all"
           >
             {theme === "dark" ? (
               <>
-                <Sun className="h-4 w-4 text-amber-400 shrink-0" />
+                <Sun className="h-3.5 w-3.5 text-amber-400 shrink-0" />
                 <span className="hidden sm:inline">{t("app.light")}</span>
               </>
             ) : (
               <>
-                <Moon className="h-4 w-4 text-indigo-600 shrink-0" />
+                <Moon className="h-3.5 w-3.5 text-indigo-600 shrink-0" />
                 <span className="hidden sm:inline">{t("app.dark")}</span>
               </>
             )}
           </button>
         </div>
-      </div>
+      </header>
 
       <div className="max-w-2xl mx-auto my-6 glass-panel rounded-[34px] overflow-hidden">
         <div className="p-6 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600 text-white text-center relative overflow-hidden">
