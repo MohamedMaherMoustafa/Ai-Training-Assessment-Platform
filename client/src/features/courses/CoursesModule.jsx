@@ -387,16 +387,6 @@ export default function CoursesModule({ mode = "admin", activeInstructorId = nul
                 </p>
               </div>
             </div>
-
-            {canManage && (
-              <button
-                onClick={() => setShowCourseForm(true)}
-                className="px-4 py-2 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/20 flex items-center gap-1.5 transition-all self-start sm:self-auto"
-              >
-                <Plus className="h-4 w-4" />
-                {t("courses.createCourse")}
-              </button>
-            )}
           </div>
 
           <div className="space-y-5">
