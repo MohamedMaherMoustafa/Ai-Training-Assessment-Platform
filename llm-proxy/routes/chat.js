@@ -5,7 +5,9 @@ const router = express.Router();
 
 const OLLAMA_BASE = process.env.OLLAMA_BASE_URL || "http://localhost:11434";
 const PREFERRED_MODEL = process.env.OLLAMA_MODEL || "academy-tutor";
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
+const GEMINI_API_KEY =
+  process.env.GEMINI_API_KEY ||
+  "AI_KEY_REMOVED_FOR_SECURITY_REASONS_00000000000000000";
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash";
 
 const STOP_WORDS = new Set([
@@ -27,11 +29,19 @@ async function callGeminiChat({
   // Add attachments (photos, PDFs, voice recordings)
   if (Array.isArray(attachments) && attachments.length > 0) {
     for (const att of attachments) {
-      if (att && att.data && att.mimeType) {
+      if (att && att.data) {
         const cleanBase64 = String(att.data).replace(/^data:[^;]+;base64,/, "");
+        const mimeType =
+          att.mimeType ||
+          att.type ||
+          (att.kind === "pdf"
+            ? "application/pdf"
+            : att.kind === "audio"
+            ? "audio/webm"
+            : "image/jpeg");
         parts.push({
           inlineData: {
-            mimeType: att.mimeType,
+            mimeType,
             data: cleanBase64,
           },
         });

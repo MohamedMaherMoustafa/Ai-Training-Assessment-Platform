@@ -29,6 +29,102 @@ function extractKeywords(str) {
     .filter((t) => t.length >= 2 && !STOP_WORDS.has(t));
 }
 
+const DIRECT_AI_KEY = "AI_KEY_REMOVED_FOR_SECURITY_REASONS_00000000000000000";
+const DIRECT_AI_PRIMARY = "gemini-3.5-flash";
+const DIRECT_AI_FALLBACK = "gemini-flash-latest";
+
+export async function callDirectAI({
+  message = "",
+  attachments = [],
+  lang = "en",
+  role = "student",
+  history = [],
+  contextSummary = "",
+}) {
+  const parts = [];
+
+  // Add attachments (photos, PDFs, voice recordings)
+  if (Array.isArray(attachments) && attachments.length > 0) {
+    for (const att of attachments) {
+      if (att && att.data) {
+        const cleanBase64 = String(att.data).replace(/^data:[^;]+;base64,/, "");
+        const mimeType =
+          att.mimeType ||
+          att.type ||
+          (att.kind === "pdf"
+            ? "application/pdf"
+            : att.kind === "audio"
+            ? "audio/webm"
+            : "image/jpeg");
+        parts.push({
+          inlineData: {
+            mimeType,
+            data: cleanBase64,
+          },
+        });
+      }
+    }
+  }
+
+  const promptText =
+    String(message || "").trim() ||
+    (attachments.length > 0
+      ? lang === "ar"
+        ? "يرجى تحليل المرفق وشرحه بالتفصيل والإجابة على أي محتوى ظاهر فيه."
+        : "Please analyze the attached file thoroughly, explain what it is, and answer any questions about it."
+      : "Hello");
+
+  parts.push({ text: promptText });
+
+  const systemPrompt = [
+    "You are the official Educational AI Assistant of the platform.",
+    "Your purpose is to provide highly accurate, helpful, step-by-step educational explanations, analysis of attachments (photos, diagrams, industrial screens, UI mockups, PDFs, voice recordings), and answers to user queries.",
+    "When examining an attached image or screenshot, describe what the image represents, transcribe and explain key text/numbers/readings shown, and provide meaningful educational or operational context.",
+    lang === "ar"
+      ? "Always answer clearly and naturally in Arabic with well-formatted markdown (bullet points, bold highlights, headers)."
+      : "Always answer clearly and naturally in English with well-formatted markdown (bullet points, bold highlights, headers).",
+    contextSummary ? `Platform Context (if relevant):\n${contextSummary}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+
+  const payload = {
+    contents: [{ role: "user", parts }],
+    systemInstruction: { parts: [{ text: systemPrompt }] },
+    generationConfig: {
+      temperature: 0.65,
+      maxOutputTokens: 2500,
+    },
+  };
+
+  const tryCall = async (modelName) => {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${DIRECT_AI_KEY}`;
+    const res = await axios.post(url, payload, {
+      headers: { "Content-Type": "application/json" },
+      timeout: 45000,
+    });
+    const candidate = res.data?.candidates?.[0];
+    const text = candidate?.content?.parts?.map((p) => p.text).filter(Boolean).join("\n");
+    return text ? text.trim() : null;
+  };
+
+  try {
+    const reply = await tryCall(DIRECT_AI_PRIMARY);
+    if (reply) return { reply, provider: "ai", model: "AI Assistant" };
+  } catch (err) {
+    console.warn("Direct primary AI call failed, trying fallback:", err.message);
+  }
+
+  try {
+    const fallbackReply = await tryCall(DIRECT_AI_FALLBACK);
+    if (fallbackReply) return { reply: fallbackReply, provider: "ai", model: "AI Assistant" };
+  } catch (fErr) {
+    console.warn("Direct fallback AI call failed:", fErr.message);
+  }
+
+  return null;
+}
+
 function findBestMatch(query, candidates, getLabel) {
   const qNorm = normalizeText(query);
   if (!qNorm) return null;
@@ -512,17 +608,29 @@ export async function processChatbotMessageWithDataset({
           history,
           contextSummary,
         },
-        { timeout: 60000 }
+        { timeout: 15000 }
       );
-      if (res.data?.reply) {
+      if (res.data?.reply && res.data.model !== "platform-ai-grounded") {
         return {
           reply: res.data.reply,
-          provider: res.data.provider,
-          model: res.data.model,
+          provider: "ai",
+          model: "AI Assistant",
         };
       }
     } catch (netErr) {
-      console.warn("Multimodal chat proxy failed:", netErr.message);
+      console.warn("Multimodal chat proxy failed or offline, using direct AI:", netErr.message);
+    }
+
+    const directResult = await callDirectAI({
+      message,
+      attachments,
+      lang,
+      role,
+      history,
+      contextSummary,
+    });
+    if (directResult?.reply) {
+      return directResult;
     }
   }
 
@@ -871,13 +979,25 @@ export async function processChatbotMessageWithDataset({
           history,
           contextSummary,
         },
-        { timeout: 30000 }
+        { timeout: 15000 }
       );
-      if (res.data?.reply) {
-        return { reply: res.data.reply };
+      if (res.data?.reply && res.data.model !== "platform-ai-grounded") {
+        return { reply: res.data.reply, provider: "ai", model: "AI Assistant" };
       }
     } catch {
-      // fallback below
+      // proxy offline, fallback to direct AI
+    }
+
+    const directAi = await callDirectAI({
+      message,
+      attachments,
+      lang,
+      role,
+      history,
+      contextSummary,
+    });
+    if (directAi?.reply) {
+      return directAi;
     }
   }
 
