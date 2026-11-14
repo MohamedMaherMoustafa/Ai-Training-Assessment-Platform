@@ -65,7 +65,20 @@ export function AuthProvider({ children }) {
   };
 
   const refreshProfile = async () => {
-    if (!user || user.role === "admin") return;
+    if (!user) return;
+    if (user.role === "admin" || user.uid === "admin_123") {
+      try {
+        const snap = await get(ref(rtdb, "admins/admin_123"));
+        if (snap.exists()) {
+          const updated = { ...user, ...snap.val(), role: "admin", uid: "admin_123" };
+          setUser(updated);
+          localStorage.setItem("admin_session", JSON.stringify(updated));
+        }
+      } catch (err) {
+        console.warn("Failed to refresh admin profile:", err);
+      }
+      return;
+    }
     const snap = await get(ref(rtdb, `users/${user.uid}`));
     if (snap.exists()) {
       setUser({ uid: user.uid, ...snap.val() });

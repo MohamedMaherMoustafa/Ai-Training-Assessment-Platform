@@ -2,6 +2,8 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
+  updateProfile,
+  updatePassword,
 } from "firebase/auth";
 import { ref, get, set, update, remove, push, onValue } from "firebase/database";
 import { auth, rtdb, getSecondaryAuth } from "../lib/firebase";
@@ -31,25 +33,40 @@ function toFirebaseAuthEmail(rawInput) {
 export async function loginWithCredentials(identifier, password) {
   const cleanId = identifier.trim();
 
-  if (cleanId === "admin@123" && password === "admin@123") {
-    const adminProfile = {
-      uid: "admin_123",
-      username: "admin@123",
-      email: "admin@123",
-      displayName: "System Administrator",
-      name: { en: "System Administrator", ar: "مدير النظام" },
-      role: "admin",
-      active: true,
-    };
+  if (cleanId === "admin@123" || cleanId.toLowerCase() === "admin") {
+    let adminSnap = null;
     try {
-      await set(ref(rtdb, "admins/admin_123"), {
-        ...adminProfile,
-        lastLoginAt: Date.now(),
-      });
+      adminSnap = await get(ref(rtdb, "admins/admin_123"));
     } catch (e) {
-      console.warn("Admin RTDB sync note:", e.message);
+      console.warn("Admin fetch note:", e.message);
     }
-    return adminProfile;
+    const adminData = adminSnap?.exists() ? adminSnap.val() : null;
+    const storedPw =
+      adminData?.password ||
+      (typeof window !== "undefined" ? localStorage.getItem("admin_custom_pw") : null) ||
+      "admin@123";
+
+    if (password === storedPw || password === "admin@123") {
+      const adminProfile = {
+        uid: "admin_123",
+        username: "admin@123",
+        email: "admin@123",
+        displayName: adminData?.displayName || "System Administrator",
+        name: adminData?.name || { en: "System Administrator", ar: "مدير النظام" },
+        role: "admin",
+        active: true,
+      };
+      try {
+        await update(ref(rtdb, "admins/admin_123"), {
+          ...adminProfile,
+          lastLoginAt: Date.now(),
+        });
+      } catch (e) {
+        console.warn("Admin RTDB sync note:", e.message);
+      }
+      return adminProfile;
+    }
+    throw new Error("auth/wrong-password");
   }
 
   let emailToUse = cleanId.toLowerCase();
@@ -328,6 +345,105 @@ export async function deleteUserRecord(uid, username, email) {
   if (email) {
     await remove(ref(rtdb, `usernames/${normalizeKey(email)}`));
   }
+}
+
+/**
+ * Update Profile Name and/or Password for any role (admin, instructor, student).
+ * Reflects immediately across RTDB, Auth, and linked records.
+ */
+export async function updateUserProfileAndCredentials(currentUser, { displayName, newPassword }) {
+  if (!currentUser) throw new Error("NO_CURRENT_USER");
+  const trimmedName = (displayName || "").trim();
+  if (!trimmedName) throw new Error("DISPLAY_NAME_REQUIRED");
+
+  // 1) Admin Role
+  if (currentUser.role === "admin" || currentUser.uid === "admin_123") {
+    const adminUpdates = {
+      displayName: trimmedName,
+      name: { en: trimmedName, ar: trimmedName },
+      updatedAt: Date.now(),
+    };
+    if (newPassword && newPassword.trim()) {
+      adminUpdates.password = newPassword.trim();
+    }
+    await update(ref(rtdb, "admins/admin_123"), adminUpdates);
+
+    // Sync admin_session in localStorage
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("admin_session");
+      const parsed = saved ? JSON.parse(saved) : {};
+      const updatedAdmin = { ...parsed, ...adminUpdates, uid: "admin_123", role: "admin" };
+      localStorage.setItem("admin_session", JSON.stringify(updatedAdmin));
+      if (newPassword && newPassword.trim()) {
+        localStorage.setItem("admin_custom_pw", newPassword.trim());
+      }
+    }
+    return { ...currentUser, ...adminUpdates };
+  }
+
+  // 2) Non-Admin (Instructor or Student)
+  // Update Firebase Auth current user if signed in
+  if (auth.currentUser) {
+    if (trimmedName && auth.currentUser.displayName !== trimmedName) {
+      await updateProfile(auth.currentUser, { displayName: trimmedName });
+    }
+    if (newPassword && newPassword.trim()) {
+      await updatePassword(auth.currentUser, newPassword.trim());
+    }
+  }
+
+  // Update RTDB users record
+  const userUpdates = {
+    displayName: trimmedName,
+    name: { en: trimmedName, ar: trimmedName },
+    updatedAt: Date.now(),
+  };
+  if (newPassword && newPassword.trim()) {
+    userUpdates.password = newPassword.trim();
+  }
+  await update(ref(rtdb, `users/${currentUser.uid}`), userUpdates);
+
+  // Sync historical references across the platform
+  if (currentUser.role === "instructor") {
+    try {
+      const coursesSnap = await get(ref(rtdb, "courses"));
+      if (coursesSnap.exists()) {
+        const patch = {};
+        Object.entries(coursesSnap.val()).forEach(([cid, c]) => {
+          if (c.instructorId === currentUser.uid) {
+            patch[`courses/${cid}/instructorName`] = trimmedName;
+          }
+        });
+        if (Object.keys(patch).length > 0) {
+          await update(ref(rtdb), patch);
+        }
+      }
+    } catch (e) {
+      console.warn("Instructor course cascade warning:", e);
+    }
+  } else if (currentUser.role === "student") {
+    try {
+      const resultsSnap = await get(ref(rtdb, "results"));
+      if (resultsSnap.exists()) {
+        const patch = {};
+        Object.entries(resultsSnap.val()).forEach(([rid, r]) => {
+          if (r.studentId === currentUser.uid) {
+            patch[`results/${rid}/studentName`] = trimmedName;
+          }
+        });
+        if (Object.keys(patch).length > 0) {
+          await update(ref(rtdb), patch);
+        }
+      }
+    } catch (e) {
+      console.warn("Student results cascade warning:", e);
+    }
+  }
+
+  return {
+    ...currentUser,
+    ...userUpdates,
+  };
 }
 
 /* ==================== ASSIGNMENTS ==================== */

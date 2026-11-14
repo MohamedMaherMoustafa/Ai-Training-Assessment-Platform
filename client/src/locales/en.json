@@ -159,6 +159,26 @@
     "connected": "Connected",
     "lockedNote": "Locked (allow read, write: if false) — Live data is safely persisted in Firebase Realtime Database until you update Firestore rules.",
     "offlineNote": "Not running locally yet (optional until AI proxy step)."
+  },
+  "profile": {
+    "editModalTitle": "Account Profile & Security",
+    "editModalSubtitle": "Update your full display name and password across the platform",
+    "fullName": "Full Name",
+    "fullNamePlaceholder": "Enter your full name",
+    "newPassword": "New Password",
+    "newPasswordPlaceholder": "Leave blank to keep current password",
+    "confirmPassword": "Confirm New Password",
+    "confirmPasswordPlaceholder": "Re-enter new password",
+    "passwordHint": "Must be at least 6 characters if you wish to change it",
+    "passwordMismatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 6 characters",
+    "nameRequired": "Full Name is required",
+    "saving": "Saving changes...",
+    "saveSuccess": "Profile updated successfully!",
+    "saveError": "Failed to update profile",
+    "close": "Close",
+    "editTooltip": "Edit Profile & Password",
+    "usernameOrEmail": "Username / Email"
   }
 }
 

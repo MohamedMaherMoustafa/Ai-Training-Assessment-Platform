@@ -25,6 +25,7 @@ import { useAuth } from "../../context/AuthContext";
 import { isSoundEnabled, setSoundEnabled, playLogoutSound } from "../../utils/soundEffects";
 import PlatformChatbotWidget from "../common/PlatformChatbotWidget";
 import LanguageDropdown from "../common/LanguageDropdown";
+import ProfileSettingsModal from "../common/ProfileSettingsModal";
 import {
   clearNotifications,
   markAllNotificationsRead,
@@ -44,6 +45,7 @@ export default function AppLayout({ navItems, children }) {
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [soundOn, setSoundOn] = useState(isSoundEnabled());
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
   const notifBoxRef = useRef(null);
 
   const toggleSound = () => {
@@ -199,19 +201,33 @@ export default function AppLayout({ navItems, children }) {
 
         {/* Bottom User Card */}
         <div className="p-3 border-t border-slate-200/60 dark:border-white/10 bg-slate-50/70 dark:bg-slate-950/40 backdrop-blur-md">
-          <div className="bg-white/95 dark:bg-slate-800/80 rounded-2xl p-2.5 flex items-center justify-between border border-slate-200/80 dark:border-white/10 shadow-sm mb-2">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-teal-500 to-emerald-500 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-sm">
+          <div className="bg-white/95 dark:bg-slate-800/80 rounded-2xl p-2.5 flex items-center justify-between border border-slate-200/80 dark:border-white/10 shadow-sm mb-2 group">
+            <div
+              onClick={() => setProfileModalOpen(true)}
+              className="flex items-center gap-2.5 min-w-0 cursor-pointer flex-1"
+              title={t("profile.editTooltip") || "Edit Profile & Password"}
+            >
+              <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-teal-500 to-emerald-500 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform">
                 {String(displayName || "U").slice(0, 2).toUpperCase()}
               </div>
               <div className="min-w-0">
-                <div className="text-xs font-bold text-slate-900 dark:text-white truncate">{displayName}</div>
+                <div className="text-xs font-bold text-slate-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                  {displayName}
+                </div>
                 <div className="text-[10px] text-slate-500 dark:text-slate-400 capitalize truncate">
                   {t(`roles.${user?.role || "student"}`)}
                 </div>
               </div>
             </div>
-            <Settings className="h-4 w-4 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors cursor-pointer shrink-0" />
+            <button
+              type="button"
+              onClick={() => setProfileModalOpen(true)}
+              title={t("profile.editTooltip") || "Edit Profile & Password"}
+              aria-label="Edit Profile"
+              className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer shrink-0"
+            >
+              <Settings className="h-4 w-4" />
+            </button>
           </div>
 
           <button
@@ -442,6 +458,12 @@ export default function AppLayout({ navItems, children }) {
 
       {/* Walking Robot AI Chatbot (Retained Exactly as Requested) */}
       <PlatformChatbotWidget />
+
+      {/* Profile & Credentials Settings Modal (Accessible by all roles) */}
+      <ProfileSettingsModal
+        isOpen={profileModalOpen}
+        onClose={() => setProfileModalOpen(false)}
+      />
     </div>
   );
 }
