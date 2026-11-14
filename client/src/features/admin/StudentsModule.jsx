@@ -352,9 +352,6 @@ export default function StudentsModule({ filterInstructorId = null }) {
               <tr>
                 <th className="px-4 py-3 text-start">{t("auth.fullName")}</th>
                 <th className="px-4 py-3 text-start">{t("auth.username")} / {t("auth.email")}</th>
-                {!filterInstructorId && (
-                  <th className="px-4 py-3 text-start">{t("admin.assignedInstructors")}</th>
-                )}
                 <th className="px-4 py-3 text-start">{t("app.status")}</th>
                 <th className="px-4 py-3 text-end">{t("app.actions")}</th>
               </tr>
@@ -362,13 +359,13 @@ export default function StudentsModule({ filterInstructorId = null }) {
             <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
               {loading ? (
                 <tr>
-                  <td colSpan={filterInstructorId ? 4 : 5} className="px-4 py-8 text-center text-slate-500">
+                  <td colSpan={4} className="px-4 py-8 text-center text-slate-500">
                     {t("app.loading")}
                   </td>
                 </tr>
               ) : filteredStudents.length === 0 ? (
                 <tr>
-                  <td colSpan={filterInstructorId ? 4 : 5} className="px-4 py-8 text-center text-slate-500">
+                  <td colSpan={4} className="px-4 py-8 text-center text-slate-500">
                     {searchQuery.trim() || statusFilter !== "all"
                       ? lang === "ar"
                         ? "لا توجد نتائج مطابقة لفلتر البحث."
@@ -387,24 +384,6 @@ export default function StudentsModule({ filterInstructorId = null }) {
                       <td className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400">
                         @{st.username} · {st.email}
                       </td>
-                      {!filterInstructorId && (
-                        <td className="px-4 py-3">
-                          <div className="flex flex-wrap gap-1.5">
-                            {(st.instructorIds || []).length === 0 ? (
-                              <span className="text-xs text-slate-400">—</span>
-                            ) : (
-                              st.instructorIds.map((id) => (
-                                <span
-                                  key={id}
-                                  className="px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800"
-                                >
-                                  {getInstructorName(id)}
-                                </span>
-                              ))
-                            )}
-                          </div>
-                        </td>
-                      )}
                       <td className="px-4 py-3">
                         <span
                           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border transition-colors ${
