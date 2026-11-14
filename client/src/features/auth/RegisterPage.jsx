@@ -143,7 +143,7 @@ export default function RegisterPage() {
   return (
     <div className="h-screen max-h-screen overflow-hidden bg-gradient-to-br from-[#eef2fb] via-[#f4f3fe] to-[#ebeffc] dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex flex-col justify-between p-2 sm:p-3 select-none transition-colors duration-300">
       {/* Top Floating Pill Navigation Bar */}
-      <header className="shrink-0 max-w-4xl w-full mx-auto bg-white/95 dark:bg-slate-900/90 backdrop-blur-md rounded-full px-4 sm:px-6 py-2 flex items-center justify-between gap-3 shadow-sm border border-slate-200/80 dark:border-white/10">
+      <header className="shrink-0 max-w-5xl xl:max-w-6xl w-full mx-auto bg-white/95 dark:bg-slate-900/90 backdrop-blur-md rounded-full px-4 sm:px-6 py-2 flex items-center justify-between gap-3 shadow-sm border border-slate-200/80 dark:border-white/10">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="h-8 w-8 sm:h-9 sm:w-9 shrink-0 flex items-center justify-center">
             <img src="/Logo.png" alt="Platform Logo" className="w-full h-full object-contain drop-shadow-sm" />
@@ -181,23 +181,23 @@ export default function RegisterPage() {
         </div>
       </header>
 
-      {/* Main Registration Card (Constant Single-Page Layout) */}
-      <main className="flex-1 min-h-0 max-w-2xl w-full mx-auto my-1.5 sm:my-2 flex items-center justify-center">
-        <div className="w-full max-h-[calc(100vh-100px)] rounded-[26px] sm:rounded-[32px] overflow-hidden shadow-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-white/10 flex flex-col transition-all">
+      {/* Main Registration Card (Constant Single-Page Layout - Spacious & Unscrollable) */}
+      <main className="flex-1 min-h-0 max-w-4xl xl:max-w-5xl w-full mx-auto my-2 sm:my-3 flex items-center justify-center">
+        <div className="w-full max-h-[calc(100vh-100px)] rounded-[28px] sm:rounded-[36px] overflow-hidden shadow-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-white/10 flex flex-col transition-all">
           {/* Header Banner */}
-          <div className="px-5 py-3 sm:py-3.5 bg-gradient-to-r from-[#181580] via-[#3523b0] to-[#5a189a] text-white text-center shrink-0">
-            <h2 className="text-lg sm:text-xl font-black">{t("auth.registerTitle")}</h2>
-            <p className="text-[11px] sm:text-xs text-indigo-200 mt-0.5">
+          <div className="px-6 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-r from-[#181580] via-[#3523b0] to-[#5a189a] text-white text-center shrink-0">
+            <h2 className="text-xl sm:text-2xl font-black tracking-tight">{t("auth.registerTitle")}</h2>
+            <p className="text-xs sm:text-[13px] text-indigo-200 mt-0.5">
               {t("auth.registerDesc")}
             </p>
           </div>
 
           {/* Form */}
-          <div className="p-4 sm:p-6 overflow-y-auto flex-1 flex flex-col justify-between">
-            <form onSubmit={handleSubmit} autoComplete="off" className="space-y-2.5 sm:space-y-3">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div className="p-5 sm:p-7 lg:p-8 overflow-y-auto flex-1 flex flex-col justify-between">
+            <form onSubmit={handleSubmit} autoComplete="off" className="space-y-3 sm:space-y-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs sm:text-[12.5px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                     {t("auth.fullName")}
                   </label>
                   <input
@@ -207,11 +207,11 @@ export default function RegisterPage() {
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="w-full px-3 py-1.5 sm:py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/60 text-xs sm:text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15"
+                    className="w-full px-3.5 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/60 text-xs sm:text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs sm:text-[12.5px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                     {t("auth.username")}
                   </label>
                   <input
@@ -220,13 +220,13 @@ export default function RegisterPage() {
                     autoComplete="off"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="w-full px-3 py-1.5 sm:py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/60 text-xs sm:text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15"
+                    className="w-full px-3.5 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/60 text-xs sm:text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs sm:text-[12.5px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                   {t("auth.email")}
                 </label>
                 <input
@@ -237,13 +237,13 @@ export default function RegisterPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="student@academy.com or student@123"
-                  className="w-full px-3 py-1.5 sm:py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/60 text-xs sm:text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15"
+                  className="w-full px-3.5 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/60 text-xs sm:text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15"
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs sm:text-[12.5px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                     {t("auth.password")}
                   </label>
                   <input
@@ -254,11 +254,11 @@ export default function RegisterPage() {
                     minLength={6}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-3 py-1.5 sm:py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/60 text-xs sm:text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15"
+                    className="w-full px-3.5 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/60 text-xs sm:text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs sm:text-[12.5px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                     {t("auth.confirmPassword")}
                   </label>
                   <input
@@ -269,7 +269,7 @@ export default function RegisterPage() {
                     minLength={6}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full px-3 py-1.5 sm:py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/60 text-xs sm:text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15"
+                    className="w-full px-3.5 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/60 text-xs sm:text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15"
                   />
                 </div>
               </div>
@@ -277,12 +277,12 @@ export default function RegisterPage() {
               {/* Multi-Instructor Selection inside fixed scroll zone */}
               <div className="pt-1">
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-white">
-                    <Users className="h-3.5 w-3.5 text-indigo-600" />
+                  <label className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                    <Users className="h-4 w-4 text-indigo-600" />
                     <span>{t("auth.chooseInstructors")}</span>
                   </label>
                   {instructors.length > 0 && (
-                    <div className="flex items-center gap-2 text-[11px]">
+                    <div className="flex items-center gap-2 text-xs">
                       <button
                         type="button"
                         onClick={selectAll}
@@ -303,22 +303,22 @@ export default function RegisterPage() {
                 </div>
 
                 {loadingInstructors ? (
-                  <div className="p-2 text-center text-xs text-slate-500">{t("app.loading")}</div>
+                  <div className="p-3 text-center text-xs text-slate-500">{t("app.loading")}</div>
                 ) : instructors.length === 0 ? (
-                  <div className="p-2.5 rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/20 text-[11px] text-amber-800 dark:text-amber-200">
+                  <div className="p-3 rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/20 text-xs text-amber-800 dark:text-amber-200">
                     {t("auth.noInstructorsYet")}
                   </div>
                 ) : (
-                  <div className="max-h-20 sm:max-h-24 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-1.5 p-1 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
+                  <div className="max-h-24 sm:max-h-28 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 p-1.5 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
                     {instructors.map((inst) => {
                       const selected = selectedIds.includes(inst.uid);
                       return (
                         <div
                           key={inst.uid}
                           onClick={() => toggleInstructor(inst.uid)}
-                          className={`p-2 rounded-lg border text-xs cursor-pointer transition-all flex items-center justify-between gap-2 select-none ${
+                          className={`p-2.5 rounded-xl border text-xs cursor-pointer transition-all flex items-center justify-between gap-2 select-none ${
                             selected
-                              ? "bg-indigo-500/10 border-indigo-400/80 text-indigo-800 dark:text-indigo-200 font-bold"
+                              ? "bg-indigo-500/10 border-indigo-400/80 text-indigo-800 dark:text-indigo-200 font-bold shadow-sm"
                               : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-indigo-300"
                           }`}
                         >
@@ -346,7 +346,7 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full mt-2 py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm text-white bg-gradient-to-r from-[#2055d5] via-[#4834d4] to-[#8c25cf] hover:from-[#1b48b5] hover:to-[#7b20b6] shadow-md shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60"
+                className="w-full mt-2.5 py-3 sm:py-3.5 px-5 rounded-xl sm:rounded-2xl font-bold text-xs sm:text-sm text-white bg-gradient-to-r from-[#2055d5] via-[#4834d4] to-[#8c25cf] hover:from-[#1b48b5] hover:to-[#7b20b6] shadow-md shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60"
               >
                 <span>{submitting ? t("auth.signingIn") : t("auth.registerBtn")}</span>
                 <ArrowRight className="h-4 w-4 rtl:rotate-180" />
@@ -354,7 +354,7 @@ export default function RegisterPage() {
             </form>
 
             {/* Back to Login link */}
-            <div className="pt-2 text-center text-xs text-slate-500 dark:text-slate-400">
+            <div className="pt-2.5 text-center text-xs text-slate-500 dark:text-slate-400">
               <span>{t("auth.haveAccount")} </span>
               <Link
                 to="/login"
