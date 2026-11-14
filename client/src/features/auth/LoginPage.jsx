@@ -24,15 +24,14 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
-import { useLang } from "../../context/LangContext";
 import { usePopup } from "../../context/PopupContext";
 import { playLoginSuccessSound } from "../../utils/soundEffects";
+import LanguageDropdown from "../../components/common/LanguageDropdown";
 
 export default function LoginPage() {
   const { t, i18n } = useTranslation();
   const { login } = useAuth();
   const { theme, toggleTheme } = useTheme();
-  const { toggleLang } = useLang();
   const { showPopup } = usePopup();
   const navigate = useNavigate();
 
@@ -90,11 +89,6 @@ export default function LoginPage() {
     }
   };
 
-  const fillAdminDemo = () => {
-    setIdentifier("admin@123");
-    setPassword("admin@123");
-  };
-
   return (
     <div className="h-screen max-h-screen overflow-hidden bg-gradient-to-br from-[#eef2fb] via-[#f4f3fe] to-[#ebeffc] dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex flex-col justify-between p-2 sm:p-3 select-none transition-colors duration-300">
       {/* Top Floating Pill Navigation Bar (Compact Height) */}
@@ -114,15 +108,7 @@ export default function LoginPage() {
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={toggleLang}
-            aria-label="Toggle language"
-            className="flex items-center gap-1 px-3 py-1 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/60 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition-all"
-          >
-            <Globe className="h-3 w-3 text-slate-500 dark:text-slate-400 shrink-0" />
-            <span className="hidden sm:inline">{i18n.language === "ar" ? "العربية" : "English"}</span>
-            <ChevronDown className="h-3 w-3 text-slate-400 shrink-0" />
-          </button>
+          <LanguageDropdown />
 
           <button
             onClick={toggleTheme}
@@ -377,23 +363,6 @@ export default function LoginPage() {
               <UserPlus className="h-3.5 w-3.5 text-indigo-500 group-hover:scale-110 transition-transform" />
               <span>{t("auth.registerAction")}</span>
             </Link>
-
-            {/* Admin Quick Test Helper */}
-            <div className="mt-2.5 flex items-center justify-between px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-400/25 text-amber-800 dark:text-amber-200 text-[10.5px]">
-              <div className="flex items-center gap-1.5 truncate">
-                <Sparkles className="h-3 w-3 text-amber-500 shrink-0" />
-                <span className="truncate">
-                  {t("auth.adminHintTitle")}: <b>admin@123</b>
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={fillAdminDemo}
-                className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500 hover:bg-amber-600 text-white transition-colors shrink-0"
-              >
-                Fill
-              </button>
-            </div>
 
             {/* Trust Footer Badge */}
             <div className="mt-2.5 py-1 px-3 rounded-full bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800/80 flex items-center justify-center gap-1.5 text-[10.5px] font-medium text-slate-500 dark:text-slate-400 mx-auto w-fit">

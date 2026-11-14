@@ -20,6 +20,7 @@ import {
 import { useTheme } from "../../context/ThemeContext";
 import { useLang } from "../../context/LangContext";
 import { usePopup } from "../../context/PopupContext";
+import LanguageDropdown from "../../components/common/LanguageDropdown";
 
 export default function RegisterPage() {
   const { t } = useTranslation();
@@ -159,15 +160,7 @@ export default function RegisterPage() {
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={toggleLang}
-            aria-label="Toggle language"
-            className="flex items-center gap-1 px-3 py-1 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/60 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition-all"
-          >
-            <Globe className="h-3 w-3 text-slate-500 dark:text-slate-400 shrink-0" />
-            <span className="hidden sm:inline">{lang === "ar" ? "العربية" : "English"}</span>
-            <ChevronDown className="h-3 w-3 text-slate-400 shrink-0" />
-          </button>
+          <LanguageDropdown />
 
           <button
             onClick={toggleTheme}

@@ -24,6 +24,7 @@ import { useLang } from "../../context/LangContext";
 import { useAuth } from "../../context/AuthContext";
 import { isSoundEnabled, setSoundEnabled } from "../../utils/soundEffects";
 import PlatformChatbotWidget from "../common/PlatformChatbotWidget";
+import LanguageDropdown from "../common/LanguageDropdown";
 import {
   clearNotifications,
   markAllNotificationsRead,
@@ -317,15 +318,7 @@ export default function AppLayout({ navItems, children }) {
             </button>
 
             {/* Language Switcher */}
-            <button
-              onClick={toggleLang}
-              aria-label="Toggle language"
-              className="rounded-full border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 sm:px-3.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 shadow-sm flex items-center gap-1.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
-            >
-              <Globe className="h-3.5 w-3.5 text-slate-500" />
-              <span>{lang === "ar" ? "العربية" : "English"}</span>
-              <ChevronDown className="h-3 w-3 text-slate-400" />
-            </button>
+            <LanguageDropdown />
 
             {/* Theme Toggle */}
             <button
