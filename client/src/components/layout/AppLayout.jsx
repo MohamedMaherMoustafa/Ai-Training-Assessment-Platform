@@ -22,7 +22,7 @@ import {
 import { useTheme } from "../../context/ThemeContext";
 import { useLang } from "../../context/LangContext";
 import { useAuth } from "../../context/AuthContext";
-import { isSoundEnabled, setSoundEnabled } from "../../utils/soundEffects";
+import { isSoundEnabled, setSoundEnabled, playLogoutSound } from "../../utils/soundEffects";
 import PlatformChatbotWidget from "../common/PlatformChatbotWidget";
 import LanguageDropdown from "../common/LanguageDropdown";
 import {
@@ -77,8 +77,8 @@ export default function AppLayout({ navItems, children }) {
 
   const handleLogout = async () => {
     try {
+      playLogoutSound();
       await logout();
-      toast.success(t("auth.signedOut") || "Signed out");
       navigate("/login");
     } catch {
       toast.error("Logout failed");

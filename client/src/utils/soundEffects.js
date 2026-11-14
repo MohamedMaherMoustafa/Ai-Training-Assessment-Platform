@@ -80,3 +80,35 @@ export function playLoginSuccessSound() {
   }
 }
 
+/**
+ * Gentle descending soft chime played when logging out.
+ */
+export function playLogoutSound() {
+  if (!isSoundEnabled()) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    const now = ctx.currentTime;
+    const notes = [783.99, 659.25, 523.25]; // G5 - E5 - C5
+    notes.forEach((freq, idx) => {
+      const start = now + idx * 0.08;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq, start);
+
+      gain.gain.setValueAtTime(0.001, start);
+      gain.gain.linearRampToValueAtTime(0.07, start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.22);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(start);
+      osc.stop(start + 0.23);
+    });
+  } catch {
+    // ignore audio block errors
+  }
+}
+
+

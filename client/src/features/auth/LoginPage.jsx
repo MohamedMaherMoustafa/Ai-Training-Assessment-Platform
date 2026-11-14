@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import toast from "react-hot-toast";
 import {
   GraduationCap,
   Lock,
@@ -66,11 +65,6 @@ export default function LoginPage() {
       setIdentifier("");
       setPassword("");
       setShowPass(false);
-      toast.success(
-        profile.role === "admin"
-          ? "Welcome, System Admin!"
-          : `Welcome, ${profile.displayName || profile.email}!`
-      );
       if (profile.role === "admin") navigate("/admin");
       else if (profile.role === "instructor") navigate("/instructor");
       else navigate("/student");
