@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import toast from "react-hot-toast";
 import {
   Users,
   BookOpen,
@@ -13,6 +14,7 @@ import {
   CheckCircle2,
   Clock,
   ArrowUpRight,
+  Power,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -34,6 +36,7 @@ import {
   listQuizzes,
   listResults,
   listUsers,
+  updateUserRecord,
 } from "../../services/platformService";
 import { useLang } from "../../context/LangContext";
 
@@ -103,6 +106,27 @@ export default function InstructorAnalyticsDashboard({
       })
       .finally(() => setLoading(false));
   }, [instructorId, preloaded, instructorProfile]);
+
+  const handleToggleStudentActive = async (student) => {
+    const nextActive = student.active === false;
+    await updateUserRecord(student.uid, { active: nextActive });
+    const name = student.displayName || student.name || student.email;
+    if (lang === "ar") {
+      toast.success(
+        nextActive ? `تم تفعيل حساب الطالب (${name}) بنجاح` : `تم تعطيل حساب الطالب (${name})`
+      );
+    } else {
+      toast.success(
+        nextActive ? `Activated account for ${name}` : `Deactivated account for ${name}`
+      );
+    }
+    setState((prev) => ({
+      ...prev,
+      students: prev.students.map((s) =>
+        s.uid === student.uid ? { ...s, active: nextActive } : s
+      ),
+    }));
+  };
 
   const { instructor, students, courses, assignments, quizzes, results, quizAccess } = state;
 
@@ -283,6 +307,8 @@ export default function InstructorAnalyticsDashboard({
       assnSubs: stSubs.length,
       assnAvg: stAssnAvg,
       combinedAvg,
+      active: st.active !== false,
+      rawStudent: st,
     };
   });
 
@@ -630,20 +656,23 @@ export default function InstructorAnalyticsDashboard({
                 <th className="px-4 py-2.5 text-start">Quiz Attempts / Avg</th>
                 <th className="px-4 py-2.5 text-start">Assignments / Avg</th>
                 <th className="px-4 py-2.5 text-start">Overall</th>
-                <th className="px-4 py-2.5 text-start">Status</th>
-                {showManageLinks && <th className="px-4 py-2.5 text-end">Report</th>}
+                <th className="px-4 py-2.5 text-start">Academic</th>
+                <th className="px-4 py-2.5 text-start">{lang === "ar" ? "حالة الحساب" : "Account"}</th>
+                {showManageLinks && (
+                  <th className="px-4 py-2.5 text-end">{lang === "ar" ? "إجراءات" : "Actions"}</th>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-white/40 dark:divide-white/10">
               {studentProgressRows.length === 0 ? (
                 <tr>
-                  <td colSpan={showManageLinks ? 7 : 6} className="px-4 py-6 text-center text-slate-500">
+                  <td colSpan={showManageLinks ? 8 : 7} className="px-4 py-6 text-center text-slate-500">
                     No approved students linked yet.
                   </td>
                 </tr>
               ) : (
                 studentProgressRows.map((st) => (
-                  <tr key={st.uid} className="hover:bg-white/40 dark:hover:bg-white/5">
+                  <tr key={st.uid} className="hover:bg-white/40 dark:hover:bg-white/5 transition-colors">
                     <td className="px-4 py-2.5">
                       <div className="font-bold">{st.name}</div>
                       <div className="text-[11px] text-slate-400">{st.email}</div>
@@ -673,15 +702,62 @@ export default function InstructorAnalyticsDashboard({
                         </span>
                       )}
                     </td>
+                    <td className="px-4 py-2.5">
+                      <span
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-bold border ${
+                          st.active
+                            ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
+                            : "bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border-rose-200 dark:border-rose-800"
+                        }`}
+                      >
+                        <span
+                          className={`h-1.5 w-1.5 rounded-full ${
+                            st.active ? "bg-emerald-500 animate-pulse" : "bg-rose-500"
+                          }`}
+                        />
+                        {st.active ? t("app.active") : (lang === "ar" ? "معطل" : t("app.inactive"))}
+                      </span>
+                    </td>
                     {showManageLinks && (
                       <td className="px-4 py-2.5 text-end">
-                        <Link
-                          to={`/instructor/progress-tracker?studentId=${st.uid}`}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 text-sky-700 dark:text-sky-300 font-bold"
-                        >
-                          {lang === "ar" ? "تقرير" : "Track"}
-                          <ArrowUpRight className="h-3 w-3" />
-                        </Link>
+                        <div className="inline-flex items-center gap-1.5 justify-end">
+                          <button
+                            type="button"
+                            onClick={() => handleToggleStudentActive(st.rawStudent || st)}
+                            title={
+                              st.active
+                                ? lang === "ar"
+                                  ? "تعطيل حساب الطالب"
+                                  : "Deactivate student account"
+                                : lang === "ar"
+                                  ? "تفعيل حساب الطالب"
+                                  : "Activate student account"
+                            }
+                            className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg font-bold text-[11px] border transition-all active:scale-95 ${
+                              st.active
+                                ? "border-amber-300/80 bg-amber-50 hover:bg-amber-100 text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
+                                : "border-emerald-300/80 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
+                            }`}
+                          >
+                            <Power className="h-3 w-3" />
+                            <span>
+                              {st.active
+                                ? lang === "ar"
+                                  ? "تعطيل"
+                                  : "Deactivate"
+                                : lang === "ar"
+                                  ? "تفعيل"
+                                  : "Activate"}
+                            </span>
+                          </button>
+                          <Link
+                            to={`/instructor/progress-tracker?studentId=${st.uid}`}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 text-sky-700 dark:text-sky-300 font-bold"
+                          >
+                            {lang === "ar" ? "تقرير" : "Track"}
+                            <ArrowUpRight className="h-3 w-3" />
+                          </Link>
+                        </div>
                       </td>
                     )}
                   </tr>

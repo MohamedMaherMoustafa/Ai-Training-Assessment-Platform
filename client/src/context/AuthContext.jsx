@@ -32,7 +32,13 @@ export function AuthProvider({ children }) {
       try {
         const snap = await get(ref(rtdb, `users/${fbUser.uid}`));
         if (snap.exists()) {
-          setUser({ uid: fbUser.uid, ...snap.val() });
+          const profile = snap.val();
+          if (profile.active === false) {
+            await logoutAll();
+            setUser(null);
+          } else {
+            setUser({ uid: fbUser.uid, ...profile });
+          }
         } else {
           setUser(null);
         }
