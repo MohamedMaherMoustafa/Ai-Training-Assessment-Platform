@@ -285,23 +285,52 @@ export default function AppLayout({ navItems, children }) {
                         {lang === "ar" ? "لا توجد إشعارات حالياً" : "No notifications yet."}
                       </div>
                     ) : (
-                      notifications.map((n) => (
-                        <div
-                          key={n.id}
-                          onClick={() => handleNotificationClick(n)}
-                          className={`p-3 text-xs cursor-pointer transition-colors flex items-start gap-2.5 ${
-                            n.read
-                              ? "bg-transparent text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                              : "bg-indigo-50/50 dark:bg-indigo-950/20 text-slate-800 dark:text-slate-100 font-medium hover:bg-indigo-50"
-                          }`}
-                        >
-                          <div className="h-2 w-2 rounded-full mt-1.5 bg-indigo-500 shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <div className="font-bold text-xs">{n.title}</div>
-                            <div className="text-[11px] opacity-90 truncate mt-0.5">{n.message}</div>
+                      notifications.map((n) => {
+                        const title =
+                          lang === "ar"
+                            ? n.titleAr || n.titleEn || n.title || "إشعار جديد"
+                            : n.titleEn || n.titleAr || n.title || "New Notification";
+                        const body =
+                          lang === "ar"
+                            ? n.bodyAr || n.bodyEn || n.message || n.body || ""
+                            : n.bodyEn || n.bodyAr || n.message || n.body || "";
+
+                        return (
+                          <div
+                            key={n.id}
+                            onClick={() => handleNotificationClick(n)}
+                            className={`p-3 text-xs cursor-pointer transition-colors flex items-start gap-2.5 ${
+                              n.read
+                                ? "bg-transparent text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                                : "bg-indigo-50/60 dark:bg-indigo-950/30 text-slate-800 dark:text-slate-100 font-medium hover:bg-indigo-50 dark:hover:bg-indigo-950/50"
+                            }`}
+                          >
+                            <div
+                              className={`h-2 w-2 rounded-full mt-1.5 shrink-0 ${
+                                n.read ? "bg-slate-300 dark:bg-slate-700" : "bg-indigo-600 dark:bg-cyan-400"
+                              }`}
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="font-bold text-xs text-slate-900 dark:text-white leading-snug">
+                                {title}
+                              </div>
+                              {body && (
+                                <div className="text-[11px] text-slate-600 dark:text-slate-300 mt-0.5 leading-relaxed break-words">
+                                  {body}
+                                </div>
+                              )}
+                              {n.createdAt && (
+                                <div className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
+                                  {new Date(n.createdAt).toLocaleTimeString([], {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
+                                </div>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      ))
+                        );
+                      })
                     )}
                   </div>
                 </div>

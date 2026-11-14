@@ -810,6 +810,8 @@ export async function pushNotification(recipientId, {
       titleAr: titleAr || titleEn || "",
       bodyEn: bodyEn || "",
       bodyAr: bodyAr || bodyEn || "",
+      title: titleEn || titleAr || "",
+      message: bodyEn || bodyAr || "",
       type,
       link,
       read: false,
