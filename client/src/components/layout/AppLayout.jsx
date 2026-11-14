@@ -147,14 +147,14 @@ export default function AppLayout({ navItems, children }) {
             >
               <X className="h-4 w-4" />
             </button>
-            <div className="h-12 w-12 rounded-2xl bg-gradient-to-tr from-[#3b28b6] to-[#6025d8] text-white flex items-center justify-center shadow-lg shadow-indigo-600/35 mx-auto mb-2.5">
-              <GraduationCap className="h-6 w-6 text-white" />
+            <div className="h-14 w-14 rounded-2xl bg-white/10 backdrop-blur-md p-1.5 border border-white/20 shadow-xl shadow-indigo-950/40 mx-auto mb-2.5 overflow-hidden flex items-center justify-center">
+              <img src="/Logo.png" alt="Platform Logo" className="w-full h-full object-contain drop-shadow" />
             </div>
             <div className="font-extrabold text-sm sm:text-[14px] leading-snug tracking-tight text-white">
               AI Training &<br />Assessment Platform
             </div>
-            <div className="text-[10.5px] font-semibold text-indigo-300/90 mt-1">
-              Learn • Practice • Get Certified
+            <div className="text-[10.5px] font-semibold text-indigo-200 mt-1">
+              {t("auth.learnTagline")}
             </div>
           </div>
 

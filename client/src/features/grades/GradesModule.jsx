@@ -9,7 +9,25 @@ import { useAuth } from "../../context/AuthContext";
  * Renders the platform logo mark onto an offscreen canvas so jsPDF can embed
  * a crisp high-DPI logo matching the platform's sky -> indigo gradient theme.
  */
+let cachedLogoDataUrl = null;
+if (typeof window !== "undefined") {
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.src = "/Logo.png";
+  img.onload = () => {
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = 160;
+      canvas.height = 160;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, 160, 160);
+      cachedLogoDataUrl = canvas.toDataURL("image/png");
+    } catch {}
+  };
+}
+
 function createPlatformLogoPng() {
+  if (cachedLogoDataUrl) return cachedLogoDataUrl;
   const canvas = document.createElement("canvas");
   canvas.width = 160;
   canvas.height = 160;

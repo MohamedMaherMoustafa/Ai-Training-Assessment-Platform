@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import {
-  GraduationCap,
   CheckCircle2,
   Circle,
   Sun,
@@ -146,8 +145,8 @@ export default function RegisterPage() {
       {/* Top Floating Pill Navigation Bar */}
       <header className="shrink-0 max-w-4xl w-full mx-auto bg-white/95 dark:bg-slate-900/90 backdrop-blur-md rounded-full px-4 sm:px-6 py-2 flex items-center justify-between gap-3 shadow-sm border border-slate-200/80 dark:border-white/10">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-gradient-to-tr from-[#5719bd] via-[#6a1ecf] to-[#8022d8] text-white flex items-center justify-center shadow-md shadow-purple-500/25 shrink-0">
-            <GraduationCap className="h-4 w-4 sm:h-5 sm:w-5" />
+          <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl overflow-hidden shadow-md shadow-indigo-500/25 shrink-0 bg-white dark:bg-slate-800 p-1 border border-slate-200/80 dark:border-white/10 flex items-center justify-center">
+            <img src="/Logo.png" alt="Platform Logo" className="w-full h-full object-contain" />
           </div>
           <div className="min-w-0">
             <h1 className="font-extrabold text-xs sm:text-sm text-slate-900 dark:text-white truncate">

@@ -1,6 +1,24 @@
 import { jsPDF } from "jspdf";
 
+let cachedLogoDataUrl = null;
+if (typeof window !== "undefined") {
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.src = "/Logo.png";
+  img.onload = () => {
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = 180;
+      canvas.height = 180;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, 180, 180);
+      cachedLogoDataUrl = canvas.toDataURL("image/png");
+    } catch {}
+  };
+}
+
 function createPlatformLogoPng(primaryHex = "#0284c7", secondaryHex = "#4f46e5") {
+  if (cachedLogoDataUrl) return cachedLogoDataUrl;
   const canvas = document.createElement("canvas");
   canvas.width = 180;
   canvas.height = 180;

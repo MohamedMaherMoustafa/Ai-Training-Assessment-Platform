@@ -1,7 +1,7 @@
 {
   "app": {
     "title": "AI Training & Assessment Platform",
-    "subtitle": "Technical Education | Powered by Platform AI",
+    "subtitle": "Learn .. Develop .. Achieve Your Goals",
     "light": "Light",
     "dark": "Dark",
     "lang": "العربية",
@@ -24,7 +24,7 @@
     "loginDesc": "Sign in as System Admin, Instructor, or Student",
     "welcomeBack": "Welcome Back!",
     "welcomeDesc": "Sign in to access your learning workspace",
-    "learnTagline": "Learn • Practice • Get Certified",
+    "learnTagline": "Learn .. Develop .. Achieve Your Goals",
     "heroDesc": "Your smart learning companion for technical education and skill development.",
     "featPdf": "Live PDF Annotations",
     "featPdfDesc": "Study with interactive tools",

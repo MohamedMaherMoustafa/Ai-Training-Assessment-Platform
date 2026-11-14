@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
-  GraduationCap,
   Lock,
   User,
   Mail,
@@ -88,8 +87,8 @@ export default function LoginPage() {
       {/* Top Floating Pill Navigation Bar (Compact Height) */}
       <header className="shrink-0 max-w-5xl w-full mx-auto bg-white/95 dark:bg-slate-900/90 backdrop-blur-md rounded-full px-4 sm:px-6 py-2 flex items-center justify-between gap-3 shadow-sm border border-slate-200/80 dark:border-white/10">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-gradient-to-tr from-[#5719bd] via-[#6a1ecf] to-[#8022d8] text-white flex items-center justify-center shadow-md shadow-purple-500/25 shrink-0">
-            <GraduationCap className="h-4 w-4 sm:h-5 sm:w-5" />
+          <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl overflow-hidden shadow-md shadow-indigo-500/25 shrink-0 bg-white dark:bg-slate-800 p-1 border border-slate-200/80 dark:border-white/10 flex items-center justify-center">
+            <img src="/Logo.png" alt="Platform Logo" className="w-full h-full object-contain" />
           </div>
           <div className="min-w-0">
             <h1 className="font-extrabold text-xs sm:text-sm text-slate-900 dark:text-white truncate">
@@ -133,13 +132,20 @@ export default function LoginPage() {
             <div className="pointer-events-none absolute bottom-0 start-0 h-64 w-64 rounded-full bg-indigo-500/20 blur-3xl" />
 
             <div className="relative z-10">
-              <h2 className="text-xl sm:text-2xl font-black leading-tight text-white tracking-tight">
-                {t("app.title")}
-              </h2>
-              <div className="text-xs font-semibold text-indigo-200 mt-1">
-                {t("auth.learnTagline")}
+              <div className="flex items-center gap-3 mb-2.5">
+                <div className="h-11 w-11 rounded-2xl bg-white/15 backdrop-blur-md border border-white/25 p-1 shadow-lg shrink-0 flex items-center justify-center overflow-hidden">
+                  <img src="/Logo.png" alt="Platform Logo" className="w-full h-full object-contain" />
+                </div>
+                <div>
+                  <h2 className="text-lg sm:text-xl font-black leading-tight text-white tracking-tight">
+                    {t("app.title")}
+                  </h2>
+                  <div className="text-[11px] font-semibold text-indigo-200">
+                    {t("auth.learnTagline")}
+                  </div>
+                </div>
               </div>
-              <p className="text-[11px] text-white/80 mt-1.5 leading-relaxed max-w-sm">
+              <p className="text-[11px] text-white/80 mt-1 leading-relaxed max-w-sm">
                 {t("auth.heroDesc")}
               </p>
 
