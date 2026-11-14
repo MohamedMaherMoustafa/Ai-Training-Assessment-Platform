@@ -10,9 +10,7 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 15 
 
 const OLLAMA_BASE = process.env.OLLAMA_BASE_URL || "http://localhost:11434";
 const PREFERRED_MODEL = process.env.OLLAMA_MODEL || "academy-tutor";
-const GEMINI_API_KEY =
-  process.env.GEMINI_API_KEY ||
-  "AI_KEY_REMOVED_FOR_SECURITY_REASONS_00000000000000000";
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash";
 
 async function generateQuizWithGemini(text, lang = "en", count = 5) {
