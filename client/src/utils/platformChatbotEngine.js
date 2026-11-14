@@ -119,6 +119,7 @@ export async function loadScopedPlatformDataset(user) {
 
 export async function processChatbotMessage({
   message,
+  attachments = [],
   user,
   lang = "en",
   history = [],
@@ -127,6 +128,7 @@ export async function processChatbotMessage({
   const dataset = await loadScopedPlatformDataset(user);
   return processChatbotMessageWithDataset({
     message,
+    attachments,
     user,
     lang,
     history,

@@ -484,6 +484,7 @@ async function summarizeLessonViaAI(lesson, lang, useNetwork = true) {
 
 export async function processChatbotMessageWithDataset({
   message,
+  attachments = [],
   user,
   lang = "en",
   history = [],
@@ -495,6 +496,35 @@ export async function processChatbotMessageWithDataset({
   const role = user?.role || dataset.role || "student";
   const canAuthorQuiz = role === "instructor" || role === "admin";
   const displayName = user?.displayName || user?.username || "";
+
+  // Multimodal file attachment handling: immediately route to proxy / Gemini
+  if (Array.isArray(attachments) && attachments.length > 0 && useNetwork) {
+    const contextSummary = buildContextSummaryText(dataset, lang);
+    try {
+      const res = await axios.post(
+        "http://localhost:3001/api/chat",
+        {
+          role,
+          lang,
+          mode: "qa",
+          message: String(message || "").trim(),
+          attachments,
+          history,
+          contextSummary,
+        },
+        { timeout: 60000 }
+      );
+      if (res.data?.reply) {
+        return {
+          reply: res.data.reply,
+          provider: res.data.provider,
+          model: res.data.model,
+        };
+      }
+    } catch (netErr) {
+      console.warn("Multimodal chat proxy failed:", netErr.message);
+    }
+  }
 
   if (explicitAction?.type === "create_quiz" && canAuthorQuiz) {
     const lesson = dataset.lessons.find((l) => l.id === explicitAction.lessonId);
@@ -837,6 +867,7 @@ export async function processChatbotMessageWithDataset({
           lang,
           mode: "qa",
           message,
+          attachments,
           history,
           contextSummary,
         },

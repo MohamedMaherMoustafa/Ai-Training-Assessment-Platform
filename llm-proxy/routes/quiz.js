@@ -10,6 +10,43 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 15 
 
 const OLLAMA_BASE = process.env.OLLAMA_BASE_URL || "http://localhost:11434";
 const PREFERRED_MODEL = process.env.OLLAMA_MODEL || "academy-tutor";
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash";
+
+async function generateQuizWithGemini(text, lang = "en", count = 5) {
+  if (!GEMINI_API_KEY) return null;
+  const prompt = [
+    `You are an expert educational exam designer.`,
+    `Generate exactly ${count} high-quality multiple choice questions based on the lesson text below.`,
+    `Language: ${lang === "ar" ? "Arabic" : "English"}.`,
+    `Format: Return ONLY a valid JSON object with a "questions" array. Each question must have:`,
+    `- "id": string (e.g. "q1")`,
+    `- "text": string (the question text)`,
+    `- "options": array of exactly 4 strings or objects with "id" ("a","b","c","d") and "text"`,
+    `- "correctOptionId": "a", "b", "c", or "d"`,
+    `Lesson Content:\n${text.slice(0, 10000)}`,
+  ].join("\n\n");
+
+  const payload = {
+    contents: [{ role: "user", parts: [{ text: prompt }] }],
+    generationConfig: {
+      responseMimeType: "application/json",
+      temperature: 0.5,
+    },
+  };
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+  const res = await axios.post(url, payload, {
+    headers: { "Content-Type": "application/json" },
+    timeout: 60000,
+  });
+
+  const rawJson = res.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!rawJson) return null;
+  const parsed = JSON.parse(rawJson);
+  const questionsList = parsed.questions || parsed.quiz || (Array.isArray(parsed) ? parsed : []);
+  return normalizeQuestions(questionsList);
+}
 
 function loadPromptTemplate(lang = "en") {
   const file = path.join(__dirname, "..", "prompts", `quiz_${lang}.txt`);
@@ -125,6 +162,22 @@ router.post("/generate", upload.single("file"), async (req, res) => {
 
     if (!text || text.trim().length < 20) {
       return res.status(400).json({ error: "Lesson text is too short to generate questions." });
+    }
+
+    // Try Gemini first if key exists
+    if (GEMINI_API_KEY) {
+      try {
+        const geminiQuestions = await generateQuizWithGemini(text, lang === "ar" ? "ar" : "en", count);
+        if (geminiQuestions && geminiQuestions.length > 0) {
+          return res.json({
+            model: GEMINI_MODEL,
+            provider: "gemini",
+            questions: geminiQuestions,
+          });
+        }
+      } catch (gErr) {
+        console.warn("Gemini quiz generation failed, trying local Ollama:", gErr.message);
+      }
     }
 
     const model = await resolveAvailableModel();

@@ -5,6 +5,8 @@ const router = express.Router();
 
 const OLLAMA_BASE = process.env.OLLAMA_BASE_URL || "http://localhost:11434";
 const PREFERRED_MODEL = process.env.OLLAMA_MODEL || "academy-tutor";
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash";
 
 const STOP_WORDS = new Set([
   "the", "is", "are", "was", "were", "a", "an", "in", "on", "at", "to", "for", "of",
@@ -12,6 +14,83 @@ const STOP_WORDS = new Set([
   "about", "tell", "show", "give", "please", "does", "do", "this", "that", "it",
   "من", "في", "على", "عن", "هل", "ما", "هو", "هي", "الى", "إلى", "ان", "أن", "مع", "لي", "كم",
 ]);
+
+async function callGeminiChat({
+  apiKey,
+  model = "gemini-3.5-flash",
+  systemPrompt,
+  userPrompt,
+  attachments = [],
+}) {
+  const parts = [];
+
+  // Add attachments (photos, PDFs, voice recordings)
+  if (Array.isArray(attachments) && attachments.length > 0) {
+    for (const att of attachments) {
+      if (att && att.data && att.mimeType) {
+        const cleanBase64 = String(att.data).replace(/^data:[^;]+;base64,/, "");
+        parts.push({
+          inlineData: {
+            mimeType: att.mimeType,
+            data: cleanBase64,
+          },
+        });
+      }
+    }
+  }
+
+  // Add user prompt text
+  parts.push({
+    text: userPrompt || (attachments.length > 0 ? "Please analyze the attached file(s) and provide a detailed, helpful educational explanation." : "Hello"),
+  });
+
+  const payload = {
+    contents: [
+      {
+        role: "user",
+        parts,
+      },
+    ],
+    systemInstruction: {
+      parts: [{ text: systemPrompt }],
+    },
+    generationConfig: {
+      temperature: 0.65,
+      maxOutputTokens: 2500,
+    },
+  };
+
+  const primaryModel = model || "gemini-3.5-flash";
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${primaryModel}:generateContent?key=${apiKey}`;
+
+  try {
+    const res = await axios.post(url, payload, {
+      headers: { "Content-Type": "application/json" },
+      timeout: 60000,
+    });
+    const candidate = res.data?.candidates?.[0];
+    const text = candidate?.content?.parts?.map((p) => p.text).filter(Boolean).join("\n");
+    if (text) return { text, model: primaryModel };
+  } catch (err) {
+    console.warn(`Gemini (${primaryModel}) failed:`, err.response?.data?.error?.message || err.message);
+    if (primaryModel !== "gemini-flash-latest") {
+      try {
+        const fallbackUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
+        const res = await axios.post(fallbackUrl, payload, {
+          headers: { "Content-Type": "application/json" },
+          timeout: 60000,
+        });
+        const candidate = res.data?.candidates?.[0];
+        const text = candidate?.content?.parts?.map((p) => p.text).filter(Boolean).join("\n");
+        if (text) return { text, model: "gemini-flash-latest" };
+      } catch (fErr) {
+        console.warn("Gemini fallback model also failed:", fErr.message);
+      }
+    }
+    throw err;
+  }
+  return null;
+}
 
 async function resolveAvailableModel() {
   try {
@@ -67,7 +146,6 @@ function summarizeExtractive(rawText, lang = "en", title = "", query = "") {
     const matches = scored.filter((x) => x.score > 0).sort((a, b) => b.score - a.score);
     picked = (matches.length > 0 ? matches : scored).slice(0, 5).map((x) => x.s);
   } else {
-    // Pick evenly spaced representative sentences across the lesson
     const step = Math.max(1, Math.floor(pool.length / 5));
     picked = [];
     for (let i = 0; i < pool.length && picked.length < 5; i += step) {
@@ -144,6 +222,7 @@ router.post("/", async (req, res) => {
     lang = "en",
     mode = "qa",
     message = "",
+    attachments = [],
     history = [],
     contextSummary = "",
     lessonTitle = "",
@@ -152,8 +231,8 @@ router.post("/", async (req, res) => {
 
   const langRule =
     lang === "ar"
-      ? "Reply concisely, accurately, and directly to the question in Arabic."
-      : "Reply concisely, accurately, and directly to the question in English.";
+      ? "Reply fluently, accurately, and politely in Arabic. Use clear markdown formatting."
+      : "Reply fluently, accurately, and politely in English. Use clear markdown formatting.";
 
   const historyBlock = Array.isArray(history)
     ? history
@@ -162,58 +241,91 @@ router.post("/", async (req, res) => {
         .join("\n")
     : "";
 
-  const systemGuide =
-    mode === "summarize" && lessonText
-      ? [
-          "You are the Smart AI Tutor of 'AI Training & Assessment Platform'.",
-          langRule,
-          "Summarize the following lesson clearly into 4 to 6 concise bullet points plus 1 key takeaway.",
-          `Lesson Title: ${lessonTitle || "Lesson"}`,
-          `Lesson Content:\n${String(lessonText).slice(0, 6000)}`,
-        ].join("\n\n")
-      : [
-          `You are the Smart AI Assistant of 'AI Training & Assessment Platform' assisting a ${role}.`,
-          langRule,
-          "Answer ONLY what the user asked. Use ONLY the live platform dataset below for metrics, names, courses, lessons, assignments, quizzes, and points. Never invent data and never dump the whole dataset.",
-          contextSummary ? `LIVE PLATFORM DATASET:\n${String(contextSummary).slice(0, 8000)}` : "",
-          historyBlock ? `RECENT CHAT:\n${historyBlock}` : "",
-          `USER QUESTION: ${message}`,
-        ]
-          .filter(Boolean)
-          .join("\n\n");
+  const systemPrompt = [
+    "You are the Intelligent Multimodal AI Tutor & Educational Assistant of 'AI Training & Assessment Platform'.",
+    `Target User Role: ${role}.`,
+    langRule,
+    "Multimodal Capabilities:",
+    "- When the user sends photos/images: Analyze the visual content thoroughly (such as textbook pages, math formulas, circuit diagrams, charts, handwritten notes, or code screenshots) and explain the concepts step-by-step.",
+    "- When the user sends a PDF document: Read, analyze, summarize, or extract key questions, answers, and study notes from the PDF.",
+    "- When the user sends voice/audio: Accurately process the spoken query and provide a well-structured educational answer.",
+    "Platform Grounding:",
+    "- When the user asks about live platform data (e.g., student marks, points, scoreboard, course lists, quiz results, or instructor assignments), rely strictly on the LIVE PLATFORM DATASET below.",
+    "- When the user asks general educational, scientific, coding, mathematics, or conceptual questions, provide comprehensive, high-quality educational guidance.",
+    contextSummary ? `LIVE PLATFORM DATASET:\n${String(contextSummary).slice(0, 8000)}` : "",
+    mode === "summarize" && lessonText ? `TARGET LESSON CONTENT:\nTitle: ${lessonTitle}\n${String(lessonText).slice(0, 6000)}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 
+  const userPrompt = [
+    historyBlock ? `RECENT CHAT CONTEXT:\n${historyBlock}` : "",
+    message ? `USER QUESTION: ${message}` : "",
+    attachments.length > 0
+      ? `(User attached ${attachments.length} file(s): ${attachments.map((a) => `${a.kind || 'file'}: ${a.fileName || a.mimeType}`).join(", ")})`
+      : "",
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+
+  // Priority 1: Gemini Multimodal API if configured
+  if (GEMINI_API_KEY) {
+    try {
+      const geminiResult = await callGeminiChat({
+        apiKey: GEMINI_API_KEY,
+        model: GEMINI_MODEL,
+        systemPrompt,
+        userPrompt,
+        attachments,
+      });
+
+      if (geminiResult?.text) {
+        return res.json({
+          model: geminiResult.model,
+          provider: "gemini",
+          reply: geminiResult.text,
+          hasAttachments: attachments.length > 0,
+        });
+      }
+    } catch (gErr) {
+      console.warn("Gemini generation failed, falling back to local runner:", gErr.message);
+    }
+  }
+
+  // Priority 2: Ollama Local Model
   try {
     const model = await resolveAvailableModel();
-    if (!model) {
-      return res.json({
-        model: "platform-ai-grounded",
-        reply: buildFallbackReply({ lang, mode, message, contextSummary, lessonText, lessonTitle }),
-      });
+    if (model) {
+      const ollamaRes = await axios.post(
+        `${OLLAMA_BASE}/api/generate`,
+        {
+          model,
+          prompt: `${systemPrompt}\n\n${userPrompt}`,
+          stream: false,
+        },
+        { timeout: 60000 }
+      );
+
+      const text = String(ollamaRes.data?.response || "").trim();
+      if (text) {
+        return res.json({
+          model,
+          provider: "ollama",
+          reply: text,
+        });
+      }
     }
-
-    const ollamaRes = await axios.post(
-      `${OLLAMA_BASE}/api/generate`,
-      {
-        model,
-        prompt: systemGuide,
-        stream: false,
-      },
-      { timeout: 60000 }
-    );
-
-    const text = String(ollamaRes.data?.response || "").trim();
-    return res.json({
-      model,
-      reply: text || buildFallbackReply({ lang, mode, message, contextSummary, lessonText, lessonTitle }),
-    });
-  } catch (err) {
-    console.warn("Chat falling back to grounded response:", err.message);
-    return res.json({
-      model: "platform-ai-grounded",
-      reply: buildFallbackReply({ lang, mode, message, contextSummary, lessonText, lessonTitle }),
-    });
+  } catch (oErr) {
+    console.warn("Ollama unavailable:", oErr.message);
   }
+
+  // Priority 3: Platform Grounded Fallback
+  return res.json({
+    model: "platform-ai-grounded",
+    provider: "grounded-fallback",
+    reply: buildFallbackReply({ lang, mode, message, contextSummary, lessonText, lessonTitle }),
+  });
 });
 
 module.exports = router;
-module.exports._test = { summarizeExtractive, searchContextLines, buildFallbackReply, extractKeywords };
+module.exports._test = { summarizeExtractive, searchContextLines, buildFallbackReply, extractKeywords, callGeminiChat };
