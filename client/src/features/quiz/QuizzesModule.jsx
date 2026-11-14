@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -27,6 +27,7 @@ import {
   listQuizzes,
   markQuizEntered,
   markQuizSubmitted,
+  markQuizCheatingTerminated,
   rejectQuizRetake,
   requestQuizRetake,
   submitQuizAttempt,
@@ -34,6 +35,7 @@ import {
 } from "../../services/platformService";
 import { useAuth } from "../../context/AuthContext";
 import { useLang } from "../../context/LangContext";
+import { usePopup } from "../../context/PopupContext";
 
 const EMPTY_QUESTION = () => ({
   id: `q_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
@@ -60,6 +62,9 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
   const { t } = useTranslation();
   const { user } = useAuth();
   const { lang } = useLang();
+  const { showPopup } = usePopup();
+
+  const lastViolationTimeRef = useRef(0);
 
   const [quizzes, setQuizzes] = useState([]);
   const [courses, setCourses] = useState([]);
@@ -141,19 +146,72 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
     return () => clearInterval(timer);
   }, [activeQuiz, secondsLeft]);
 
-  // Anti-Screenshot & Content Privacy Restriction while a quiz is active
+  // Anti-Screenshot & Cheating Protection (Closes quiz immediately on 2nd violation without submitting)
+  const handlePrivacyViolation = async () => {
+    if (!activeQuiz) return;
+    const now = Date.now();
+    // Cooldown debounce: ignore duplicate triggers fired by the same shortcut within 1.5s
+    if (now - lastViolationTimeRef.current < 1500) return;
+    lastViolationTimeRef.current = now;
+
+    try {
+      navigator.clipboard?.writeText?.("").catch(() => {});
+    } catch {
+      // ignore
+    }
+
+    const nextCount = privacyCount + 1;
+    setPrivacyCount(nextCount);
+
+    if (nextCount >= 2) {
+      // Reached 2 violations: IMMEDIATELY close quiz without submitting
+      const quizToTerminate = activeQuiz;
+      setActiveQuiz(null);
+      setAnswers({});
+      setPrivacyRestricted(false);
+      setPrivacyCount(0);
+
+      try {
+        await markQuizCheatingTerminated(quizToTerminate.id, user.uid, {
+          studentName: user.displayName || user.email,
+          quizTitle: quizToTerminate.title,
+          courseId: quizToTerminate.courseId,
+          instructorId: quizToTerminate.instructorId,
+        });
+        await loadAll();
+      } catch (err) {
+        console.error("Failed to mark cheating status:", err);
+      }
+
+      showPopup({
+        type: "error",
+        title: lang === "ar" ? "تم إنهاء الاختبار لمحاولة الغش" : "Quiz Terminated (Cheating Violation)",
+        message:
+          lang === "ar"
+            ? "تم إغلاق الاختبار فوراً وإلغاء محاولتك دون إرسال الإجابات بسبب تكرار محاولة تصوير الشاشة (مخالفة 2 من 2). لا يمكنك إعادة الاختبار إلا بعد مراجعة وموافقة المحاضر."
+            : "Your quiz has been closed immediately and cancelled without submitting because screenshot attempts were detected 2 times. You cannot re-enter without instructor approval.",
+        confirmLabel: lang === "ar" ? "أدركت ذلك" : "I Understand",
+      });
+
+      toast.error(
+        lang === "ar"
+          ? "تم إغلاق الاختبار وإلغاؤه لمحاولة تصوير الشاشة (2/2)!"
+          : "Quiz terminated without submitting due to repeated screenshot attempts (2/2)!"
+      );
+    } else {
+      // Strike 1
+      setPrivacyRestricted(true);
+      toast.error(
+        lang === "ar"
+          ? "تحذير (1/2): محاولة تصوير الشاشة محظورة! التكرار مرة أخرى سيغلق الاختبار فوراً دون إرسال الإجابات."
+          : "Warning (Strike 1/2): Taking screenshots is prohibited! Repeating will close your quiz immediately without submitting."
+      );
+    }
+  };
+
+  // Anti-Screenshot & Content Privacy Restriction listeners while a quiz is active
   useEffect(() => {
     if (!activeQuiz) return undefined;
-
-    const triggerPrivacyShield = () => {
-      try {
-        navigator.clipboard?.writeText?.("").catch(() => {});
-      } catch {
-        // ignore clipboard denial
-      }
-      setPrivacyRestricted(true);
-      setPrivacyCount((c) => c + 1);
-    };
 
     const handleKeyCapture = (e) => {
       const k = (e.key || "").toLowerCase();
@@ -167,16 +225,16 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
       if (isPrintScreen || isWinSnip || isMacSnip || isPrintOrSave || isDevTools) {
         e.preventDefault();
         e.stopPropagation();
-        triggerPrivacyShield();
+        handlePrivacyViolation();
       }
     };
 
     const handleVisibility = () => {
-      if (document.hidden) triggerPrivacyShield();
+      if (document.hidden) handlePrivacyViolation();
     };
 
     const handleWindowBlur = () => {
-      triggerPrivacyShield();
+      handlePrivacyViolation();
     };
 
     window.addEventListener("keydown", handleKeyCapture, true);
@@ -190,7 +248,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
       window.removeEventListener("blur", handleWindowBlur);
       document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, [activeQuiz]);
+  }, [activeQuiz, privacyCount]);
 
   const selectedCourse = courses.find((c) => c.id === courseId);
 
@@ -345,11 +403,19 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
   const startQuizAttempt = async (qz) => {
     const access = quizAccess[qz.id]?.[user.uid];
     if (access && access.retakeStatus !== "approved") {
-      toast.error(
-        lang === "ar"
-          ? "لقد دخلت هذا الاختبار مسبقاً. اطلب إعادة المحاولة من المحاضر."
-          : "You already entered this quiz. Send a retake request to your instructor first."
-      );
+      if (access.status === "terminated_cheating") {
+        toast.error(
+          lang === "ar"
+            ? "تم إلغاء هذا الاختبار مسبقاً لمحاولة الغش (تصوير الشاشة). أرسل طلب إعادة اختبار للمحاضر أولاً."
+            : "This quiz was terminated for screenshot cheating. Send a retake request to your instructor first."
+        );
+      } else {
+        toast.error(
+          lang === "ar"
+            ? "لقد دخلت هذا الاختبار مسبقاً. اطلب إعادة المحاولة من المحاضر."
+            : "You already entered this quiz. Send a retake request to your instructor first."
+        );
+      }
       return;
     }
 
@@ -814,13 +880,11 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
           <div
             onContextMenu={(e) => {
               e.preventDefault();
-              setPrivacyRestricted(true);
-              setPrivacyCount((c) => c + 1);
+              handlePrivacyViolation();
             }}
             onCopy={(e) => {
               e.preventDefault();
-              setPrivacyRestricted(true);
-              setPrivacyCount((c) => c + 1);
+              handlePrivacyViolation();
             }}
             onCut={(e) => e.preventDefault()}
             className="quiz-privacy-protected relative glass-card border-sky-400/70 p-6 space-y-5 select-none"
@@ -831,7 +895,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                 <div className="h-16 w-16 rounded-2xl bg-rose-500/20 border border-rose-400/50 text-rose-400 flex items-center justify-center shadow-lg">
                   <ShieldAlert className="h-8 w-8" />
                 </div>
-                <div className="space-y-1.5 max-w-md">
+                <div className="space-y-2 max-w-md">
                   <h3 className="text-xl font-black tracking-tight text-rose-300">
                     {lang === "ar"
                       ? "المحتوى محمي — قيود الخصوصية"
@@ -839,23 +903,30 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                   </h3>
                   <p className="text-xs text-slate-300 leading-relaxed">
                     {lang === "ar"
-                      ? "تم حجب أسئلة الاختبار تلقائياً لأن التصوير (Screenshot) أو الطباعة أو مغادرة نافذة الاختبار محظور للحفاظ على الخصوصية."
-                      : "Quiz content is hidden because screenshots, screen capture shortcuts, printing, or leaving the quiz window are restricted."}
+                      ? "تم حجب أسئلة الاختبار تلقائياً لأن التصوير (Screenshot) أو مغادرة نافذة الاختبار محظور تماماً لمنع الغش."
+                      : "Quiz content is hidden because screenshots, screen capture shortcuts, or leaving the quiz window are strictly restricted."}
                   </p>
                   {privacyCount > 0 && (
-                    <div className="text-[11px] font-bold text-amber-300 pt-1">
-                      {lang === "ar"
-                        ? `تنبيهات الخصوصية المسجلة: ${privacyCount}`
-                        : `Privacy alerts detected: ${privacyCount}`}
+                    <div className="p-3 rounded-2xl bg-rose-500/20 border border-rose-400/30 text-rose-200 text-xs font-bold space-y-1">
+                      <div className="text-amber-300 font-black">
+                        {lang === "ar"
+                          ? `تحذير الخصوصية: مخالفة (${privacyCount} من 2)`
+                          : `Privacy Warning: Strike (${privacyCount} of 2)`}
+                      </div>
+                      <div className="text-[11px] text-slate-300 font-normal">
+                        {lang === "ar"
+                          ? "تنبيه نهائي: في حال تكرار تصوير الشاشة أو مغادرة النافذة للمرة الثانية، سيتم إنهاء الاختبار فوراً وإلغاؤه كحالة غش دون إرسال الإجابات!"
+                          : "Final Alert: If screenshot or leaving the window is attempted a 2nd time, your quiz will be closed and cancelled immediately as cheating without submitting!"}
+                      </div>
                     </div>
                   )}
                 </div>
                 <button
                   type="button"
                   onClick={() => setPrivacyRestricted(false)}
-                  className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold shadow-lg"
+                  className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold shadow-lg cursor-pointer"
                 >
-                  {lang === "ar" ? "العودة ومتابعة الاختبار" : "Return & Resume Quiz"}
+                  {lang === "ar" ? "أدركت ذلك — العودة ومتابعة الاختبار" : "I Understand — Resume Quiz"}
                 </button>
               </div>
             )}
@@ -1092,6 +1163,23 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                           <Clock className="h-3.5 w-3.5" />
                           {lang === "ar" ? "طلب الإعادة قيد المراجعة" : "Retake Pending Approval"}
                         </span>
+                      );
+                    }
+                    if (access.status === "terminated_cheating") {
+                      return (
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/15 border border-rose-400/30 text-rose-700 dark:text-rose-300 text-xs font-semibold">
+                            <ShieldAlert className="h-3.5 w-3.5" />
+                            {lang === "ar" ? "أُلغي لمحاولة تصوير الشاشة (غش)" : "Terminated (Screenshot Cheating)"}
+                          </span>
+                          <button
+                            onClick={() => handleRequestRetake(qz)}
+                            className="glass-btn-secondary px-3 py-1.5 rounded-lg text-xs font-semibold text-amber-700 dark:text-amber-300 flex items-center gap-1.5 cursor-pointer"
+                          >
+                            <Lock className="h-3.5 w-3.5" />
+                            {lang === "ar" ? "طلب إعادة الاختبار" : "Request Retake"}
+                          </button>
+                        </div>
                       );
                     }
                     return (

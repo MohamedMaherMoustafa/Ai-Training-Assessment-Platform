@@ -764,6 +764,27 @@ export async function markQuizEntered(quizId, studentId, meta = {}) {
   });
 }
 
+export async function markQuizCheatingTerminated(quizId, studentId, meta = {}) {
+  await update(ref(rtdb, `quizAccess/${quizId}/${studentId}`), {
+    quizId,
+    studentId,
+    ...meta,
+    status: "terminated_cheating",
+    retakeStatus: "none",
+    terminatedAt: Date.now(),
+  });
+  if (meta.instructorId) {
+    await pushNotification(meta.instructorId, {
+      titleEn: "Quiz Terminated (Screenshot Violation)",
+      titleAr: "إلغاء اختبار طالب لمحاولة تصوير الشاشة (غش)",
+      bodyEn: `${meta.studentName || studentId} was disqualified from "${meta.quizTitle || "Quiz"}" after repeating screenshot attempts (2/2 strikes).`,
+      bodyAr: `تم إقصاء الطالب ${meta.studentName || studentId} من اختبار "${meta.quizTitle || "الاختبار"}" بعد تكرار محاولة تصوير الشاشة مرتين (مخالفة غش).`,
+      type: "warning",
+      link: "/instructor/quizzes",
+    });
+  }
+}
+
 export async function markQuizSubmitted(quizId, studentId) {
   await update(ref(rtdb, `quizAccess/${quizId}/${studentId}`), {
     status: "submitted",
