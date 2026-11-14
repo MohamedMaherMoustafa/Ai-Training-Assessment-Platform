@@ -258,3 +258,36 @@
 .chatbot-pop-in {
   animation: chatbot-pop 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+@keyframes upload-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(250%);
+  }
+}
+
+.upload-shimmer-anim {
+  animation: upload-shimmer 2s ease-in-out infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+}
+
+.pulse-ring-anim {
+  animation: pulse-ring 2.4s ease-in-out infinite;
+}
+

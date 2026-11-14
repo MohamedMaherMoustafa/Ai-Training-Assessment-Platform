@@ -5,6 +5,7 @@ import { ThemeProvider } from "./context/ThemeContext";
 import { LangProvider } from "./context/LangContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { PopupProvider } from "./context/PopupContext";
+import { UploadProgressProvider } from "./context/UploadProgressContext";
 import { playClickSound } from "./utils/soundEffects";
 import RoleGuard from "./components/common/RoleGuard";
 import LoginPage from "./features/auth/LoginPage";
@@ -40,60 +41,62 @@ export default function App() {
       <LangProvider>
         <AuthProvider>
           <PopupProvider>
-            <BrowserRouter>
-              <Toaster
-                position="top-center"
-                toastOptions={{
-                  duration: 3800,
-                  style: {
-                    background: "rgba(15, 23, 42, 0.84)",
-                    color: "#f8fafc",
-                    backdropFilter: "blur(16px)",
-                    WebkitBackdropFilter: "blur(16px)",
-                    border: "1px solid rgba(255, 255, 255, 0.18)",
-                    borderRadius: "16px",
-                    padding: "12px 16px",
-                    boxShadow: "0 14px 40px rgba(2, 132, 199, 0.25)",
-                    fontSize: "13px",
-                    fontWeight: 600,
-                  },
-                }}
-              />
-              <Routes>
-                <Route path="/" element={<RootRedirect />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-
-                <Route
-                  path="/admin/*"
-                  element={
-                    <RoleGuard allowedRoles={["admin"]}>
-                      <AdminDashboard />
-                    </RoleGuard>
-                  }
+            <UploadProgressProvider>
+              <BrowserRouter>
+                <Toaster
+                  position="top-center"
+                  toastOptions={{
+                    duration: 3800,
+                    style: {
+                      background: "rgba(15, 23, 42, 0.84)",
+                      color: "#f8fafc",
+                      backdropFilter: "blur(16px)",
+                      WebkitBackdropFilter: "blur(16px)",
+                      border: "1px solid rgba(255, 255, 255, 0.18)",
+                      borderRadius: "16px",
+                      padding: "12px 16px",
+                      boxShadow: "0 14px 40px rgba(2, 132, 199, 0.25)",
+                      fontSize: "13px",
+                      fontWeight: 600,
+                    },
+                  }}
                 />
+                <Routes>
+                  <Route path="/" element={<RootRedirect />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/register" element={<RegisterPage />} />
 
-                <Route
-                  path="/instructor/*"
-                  element={
-                    <RoleGuard allowedRoles={["instructor"]}>
-                      <InstructorDashboard />
-                    </RoleGuard>
-                  }
-                />
+                  <Route
+                    path="/admin/*"
+                    element={
+                      <RoleGuard allowedRoles={["admin"]}>
+                        <AdminDashboard />
+                      </RoleGuard>
+                    }
+                  />
 
-                <Route
-                  path="/student/*"
-                  element={
-                    <RoleGuard allowedRoles={["student"]}>
-                      <StudentDashboard />
-                    </RoleGuard>
-                  }
-                />
+                  <Route
+                    path="/instructor/*"
+                    element={
+                      <RoleGuard allowedRoles={["instructor"]}>
+                        <InstructorDashboard />
+                      </RoleGuard>
+                    }
+                  />
 
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </BrowserRouter>
+                  <Route
+                    path="/student/*"
+                    element={
+                      <RoleGuard allowedRoles={["student"]}>
+                        <StudentDashboard />
+                      </RoleGuard>
+                    }
+                  />
+
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </BrowserRouter>
+            </UploadProgressProvider>
           </PopupProvider>
         </AuthProvider>
       </LangProvider>

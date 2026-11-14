@@ -28,6 +28,7 @@ import { renderPdfFileToPages } from "../../utils/pdfPageRenderer";
 import { useAuth } from "../../context/AuthContext";
 import { useLang } from "../../context/LangContext";
 import { usePopup } from "../../context/PopupContext";
+import { useUploadProgress } from "../../context/UploadProgressContext";
 import LiveAnnotationModal from "./LiveAnnotationModal";
 
 const MARK_PRESETS = [5, 10, 15, 20, 25, 50];
@@ -55,6 +56,7 @@ export default function AssignmentsModule({
   const { user } = useAuth();
   const { lang } = useLang();
   const { showPopup } = usePopup();
+  const { trackUpload } = useUploadProgress();
 
   const [assignments, setAssignments] = useState([]);
   const [courses, setCourses] = useState([]);
@@ -152,7 +154,14 @@ export default function AssignmentsModule({
     }
     setParsingPdf(true);
     try {
-      const rendered = await renderPdfFileToPages(file);
+      const rendered = await trackUpload({
+        fileName: file.name,
+        fileSize: file.size,
+        title: lang === "ar" ? "رفع وتجهيز ملف الواجب (PDF)" : "Uploading Assignment PDF",
+        action: async (reportProgress) => {
+          return await renderPdfFileToPages(file, { onProgress: reportProgress });
+        },
+      });
       setForm((prev) => ({
         ...prev,
         title: prev.title || file.name.replace(/\.pdf$/i, ""),

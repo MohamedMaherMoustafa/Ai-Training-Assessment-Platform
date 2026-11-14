@@ -20,11 +20,13 @@ import {
 import { extractTextFromPdfFile } from "../../utils/pdfExtractor";
 import { useAuth } from "../../context/AuthContext";
 import { useLang } from "../../context/LangContext";
+import { useUploadProgress } from "../../context/UploadProgressContext";
 
 export default function CoursesModule({ mode = "admin", activeInstructorId = null }) {
   const { t } = useTranslation();
   const { user, refreshProfile } = useAuth();
   const { lang } = useLang();
+  const { trackUpload } = useUploadProgress();
 
   const [courses, setCourses] = useState([]);
   const [instructors, setInstructors] = useState([]);
@@ -54,19 +56,31 @@ export default function CoursesModule({ mode = "admin", activeInstructorId = nul
     if (!file) return;
     setExtractingPdf(true);
     try {
-      const extracted =
-        file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")
-          ? await extractTextFromPdfFile(file)
-          : await file.text();
+      const extracted = await trackUpload({
+        fileName: file.name,
+        fileSize: file.size,
+        title: lang === "ar" ? "رفع واستخراج محتوى الدرس" : "Uploading & Reading Lesson Content",
+        action: async (reportProgress) => {
+          reportProgress({ percent: 15, stage: lang === "ar" ? "قراءة ملف الدرس..." : "Reading lesson file..." });
+          let res;
+          if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
+            res = await extractTextFromPdfFile(file, { onProgress: reportProgress });
+          } else {
+            res = await file.text();
+            reportProgress({ percent: 90, stage: lang === "ar" ? "معالجة النص..." : "Processing text..." });
+          }
+          return res;
+        },
+      });
       setLessonForm((prev) => ({
         ...prev,
         titleEn: prev.titleEn || file.name.replace(/\.[^.]+$/, ""),
         content: extracted.slice(0, 12000),
       }));
-      toast.success(`Extracted text from ${file.name}`);
+      toast.success(lang === "ar" ? `تم استخراج النص من ${file.name}` : `Extracted text from ${file.name}`);
     } catch (err) {
       console.error(err);
-      toast.error("Could not extract text from file");
+      toast.error(lang === "ar" ? "تعذر قراءة أو استخراج النص من الملف" : "Could not extract text from file");
     } finally {
       e.target.value = "";
       setExtractingPdf(false);

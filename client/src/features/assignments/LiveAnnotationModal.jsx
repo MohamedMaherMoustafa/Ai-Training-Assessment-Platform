@@ -16,6 +16,7 @@ import {
   X,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { useUploadProgress } from "../../context/UploadProgressContext";
 
 const PEN_COLORS = [
   { id: "black", hex: "#0f172a", label: "Black" },
@@ -101,6 +102,7 @@ export default function LiveAnnotationModal({
   );
   const [feedbackText, setFeedbackText] = useState(submission?.feedback || "");
   const [saving, setSaving] = useState(false);
+  const { trackUpload } = useUploadProgress();
 
   const [textDraft, setTextDraft] = useState(null); // { x, y, value }
 
@@ -355,10 +357,29 @@ export default function LiveAnnotationModal({
     setSaving(true);
     try {
       if (mode === "student") {
-        const annotatedPages = await buildMergedPages();
-        await onSubmitStudent({
-          answerText: answerText.trim() || "Live Annotated Worksheet Submission",
-          annotatedPages,
+        await trackUpload({
+          fileName: `${assignment?.title || "Assignment"}_Worksheet.pdf`,
+          fileSize: (pages.length || 1) * 320000,
+          title: lang === "ar" ? "رفع تسليم الواجب المحلول" : "Uploading Annotated Submission",
+          action: async (reportProgress) => {
+            reportProgress({
+              percent: 25,
+              stage: lang === "ar" ? "دمج وتجهيز صفحات الحل..." : "Processing & merging annotated pages...",
+            });
+            const annotatedPages = await buildMergedPages();
+            reportProgress({
+              percent: 70,
+              stage: lang === "ar" ? "رفع الإجابات والرسومات إلى المنصة..." : "Uploading drawings & answers to server...",
+            });
+            await onSubmitStudent({
+              answerText: answerText.trim() || "Live Annotated Worksheet Submission",
+              annotatedPages,
+            });
+            reportProgress({
+              percent: 100,
+              stage: lang === "ar" ? "تم تسليم الواجب بنجاح!" : "Submission complete!",
+            });
+          },
         });
       } else if (mode === "correct") {
         if (gradeValue === "" || Number.isNaN(Number(gradeValue))) {
@@ -380,17 +401,51 @@ export default function LiveAnnotationModal({
           setSaving(false);
           return;
         }
-        const correctedPages = await buildMergedPages();
-        await onSaveCorrection({
-          score: numericScore,
-          feedback: feedbackText.trim(),
-          correctedPages,
+        await trackUpload({
+          fileName: `${assignment?.title || "Assignment"}_Correction.pdf`,
+          fileSize: (pages.length || 1) * 280000,
+          title: lang === "ar" ? "حفظ ورفع تصحيح المعلم" : "Uploading Teacher Review & Correction",
+          action: async (reportProgress) => {
+            reportProgress({
+              percent: 30,
+              stage: lang === "ar" ? "معالجة ملاحظات التصحيح..." : "Merging teacher review annotations...",
+            });
+            const correctedPages = await buildMergedPages();
+            reportProgress({
+              percent: 75,
+              stage: lang === "ar" ? "حفظ التقييم وإرسال الدرجة..." : "Saving grade & teacher feedback...",
+            });
+            await onSaveCorrection({
+              score: numericScore,
+              feedback: feedbackText.trim(),
+              correctedPages,
+            });
+            reportProgress({
+              percent: 100,
+              stage: lang === "ar" ? "تم حفظ التصحيح بنجاح!" : "Review saved successfully!",
+            });
+          },
         });
       } else if (mode === "lesson") {
-        snapshotCurrentPage();
-        await onSaveLessonNotes({
-          inkSnapshots: { ...inkSnapshotsRef.current },
-          notes: answerText.trim(),
+        await trackUpload({
+          fileName: `${assignment?.title || "Lesson"}_Notes.ink`,
+          fileSize: 180000,
+          title: lang === "ar" ? "حفظ ملاحظات الدرس الخاصة" : "Uploading Private Lesson Notes",
+          action: async (reportProgress) => {
+            reportProgress({
+              percent: 40,
+              stage: lang === "ar" ? "التقاط الرسومات والتظليل..." : "Saving ink drawings & notes...",
+            });
+            snapshotCurrentPage();
+            await onSaveLessonNotes({
+              inkSnapshots: { ...inkSnapshotsRef.current },
+              notes: answerText.trim(),
+            });
+            reportProgress({
+              percent: 100,
+              stage: lang === "ar" ? "تم حفظ الملاحظات!" : "Notes saved!",
+            });
+          },
         });
       }
       onClose();

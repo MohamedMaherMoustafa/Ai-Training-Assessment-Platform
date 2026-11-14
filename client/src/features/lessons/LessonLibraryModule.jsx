@@ -23,6 +23,7 @@ import { renderPdfFileToPages } from "../../utils/pdfPageRenderer";
 import { extractTextFromPdfFile } from "../../utils/pdfExtractor";
 import { useAuth } from "../../context/AuthContext";
 import { useLang } from "../../context/LangContext";
+import { useUploadProgress } from "../../context/UploadProgressContext";
 import LiveAnnotationModal from "../assignments/LiveAnnotationModal";
 
 export default function LessonLibraryModule({
@@ -32,6 +33,7 @@ export default function LessonLibraryModule({
   const { t } = useTranslation();
   const { user } = useAuth();
   const { lang } = useLang();
+  const { trackUpload } = useUploadProgress();
 
   const [materials, setMaterials] = useState([]);
   const [courses, setCourses] = useState([]);
@@ -119,10 +121,17 @@ export default function LessonLibraryModule({
     }
     setParsingPdf(true);
     try {
-      const [rendered, extractedText] = await Promise.all([
-        renderPdfFileToPages(file),
-        extractTextFromPdfFile(file).catch(() => ""),
-      ]);
+      const [rendered, extractedText] = await trackUpload({
+        fileName: file.name,
+        fileSize: file.size,
+        title: lang === "ar" ? "رفع وتجهيز ملف الدرس (PDF)" : "Uploading Lesson PDF",
+        action: async (reportProgress) => {
+          return await Promise.all([
+            renderPdfFileToPages(file, { onProgress: reportProgress }),
+            extractTextFromPdfFile(file, { onProgress: reportProgress }).catch(() => ""),
+          ]);
+        },
+      });
       setForm((prev) => ({
         ...prev,
         title: prev.title || file.name.replace(/\.pdf$/i, ""),

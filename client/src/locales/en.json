@@ -179,6 +179,25 @@
     "close": "Close",
     "editTooltip": "Edit Profile & Password",
     "usernameOrEmail": "Username / Email"
+  },
+  "upload": {
+    "title": "Uploading File",
+    "calculatingEta": "Calculating estimated time...",
+    "speed": "Speed",
+    "eta": "Estimated Time Remaining",
+    "elapsed": "Elapsed",
+    "seconds": "s",
+    "minutes": "m",
+    "remaining": "remaining",
+    "lessThanSec": "Less than a second remaining",
+    "complete": "Upload Complete!",
+    "failed": "Upload Failed",
+    "preparing": "Preparing file...",
+    "reading": "Reading file from disk...",
+    "rendering": "Rendering page",
+    "of": "of",
+    "uploadingData": "Uploading data to database...",
+    "cancel": "Cancel Upload"
   }
 }
 
