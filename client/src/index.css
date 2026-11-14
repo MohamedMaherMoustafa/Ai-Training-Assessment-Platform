@@ -5,24 +5,22 @@
 @layer base {
   body {
     @apply min-h-screen text-slate-900 dark:text-slate-100 antialiased transition-colors duration-300;
-    background-color: #eef4ff;
+    background-color: #f2f4fc;
     background-image:
-      radial-gradient(at 8% 12%, rgba(6, 182, 212, 0.30) 0px, transparent 42%),
-      radial-gradient(at 88% 10%, rgba(168, 85, 247, 0.28) 0px, transparent 44%),
-      radial-gradient(at 78% 86%, rgba(236, 72, 153, 0.22) 0px, transparent 42%),
-      radial-gradient(at 18% 84%, rgba(16, 185, 129, 0.24) 0px, transparent 44%),
-      linear-gradient(135deg, #ecfeff 0%, #eef2ff 48%, #fdf2f8 100%);
+      radial-gradient(at 12% 14%, rgba(99, 102, 241, 0.08) 0px, transparent 48%),
+      radial-gradient(at 88% 18%, rgba(139, 92, 246, 0.08) 0px, transparent 48%),
+      radial-gradient(at 80% 82%, rgba(59, 130, 246, 0.06) 0px, transparent 50%),
+      linear-gradient(135deg, #f2f4fc 0%, #f7f8fd 50%, #edf1fc 100%);
     background-attachment: fixed;
   }
 
   .dark body {
-    background-color: #050816;
+    background-color: #080c1a;
     background-image:
-      radial-gradient(at 10% 14%, rgba(6, 182, 212, 0.24) 0px, transparent 42%),
-      radial-gradient(at 88% 12%, rgba(139, 92, 246, 0.26) 0px, transparent 44%),
-      radial-gradient(at 80% 88%, rgba(236, 72, 153, 0.18) 0px, transparent 42%),
-      radial-gradient(at 18% 86%, rgba(16, 185, 129, 0.18) 0px, transparent 44%),
-      linear-gradient(135deg, #030712 0%, #0b1026 52%, #130b24 100%);
+      radial-gradient(at 10% 14%, rgba(99, 102, 241, 0.15) 0px, transparent 45%),
+      radial-gradient(at 88% 12%, rgba(139, 92, 246, 0.16) 0px, transparent 45%),
+      radial-gradient(at 80% 88%, rgba(56, 189, 248, 0.10) 0px, transparent 45%),
+      linear-gradient(135deg, #050711 0%, #0a0e22 52%, #0d122e 100%);
     background-attachment: fixed;
   }
 
@@ -62,6 +60,11 @@
 
   .glass-btn-secondary {
     @apply bg-white/75 dark:bg-slate-800/75 backdrop-blur-md border border-indigo-200/70 dark:border-white/15 rounded-2xl hover:bg-gradient-to-r hover:from-cyan-500/10 hover:to-violet-500/10 hover:border-violet-400/60 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200;
+  }
+
+  .bg-dot-pattern {
+    background-image: radial-gradient(rgba(99, 102, 241, 0.16) 1.2px, transparent 1.2px);
+    background-size: 20px 20px;
   }
 }
 

@@ -537,80 +537,95 @@ export default function PlatformChatbotWidget() {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="robot-patrol-track group relative flex flex-col items-center focus:outline-none cursor-pointer select-none"
+          className="robot-patrol-track group relative flex items-center gap-3 focus:outline-none cursor-pointer select-none"
           title={lang === "ar" ? "اضغط للتحدث مع المساعد الذكي (Gemini)" : "Click to open Gemini AI Assistant"}
           aria-label="Open AI Robot Chatbot"
         >
-          {/* Floating Pill with Pulse */}
-          <span className="mb-1 px-3 py-1 rounded-full bg-gradient-to-r from-sky-500 via-indigo-600 to-purple-600 text-white text-[11px] font-extrabold shadow-lg border border-white/40 flex items-center gap-1.5 whitespace-nowrap transition-transform group-hover:scale-105">
-            <Sparkles className="h-3 w-3 text-amber-200 animate-pulse" />
-            <span>{lang === "ar" ? "اسأل Gemini AI" : "Ask Gemini AI"}</span>
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" />
-          </span>
-
-          {/* Live Walking Robot SVG */}
-          <div className="robot-face-flip">
-            <div className="robot-bob-anim drop-shadow-[0_8px_16px_rgba(2,132,199,0.4)] group-hover:scale-110 transition-transform">
-              <svg
-                width="70"
-                height="76"
-                viewBox="0 0 80 88"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <defs>
-                  <linearGradient id="botBodyGrad" x1="18" y1="16" x2="62" y2="66" gradientUnits="userSpaceOnUse">
-                    <stop stopColor="#38bdf8" />
-                    <stop offset="0.55" stopColor="#2563eb" />
-                    <stop offset="1" stopColor="#4f46e5" />
-                  </linearGradient>
-                  <linearGradient id="botMetalGrad" x1="20" y1="10" x2="60" y2="38" gradientUnits="userSpaceOnUse">
-                    <stop stopColor="#f8fafc" />
-                    <stop offset="1" stopColor="#cbd5e1" />
-                  </linearGradient>
-                </defs>
-
-                {/* Antenna */}
-                <line x1="40" y1="14" x2="40" y2="6" stroke="#38bdf8" strokeWidth="3" strokeLinecap="round" />
-                <circle cx="40" cy="5" r="4" fill="#fbbf24" stroke="#ffffff" strokeWidth="1.5" />
-
-                {/* Arms */}
-                <g className="robot-arm-l">
-                  <rect x="12" y="42" width="8" height="19" rx="4" fill="url(#botMetalGrad)" stroke="#0284c7" strokeWidth="1.5" />
-                  <circle cx="16" cy="61" r="3.5" fill="#38bdf8" />
-                </g>
-                <g className="robot-arm-r">
-                  <rect x="60" y="42" width="8" height="19" rx="4" fill="url(#botMetalGrad)" stroke="#0284c7" strokeWidth="1.5" />
-                  <circle cx="64" cy="61" r="3.5" fill="#38bdf8" />
-                </g>
-
-                {/* Legs */}
-                <g className="robot-leg-l">
-                  <rect x="27" y="64" width="9" height="15" rx="4" fill="#334155" />
-                  <rect x="25" y="75" width="13" height="6" rx="3" fill="#0284c7" />
-                </g>
-                <g className="robot-leg-r">
-                  <rect x="44" y="64" width="9" height="15" rx="4" fill="#334155" />
-                  <rect x="42" y="75" width="13" height="6" rx="3" fill="#0284c7" />
-                </g>
-
-                {/* Robot Torso */}
-                <rect x="22" y="40" width="36" height="27" rx="10" fill="url(#botBodyGrad)" stroke="#bae6fd" strokeWidth="2" />
-                <rect x="30" y="47" width="20" height="12" rx="4" fill="#0f172a" fillOpacity="0.65" />
-                <circle cx="35" cy="53" r="2.2" fill="#34d399" />
-                <circle cx="40" cy="53" r="2.2" fill="#38bdf8" />
-                <circle cx="45" cy="53" r="2.2" fill="#fbbf24" />
-
-                {/* Robot Head */}
-                <rect x="19" y="13" width="42" height="28" rx="11" fill="url(#botMetalGrad)" stroke="#38bdf8" strokeWidth="2.2" />
-                <rect x="24" y="18" width="32" height="17" rx="6" fill="#0f172a" />
-                <circle cx="33" cy="25" r="3.2" fill="#38bdf8" className="robot-eye-blink" />
-                <circle cx="47" cy="25" r="3.2" fill="#38bdf8" className="robot-eye-blink" />
-                <path d="M35 30.5C37 32.5 43 32.5 45 30.5" stroke="#34d399" strokeWidth="2" strokeLinecap="round" />
-              </svg>
+          {/* Floating Speech Bubble matching screenshot */}
+          <div className="hidden sm:flex items-center gap-2.5 px-3.5 py-2 rounded-2xl bg-white/95 dark:bg-slate-900/90 shadow-xl border border-slate-200/80 dark:border-white/10 text-start group-hover:scale-105 transition-transform backdrop-blur-md">
+            <div className="h-7 w-7 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 flex items-center justify-center text-indigo-600 dark:text-cyan-400 shrink-0 shadow-inner">
+              <Sparkles className="h-3.5 w-3.5 text-indigo-600 dark:text-cyan-400 animate-pulse" />
+            </div>
+            <div>
+              <div className="font-extrabold text-[11px] text-slate-900 dark:text-white leading-tight">
+                {lang === "ar" ? "تحتاج مساعدة؟" : "Need help?"}
+              </div>
+              <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
+                {lang === "ar" ? "اسألني أي شيء!" : "Ask me anything!"}
+              </div>
             </div>
           </div>
-          <div className="w-12 h-2.5 -mt-1 rounded-full bg-slate-900/25 dark:bg-sky-400/20 blur-[2px]" />
+
+          {/* Live Walking Robot SVG */}
+          <div className="flex flex-col items-center">
+            <div className="robot-face-flip">
+              <div className="robot-bob-anim drop-shadow-[0_8px_16px_rgba(2,132,199,0.4)] group-hover:scale-110 transition-transform">
+                <svg
+                  width="72"
+                  height="78"
+                  viewBox="0 0 80 88"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <defs>
+                    <linearGradient id="botBodyGrad" x1="18" y1="16" x2="62" y2="66" gradientUnits="userSpaceOnUse">
+                      <stop stopColor="#38bdf8" />
+                      <stop offset="0.55" stopColor="#2563eb" />
+                      <stop offset="1" stopColor="#4f46e5" />
+                    </linearGradient>
+                    <linearGradient id="botMetalGrad" x1="20" y1="10" x2="60" y2="38" gradientUnits="userSpaceOnUse">
+                      <stop stopColor="#f8fafc" />
+                      <stop offset="1" stopColor="#cbd5e1" />
+                    </linearGradient>
+                  </defs>
+
+                  {/* Antenna with Graduation Cap Accent */}
+                  <line x1="40" y1="14" x2="40" y2="6" stroke="#38bdf8" strokeWidth="3" strokeLinecap="round" />
+                  <circle cx="40" cy="5" r="4" fill="#fbbf24" stroke="#ffffff" strokeWidth="1.5" />
+
+                  {/* Arms */}
+                  <g className="robot-arm-l">
+                    <rect x="12" y="42" width="8" height="19" rx="4" fill="url(#botMetalGrad)" stroke="#0284c7" strokeWidth="1.5" />
+                    <circle cx="16" cy="61" r="3.5" fill="#38bdf8" />
+                  </g>
+                  <g className="robot-arm-r">
+                    <rect x="60" y="42" width="8" height="19" rx="4" fill="url(#botMetalGrad)" stroke="#0284c7" strokeWidth="1.5" />
+                    <circle cx="64" cy="61" r="3.5" fill="#38bdf8" />
+                  </g>
+
+                  {/* Legs */}
+                  <g className="robot-leg-l">
+                    <rect x="27" y="64" width="9" height="15" rx="4" fill="#334155" />
+                    <rect x="25" y="75" width="13" height="6" rx="3" fill="#0284c7" />
+                  </g>
+                  <g className="robot-leg-r">
+                    <rect x="44" y="64" width="9" height="15" rx="4" fill="#334155" />
+                    <rect x="42" y="75" width="13" height="6" rx="3" fill="#0284c7" />
+                  </g>
+
+                  {/* Robot Torso */}
+                  <rect x="22" y="40" width="36" height="27" rx="10" fill="url(#botBodyGrad)" stroke="#bae6fd" strokeWidth="2" />
+                  <rect x="30" y="47" width="20" height="12" rx="4" fill="#0f172a" fillOpacity="0.65" />
+                  <circle cx="35" cy="53" r="2.2" fill="#34d399" />
+                  <circle cx="40" cy="53" r="2.2" fill="#38bdf8" />
+                  <circle cx="45" cy="53" r="2.2" fill="#fbbf24" />
+
+                  {/* Robot Head */}
+                  <rect x="19" y="13" width="42" height="28" rx="11" fill="url(#botMetalGrad)" stroke="#38bdf8" strokeWidth="2.2" />
+                  <rect x="24" y="18" width="32" height="17" rx="6" fill="#0f172a" />
+                  <circle cx="33" cy="25" r="3.2" fill="#38bdf8" className="robot-eye-blink" />
+                  <circle cx="47" cy="25" r="3.2" fill="#38bdf8" className="robot-eye-blink" />
+                  <path d="M35 30.5C37 32.5 43 32.5 45 30.5" stroke="#34d399" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+              </div>
+            </div>
+            <div className="w-12 h-2.5 -mt-1 rounded-full bg-slate-900/25 dark:bg-sky-400/20 blur-[2px]" />
+          </div>
+
+          {/* Floating Purple Chat Icon Dock */}
+          <div className="h-11 w-11 rounded-2xl bg-gradient-to-tr from-[#4f3df7] to-[#703bf7] text-white flex items-center justify-center shadow-lg shadow-indigo-600/35 group-hover:scale-105 transition-transform shrink-0">
+            <Bot className="h-5 w-5 text-white" />
+          </div>
         </button>
       ) : (
         <div

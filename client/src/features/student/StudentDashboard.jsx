@@ -238,21 +238,21 @@ function RequireInstructorSelected({
 
   return (
     <div className="space-y-4">
-      <div className="glass-panel rounded-2xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-2">
+      <div className="rounded-[22px] bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-white/10 px-5 py-3 flex flex-wrap items-center justify-between gap-3 shadow-sm">
         <div className="text-xs flex items-center gap-2">
           <span className="text-slate-500 dark:text-slate-400">
             {lang === "ar" ? "المحاضر المفتوح حالياً:" : "Active Instructor:"}
           </span>
-          <strong className="text-sky-700 dark:text-sky-300">
+          <strong className="text-indigo-600 dark:text-indigo-400 font-extrabold text-sm">
             {activeInstructor.name?.[lang] || activeInstructor.displayName}
           </strong>
         </div>
         <button
           onClick={onSwitch}
-          className="glass-btn-secondary px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5"
+          className="rounded-2xl border border-slate-200 dark:border-slate-700 px-3.5 py-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:border-indigo-500 bg-slate-50/50 dark:bg-slate-800/80 shadow-sm flex items-center gap-1.5 transition-all"
         >
-          <RefreshCw className="h-3.5 w-3.5 text-sky-600" />
-          {lang === "ar" ? "تبديل المحاضر" : "Switch Instructor"}
+          <RefreshCw className="h-3.5 w-3.5" />
+          <span>{lang === "ar" ? "تبديل المحاضر" : "Switch Instructor"}</span>
         </button>
       </div>
       {children}

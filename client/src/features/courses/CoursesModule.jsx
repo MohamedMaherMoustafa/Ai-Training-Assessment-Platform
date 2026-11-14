@@ -352,119 +352,168 @@ export default function CoursesModule({ mode = "admin", activeInstructorId = nul
       {loading ? (
         <div className="text-sm text-slate-500 py-8 text-center">{t("app.loading")}</div>
       ) : courses.length === 0 ? (
-        <div className="glass-card p-8 text-center text-sm text-slate-500">
+        <div className="rounded-[26px] bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-white/10 p-8 text-center text-sm text-slate-500 shadow-sm">
           {t("app.noData")}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {courses.map((c) => {
-            const isEnrolled = c.enrolledStudents.includes(user?.uid);
-            return (
-              <div
-                key={c.id}
-                className="glass-card p-5 flex flex-col justify-between space-y-4"
+        <div className="rounded-[26px] bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-white/10 shadow-sm p-5 sm:p-6 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-4 border-b border-slate-100 dark:border-white/5">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-600/25 shrink-0">
+                <BookOpen className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight">
+                  {t("courses.title") || "Courses"}
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  {lang === "ar"
+                    ? "المقررات المقدمة من المحاضر (المحاضرين) الذين اخترتهم."
+                    : "Courses offered by the instructor(s) you selected."}
+                </p>
+              </div>
+            </div>
+
+            {canManage && (
+              <button
+                onClick={() => setShowCourseForm(true)}
+                className="px-4 py-2 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/20 flex items-center gap-1.5 transition-all self-start sm:self-auto"
               >
-                <div>
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2.5">
-                      <div className="h-9 w-9 rounded-xl bg-sky-100 dark:bg-sky-900/40 text-sky-600 dark:text-sky-300 flex items-center justify-center shrink-0">
-                        <BookOpen className="h-5 w-5" />
+                <Plus className="h-4 w-4" />
+                {t("courses.createCourse")}
+              </button>
+            )}
+          </div>
+
+          <div className="space-y-5">
+            {courses.map((c) => {
+              const isEnrolled = c.enrolledStudents.includes(user?.uid);
+              return (
+                <div
+                  key={c.id}
+                  className="rounded-[22px] border border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800/40 p-5 space-y-4 transition-all"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="h-11 w-11 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 font-mono font-bold text-sm flex items-center justify-center shrink-0 border border-indigo-100 dark:border-indigo-900/50 shadow-sm">
+                        {"</>"}
                       </div>
                       <div>
-                        <h3 className="font-bold text-base">
+                        <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
                           {c.title?.[lang] || c.title?.en}
                         </h3>
-                        <p className="text-xs text-slate-500">
-                          {t("courses.instructor")}: {c.instructorName || c.instructorId}
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1">
+                          <span>👤 {t("courses.instructor")}:</span>
+                          <strong className="text-slate-700 dark:text-slate-300">
+                            {c.instructorName || c.instructorId}
+                          </strong>
                         </p>
                       </div>
                     </div>
                     {canManage && (
                       <button
                         onClick={() => handleDeleteCourse(c.id)}
-                        className="p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-600"
+                        className="p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-600 transition-colors"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
                     )}
                   </div>
 
-                  <p className="text-xs text-slate-600 dark:text-slate-300 mt-3">
-                    {c.description?.[lang] || c.description?.en || "—"}
-                  </p>
+                  {c.description && (
+                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed ps-1">
+                      {c.description?.[lang] || c.description?.en}
+                    </p>
+                  )}
 
-                  {/* Lessons */}
-                  <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-bold uppercase text-slate-500">
-                        {t("courses.lessons")} ({c.lessons.length})
+                  {/* Lessons Section */}
+                  <div className="pt-3 border-t border-slate-200/60 dark:border-white/5">
+                    <div className="flex items-center justify-between mb-2.5">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                        <BookOpen className="h-3.5 w-3.5 text-indigo-500" />
+                        <span>
+                          {t("courses.lessons")} ({c.lessons.length})
+                        </span>
                       </span>
                       {canManage && (
                         <button
                           onClick={() => setLessonCourseId(c.id)}
-                          className="text-xs font-semibold text-sky-600 dark:text-sky-400 hover:underline"
+                          className="text-xs font-bold text-indigo-600 dark:text-cyan-400 hover:underline"
                         >
                           + {t("courses.addLesson")}
                         </button>
                       )}
                     </div>
-                    <div className="space-y-1.5">
+
+                    <div className="space-y-2">
                       {c.lessons.map((l) => (
                         <div
                           key={l.id}
                           onClick={() => setReadingLesson(l)}
-                          className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 hover:bg-sky-50 dark:hover:bg-sky-950/30 cursor-pointer text-xs space-y-1 transition-colors"
+                          className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                            isEnrolled
+                              ? "bg-[#f0fdf4] dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/40 hover:bg-emerald-50/70"
+                              : "bg-white dark:bg-slate-800/60 border-slate-200/70 hover:bg-indigo-50/40"
+                          }`}
                         >
-                          <div className="flex items-center justify-between font-semibold">
-                            <span className="flex items-center gap-1.5">
-                              <FileText className="h-3.5 w-3.5 text-emerald-500" />
-                              {l.title?.[lang] || l.title?.en}
-                            </span>
+                          <div className="flex items-start gap-2.5 min-w-0">
+                            <FileText className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
+                            <div className="min-w-0">
+                              <div className="font-bold text-xs text-slate-900 dark:text-white truncate">
+                                {l.title?.[lang] || l.title?.en}
+                              </div>
+                              {l.content && (
+                                <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
+                                  {l.content}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0">
+                            {isEnrolled && (
+                              <span className="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-[11px] font-bold flex items-center gap-1">
+                                <CheckCircle2 className="h-3 w-3" />
+                                <span>{lang === "ar" ? "مسجّل" : "Enrolled"}</span>
+                              </span>
+                            )}
                             {l.fileUrl && (
                               <a
                                 href={l.fileUrl}
                                 target="_blank"
                                 rel="noreferrer"
                                 onClick={(e) => e.stopPropagation()}
-                                className="inline-flex items-center gap-1 text-sky-600 hover:underline"
+                                className="inline-flex items-center gap-1 text-xs text-indigo-600 dark:text-cyan-400 hover:underline font-bold"
                               >
                                 PDF <ExternalLink className="h-3 w-3" />
                               </a>
                             )}
                           </div>
-                          {l.content && (
-                            <p className="text-slate-500 dark:text-slate-400 line-clamp-2">
-                              {l.content}
-                            </p>
-                          )}
                         </div>
                       ))}
                     </div>
                   </div>
-                </div>
 
-                <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
-                  <span className="text-slate-500">
-                    {t("courses.studentsCount")}: <strong>{c.enrolledStudents.length}</strong>
-                  </span>
-                  {mode === "student" && (
-                    <button
-                      onClick={() => handleEnrol(c.id)}
-                      disabled={isEnrolled}
-                      className={`px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 ${
-                        isEnrolled
-                          ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
-                          : "bg-sky-600 hover:bg-sky-700 text-white"
-                      }`}
-                    >
-                      {isEnrolled && <CheckCircle2 className="h-3.5 w-3.5" />}
-                      {isEnrolled ? t("courses.enrolled") : t("courses.enrol")}
-                    </button>
-                  )}
+                  <div className="flex items-center justify-between pt-3 border-t border-slate-200/60 dark:border-white/5 text-xs font-semibold text-slate-500">
+                    <span className="flex items-center gap-1.5">
+                      <span>👥 {t("courses.studentsCount")}:</span>
+                      <strong className="text-slate-800 dark:text-slate-200">
+                        {c.enrolledStudents.length}
+                      </strong>
+                    </span>
+                    {mode === "student" && !isEnrolled && (
+                      <button
+                        onClick={() => handleEnrol(c.id)}
+                        className="px-4 py-1.5 rounded-xl font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition-all"
+                      >
+                        {t("courses.enrol")}
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       )}
 
