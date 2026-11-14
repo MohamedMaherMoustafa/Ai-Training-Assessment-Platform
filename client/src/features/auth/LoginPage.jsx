@@ -83,9 +83,9 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="h-screen max-h-screen overflow-hidden bg-gradient-to-br from-[#eef2fb] via-[#f4f3fe] to-[#ebeffc] dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex flex-col justify-between p-2 sm:p-3 select-none transition-colors duration-300">
+    <div className="h-screen max-h-screen overflow-hidden bg-gradient-to-br from-[#eef2fb] via-[#f4f3fe] to-[#ebeffc] dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex flex-col justify-between p-2 sm:p-3 md:p-4 select-none transition-colors duration-300">
       {/* Top Floating Pill Navigation Bar (Compact Height) */}
-      <header className="shrink-0 max-w-5xl w-full mx-auto bg-white/95 dark:bg-slate-900/90 backdrop-blur-md rounded-full px-4 sm:px-6 py-2 flex items-center justify-between gap-3 shadow-sm border border-slate-200/80 dark:border-white/10">
+      <header className="shrink-0 max-w-6xl xl:max-w-7xl w-full mx-auto bg-white/95 dark:bg-slate-900/90 backdrop-blur-md rounded-full px-4 sm:px-6 py-2 flex items-center justify-between gap-3 shadow-sm border border-slate-200/80 dark:border-white/10">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl overflow-hidden shadow-md shadow-indigo-500/25 shrink-0 bg-white dark:bg-slate-800 p-1 border border-slate-200/80 dark:border-white/10 flex items-center justify-center">
             <img src="/Logo.png" alt="Platform Logo" className="w-full h-full object-contain" />
@@ -124,70 +124,70 @@ export default function LoginPage() {
       </header>
 
       {/* Main Split Showcase Login Card (Locked Inside Screen Height) */}
-      <main className="flex-1 min-h-0 max-w-5xl w-full mx-auto my-1.5 sm:my-2 flex items-center justify-center">
-        <div className="w-full h-full max-h-[calc(100vh-100px)] rounded-[26px] sm:rounded-[32px] overflow-hidden shadow-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-white/10 grid grid-cols-1 lg:grid-cols-12 transition-all">
+      <main className="flex-1 min-h-0 max-w-6xl xl:max-w-7xl w-full mx-auto my-1.5 sm:my-2.5 flex items-center justify-center">
+        <div className="w-full h-full max-h-[calc(100vh-100px)] rounded-[28px] sm:rounded-[36px] overflow-hidden shadow-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-white/10 grid grid-cols-1 lg:grid-cols-12 transition-all">
           {/* Left Column: Royal Purple Showcase Banner */}
-          <section className="hidden lg:flex lg:col-span-5 relative p-6 lg:p-7 bg-gradient-to-b from-[#181580] via-[#3523b0] to-[#5a189a] text-white flex-col justify-between overflow-hidden">
+          <section className="hidden lg:flex lg:col-span-5 relative p-6 sm:p-8 lg:p-9 xl:p-11 bg-gradient-to-b from-[#181580] via-[#3523b0] to-[#5a189a] text-white flex-col justify-between overflow-hidden">
             <div className="pointer-events-none absolute -top-16 -end-16 h-56 w-56 rounded-full bg-violet-400/20 blur-2xl" />
             <div className="pointer-events-none absolute bottom-0 start-0 h-64 w-64 rounded-full bg-indigo-500/20 blur-3xl" />
 
             <div className="relative z-10">
               <div className="flex items-center gap-3 mb-2.5">
-                <div className="h-11 w-11 rounded-2xl bg-white/15 backdrop-blur-md border border-white/25 p-1 shadow-lg shrink-0 flex items-center justify-center overflow-hidden">
+                <div className="h-12 w-12 sm:h-13 sm:w-13 rounded-2xl bg-white/15 backdrop-blur-md border border-white/25 p-1 shadow-lg shrink-0 flex items-center justify-center overflow-hidden">
                   <img src="/Logo.png" alt="Platform Logo" className="w-full h-full object-contain" />
                 </div>
                 <div>
-                  <h2 className="text-lg sm:text-xl font-black leading-tight text-white tracking-tight">
+                  <h2 className="text-xl sm:text-2xl xl:text-3xl font-black leading-tight text-white tracking-tight">
                     {t("app.title")}
                   </h2>
-                  <div className="text-[11px] font-semibold text-indigo-200">
+                  <div className="text-xs sm:text-[13px] font-semibold text-indigo-200">
                     {t("auth.learnTagline")}
                   </div>
                 </div>
               </div>
-              <p className="text-[11px] text-white/80 mt-1 leading-relaxed max-w-sm">
+              <p className="text-xs sm:text-[12.5px] text-white/85 mt-1 leading-relaxed max-w-md">
                 {t("auth.heroDesc")}
               </p>
 
               {/* 4 Feature Pills */}
-              <div className="mt-4 space-y-2.5">
-                <div className="flex items-center gap-2.5">
-                  <div className="h-7 w-7 rounded-full bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center shrink-0 text-white shadow-sm">
-                    <Laptop className="h-3.5 w-3.5" />
+              <div className="mt-4 sm:mt-5 space-y-2.5 sm:space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-full bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center shrink-0 text-white shadow-sm">
+                    <Laptop className="h-4 w-4" />
                   </div>
                   <div>
-                    <div className="text-xs font-bold text-white">{t("auth.featPdf")}</div>
-                    <div className="text-[10px] text-indigo-200">{t("auth.featPdfDesc")}</div>
+                    <div className="text-xs sm:text-[13px] font-bold text-white">{t("auth.featPdf")}</div>
+                    <div className="text-[10px] sm:text-[11px] text-indigo-200">{t("auth.featPdfDesc")}</div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2.5">
-                  <div className="h-7 w-7 rounded-full bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center shrink-0 text-white shadow-sm">
-                    <Bot className="h-3.5 w-3.5" />
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-full bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center shrink-0 text-white shadow-sm">
+                    <Bot className="h-4 w-4" />
                   </div>
                   <div>
-                    <div className="text-xs font-bold text-white">{t("auth.featQuiz")}</div>
-                    <div className="text-[10px] text-indigo-200">{t("auth.featQuizDesc")}</div>
+                    <div className="text-xs sm:text-[13px] font-bold text-white">{t("auth.featQuiz")}</div>
+                    <div className="text-[10px] sm:text-[11px] text-indigo-200">{t("auth.featQuizDesc")}</div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2.5">
-                  <div className="h-7 w-7 rounded-full bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center shrink-0 text-white shadow-sm">
-                    <Trophy className="h-3.5 w-3.5" />
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-full bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center shrink-0 text-white shadow-sm">
+                    <Trophy className="h-4 w-4" />
                   </div>
                   <div>
-                    <div className="text-xs font-bold text-white">{t("auth.featPoints")}</div>
-                    <div className="text-[10px] text-indigo-200">{t("auth.featPointsDesc")}</div>
+                    <div className="text-xs sm:text-[13px] font-bold text-white">{t("auth.featPoints")}</div>
+                    <div className="text-[10px] sm:text-[11px] text-indigo-200">{t("auth.featPointsDesc")}</div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2.5">
-                  <div className="h-7 w-7 rounded-full bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center shrink-0 text-white shadow-sm">
-                    <BarChart3 className="h-3.5 w-3.5" />
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-full bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center shrink-0 text-white shadow-sm">
+                    <BarChart3 className="h-4 w-4" />
                   </div>
                   <div>
-                    <div className="text-xs font-bold text-white">{t("auth.featReports")}</div>
-                    <div className="text-[10px] text-indigo-200">{t("auth.featReportsDesc")}</div>
+                    <div className="text-xs sm:text-[13px] font-bold text-white">{t("auth.featReports")}</div>
+                    <div className="text-[10px] sm:text-[11px] text-indigo-200">{t("auth.featReportsDesc")}</div>
                   </div>
                 </div>
               </div>
@@ -246,128 +246,130 @@ export default function LoginPage() {
           </section>
 
           {/* Right Column: Clean Authentication Form */}
-          <section className="col-span-1 lg:col-span-7 p-4 sm:p-7 lg:p-8 bg-white dark:bg-slate-900 flex flex-col justify-center overflow-y-auto transition-colors">
-            {/* Header */}
-            <div className="text-center mb-3 sm:mb-4">
-              <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                {t("auth.welcomeBack")}
-              </h2>
-              <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                {t("auth.welcomeDesc")}
-              </p>
-            </div>
-
-            <form onSubmit={handleSubmit} autoComplete="off" className="space-y-2.5 sm:space-y-3">
-              {/* Username or Email */}
-              <div>
-                <label className="flex items-center gap-1.5 text-[11px] font-bold text-slate-800 dark:text-slate-200 mb-1">
-                  <User className="h-3 w-3 text-blue-600 dark:text-cyan-400" />
-                  <span>{t("auth.identifier")}</span>
-                </label>
-                <div className="relative flex items-center">
-                  <Mail className="h-3.5 w-3.5 text-slate-400 absolute start-3.5 pointer-events-none" />
-                  <input
-                    type="text"
-                    name="platform_login_id"
-                    autoComplete="off"
-                    required
-                    value={identifier}
-                    onChange={(e) => setIdentifier(e.target.value)}
-                    placeholder={t("auth.identifierPlaceholder")}
-                    className="w-full ps-9 pe-3 py-2 sm:py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder:text-slate-400 text-xs sm:text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15 transition-all shadow-sm"
-                  />
-                </div>
+          <section className="col-span-1 lg:col-span-7 p-6 sm:p-9 lg:p-10 xl:p-14 bg-white dark:bg-slate-900 flex flex-col justify-center overflow-y-auto transition-colors">
+            <div className="max-w-md xl:max-w-lg mx-auto w-full">
+              {/* Header */}
+              <div className="text-center mb-4 sm:mb-5">
+                <h2 className="text-2xl sm:text-3xl xl:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+                  {t("auth.welcomeBack")}
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+                  {t("auth.welcomeDesc")}
+                </p>
               </div>
 
-              {/* Password */}
-              <div>
-                <label className="flex items-center gap-1.5 text-[11px] font-bold text-slate-800 dark:text-slate-200 mb-1">
-                  <Lock className="h-3 w-3 text-blue-600 dark:text-cyan-400" />
-                  <span>{t("auth.password")}</span>
-                </label>
-                <div className="relative flex items-center">
-                  <Lock className="h-3.5 w-3.5 text-slate-400 absolute start-3.5 pointer-events-none" />
-                  <input
-                    type={showPass ? "text" : "password"}
-                    name="platform_login_pw"
-                    autoComplete="new-password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder={t("auth.passwordPlaceholder")}
-                    className="w-full ps-9 pe-9 py-2 sm:py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder:text-slate-400 text-xs sm:text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15 transition-all shadow-sm"
-                  />
+              <form onSubmit={handleSubmit} autoComplete="off" className="space-y-3 sm:space-y-3.5">
+                {/* Username or Email */}
+                <div>
+                  <label className="flex items-center gap-1.5 text-xs sm:text-[13px] font-bold text-slate-800 dark:text-slate-200 mb-1">
+                    <User className="h-3.5 w-3.5 text-blue-600 dark:text-cyan-400" />
+                    <span>{t("auth.identifier")}</span>
+                  </label>
+                  <div className="relative flex items-center">
+                    <Mail className="h-4 w-4 text-slate-400 absolute start-3.5 pointer-events-none" />
+                    <input
+                      type="text"
+                      name="platform_login_id"
+                      autoComplete="off"
+                      required
+                      value={identifier}
+                      onChange={(e) => setIdentifier(e.target.value)}
+                      placeholder={t("auth.identifierPlaceholder")}
+                      className="w-full ps-10 pe-3.5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder:text-slate-400 text-xs sm:text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15 transition-all shadow-sm"
+                    />
+                  </div>
+                </div>
+
+                {/* Password */}
+                <div>
+                  <label className="flex items-center gap-1.5 text-xs sm:text-[13px] font-bold text-slate-800 dark:text-slate-200 mb-1">
+                    <Lock className="h-3.5 w-3.5 text-blue-600 dark:text-cyan-400" />
+                    <span>{t("auth.password")}</span>
+                  </label>
+                  <div className="relative flex items-center">
+                    <Lock className="h-4 w-4 text-slate-400 absolute start-3.5 pointer-events-none" />
+                    <input
+                      type={showPass ? "text" : "password"}
+                      name="platform_login_pw"
+                      autoComplete="new-password"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder={t("auth.passwordPlaceholder")}
+                      className="w-full ps-10 pe-10 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder:text-slate-400 text-xs sm:text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15 transition-all shadow-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPass((p) => !p)}
+                      aria-label="Toggle password visibility"
+                      className="absolute end-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1"
+                    >
+                      {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Remember Me & Forgot Password */}
+                <div className="flex items-center justify-between text-xs sm:text-[13px]">
+                  <label className="flex items-center gap-1.5 cursor-pointer select-none text-slate-700 dark:text-slate-300 font-semibold">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      className="h-3.5 w-3.5 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 dark:border-slate-700 dark:bg-slate-800 cursor-pointer"
+                    />
+                    <span>{t("auth.rememberMe")}</span>
+                  </label>
                   <button
                     type="button"
-                    onClick={() => setShowPass((p) => !p)}
-                    aria-label="Toggle password visibility"
-                    className="absolute end-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1"
+                    onClick={() =>
+                      showPopup({
+                        title: t("auth.forgotPassword"),
+                        message: t("auth.forgotPasswordHint"),
+                        type: "info",
+                      })
+                    }
+                    className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
                   >
-                    {showPass ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                    {t("auth.forgotPassword")}
                   </button>
                 </div>
-              </div>
 
-              {/* Remember Me & Forgot Password */}
-              <div className="flex items-center justify-between text-[11px] sm:text-xs">
-                <label className="flex items-center gap-1.5 cursor-pointer select-none text-slate-700 dark:text-slate-300 font-semibold">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="h-3.5 w-3.5 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 dark:border-slate-700 dark:bg-slate-800 cursor-pointer"
-                  />
-                  <span>{t("auth.rememberMe")}</span>
-                </label>
+                {/* Gradient Sign In Button */}
                 <button
-                  type="button"
-                  onClick={() =>
-                    showPopup({
-                      title: t("auth.forgotPassword"),
-                      message: t("auth.forgotPasswordHint"),
-                      type: "info",
-                    })
-                  }
-                  className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
+                  type="submit"
+                  disabled={submitting}
+                  className="w-full mt-2 py-3 sm:py-3.5 px-5 rounded-xl sm:rounded-2xl font-bold text-xs sm:text-sm text-white bg-gradient-to-r from-[#2055d5] via-[#4834d4] to-[#8c25cf] hover:from-[#1b48b5] hover:to-[#7b20b6] shadow-md shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60 cursor-pointer"
                 >
-                  {t("auth.forgotPassword")}
+                  <ArrowRight className="h-4 w-4 rtl:rotate-180" />
+                  <span>{submitting ? t("auth.signingIn") : t("auth.signIn")}</span>
                 </button>
+              </form>
+
+              {/* Divider */}
+              <div className="relative my-3 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-slate-200 dark:border-slate-800" />
+                </div>
+                <span className="relative bg-white dark:bg-slate-900 px-3 text-[11px] font-semibold text-slate-400 dark:text-slate-500">
+                  {t("auth.noAccount")}
+                </span>
               </div>
 
-              {/* Gradient Sign In Button */}
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full mt-2 py-2.5 sm:py-3 px-5 rounded-xl font-bold text-xs sm:text-sm text-white bg-gradient-to-r from-[#2055d5] via-[#4834d4] to-[#8c25cf] hover:from-[#1b48b5] hover:to-[#7b20b6] shadow-md shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60 cursor-pointer"
+              {/* Register Secondary Button */}
+              <Link
+                to="/register"
+                className="w-full py-2.5 px-4 rounded-xl sm:rounded-2xl border border-indigo-200 dark:border-indigo-900/60 hover:border-indigo-500 dark:hover:border-indigo-400 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/20 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-sm group"
               >
-                <ArrowRight className="h-4 w-4 rtl:rotate-180" />
-                <span>{submitting ? t("auth.signingIn") : t("auth.signIn")}</span>
-              </button>
-            </form>
+                <UserPlus className="h-4 w-4 text-indigo-500 group-hover:scale-110 transition-transform" />
+                <span>{t("auth.registerAction")}</span>
+              </Link>
 
-            {/* Divider */}
-            <div className="relative my-2.5 flex items-center justify-center">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-200 dark:border-slate-800" />
+              {/* Trust Footer Badge */}
+              <div className="mt-3 py-1.5 px-4 rounded-full bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800/80 flex items-center justify-center gap-2 text-[11px] font-medium text-slate-500 dark:text-slate-400 mx-auto w-fit">
+                <ShieldCheck className="h-3.5 w-3.5 text-blue-500" />
+                <span>{t("auth.trustBadge")}</span>
               </div>
-              <span className="relative bg-white dark:bg-slate-900 px-2.5 text-[10.5px] font-semibold text-slate-400 dark:text-slate-500">
-                {t("auth.noAccount")}
-              </span>
-            </div>
-
-            {/* Register Secondary Button */}
-            <Link
-              to="/register"
-              className="w-full py-2 px-3.5 rounded-xl border border-indigo-200 dark:border-indigo-900/60 hover:border-indigo-500 dark:hover:border-indigo-400 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/20 font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm group"
-            >
-              <UserPlus className="h-3.5 w-3.5 text-indigo-500 group-hover:scale-110 transition-transform" />
-              <span>{t("auth.registerAction")}</span>
-            </Link>
-
-            {/* Trust Footer Badge */}
-            <div className="mt-2.5 py-1 px-3 rounded-full bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800/80 flex items-center justify-center gap-1.5 text-[10.5px] font-medium text-slate-500 dark:text-slate-400 mx-auto w-fit">
-              <ShieldCheck className="h-3 w-3 text-blue-500" />
-              <span>{t("auth.trustBadge")}</span>
             </div>
           </section>
         </div>
