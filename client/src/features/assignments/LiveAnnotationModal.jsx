@@ -686,7 +686,7 @@ export default function LiveAnnotationModal({
                       }
                     }}
                     placeholder={lang === "ar" ? "اكتب هنا..." : "Type note..."}
-                    className="px-2 py-1 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-transparent text-slate-900 dark:text-white outline-none w-40"
+                    className="px-2.5 py-1 text-xs glass-input w-40"
                   />
                   <button
                     type="button"

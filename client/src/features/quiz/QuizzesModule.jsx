@@ -603,10 +603,32 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
 
       {/* Quiz Builder */}
       {showBuilder && canManage && (
-        <form onSubmit={handleSaveQuiz} autoComplete="off" className="glass-card p-5 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <form onSubmit={handleSaveQuiz} autoComplete="off" className="glass-form-card p-6 sm:p-7 space-y-6">
+          <div className="flex items-center gap-3 pb-3 border-b border-slate-200/60 dark:border-white/10">
+            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-violet-600 to-fuchsia-600 text-white flex items-center justify-center shadow-md shadow-violet-500/20">
+              <Sparkles className="h-5 w-5" />
+            </div>
             <div>
-              <label className="block text-xs font-semibold mb-1">{t("quizzes.course")}</label>
+              <h2 className="text-base font-bold text-slate-900 dark:text-white">
+                {editingId
+                  ? lang === "ar"
+                    ? "تعديل الاختبار"
+                    : "Edit Quiz"
+                  : lang === "ar"
+                  ? "إنشاء اختبار تفاعلي جديد"
+                  : "Create New Interactive Quiz"}
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                {lang === "ar"
+                  ? "قم بصياغة الأسئلة يدوياً أو بواسطة الذكاء الاصطناعي وحدد مدة المؤقت"
+                  : "Draft MCQ questions with Platform AI or manually, set timer and correct answers"}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-5">
+            <div>
+              <label className="glass-form-label">{t("quizzes.course")}</label>
               <select
                 required
                 value={courseId}
@@ -614,7 +636,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                   setCourseId(e.target.value);
                   setLessonId("");
                 }}
-                className="w-full px-3 py-2 rounded-xl glass-input text-sm"
+                className="w-full px-3.5 py-2.5 glass-input text-sm"
               >
                 <option value="">-- Select Course --</option>
                 {courses.map((c) => (
@@ -625,11 +647,11 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold mb-1">{t("quizzes.lesson")}</label>
+              <label className="glass-form-label">{t("quizzes.lesson")}</label>
               <select
                 value={lessonId}
                 onChange={(e) => setLessonId(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl glass-input text-sm"
+                className="w-full px-3.5 py-2.5 glass-input text-sm"
               >
                 <option value="">-- Optional Lesson --</option>
                 {(selectedCourse?.lessons || []).map((l) => (
@@ -640,16 +662,17 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold mb-1">{t("quizzes.quizTitle")}</label>
+              <label className="glass-form-label">{t("quizzes.quizTitle")}</label>
               <input
                 required
                 value={quizTitle}
                 onChange={(e) => setQuizTitle(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl glass-input text-sm"
+                placeholder="e.g. Midterm Assessment"
+                className="w-full px-3.5 py-2.5 glass-input text-sm"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold mb-1">
+              <label className="glass-form-label">
                 {lang === "ar" ? "الوقت (بالدقائق)" : "Timer (Minutes)"}
               </label>
               <input
@@ -659,17 +682,17 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                 required
                 value={durationMinutes}
                 onChange={(e) => setDurationMinutes(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl glass-input text-sm"
+                className="w-full px-3.5 py-2.5 glass-input text-sm font-bold"
               />
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-3 pt-1">
             <button
               type="button"
               onClick={handleDraftWithAI}
               disabled={draftingAI}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs font-semibold shadow-md transition-all"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white text-xs font-bold shadow-lg shadow-purple-500/25 active:scale-95 transition-all cursor-pointer disabled:opacity-60"
             >
               <Sparkles className="h-4 w-4" />
               {draftingAI ? t("app.loading") : t("quizzes.draftWithAI")}
@@ -677,24 +700,24 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
             <button
               type="button"
               onClick={() => setQuestions((prev) => [...prev, EMPTY_QUESTION()])}
-              className="glass-btn-secondary flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold"
+              className="glass-btn-secondary flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-xs font-bold cursor-pointer"
             >
               <Plus className="h-3.5 w-3.5" />
               {t("quizzes.addQuestion")}
             </button>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             {questions.map((q, idx) => {
               const correctIds = getCorrectIds(q);
               const isMulti = Boolean(q.allowMultiple) || correctIds.length > 1;
               return (
                 <div
                   key={q.id}
-                  className="p-4 rounded-xl glass-subtle space-y-2.5"
+                  className="p-5 rounded-2xl glass-subtle space-y-3.5 border border-white/80 dark:border-white/10"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="text-xs font-bold">
+                    <span className="text-xs font-black uppercase tracking-wider text-indigo-700 dark:text-indigo-300">
                       {t("quizzes.questionText")} #{idx + 1}
                     </span>
                     <div className="flex items-center gap-3">
@@ -703,6 +726,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                           type="checkbox"
                           checked={isMulti}
                           onChange={() => toggleQuestionMode(idx)}
+                          className="rounded text-indigo-600 focus:ring-indigo-500"
                         />
                         {lang === "ar" ? "أكثر من إجابة صحيحة" : "Multiple Correct Answers"}
                       </label>
@@ -710,7 +734,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                         <button
                           type="button"
                           onClick={() => setQuestions((prev) => prev.filter((_, i) => i !== idx))}
-                          className="text-xs text-rose-600 hover:underline"
+                          className="text-xs text-rose-600 dark:text-rose-400 font-semibold hover:underline cursor-pointer"
                         >
                           {t("app.delete")}
                         </button>
@@ -726,18 +750,19 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                       setQuestions(next);
                     }}
                     placeholder="Enter MCQ question..."
-                    className="w-full px-3 py-2 rounded-lg glass-input text-sm"
+                    className="w-full px-3.5 py-2.5 glass-input text-sm"
                   />
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     {q.options.map((opt, oIdx) => {
                       const checked = correctIds.includes(opt.id);
                       return (
-                        <div key={opt.id} className="flex items-center gap-2">
+                        <div key={opt.id} className="flex items-center gap-2 p-1.5 rounded-xl bg-white/40 dark:bg-slate-800/40 border border-slate-200/50 dark:border-white/5">
                           <input
                             type={isMulti ? "checkbox" : "radio"}
                             name={`correct_${q.id}`}
                             checked={checked}
                             onChange={() => toggleCorrectOption(idx, opt.id)}
+                            className="ms-2 cursor-pointer"
                           />
                           <input
                             required
@@ -748,7 +773,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                               setQuestions(next);
                             }}
                             placeholder={`${t("quizzes.option")} ${opt.id.toUpperCase()}`}
-                            className="flex-1 px-2.5 py-1.5 rounded-lg glass-input text-xs"
+                            className="flex-1 px-3 py-1.5 glass-input text-xs"
                           />
                         </div>
                       );
@@ -759,15 +784,18 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
             })}
           </div>
 
-          <div className="flex justify-end gap-2">
+          <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-200/60 dark:border-white/10">
             <button
               type="button"
               onClick={resetBuilder}
-              className="glass-btn-secondary px-4 py-2 rounded-xl text-sm font-semibold"
+              className="glass-btn-secondary px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer"
             >
               {t("app.cancel")}
             </button>
-            <button type="submit" className="glass-btn-primary px-5 py-2 rounded-xl text-sm">
+            <button
+              type="submit"
+              className="glass-btn-primary px-6 py-2.5 rounded-xl text-xs sm:text-sm cursor-pointer"
+            >
               {t("app.save")}
             </button>
           </div>

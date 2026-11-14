@@ -245,15 +245,31 @@ export default function LessonLibraryModule({
 
       {/* Instructor Upload Lesson PDF Form */}
       {showForm && mode === "instructor" && (
-        <form onSubmit={handleCreate} autoComplete="off" className="glass-card p-5 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form onSubmit={handleCreate} autoComplete="off" className="glass-form-card p-6 sm:p-7 space-y-6">
+          <div className="flex items-center gap-3 pb-3 border-b border-slate-200/60 dark:border-white/10">
+            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-emerald-500 to-cyan-600 text-white flex items-center justify-center shadow-md shadow-emerald-500/20">
+              <BookOpenCheck className="h-5 w-5" />
+            </div>
             <div>
-              <label className="block text-xs font-semibold mb-1">{t("quizzes.course")}</label>
+              <h2 className="text-base font-bold text-slate-900 dark:text-white">
+                {lang === "ar" ? "رفع درس PDF جديد" : "Upload New Lesson PDF"}
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                {lang === "ar"
+                  ? "اختر الدورة وارفع ملف المحاضرة ليتمكن الطلاب من تصفحه وتدوين الملاحظات عليه"
+                  : "Select course and upload lecture PDF so students can annotate and study privately"}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+            <div>
+              <label className="glass-form-label">{t("quizzes.course")}</label>
               <select
                 required
                 value={form.courseId}
                 onChange={(e) => setForm({ ...form, courseId: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl glass-input text-sm"
+                className="w-full px-3.5 py-2.5 glass-input text-sm"
               >
                 <option value="">-- Select Course --</option>
                 {courses.map((c) => (
@@ -265,7 +281,7 @@ export default function LessonLibraryModule({
             </div>
 
             <div>
-              <label className="block text-xs font-semibold mb-1">
+              <label className="glass-form-label">
                 {lang === "ar" ? "عنوان الدرس" : "Lesson Title"}
               </label>
               <input
@@ -273,18 +289,18 @@ export default function LessonLibraryModule({
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
                 placeholder={lang === "ar" ? "مثال: الوحدة الثانية - الشبكات" : "e.g., Lecture 2 — Neural Networks"}
-                className="w-full px-3 py-2 rounded-xl glass-input text-sm"
+                className="w-full px-3.5 py-2.5 glass-input text-sm"
               />
             </div>
           </div>
 
-          <div className="p-3.5 rounded-2xl glass-subtle space-y-2">
-            <label className="block text-xs font-bold">
+          <div className="p-4 rounded-2xl glass-subtle space-y-2.5">
+            <label className="glass-form-label !mb-0">
               {lang === "ar" ? "ملف الدرس (PDF)" : "Lesson PDF Document"}
             </label>
             <div className="flex flex-wrap items-center gap-3">
-              <label className="glass-btn-secondary px-3.5 py-2 rounded-xl text-xs font-bold cursor-pointer inline-flex items-center gap-2">
-                <Upload className="h-4 w-4 text-sky-600" />
+              <label className="glass-btn-secondary px-4 py-2.5 rounded-xl text-xs font-bold cursor-pointer inline-flex items-center gap-2">
+                <Upload className="h-4 w-4 text-emerald-600" />
                 {parsingPdf
                   ? lang === "ar"
                     ? "جاري التجهيز..."
@@ -300,7 +316,7 @@ export default function LessonLibraryModule({
                 />
               </label>
               {form.pdfName && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-xs font-bold">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-xs font-bold border border-emerald-400/30">
                   <FileText className="h-3.5 w-3.5" />
                   {form.pdfName} ({form.pdfPages.length}p)
                 </span>
@@ -309,32 +325,33 @@ export default function LessonLibraryModule({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold mb-1">
+            <label className="glass-form-label">
               {lang === "ar" ? "وصف مختصر (اختياري)" : "Short Description (Optional)"}
             </label>
             <textarea
-              rows={2}
+              rows={3}
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl glass-input text-sm"
+              placeholder={lang === "ar" ? "أدخل ملخصاً أو إرشادات للدرس..." : "Enter summary or lecture guidance..."}
+              className="w-full px-3.5 py-2.5 glass-input text-sm"
             />
           </div>
 
-          <div className="flex justify-end gap-2">
+          <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-200/60 dark:border-white/10">
             <button
               type="button"
               onClick={() => {
                 setShowForm(false);
                 resetForm();
               }}
-              className="glass-btn-secondary px-4 py-2 rounded-xl text-sm font-semibold"
+              className="glass-btn-secondary px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer"
             >
               {t("app.cancel")}
             </button>
             <button
               type="submit"
               disabled={parsingPdf}
-              className="glass-btn-primary px-5 py-2 rounded-xl text-sm disabled:opacity-50"
+              className="glass-btn-primary px-6 py-2.5 rounded-xl text-xs sm:text-sm cursor-pointer disabled:opacity-50"
             >
               {lang === "ar" ? "نشر الدرس للطلاب" : "Publish Lesson PDF"}
             </button>

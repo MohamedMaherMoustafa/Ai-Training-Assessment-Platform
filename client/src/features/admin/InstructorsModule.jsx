@@ -155,44 +155,57 @@ export default function InstructorsModule() {
         <form
           onSubmit={handleSubmit}
           autoComplete="off"
-          className="glass-card p-5 space-y-4"
+          className="glass-form-card p-6 sm:p-7 space-y-6"
         >
-          <h2 className="text-sm font-bold">
-            {editingUid ? t("admin.editInstructor") : t("admin.addInstructor")}
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex items-center gap-3 pb-3 border-b border-slate-200/60 dark:border-white/10">
+            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-600 text-white flex items-center justify-center shadow-md shadow-indigo-500/20">
+              {editingUid ? <Edit3 className="h-5 w-5" /> : <UserPlus className="h-5 w-5" />}
+            </div>
             <div>
-              <label className="block text-xs font-semibold mb-1">{t("admin.nameEn")}</label>
+              <h2 className="text-base font-bold text-slate-900 dark:text-white">
+                {editingUid ? t("admin.editInstructor") : t("admin.addInstructor")}
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                {editingUid
+                  ? "Update instructor details and specialization"
+                  : "Create instructor credentials & profile for the platform"}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+            <div>
+              <label className="glass-form-label">{t("admin.nameEn")}</label>
               <input
                 required
                 value={form.nameEn}
                 onChange={(e) => setForm({ ...form, nameEn: e.target.value })}
                 placeholder="Dr. Ahmed Hassan"
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+                className="w-full px-3.5 py-2.5 glass-input text-sm"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold mb-1">{t("admin.nameAr")}</label>
+              <label className="glass-form-label">{t("admin.nameAr")}</label>
               <input
                 value={form.nameAr}
                 onChange={(e) => setForm({ ...form, nameAr: e.target.value })}
                 placeholder="د. أحمد حسن"
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+                className="w-full px-3.5 py-2.5 glass-input text-sm"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold mb-1">{t("auth.username")}</label>
+              <label className="glass-form-label">{t("auth.username")}</label>
               <input
                 required
                 disabled={Boolean(editingUid)}
                 value={form.username}
                 onChange={(e) => setForm({ ...form, username: e.target.value })}
                 placeholder="teacher1"
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm disabled:opacity-60"
+                className="w-full px-3.5 py-2.5 glass-input text-sm disabled:opacity-60"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold mb-1">{t("auth.email")}</label>
+              <label className="glass-form-label">{t("auth.email")}</label>
               <input
                 type="text"
                 required
@@ -200,12 +213,12 @@ export default function InstructorsModule() {
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 placeholder="teacher1@academy.com or teacher@123"
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm disabled:opacity-60"
+                className="w-full px-3.5 py-2.5 glass-input text-sm disabled:opacity-60"
               />
             </div>
             {!editingUid && (
-              <div>
-                <label className="block text-xs font-semibold mb-1">{t("auth.password")}</label>
+              <div className="md:col-span-2">
+                <label className="glass-form-label">{t("auth.password")}</label>
                 <input
                   type="password"
                   name="inst_new_password"
@@ -215,30 +228,31 @@ export default function InstructorsModule() {
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
                   placeholder="Min 6 characters"
-                  className="w-full px-3 py-2 rounded-xl glass-input text-sm"
+                  className="w-full px-3.5 py-2.5 glass-input text-sm"
                 />
               </div>
             )}
             <div>
-              <label className="block text-xs font-semibold mb-1">{t("admin.specEn")}</label>
+              <label className="glass-form-label">{t("admin.specEn")}</label>
               <input
                 value={form.specEn}
                 onChange={(e) => setForm({ ...form, specEn: e.target.value })}
                 placeholder="AI & Software Engineering"
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+                className="w-full px-3.5 py-2.5 glass-input text-sm"
               />
             </div>
-            <div className="md:col-span-2">
-              <label className="block text-xs font-semibold mb-1">{t("admin.specAr")}</label>
+            <div>
+              <label className="glass-form-label">{t("admin.specAr")}</label>
               <input
                 value={form.specAr}
                 onChange={(e) => setForm({ ...form, specAr: e.target.value })}
                 placeholder="الذكاء الاصطناعي وهندسة البرمجيات"
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+                className="w-full px-3.5 py-2.5 glass-input text-sm"
               />
             </div>
           </div>
-          <div className="flex items-center gap-2 justify-end">
+
+          <div className="flex items-center gap-2.5 justify-end pt-2 border-t border-slate-200/60 dark:border-white/10">
             <button
               type="button"
               onClick={() => {
@@ -246,14 +260,14 @@ export default function InstructorsModule() {
                 setEditingUid(null);
                 setForm(INITIAL_FORM);
               }}
-              className="glass-btn-secondary px-4 py-2 rounded-xl text-sm font-semibold"
+              className="glass-btn-secondary px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer"
             >
               {t("app.cancel")}
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="glass-btn-primary px-5 py-2 rounded-xl text-sm disabled:opacity-60"
+              className="glass-btn-primary px-6 py-2.5 rounded-xl text-xs sm:text-sm cursor-pointer disabled:opacity-60"
             >
               {saving ? t("app.loading") : editingUid ? t("app.save") : t("app.create")}
             </button>

@@ -201,47 +201,67 @@ export default function CoursesModule({ mode = "admin", activeInstructorId = nul
         <form
           onSubmit={handleCreateCourse}
           autoComplete="off"
-          className="glass-card p-5 space-y-4"
+          className="glass-form-card p-6 sm:p-7 space-y-6"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex items-center gap-3 pb-3 border-b border-slate-200/60 dark:border-white/10">
+            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 text-white flex items-center justify-center shadow-md shadow-cyan-500/20">
+              <BookOpen className="h-5 w-5" />
+            </div>
             <div>
-              <label className="block text-xs font-semibold mb-1">{t("courses.titleEn")}</label>
+              <h2 className="text-base font-bold text-slate-900 dark:text-white">
+                {t("courses.addCourse")}
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                {lang === "ar"
+                  ? "أدخل تفاصيل الدورة التدريبية والمعلومات الخاصة بها"
+                  : "Enter course details, descriptions and assigned instructor"}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+            <div>
+              <label className="glass-form-label">{t("courses.titleEn")}</label>
               <input
                 required
                 value={courseForm.titleEn}
                 onChange={(e) => setCourseForm({ ...courseForm, titleEn: e.target.value })}
-                className="w-full px-3 py-2 glass-input text-sm"
+                placeholder="e.g. Full Stack Web Development"
+                className="w-full px-3.5 py-2.5 glass-input text-sm"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold mb-1">{t("courses.titleAr")}</label>
+              <label className="glass-form-label">{t("courses.titleAr")}</label>
               <input
                 value={courseForm.titleAr}
                 onChange={(e) => setCourseForm({ ...courseForm, titleAr: e.target.value })}
-                className="w-full px-3 py-2 glass-input text-sm"
+                placeholder="مثال: تطوير الويب المتكامل"
+                className="w-full px-3.5 py-2.5 glass-input text-sm"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold mb-1">{t("courses.descEn")}</label>
+              <label className="glass-form-label">{t("courses.descEn")}</label>
               <textarea
-                rows={2}
+                rows={3}
                 value={courseForm.descEn}
                 onChange={(e) => setCourseForm({ ...courseForm, descEn: e.target.value })}
-                className="w-full px-3 py-2 glass-input text-sm"
+                placeholder="Course curriculum overview in English..."
+                className="w-full px-3.5 py-2.5 glass-input text-sm"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold mb-1">{t("courses.descAr")}</label>
+              <label className="glass-form-label">{t("courses.descAr")}</label>
               <textarea
-                rows={2}
+                rows={3}
                 value={courseForm.descAr}
                 onChange={(e) => setCourseForm({ ...courseForm, descAr: e.target.value })}
-                className="w-full px-3 py-2 glass-input text-sm"
+                placeholder="نبذة عن المنهج والمحتوى بالعربية..."
+                className="w-full px-3.5 py-2.5 glass-input text-sm"
               />
             </div>
             {mode === "admin" && (
               <div className="md:col-span-2">
-                <label className="block text-xs font-semibold mb-1">
+                <label className="glass-form-label">
                   {t("courses.instructor")}
                 </label>
                 <select
@@ -250,7 +270,7 @@ export default function CoursesModule({ mode = "admin", activeInstructorId = nul
                   onChange={(e) =>
                     setCourseForm({ ...courseForm, instructorId: e.target.value })
                   }
-                  className="w-full px-3 py-2 glass-input text-sm"
+                  className="w-full px-3.5 py-2.5 glass-input text-sm"
                 >
                   <option value="">-- Select Instructor --</option>
                   {instructors.map((inst) => (
@@ -262,20 +282,20 @@ export default function CoursesModule({ mode = "admin", activeInstructorId = nul
               </div>
             )}
           </div>
-          <div className="flex justify-end gap-2">
+          <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-200/60 dark:border-white/10">
             <button
               type="button"
               onClick={() => {
                 setShowCourseForm(false);
                 setCourseForm({ titleEn: "", titleAr: "", descEn: "", descAr: "", instructorId: "" });
               }}
-              className="glass-btn-secondary px-4 py-2 rounded-xl text-sm font-semibold"
+              className="glass-btn-secondary px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer"
             >
               {t("app.cancel")}
             </button>
             <button
               type="submit"
-              className="glass-btn-primary px-5 py-2 rounded-xl text-sm"
+              className="glass-btn-primary px-6 py-2.5 rounded-xl text-xs sm:text-sm cursor-pointer"
             >
               {t("app.create")}
             </button>
@@ -287,75 +307,97 @@ export default function CoursesModule({ mode = "admin", activeInstructorId = nul
         <form
           onSubmit={handleAddLesson}
           autoComplete="off"
-          className="glass-card border-sky-400/60 p-5 space-y-4"
+          className="glass-form-card p-6 sm:p-7 space-y-6"
         >
-          <h3 className="text-sm font-bold">{t("courses.addLesson")}</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex items-center gap-3 pb-3 border-b border-slate-200/60 dark:border-white/10">
+            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-sky-500/20">
+              <FileText className="h-5 w-5" />
+            </div>
             <div>
-              <label className="block text-xs font-semibold mb-1">{t("courses.lessonTitleEn")}</label>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                {t("courses.addLesson")}
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                {lang === "ar"
+                  ? "أضف درساً جديداً للمنهج وارفع ملخصاً أو ملف PDF"
+                  : "Add a new lesson to this course and upload lecture materials"}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+            <div>
+              <label className="glass-form-label">{t("courses.lessonTitleEn")}</label>
               <input
                 required
                 value={lessonForm.titleEn}
                 onChange={(e) => setLessonForm({ ...lessonForm, titleEn: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+                placeholder="e.g. Introduction to React Components"
+                className="w-full px-3.5 py-2.5 glass-input text-sm"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold mb-1">{t("courses.lessonTitleAr")}</label>
+              <label className="glass-form-label">{t("courses.lessonTitleAr")}</label>
               <input
                 value={lessonForm.titleAr}
                 onChange={(e) => setLessonForm({ ...lessonForm, titleAr: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+                placeholder="مثال: مقدمة إلى مكونات React"
+                className="w-full px-3.5 py-2.5 glass-input text-sm"
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-xs font-semibold mb-1">
+              <label className="glass-form-label">
                 Upload Lesson File (PDF / TXT / MD — auto-extracts text for Platform AI)
               </label>
-              <input
-                type="file"
-                accept=".pdf,.txt,.md"
-                onChange={handleLessonFilePick}
-                className="w-full px-3 py-2 rounded-xl border border-dashed border-sky-400 dark:border-sky-700 bg-sky-50/40 dark:bg-sky-950/20 text-xs"
-              />
-              {extractingPdf && (
-                <div className="text-xs text-sky-600 mt-1">Extracting lesson text...</div>
-              )}
+              <div className="p-4 rounded-2xl glass-subtle border border-dashed border-sky-400/60 dark:border-sky-500/40">
+                <input
+                  type="file"
+                  accept=".pdf,.txt,.md"
+                  onChange={handleLessonFilePick}
+                  className="w-full text-xs text-slate-600 dark:text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-sky-600 file:text-white hover:file:bg-sky-500 cursor-pointer"
+                />
+                {extractingPdf && (
+                  <div className="text-xs text-sky-600 dark:text-sky-400 font-semibold mt-2 animate-pulse">
+                    Extracting lesson text for AI features...
+                  </div>
+                )}
+              </div>
             </div>
             <div className="md:col-span-2">
-              <label className="block text-xs font-semibold mb-1">{t("courses.lessonUrl")}</label>
+              <label className="glass-form-label">{t("courses.lessonUrl")}</label>
               <input
                 value={lessonForm.fileUrl}
                 onChange={(e) => setLessonForm({ ...lessonForm, fileUrl: e.target.value })}
                 placeholder="https://..."
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+                className="w-full px-3.5 py-2.5 glass-input text-sm"
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-xs font-semibold mb-1">{t("courses.lessonContent")}</label>
+              <label className="glass-form-label">{t("courses.lessonContent")}</label>
               <textarea
                 rows={4}
                 required
                 value={lessonForm.content}
                 onChange={(e) => setLessonForm({ ...lessonForm, content: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+                placeholder="Lesson study notes or transcription..."
+                className="w-full px-3.5 py-2.5 glass-input text-sm"
               />
             </div>
           </div>
-          <div className="flex justify-end gap-2">
+          <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-200/60 dark:border-white/10">
             <button
               type="button"
               onClick={() => {
                 setLessonCourseId(null);
                 setLessonForm({ titleEn: "", titleAr: "", content: "", fileUrl: "" });
               }}
-              className="glass-btn-secondary px-4 py-2 rounded-xl text-sm font-semibold"
+              className="glass-btn-secondary px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer"
             >
               {t("app.cancel")}
             </button>
             <button
               type="submit"
-              className="px-5 py-2 rounded-xl bg-emerald-600 text-white text-sm font-semibold"
+              className="glass-btn-primary px-6 py-2.5 rounded-xl text-xs sm:text-sm cursor-pointer"
             >
               {t("app.save")}
             </button>

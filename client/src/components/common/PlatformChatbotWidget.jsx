@@ -892,7 +892,7 @@ export default function PlatformChatbotWidget() {
               e.preventDefault();
               handleSend();
             }}
-            className="p-3 border-t border-slate-200/80 dark:border-white/10 flex items-center gap-2 bg-white dark:bg-slate-900"
+            className="p-3 border-t border-slate-200/80 dark:border-white/10 flex items-center gap-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl"
           >
             {/* Hidden File Input */}
             <input
@@ -910,7 +910,7 @@ export default function PlatformChatbotWidget() {
               onClick={() => fileInputRef.current?.click()}
               disabled={busy || recording}
               title={lang === "ar" ? "إرفاق صورة أو PDF أو صوت" : "Attach Photo, PDF, or Audio"}
-              className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-indigo-500 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/30 text-slate-600 dark:text-slate-300 transition-colors shrink-0 disabled:opacity-50"
+              className="p-2.5 rounded-2xl border border-slate-200 dark:border-white/10 hover:border-indigo-500 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/30 text-slate-600 dark:text-slate-300 transition-colors shrink-0 disabled:opacity-50 cursor-pointer"
             >
               <Paperclip className="h-4 w-4" />
             </button>
@@ -921,10 +921,10 @@ export default function PlatformChatbotWidget() {
               onClick={recording ? stopRecording : startRecording}
               disabled={busy}
               title={recording ? "Stop Recording" : "Record Voice Query"}
-              className={`p-2.5 rounded-xl border transition-colors shrink-0 disabled:opacity-50 ${
+              className={`p-2.5 rounded-2xl border transition-colors shrink-0 disabled:opacity-50 cursor-pointer ${
                 recording
                   ? "border-rose-500 bg-rose-500 text-white animate-pulse"
-                  : "border-slate-200 dark:border-slate-700 hover:border-indigo-500 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/30 text-slate-600 dark:text-slate-300"
+                  : "border-slate-200 dark:border-white/10 hover:border-indigo-500 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/30 text-slate-600 dark:text-slate-300"
               }`}
             >
               <Mic className="h-4 w-4" />
@@ -940,14 +940,14 @@ export default function PlatformChatbotWidget() {
                   ? "اسأل المساعد الذكي، اطلب تلخيصاً، أو أرفق صورة/PDF..."
                   : "Ask AI anything, request summaries, or attach photos/PDFs..."
               }
-              className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder:text-slate-400 text-xs sm:text-[13px] outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all shadow-inner"
+              className="flex-1 px-3.5 py-2.5 rounded-2xl glass-input text-xs sm:text-[13px]"
             />
 
             {/* Send Button */}
             <button
               type="submit"
               disabled={busy || (!input.trim() && attachments.length === 0)}
-              className="p-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md shadow-indigo-600/30 transition-all disabled:opacity-40 shrink-0 cursor-pointer"
+              className="p-2.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md shadow-indigo-600/30 transition-all disabled:opacity-40 shrink-0 cursor-pointer"
               aria-label="Send message"
             >
               <Send className="h-4 w-4 rtl:rotate-180" />

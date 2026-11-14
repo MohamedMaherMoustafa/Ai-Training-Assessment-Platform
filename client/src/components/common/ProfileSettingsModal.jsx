@@ -122,7 +122,7 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-fadeIn">
       <div
-        className="relative w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-white/10 rounded-3xl shadow-2xl overflow-hidden animate-scaleUp text-slate-800 dark:text-slate-100"
+        className="glass-form-card relative w-full max-w-md bg-white/90 dark:bg-slate-900/90 border border-white/80 dark:border-white/10 rounded-3xl shadow-2xl overflow-hidden animate-scaleUp text-slate-800 dark:text-slate-100"
         role="dialog"
         aria-modal="true"
         aria-labelledby="profile-modal-title"
@@ -189,7 +189,7 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder={t("profile.fullNamePlaceholder")}
-                className="w-full pl-10 pr-3.5 rtl:pl-3.5 rtl:pr-10 py-2.5 text-xs sm:text-sm rounded-xl bg-slate-50/80 dark:bg-slate-800/70 border border-slate-200 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-slate-900 dark:text-white transition-all"
+                className="w-full pl-10 pr-3.5 rtl:pl-3.5 rtl:pr-10 py-2.5 text-xs sm:text-sm glass-input"
               />
             </div>
           </div>
@@ -214,7 +214,7 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder={t("profile.newPasswordPlaceholder")}
                 autoComplete="new-password"
-                className="w-full pl-10 pr-10 rtl:pl-10 rtl:pr-10 py-2.5 text-xs sm:text-sm rounded-xl bg-slate-50/80 dark:bg-slate-800/70 border border-slate-200 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-slate-900 dark:text-white transition-all"
+                className="w-full pl-10 pr-10 rtl:pl-10 rtl:pr-10 py-2.5 text-xs sm:text-sm glass-input"
               />
               <button
                 type="button"
@@ -243,7 +243,7 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder={t("profile.confirmPasswordPlaceholder")}
                   autoComplete="new-password"
-                  className="w-full pl-10 pr-10 rtl:pl-10 rtl:pr-10 py-2.5 text-xs sm:text-sm rounded-xl bg-slate-50/80 dark:bg-slate-800/70 border border-slate-200 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-slate-900 dark:text-white transition-all"
+                  className="w-full pl-10 pr-10 rtl:pl-10 rtl:pr-10 py-2.5 text-xs sm:text-sm glass-input"
                 />
                 <button
                   type="button"

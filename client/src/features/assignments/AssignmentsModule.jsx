@@ -353,26 +353,37 @@ export default function AssignmentsModule({
 
       {/* Instructor Create / Edit PDF Assignment Form */}
       {showForm && mode === "instructor" && (
-        <form onSubmit={handleCreate} autoComplete="off" className="glass-card p-5 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-extrabold text-sky-700 dark:text-sky-300">
-              {editingId
-                ? lang === "ar"
-                  ? "تعديل الواجب المرفوع"
-                  : "Edit Assignment"
-                : lang === "ar"
-                ? "إضافة واجب PDF جديد"
-                : "New PDF Assignment"}
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <form onSubmit={handleCreate} autoComplete="off" className="glass-form-card p-6 sm:p-7 space-y-6">
+          <div className="flex items-center gap-3 pb-3 border-b border-slate-200/60 dark:border-white/10">
+            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-sky-500/20">
+              {editingId ? <Edit3 className="h-5 w-5" /> : <ClipboardList className="h-5 w-5" />}
+            </div>
             <div>
-              <label className="block text-xs font-semibold mb-1">{t("quizzes.course")}</label>
+              <h2 className="text-base font-bold text-slate-900 dark:text-white">
+                {editingId
+                  ? lang === "ar"
+                    ? "تعديل الواجب المرفوع"
+                    : "Edit Assignment"
+                  : lang === "ar"
+                  ? "إضافة واجب PDF جديد"
+                  : "New PDF Assignment"}
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                {lang === "ar"
+                  ? "حدد الدورة والدرجات وموعد الإغلاق وارفع ملف الواجب للطلاب"
+                  : "Specify course, deadline, max points and upload assignment PDF sheet"}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+            <div>
+              <label className="glass-form-label">{t("quizzes.course")}</label>
               <select
                 required
                 value={form.courseId}
                 onChange={(e) => setForm({ ...form, courseId: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl glass-input text-sm"
+                className="w-full px-3.5 py-2.5 glass-input text-sm"
               >
                 <option value="">-- Select Course --</option>
                 {courses.map((c) => (
@@ -384,7 +395,7 @@ export default function AssignmentsModule({
             </div>
 
             <div>
-              <label className="block text-xs font-semibold mb-1">
+              <label className="glass-form-label">
                 {lang === "ar" ? "عنوان الواجب" : "Assignment Title"}
               </label>
               <input
@@ -392,12 +403,12 @@ export default function AssignmentsModule({
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
                 placeholder={lang === "ar" ? "مثال: ورقة عمل 1" : "e.g., Worksheet 1"}
-                className="w-full px-3 py-2 rounded-xl glass-input text-sm"
+                className="w-full px-3.5 py-2.5 glass-input text-sm"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold mb-1">
+              <label className="glass-form-label">
                 {lang === "ar" ? "تاريخ الإغلاق (Due Date)" : "Due Date (Lock After)"}
               </label>
               <input
@@ -417,12 +428,12 @@ export default function AssignmentsModule({
                   }
                   setForm({ ...form, dueDate: val });
                 }}
-                className="w-full px-3 py-2 rounded-xl glass-input text-sm"
+                className="w-full px-3.5 py-2.5 glass-input text-sm"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold mb-1">
+              <label className="glass-form-label">
                 {lang === "ar" ? "وقت الإغلاق" : "Due Time"}
               </label>
               <input
@@ -430,27 +441,27 @@ export default function AssignmentsModule({
                 value={form.dueTime}
                 disabled={!form.dueDate}
                 onChange={(e) => setForm({ ...form, dueTime: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl glass-input text-sm disabled:opacity-50"
+                className="w-full px-3.5 py-2.5 glass-input text-sm disabled:opacity-50"
               />
             </div>
           </div>
 
           {/* Marks Selection + PDF Upload */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-3.5 rounded-2xl glass-subtle space-y-2">
-              <label className="block text-xs font-bold">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+            <div className="p-4 rounded-2xl glass-subtle space-y-2.5">
+              <label className="glass-form-label !mb-0">
                 {lang === "ar" ? "الدرجة الكاملة للواجب (النقاط)" : "Assignment Total Marks (Points)"}
               </label>
-              <div className="flex flex-wrap items-center gap-1.5">
+              <div className="flex flex-wrap items-center gap-2">
                 {MARK_PRESETS.map((m) => (
                   <button
                     key={m}
                     type="button"
                     onClick={() => setForm({ ...form, maxMarks: m })}
-                    className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                       Number(form.maxMarks) === m
-                        ? "bg-sky-600 text-white shadow-sm"
-                        : "glass-card text-slate-700 dark:text-slate-200"
+                        ? "bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-md shadow-sky-500/20 scale-105"
+                        : "glass-card text-slate-700 dark:text-slate-200 hover:border-sky-400"
                     }`}
                   >
                     {m} pts
@@ -461,17 +472,17 @@ export default function AssignmentsModule({
                   min={1}
                   value={form.maxMarks}
                   onChange={(e) => setForm({ ...form, maxMarks: e.target.value })}
-                  className="w-20 px-2.5 py-1 rounded-xl glass-input text-xs font-bold text-center"
+                  className="w-20 px-3 py-1.5 rounded-xl glass-input text-xs font-bold text-center"
                 />
               </div>
             </div>
 
-            <div className="p-3.5 rounded-2xl glass-subtle space-y-2">
-              <label className="block text-xs font-bold">
+            <div className="p-4 rounded-2xl glass-subtle space-y-2.5">
+              <label className="glass-form-label !mb-0">
                 {lang === "ar" ? "رفع ملف الواجب (PDF)" : "Upload Assignment PDF"}
               </label>
               <div className="flex flex-wrap items-center gap-3">
-                <label className="glass-btn-secondary px-3.5 py-2 rounded-xl text-xs font-bold cursor-pointer inline-flex items-center gap-2">
+                <label className="glass-btn-secondary px-4 py-2.5 rounded-xl text-xs font-bold cursor-pointer inline-flex items-center gap-2">
                   <Upload className="h-4 w-4 text-sky-600" />
                   {parsingPdf
                     ? lang === "ar"
@@ -489,12 +500,12 @@ export default function AssignmentsModule({
                 </label>
 
                 {form.pdfName ? (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-xs font-bold">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-xs font-bold border border-emerald-400/30">
                     <FileText className="h-3.5 w-3.5" />
                     {form.pdfName} ({form.pdfPages.length}p)
                   </span>
                 ) : (
-                  <span className="text-[11px] text-slate-500">
+                  <span className="text-xs text-slate-500">
                     {lang === "ar"
                       ? "سيظهر للطلاب داخل نافذة الكتابة الحرة"
                       : "Rendered inside students' Live Annotation canvas"}
@@ -505,11 +516,11 @@ export default function AssignmentsModule({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold mb-1">
+            <label className="glass-form-label">
               {lang === "ar" ? "تعليمات إضافية (اختياري مع PDF)" : "Instructions (Optional with PDF)"}
             </label>
             <textarea
-              rows={2}
+              rows={3}
               value={form.instructions}
               onChange={(e) => setForm({ ...form, instructions: e.target.value })}
               placeholder={
@@ -517,25 +528,25 @@ export default function AssignmentsModule({
                   ? "اكتب أي ملاحظات أو إرشادات للطلاب..."
                   : "Optional notes or guidance for students..."
               }
-              className="w-full px-3 py-2 rounded-xl glass-input text-sm"
+              className="w-full px-3.5 py-2.5 glass-input text-sm"
             />
           </div>
 
-          <div className="flex justify-end gap-2">
+          <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-200/60 dark:border-white/10">
             <button
               type="button"
               onClick={() => {
                 setShowForm(false);
                 resetForm();
               }}
-              className="glass-btn-secondary px-4 py-2 rounded-xl text-sm font-semibold"
+              className="glass-btn-secondary px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer"
             >
               {t("app.cancel")}
             </button>
             <button
               type="submit"
               disabled={parsingPdf}
-              className="glass-btn-primary px-5 py-2 rounded-xl text-sm disabled:opacity-50"
+              className="glass-btn-primary px-6 py-2.5 rounded-xl text-xs sm:text-sm cursor-pointer disabled:opacity-50"
             >
               {editingId
                 ? lang === "ar"

@@ -275,7 +275,7 @@ export default function LoginPage() {
                       value={identifier}
                       onChange={(e) => setIdentifier(e.target.value)}
                       placeholder={t("auth.identifierPlaceholder")}
-                      className="w-full ps-10 pe-3.5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder:text-slate-400 text-xs sm:text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15 transition-all shadow-sm"
+                      className="w-full ps-10 pe-3.5 py-2.5 sm:py-3 glass-input text-xs sm:text-sm"
                     />
                   </div>
                 </div>
@@ -296,7 +296,7 @@ export default function LoginPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder={t("auth.passwordPlaceholder")}
-                      className="w-full ps-10 pe-10 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder:text-slate-400 text-xs sm:text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15 transition-all shadow-sm"
+                      className="w-full ps-10 pe-10 py-2.5 sm:py-3 glass-input text-xs sm:text-sm"
                     />
                     <button
                       type="button"

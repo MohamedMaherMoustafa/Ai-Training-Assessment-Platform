@@ -46,12 +46,20 @@
     @apply relative overflow-hidden bg-white/75 dark:bg-slate-900/65 backdrop-blur-2xl border border-white/85 dark:border-white/15 rounded-[24px] shadow-[0_10px_32px_rgba(37,99,235,0.09),inset_0_1px_0_rgba(255,255,255,0.85)] dark:shadow-[0_12px_36px_rgba(0,0,0,0.48),inset_0_1px_0_rgba(255,255,255,0.10)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_48px_rgba(124,58,237,0.18)] dark:hover:shadow-[0_20px_48px_rgba(56,189,248,0.20)] hover:border-cyan-400/75 dark:hover:border-violet-400/50;
   }
 
+  .glass-form-card {
+    @apply relative overflow-hidden bg-white/85 dark:bg-slate-900/80 backdrop-blur-2xl border border-white/90 dark:border-white/15 rounded-3xl shadow-[0_16px_40px_rgba(79,70,229,0.08),inset_0_1px_0_rgba(255,255,255,0.9)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.1)];
+  }
+
   .glass-subtle {
     @apply bg-gradient-to-br from-white/70 via-sky-50/45 to-violet-50/45 dark:from-slate-800/70 dark:via-slate-800/55 dark:to-indigo-950/45 backdrop-blur-lg border border-white/75 dark:border-white/10 rounded-2xl transition-all duration-200 hover:from-white/90 hover:to-violet-50/75 dark:hover:from-slate-800/90 dark:hover:border-cyan-400/45 hover:border-cyan-400/60;
   }
 
   .glass-input {
-    @apply bg-white/75 dark:bg-slate-800/75 backdrop-blur-md border border-indigo-200/80 dark:border-white/15 rounded-2xl focus:bg-white dark:focus:bg-slate-800/95 focus:outline-none focus:ring-2 focus:ring-violet-500/65 focus:border-cyan-400 transition-all duration-200;
+    @apply bg-white/80 dark:bg-slate-800/70 backdrop-blur-md border border-slate-200/90 dark:border-white/10 rounded-2xl text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 shadow-sm focus:bg-white dark:focus:bg-slate-800/95 focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500/80 transition-all duration-200;
+  }
+
+  .glass-form-label {
+    @apply block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5;
   }
 
   .glass-btn-primary {
