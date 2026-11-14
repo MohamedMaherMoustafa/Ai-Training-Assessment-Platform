@@ -126,78 +126,82 @@ export default function LoginPage() {
       {/* Main Split Showcase Login Card (Locked Inside Screen Height) */}
       <main className="flex-1 min-h-0 max-w-6xl xl:max-w-7xl w-full mx-auto my-1.5 sm:my-2.5 flex items-center justify-center">
         <div className="w-full h-full max-h-[calc(100vh-100px)] rounded-[28px] sm:rounded-[36px] overflow-hidden shadow-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-white/10 grid grid-cols-1 lg:grid-cols-12 transition-all">
-          {/* Left Column: Royal Purple Showcase Banner */}
-          <section className="hidden lg:flex lg:col-span-5 relative p-6 sm:p-8 lg:p-9 xl:p-11 bg-gradient-to-b from-[#181580] via-[#3523b0] to-[#5a189a] text-white flex-col justify-between overflow-hidden">
-            <div className="pointer-events-none absolute -top-16 -end-16 h-56 w-56 rounded-full bg-violet-400/20 blur-2xl" />
-            <div className="pointer-events-none absolute bottom-0 start-0 h-64 w-64 rounded-full bg-indigo-500/20 blur-3xl" />
+          {/* Left Column: Royal Purple Showcase Banner (Centered & Elegantly Restyled) */}
+          <section className="hidden lg:flex lg:col-span-5 relative p-6 sm:p-7 xl:p-8 bg-gradient-to-b from-[#181580] via-[#3523b0] to-[#5a189a] text-white flex-col justify-between items-center text-center overflow-hidden">
+            {/* Ambient Background Lighting Orbs */}
+            <div className="pointer-events-none absolute -top-12 -end-12 h-64 w-64 rounded-full bg-violet-400/25 blur-3xl" />
+            <div className="pointer-events-none absolute bottom-0 -start-10 h-64 w-64 rounded-full bg-indigo-500/25 blur-3xl" />
 
-            <div className="relative z-10">
-              <div className="flex items-center gap-3 mb-2.5">
-                <div className="h-12 w-12 sm:h-13 sm:w-13 shrink-0 flex items-center justify-center">
-                  <img src="/Logo.png" alt="Platform Logo" className="w-full h-full object-contain drop-shadow-md" />
-                </div>
-                <div>
-                  <h2 className="text-xl sm:text-2xl xl:text-3xl font-black leading-tight text-white tracking-tight">
-                    {t("app.title")}
-                  </h2>
-                  <div className="text-xs sm:text-[13px] font-semibold text-indigo-200">
-                    {t("auth.learnTagline")}
-                  </div>
-                </div>
+            {/* Top Centered Header & Branding */}
+            <div className="relative z-10 flex flex-col items-center text-center w-full">
+              {/* Floating Glowing Glass Logo Container */}
+              <div className="h-16 w-16 sm:h-18 sm:w-18 rounded-2xl bg-white/15 backdrop-blur-xl border border-white/25 flex items-center justify-center shadow-xl shadow-black/20 p-2.5 mb-2 hover:scale-105 transition-transform">
+                <img src="/Logo.png" alt="Platform Logo" className="w-full h-full object-contain drop-shadow-md" />
               </div>
-              <p className="text-xs sm:text-[12.5px] text-white/85 mt-1 leading-relaxed max-w-md">
+
+              {/* Platform Title */}
+              <h2 className="text-xl sm:text-2xl xl:text-3xl font-black text-white tracking-tight leading-tight">
+                {t("app.title")}
+              </h2>
+
+              {/* Tagline Badge */}
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-xs font-semibold text-indigo-100 mt-2 shadow-xs">
+                <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                <span>{t("auth.learnTagline")}</span>
+              </div>
+
+              {/* Hero Description */}
+              <p className="text-xs sm:text-[12.5px] text-white/85 mt-2.5 leading-relaxed max-w-sm mx-auto">
                 {t("auth.heroDesc")}
               </p>
+            </div>
 
-              {/* 4 Feature Pills */}
-              <div className="mt-4 sm:mt-5 space-y-2.5 sm:space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-full bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center shrink-0 text-white shadow-sm">
+            {/* Centered 2x2 Feature Showcase Grid */}
+            <div className="relative z-10 w-full max-w-sm my-auto pt-3 pb-2">
+              <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+                {/* 1. PDF Annotations */}
+                <div className="flex flex-col items-center text-center p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 hover:bg-white/15 transition-all shadow-sm">
+                  <div className="h-8 w-8 rounded-xl bg-white/20 backdrop-blur-md border border-white/25 flex items-center justify-center text-white mb-1.5 shadow-xs">
                     <Laptop className="h-4 w-4" />
                   </div>
-                  <div>
-                    <div className="text-xs sm:text-[13px] font-bold text-white">{t("auth.featPdf")}</div>
-                    <div className="text-[10px] sm:text-[11px] text-indigo-200">{t("auth.featPdfDesc")}</div>
-                  </div>
+                  <div className="text-xs font-bold text-white leading-tight">{t("auth.featPdf")}</div>
+                  <div className="text-[10px] text-indigo-200 mt-0.5 leading-tight">{t("auth.featPdfDesc")}</div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-full bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center shrink-0 text-white shadow-sm">
+                {/* 2. Quiz & Chatbot */}
+                <div className="flex flex-col items-center text-center p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 hover:bg-white/15 transition-all shadow-sm">
+                  <div className="h-8 w-8 rounded-xl bg-white/20 backdrop-blur-md border border-white/25 flex items-center justify-center text-white mb-1.5 shadow-xs">
                     <Bot className="h-4 w-4" />
                   </div>
-                  <div>
-                    <div className="text-xs sm:text-[13px] font-bold text-white">{t("auth.featQuiz")}</div>
-                    <div className="text-[10px] sm:text-[11px] text-indigo-200">{t("auth.featQuizDesc")}</div>
-                  </div>
+                  <div className="text-xs font-bold text-white leading-tight">{t("auth.featQuiz")}</div>
+                  <div className="text-[10px] text-indigo-200 mt-0.5 leading-tight">{t("auth.featQuizDesc")}</div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-full bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center shrink-0 text-white shadow-sm">
+                {/* 3. Points & Certificates */}
+                <div className="flex flex-col items-center text-center p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 hover:bg-white/15 transition-all shadow-sm">
+                  <div className="h-8 w-8 rounded-xl bg-white/20 backdrop-blur-md border border-white/25 flex items-center justify-center text-white mb-1.5 shadow-xs">
                     <Trophy className="h-4 w-4" />
                   </div>
-                  <div>
-                    <div className="text-xs sm:text-[13px] font-bold text-white">{t("auth.featPoints")}</div>
-                    <div className="text-[10px] sm:text-[11px] text-indigo-200">{t("auth.featPointsDesc")}</div>
-                  </div>
+                  <div className="text-xs font-bold text-white leading-tight">{t("auth.featPoints")}</div>
+                  <div className="text-[10px] text-indigo-200 mt-0.5 leading-tight">{t("auth.featPointsDesc")}</div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-full bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center shrink-0 text-white shadow-sm">
+                {/* 4. Progress Reports */}
+                <div className="flex flex-col items-center text-center p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 hover:bg-white/15 transition-all shadow-sm">
+                  <div className="h-8 w-8 rounded-xl bg-white/20 backdrop-blur-md border border-white/25 flex items-center justify-center text-white mb-1.5 shadow-xs">
                     <BarChart3 className="h-4 w-4" />
                   </div>
-                  <div>
-                    <div className="text-xs sm:text-[13px] font-bold text-white">{t("auth.featReports")}</div>
-                    <div className="text-[10px] sm:text-[11px] text-indigo-200">{t("auth.featReportsDesc")}</div>
-                  </div>
+                  <div className="text-xs font-bold text-white leading-tight">{t("auth.featReports")}</div>
+                  <div className="text-[10px] text-indigo-200 mt-0.5 leading-tight">{t("auth.featReportsDesc")}</div>
                 </div>
               </div>
             </div>
 
-            {/* Bottom 3D Artwork Composition */}
-            <div className="relative mt-2 flex justify-end">
+            {/* Bottom 3D Artwork Composition (Centered) */}
+            <div className="relative z-10 w-full flex items-center justify-center mt-1">
               <svg
                 viewBox="0 0 320 180"
-                className="w-40 sm:w-48 h-auto drop-shadow-xl select-none pointer-events-none"
+                className="w-44 sm:w-52 h-auto drop-shadow-2xl select-none pointer-events-none mx-auto"
                 fill="none"
               >
                 <defs>
