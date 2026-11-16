@@ -15,7 +15,10 @@ import {
   Clock,
   ArrowUpRight,
   Power,
+  AlertTriangle,
+  MessageCircle,
 } from "lucide-react";
+import { openWhatsAppSupportChat } from "../../utils/whatsappHelper";
 import {
   ResponsiveContainer,
   BarChart,
@@ -297,20 +300,54 @@ export default function InstructorAnalyticsDashboard({
           )
         : null;
 
+    const phoneNumber = st.phoneNumber || st.phone || "";
+    const isAssessed = combinedAvg !== null;
+    const needsSupport =
+      isAssessed &&
+      (combinedAvg < 60 ||
+        (stQuizResults.length > 0 && stQuizAvg < 60) ||
+        (stGradedSubs.length > 0 && stAssnAvg < 60));
+
     return {
       uid: st.uid,
       name: st.displayName || st.email,
       email: st.email,
+      phoneNumber,
       enrolled: stEnrolled,
       quizAttempts: stQuizResults.length,
       quizAvg: stQuizAvg,
       assnSubs: stSubs.length,
       assnAvg: stAssnAvg,
       combinedAvg,
+      needsSupport,
       active: st.active !== false,
       rawStudent: st,
     };
   });
+
+  const handleContactWhatsApp = (studentRow) => {
+    const phone =
+      studentRow.phoneNumber ||
+      studentRow.phone ||
+      studentRow.rawStudent?.phoneNumber ||
+      studentRow.rawStudent?.phone;
+    if (!phone) {
+      toast.error(
+        lang === "ar"
+          ? "لم يقم هذا الطالب بتسجيل رقم هاتف بعد."
+          : "This student has not registered a phone number yet."
+      );
+      return;
+    }
+    const opened = openWhatsAppSupportChat(phone, null, lang);
+    if (opened) {
+      toast.success(
+        lang === "ar"
+          ? "تم فتح محادثة واتساب مع تجهيز رسالة الدعم (اضغط إرسال يدوياً داخل واتساب)."
+          : "Opened WhatsApp with support message pre-filled. Press Send manually inside WhatsApp."
+      );
+    }
+  };
 
   if (loading) {
     return (
@@ -672,10 +709,20 @@ export default function InstructorAnalyticsDashboard({
                 </tr>
               ) : (
                 studentProgressRows.map((st) => (
-                  <tr key={st.uid} className="hover:bg-white/40 dark:hover:bg-white/5 transition-colors">
+                  <tr key={st.uid} className={`transition-colors ${st.needsSupport ? "bg-rose-500/5 hover:bg-rose-500/10" : "hover:bg-white/40 dark:hover:bg-white/5"}`}>
                     <td className="px-4 py-2.5">
-                      <div className="font-bold">{st.name}</div>
+                      <div className="font-bold flex items-center gap-1.5">
+                        <span>{st.name}</span>
+                        {st.needsSupport && (
+                          <span className="h-2 w-2 rounded-full bg-rose-500 animate-ping shrink-0" title="Needs Academic Support" />
+                        )}
+                      </div>
                       <div className="text-[11px] text-slate-400">{st.email}</div>
+                      {st.phoneNumber && (
+                        <div className="text-[10px] text-slate-500 font-mono mt-0.5">
+                          📞 {st.phoneNumber}
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 py-2.5">{st.enrolled}</td>
                     <td className="px-4 py-2.5">
@@ -692,13 +739,14 @@ export default function InstructorAnalyticsDashboard({
                         <span className="inline-flex items-center gap-1 text-slate-500 font-semibold">
                           <Clock className="h-3.5 w-3.5" /> Not assessed
                         </span>
-                      ) : st.combinedAvg >= 60 ? (
+                      ) : !st.needsSupport ? (
                         <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold">
-                          <CheckCircle2 className="h-3.5 w-3.5" /> On Track
+                          <CheckCircle2 className="h-3.5 w-3.5" /> {lang === "ar" ? "مستواه ممتاز" : "On Track"}
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-rose-600 dark:text-rose-400 font-bold">
-                          Needs Support
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 shadow-sm animate-pulse">
+                          <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                          <span>{lang === "ar" ? "يحتاج إلى دعم" : "Needs Support"}</span>
                         </span>
                       )}
                     </td>
@@ -720,7 +768,26 @@ export default function InstructorAnalyticsDashboard({
                     </td>
                     {showManageLinks && (
                       <td className="px-4 py-2.5 text-end">
-                        <div className="inline-flex items-center gap-1.5 justify-end">
+                        <div className="inline-flex items-center gap-1.5 justify-end flex-wrap">
+                          {st.needsSupport && (
+                            <button
+                              type="button"
+                              onClick={() => handleContactWhatsApp(st)}
+                              title={
+                                st.phoneNumber
+                                  ? lang === "ar"
+                                    ? "مراسلة الطالب عبر واتساب لتقديم الدعم الأكاديمي"
+                                    : "Contact Student on WhatsApp"
+                                  : lang === "ar"
+                                    ? "لم يسجل الطالب رقم هاتف بعد"
+                                    : "Student has no registered phone number"
+                              }
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-bold text-[11px] bg-[#25D366]/15 hover:bg-[#25D366]/25 text-[#128C7E] dark:text-[#25D366] border border-[#25D366]/40 shadow-sm transition-all active:scale-95 cursor-pointer"
+                            >
+                              <MessageCircle className="h-3.5 w-3.5 shrink-0 text-[#25D366]" />
+                              <span>{lang === "ar" ? "تواصل عبر واتساب" : "Contact on WhatsApp"}</span>
+                            </button>
+                          )}
                           <button
                             type="button"
                             onClick={() => handleToggleStudentActive(st.rawStudent || st)}

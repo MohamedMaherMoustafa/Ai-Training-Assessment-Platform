@@ -7,8 +7,9 @@ import {
 } from "firebase/auth";
 import { ref, get, set, update, remove, push, onValue } from "firebase/database";
 import { auth, rtdb, getSecondaryAuth } from "../lib/firebase";
+import { validateUsername } from "../utils/validators";
 
-const normalizeKey = (value) => value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, "_");
+const normalizeKey = (value) => value.trim().toLowerCase().replace(/[^a-z0-9_@-]/g, "_");
 
 const VALID_EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -121,6 +122,11 @@ export async function createInstructorAccount({
   specEn,
   specAr,
 }) {
+  const usernameCheck = validateUsername(username, "en");
+  if (!usernameCheck.isValid) {
+    throw new Error(usernameCheck.error);
+  }
+
   const displayEmail = email.trim().toLowerCase();
   const authEmail = toFirebaseAuthEmail(displayEmail);
   const cleanUsername = normalizeKey(username || displayEmail.split("@")[0]);
@@ -168,13 +174,20 @@ export async function registerStudentAccount({
   username,
   email,
   password,
+  phoneNumber = "",
   instructorIds,
   lang = "en",
   theme = "light",
 }) {
+  const usernameCheck = validateUsername(username, lang);
+  if (!usernameCheck.isValid) {
+    throw new Error(usernameCheck.error);
+  }
+
   const displayEmail = email.trim().toLowerCase();
   const authEmail = toFirebaseAuthEmail(displayEmail);
   const cleanUsername = normalizeKey(username || displayEmail.split("@")[0]);
+  const cleanPhone = String(phoneNumber || "").replace(/\D/g, "").slice(0, 11);
   const requested = Array.isArray(instructorIds) ? instructorIds : [];
   const instructorRequests = requested.reduce((acc, id) => {
     acc[id] = "pending";
@@ -190,6 +203,8 @@ export async function registerStudentAccount({
     username: cleanUsername,
     email: displayEmail,
     authEmail,
+    phoneNumber: cleanPhone,
+    phone: cleanPhone,
     displayName: fullName,
     name: { en: fullName, ar: fullName },
     instructorIds: [],
@@ -351,7 +366,7 @@ export async function deleteUserRecord(uid, username, email) {
  * Update Profile Name and/or Password for any role (admin, instructor, student).
  * Reflects immediately across RTDB, Auth, and linked records.
  */
-export async function updateUserProfileAndCredentials(currentUser, { displayName, newPassword }) {
+export async function updateUserProfileAndCredentials(currentUser, { displayName, newPassword, phoneNumber }) {
   if (!currentUser) throw new Error("NO_CURRENT_USER");
   const trimmedName = (displayName || "").trim();
   if (!trimmedName) throw new Error("DISPLAY_NAME_REQUIRED");
@@ -365,6 +380,11 @@ export async function updateUserProfileAndCredentials(currentUser, { displayName
     };
     if (newPassword && newPassword.trim()) {
       adminUpdates.password = newPassword.trim();
+    }
+    if (phoneNumber !== undefined) {
+      const cleanPhone = String(phoneNumber || "").replace(/\D/g, "").slice(0, 11);
+      adminUpdates.phoneNumber = cleanPhone;
+      adminUpdates.phone = cleanPhone;
     }
     await update(ref(rtdb, "admins/admin_123"), adminUpdates);
 
@@ -400,6 +420,11 @@ export async function updateUserProfileAndCredentials(currentUser, { displayName
   };
   if (newPassword && newPassword.trim()) {
     userUpdates.password = newPassword.trim();
+  }
+  if (phoneNumber !== undefined) {
+    const cleanPhone = String(phoneNumber || "").replace(/\D/g, "").slice(0, 11);
+    userUpdates.phoneNumber = cleanPhone;
+    userUpdates.phone = cleanPhone;
   }
   await update(ref(rtdb, `users/${currentUser.uid}`), userUpdates);
 

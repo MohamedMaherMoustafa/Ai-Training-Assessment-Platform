@@ -19,6 +19,7 @@ import {
 import { useTheme } from "../../context/ThemeContext";
 import { useLang } from "../../context/LangContext";
 import { usePopup } from "../../context/PopupContext";
+import { validateUsername } from "../../utils/validators";
 import LanguageDropdown from "../../components/common/LanguageDropdown";
 
 export default function RegisterPage() {
@@ -34,6 +35,7 @@ export default function RegisterPage() {
   const [fullName, setFullName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [selectedIds, setSelectedIds] = useState([]);
@@ -43,9 +45,37 @@ export default function RegisterPage() {
     setFullName("");
     setUsername("");
     setEmail("");
+    setPhoneNumber("");
     setPassword("");
     setConfirmPassword("");
     setSelectedIds([]);
+  };
+
+  const handlePhoneChange = (e) => {
+    // Strictly prevent letters, symbols, and spaces by keeping only numerical digits (up to 11)
+    const digitsOnly = e.target.value.replace(/\D/g, "").slice(0, 11);
+    setPhoneNumber(digitsOnly);
+  };
+
+  const handlePhoneKeyDown = (e) => {
+    // Allow functional navigation and editing keys
+    if (
+      ["Backspace", "Delete", "Tab", "ArrowLeft", "ArrowRight", "Home", "End", "Enter"].includes(e.key) ||
+      ((e.ctrlKey || e.metaKey) && ["a", "c", "v", "x"].includes(e.key.toLowerCase()))
+    ) {
+      return;
+    }
+    // Block any non-digit input (letters, symbols, spaces)
+    if (!/^\d$/.test(e.key)) {
+      e.preventDefault();
+    }
+  };
+
+  const handlePhonePaste = (e) => {
+    e.preventDefault();
+    const text = (e.clipboardData || window.clipboardData)?.getData("text") || "";
+    const digitsOnly = text.replace(/\D/g, "").slice(0, 11);
+    setPhoneNumber(digitsOnly);
   };
 
   useEffect(() => {
@@ -83,6 +113,15 @@ export default function RegisterPage() {
       toast.error(t("auth.passwordMismatch"));
       return;
     }
+    const uCheck = validateUsername(username, lang);
+    if (!uCheck.isValid) {
+      toast.error(uCheck.error);
+      return;
+    }
+    if (!phoneNumber || phoneNumber.trim().length !== 11) {
+      toast.error(t("auth.phoneValidation"));
+      return;
+    }
     if (instructors.length > 0 && selectedIds.length === 0) {
       toast.error(t("auth.selectAtLeastOneInstructor"));
       return;
@@ -94,6 +133,7 @@ export default function RegisterPage() {
         fullName: fullName.trim(),
         username: username.trim(),
         email: email.trim(),
+        phoneNumber: phoneNumber.trim(),
         password,
         instructorIds: selectedIds,
         lang,
@@ -211,34 +251,81 @@ export default function RegisterPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs sm:text-[12.5px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    {t("auth.username")}
-                  </label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs sm:text-[12.5px] font-bold text-slate-700 dark:text-slate-300">
+                      {t("auth.username")} <span className="text-rose-500">*</span>
+                    </label>
+                    <span
+                      className={`text-[10px] font-mono font-bold px-1.5 py-0.2 rounded ${
+                        username.length >= 8 &&
+                        /[@_]/.test(username) &&
+                        !/[^a-zA-Z0-9@_]/.test(username)
+                          ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                          : "bg-slate-200/60 dark:bg-slate-800 text-slate-500"
+                      }`}
+                    >
+                      {username.length >= 8 ? `${username.length} chars` : `${username.length}/8 min`}
+                    </span>
+                  </div>
                   <input
                     type="text"
                     name="reg_username"
                     autoComplete="off"
+                    required
                     value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="w-full px-3.5 py-2 sm:py-2.5 glass-input text-xs sm:text-sm"
+                    onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9@_]/g, ""))}
+                    placeholder={t("auth.usernamePlaceholder") || "e.g. student_01 or student@1"}
+                    className="w-full px-3.5 py-2 sm:py-2.5 glass-input text-xs sm:text-sm font-mono tracking-wide"
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs sm:text-[12.5px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  {t("auth.email")}
-                </label>
-                <input
-                  type="text"
-                  name="reg_email"
-                  autoComplete="off"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="student@academy.com or student@123"
-                  className="w-full px-3.5 py-2 sm:py-2.5 glass-input text-xs sm:text-sm"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div>
+                  <label className="block text-xs sm:text-[12.5px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    {t("auth.email")} <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="reg_email"
+                    autoComplete="off"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="student@academy.com or student@123"
+                    className="w-full px-3.5 py-2 sm:py-2.5 glass-input text-xs sm:text-sm"
+                  />
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs sm:text-[12.5px] font-bold text-slate-700 dark:text-slate-300">
+                      {t("auth.phoneNumber")} <span className="text-rose-500">*</span>
+                    </label>
+                    <span
+                      className={`text-[10px] font-mono font-bold px-1.5 py-0.2 rounded ${
+                        phoneNumber.length === 11
+                          ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                          : "bg-slate-200/60 dark:bg-slate-800 text-slate-500"
+                      }`}
+                    >
+                      {phoneNumber.length}/11
+                    </span>
+                  </div>
+                  <input
+                    type="tel"
+                    name="reg_phone"
+                    autoComplete="tel"
+                    required
+                    inputMode="numeric"
+                    maxLength={11}
+                    value={phoneNumber}
+                    onChange={handlePhoneChange}
+                    onKeyDown={handlePhoneKeyDown}
+                    onPaste={handlePhonePaste}
+                    placeholder={t("auth.phonePlaceholder")}
+                    className="w-full px-3.5 py-2 sm:py-2.5 glass-input text-xs sm:text-sm font-mono tracking-wider"
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">

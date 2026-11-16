@@ -30,6 +30,7 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
     "";
 
   const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -40,6 +41,7 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
   useEffect(() => {
     if (isOpen) {
       setFullName(currentDisplayName);
+      setPhone(user?.phoneNumber || user?.phone || "");
       setNewPassword("");
       setConfirmPassword("");
       setShowNewPassword(false);
@@ -47,7 +49,7 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
       setErrorMsg("");
       setSaving(false);
     }
-  }, [isOpen, currentDisplayName]);
+  }, [isOpen, currentDisplayName, user?.phoneNumber, user?.phone]);
 
   // Handle ESC key to close
   useEffect(() => {
@@ -72,6 +74,12 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
       return;
     }
 
+    const trimmedPhone = phone.trim();
+    if (trimmedPhone && trimmedPhone.length !== 11) {
+      setErrorMsg(t("auth.phoneValidation") || "Phone number must be exactly 11 digits");
+      return;
+    }
+
     const trimmedPassword = newPassword.trim();
     const trimmedConfirm = confirmPassword.trim();
 
@@ -90,6 +98,7 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
       setSaving(true);
       const updatedUser = await updateUserProfileAndCredentials(user, {
         displayName: trimmedName,
+        phoneNumber: trimmedPhone,
         newPassword: trimmedPassword || undefined,
       });
 
@@ -192,6 +201,33 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
                 className="w-full pl-10 pr-3.5 rtl:pl-3.5 rtl:pr-10 py-2.5 text-xs sm:text-sm glass-input"
               />
             </div>
+          </div>
+
+          {/* Phone Number */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                {t("auth.phoneNumber") || "Phone Number"}
+              </label>
+              <span
+                className={`text-[10px] font-mono font-bold px-1.5 py-0.2 rounded ${
+                  phone.length === 11
+                    ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                    : "bg-slate-200/60 dark:bg-slate-800 text-slate-500"
+                }`}
+              >
+                {phone.length}/11
+              </span>
+            </div>
+            <input
+              type="tel"
+              inputMode="numeric"
+              maxLength={11}
+              value={phone}
+              onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 11))}
+              placeholder={t("auth.phonePlaceholder") || "01xxxxxxxxx (11 digits)"}
+              className="w-full px-3.5 py-2.5 text-xs sm:text-sm glass-input font-mono tracking-wider"
+            />
           </div>
 
           {/* New Password */}

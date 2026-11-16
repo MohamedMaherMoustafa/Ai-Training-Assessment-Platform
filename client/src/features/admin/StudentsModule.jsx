@@ -11,8 +11,6 @@ import {
   Clock,
   Search,
   Users,
-  ShieldCheck,
-  ShieldAlert,
 } from "lucide-react";
 import {
   approveStudentRequest,
@@ -215,6 +213,11 @@ export default function StudentsModule({ filterInstructorId = null }) {
                     <div className="font-bold text-sm">{req.displayName}</div>
                     <div className="text-xs text-slate-500">
                       @{req.username} · {req.email}
+                      {(req.phoneNumber || req.phone) && (
+                        <span className="ms-2 font-mono text-emerald-600 dark:text-emerald-400">
+                          📞 {req.phoneNumber || req.phone}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -382,7 +385,12 @@ export default function StudentsModule({ filterInstructorId = null }) {
                         {st.displayName}
                       </td>
                       <td className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400">
-                        @{st.username} · {st.email}
+                        <div>@{st.username} · {st.email}</div>
+                        {(st.phoneNumber || st.phone) && (
+                          <div className="text-[11px] text-slate-500 font-mono mt-0.5 font-medium">
+                            📞 {st.phoneNumber || st.phone}
+                          </div>
+                        )}
                       </td>
                       <td className="px-4 py-3">
                         <span

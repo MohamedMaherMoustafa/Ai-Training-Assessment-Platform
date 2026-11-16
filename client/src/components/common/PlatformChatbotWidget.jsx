@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import toast from "react-hot-toast";
 import {
   Bot,
@@ -18,6 +19,8 @@ import {
   Copy,
   Check,
   Volume2,
+  Languages,
+  Loader2,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useLang } from "../../context/LangContext";
@@ -260,6 +263,7 @@ export default function PlatformChatbotWidget() {
   const [recording, setRecording] = useState(false);
   const [recordSeconds, setRecordSeconds] = useState(0);
   const [copiedMsgId, setCopiedMsgId] = useState(null);
+  const [translatingMsgId, setTranslatingMsgId] = useState(null);
 
   const fileInputRef = useRef(null);
   const mediaRecorderRef = useRef(null);
@@ -520,6 +524,90 @@ export default function PlatformChatbotWidget() {
     setTimeout(() => setCopiedMsgId(null), 2000);
   };
 
+  const handleTranslateMessage = async (msgId) => {
+    const targetMsg = messages.find((m) => m.id === msgId);
+    if (!targetMsg) return;
+
+    // Toggle if translation is already cached
+    if (targetMsg.translatedText) {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === msgId ? { ...m, showTranslation: !m.showTranslation } : m
+        )
+      );
+      return;
+    }
+
+    setTranslatingMsgId(msgId);
+    try {
+      let arabicText = "";
+      // 1. Try Platform AI proxy translate endpoint
+      try {
+        const res = await axios.post(
+          "http://localhost:3001/api/chat/translate",
+          {
+            text: targetMsg.text,
+            from: "en",
+            to: "ar",
+          },
+          { timeout: 15000 }
+        );
+        if (res.data?.translatedText) {
+          arabicText = res.data.translatedText;
+        }
+      } catch {
+        // 2. Direct browser fallback via MyMemory
+        const lines = String(targetMsg.text || "").split("\n");
+        const translatedLines = [];
+        for (const line of lines) {
+          if (!line.trim()) {
+            translatedLines.push("");
+            continue;
+          }
+          if (line.trim().startsWith("```")) {
+            translatedLines.push(line);
+            continue;
+          }
+          try {
+            const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(
+              line.trim()
+            )}&langpair=en|ar`;
+            const mRes = await axios.get(url, { timeout: 8000 });
+            const translated = mRes.data?.responseData?.translatedText;
+            translatedLines.push(translated && translated.trim() ? translated.trim() : line);
+          } catch {
+            translatedLines.push(line);
+          }
+        }
+        arabicText = translatedLines.join("\n");
+      }
+
+      if (arabicText && arabicText.trim()) {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === msgId
+              ? { ...m, translatedText: arabicText.trim(), showTranslation: true }
+              : m
+          )
+        );
+        toast.success(
+          lang === "ar" ? "تمت ترجمة الرد إلى العربية!" : "Translated reply to Arabic!"
+        );
+      } else {
+        toast.error(
+          lang === "ar" ? "تعذر ترجمة الرد حالياً." : "Failed to translate reply."
+        );
+      }
+    } catch (err) {
+      console.error("Translation error:", err);
+      toast.error(
+        lang === "ar" ? "تعذر ترجمة الرد حالياً." : "Failed to translate reply."
+      );
+    } finally {
+      setTranslatingMsgId(null);
+    }
+  };
+
   const resetChat = () => {
     setMessages([
       {
@@ -728,15 +816,36 @@ export default function PlatformChatbotWidget() {
                   )}
 
                   {/* Message Text with Structured Typography */}
-                  <div className="text-[13px] sm:text-[13.5px]">
+                  <div
+                    className="text-[13px] sm:text-[13.5px]"
+                    dir={m.showTranslation ? "rtl" : undefined}
+                  >
+                    {m.showTranslation && m.translatedText && (
+                      <div className="mb-2 flex items-center justify-between text-[10.5px] text-indigo-600 dark:text-cyan-400 font-bold bg-indigo-500/10 dark:bg-cyan-500/10 px-2.5 py-1 rounded-lg border border-indigo-400/20">
+                        <span className="flex items-center gap-1.5">
+                          <Languages className="h-3 w-3" />
+                          <span>{lang === "ar" ? "مترجم إلى العربية" : "Translated to Arabic"}</span>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleTranslateMessage(m.id)}
+                          className="hover:underline text-[10px] text-slate-500 dark:text-slate-400 font-semibold cursor-pointer"
+                        >
+                          {lang === "ar" ? "عرض الأصل" : "Show original"}
+                        </button>
+                      </div>
+                    )}
                     {m.sender === "user" ? (
                       <p className="whitespace-pre-line leading-relaxed font-medium">{m.text}</p>
                     ) : (
-                      <FormattedBotText text={m.text} lang={lang} />
+                      <FormattedBotText
+                        text={m.showTranslation && m.translatedText ? m.translatedText : m.text}
+                        lang={m.showTranslation ? "ar" : lang}
+                      />
                     )}
                   </div>
 
-                  {/* Bot Bubble Bottom Info (Model tag + Copy + Time) */}
+                  {/* Bot Bubble Bottom Info (Model tag + Translate + Copy + Time) */}
                   {m.sender === "bot" && (
                     <div className="mt-2.5 pt-2 border-t border-slate-200/60 dark:border-white/10 flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500">
                       <span className="flex items-center gap-1 font-semibold text-indigo-600 dark:text-cyan-400">
@@ -744,11 +853,53 @@ export default function PlatformChatbotWidget() {
                         {m.model || (lang === "ar" ? "المساعد الذكي" : "AI Assistant")}
                       </span>
                       <div className="flex items-center gap-2">
+                        {/* Translate to Arabic Button (Beside Copy Button) */}
                         <button
                           type="button"
-                          onClick={() => copyMessage(m.text, m.id)}
-                          className="hover:text-slate-700 dark:hover:text-slate-200 flex items-center gap-0.5"
-                          title="Copy reply"
+                          onClick={() => handleTranslateMessage(m.id)}
+                          disabled={translatingMsgId === m.id}
+                          className={`flex items-center gap-1 px-1.5 py-0.5 rounded transition-all cursor-pointer ${
+                            m.showTranslation
+                              ? "bg-indigo-500/15 text-indigo-600 dark:text-cyan-400 font-bold"
+                              : "hover:text-slate-700 dark:hover:text-slate-200"
+                          }`}
+                          title={
+                            m.showTranslation
+                              ? lang === "ar"
+                                ? "عرض النص الأصلي"
+                                : "Show original English"
+                              : lang === "ar"
+                              ? "ترجمة الرد إلى العربية"
+                              : "Translate reply to Arabic"
+                          }
+                        >
+                          {translatingMsgId === m.id ? (
+                            <Loader2 className="h-3 w-3 animate-spin text-indigo-500" />
+                          ) : (
+                            <Languages className="h-3 w-3" />
+                          )}
+                          <span className="text-[9.5px]">
+                            {m.showTranslation
+                              ? lang === "ar"
+                                ? "الأصل"
+                                : "Original"
+                              : lang === "ar"
+                              ? "ترجمة"
+                              : "Translate to Arabic"}
+                          </span>
+                        </button>
+
+                        {/* Copy Button */}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            copyMessage(
+                              m.showTranslation && m.translatedText ? m.translatedText : m.text,
+                              m.id
+                            )
+                          }
+                          className="hover:text-slate-700 dark:hover:text-slate-200 flex items-center gap-0.5 cursor-pointer"
+                          title={lang === "ar" ? "نسخ الرد" : "Copy reply"}
                         >
                           {copiedMsgId === m.id ? (
                             <Check className="h-3 w-3 text-emerald-500" />

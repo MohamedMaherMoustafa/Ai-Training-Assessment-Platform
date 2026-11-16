@@ -335,5 +335,99 @@ router.post("/", async (req, res) => {
   });
 });
 
+/**
+ * POST /api/chat/translate
+ * Translates educational chatbot output from English into Arabic.
+ * Priority: Gemini (if key) -> Ollama (if available) -> Google GTX fallback
+ */
+router.post("/translate", async (req, res) => {
+  const { text = "", from = "en", to = "ar" } = req.body || {};
+  if (!text || !String(text).trim()) {
+    return res.status(400).json({ error: "No text provided for translation." });
+  }
+
+  const cleanText = String(text).trim();
+
+  // Priority 1: Gemini if configured
+  if (GEMINI_API_KEY) {
+    try {
+      const prompt = `You are a professional educational translator. Translate the following educational text from English into natural, fluent, and precise Modern Standard Arabic (فصحى معاصرة). Preserve formatting, bullet points, numbers, code blocks, and markdown structure. Return ONLY the translated Arabic text with no additional commentary.\n\nText:\n${cleanText}`;
+      const payload = {
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.25, maxOutputTokens: 2500 },
+      };
+      const primaryModel = GEMINI_MODEL || "gemini-3.5-flash";
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${primaryModel}:generateContent?key=${GEMINI_API_KEY}`;
+      const gRes = await axios.post(url, payload, {
+        headers: { "Content-Type": "application/json" },
+        timeout: 30000,
+      });
+      const candidate = gRes.data?.candidates?.[0];
+      const translated = candidate?.content?.parts?.map((p) => p.text).filter(Boolean).join("\n");
+      if (translated && translated.trim()) {
+        return res.json({ translatedText: translated.trim(), provider: "gemini" });
+      }
+    } catch (gErr) {
+      console.warn("Gemini translation failed, trying fallback:", gErr.message);
+    }
+  }
+
+  // Priority 2: Local Ollama model
+  try {
+    const model = await resolveAvailableModel();
+    if (model) {
+      const oRes = await axios.post(
+        `${OLLAMA_BASE}/api/generate`,
+        {
+          model,
+          prompt: `Translate the following educational text from English to Arabic. Return only the Arabic translation:\n\n${cleanText}`,
+          stream: false,
+        },
+        { timeout: 30000 }
+      );
+      const translated = String(oRes.data?.response || "").trim();
+      if (translated) {
+        return res.json({ translatedText: translated, provider: "ollama" });
+      }
+    }
+  } catch (oErr) {
+    console.warn("Ollama translation unavailable:", oErr.message);
+  }
+
+  // Priority 3: Translation Fallback via MyMemory
+  try {
+    const lines = cleanText.split("\n");
+    const translatedLines = [];
+    for (const line of lines) {
+      if (!line.trim()) {
+        translatedLines.push("");
+        continue;
+      }
+      if (line.trim().startsWith("```")) {
+        translatedLines.push(line);
+        continue;
+      }
+      try {
+        const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(
+          line.trim()
+        )}&langpair=${from}|${to}`;
+        const mRes = await axios.get(url, { timeout: 8000 });
+        const translated = mRes.data?.responseData?.translatedText;
+        translatedLines.push(translated && translated.trim() ? translated.trim() : line);
+      } catch {
+        translatedLines.push(line);
+      }
+    }
+    const finalTranslation = translatedLines.join("\n").trim();
+    if (finalTranslation) {
+      return res.json({ translatedText: finalTranslation, provider: "mymemory" });
+    }
+  } catch (mErr) {
+    console.warn("MyMemory translation failed:", mErr.message);
+  }
+
+  return res.status(500).json({ error: "Translation service temporarily unavailable." });
+});
+
 module.exports = router;
 module.exports._test = { summarizeExtractive, searchContextLines, buildFallbackReply, extractKeywords, callGeminiChat };

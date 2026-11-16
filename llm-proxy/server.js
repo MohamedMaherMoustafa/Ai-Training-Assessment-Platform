@@ -27,6 +27,10 @@ app.get("/health", (_req, res) =>
 app.use("/api/quiz", quizRouter);
 app.use("/api/feedback", feedbackRouter);
 app.use("/api/chat", chatRouter);
+app.use("/api/translate", (req, res, next) => {
+  req.url = "/translate";
+  chatRouter(req, res, next);
+});
 
 app.use((err, _req, res, _next) => {
   console.error(err);

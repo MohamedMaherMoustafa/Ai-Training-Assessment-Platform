@@ -17,6 +17,7 @@ import {
   UserCheck,
   UserX,
   ShieldAlert,
+  Loader2,
 } from "lucide-react";
 import {
   approveQuizRetake,
@@ -78,7 +79,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
   const [quizTitle, setQuizTitle] = useState("");
   const [durationMinutes, setDurationMinutes] = useState(10);
   const [questions, setQuestions] = useState([EMPTY_QUESTION()]);
-  const [draftingAI, setDraftingAI] = useState(false);
+  const [draftingAI, setDraftingAI] = useState(null);
 
   // Student quiz player + timer + instant review
   const [activeQuiz, setActiveQuiz] = useState(null);
@@ -252,18 +253,22 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
 
   const selectedCourse = courses.find((c) => c.id === courseId);
 
-  const handleDraftWithAI = async () => {
+  const handleDraftWithAI = async (count = 10) => {
     const lesson = selectedCourse?.lessons?.find((l) => l.id === lessonId);
     const text = lesson?.content || selectedCourse?.description?.[lang] || "";
     if (!text || text.trim().length < 20) {
-      toast.error("Select a lesson with content first so Platform AI has text to draft from.");
+      toast.error(
+        lang === "ar"
+          ? "اختر درساً يحتوي على محتوى أولاً ليتمكن ذكاء المنصة من توليد الأسئلة منه."
+          : "Select a lesson with content first so Platform AI has text to draft from."
+      );
       return;
     }
-    setDraftingAI(true);
+    setDraftingAI(count);
     try {
       const res = await axios.post(
         "http://localhost:3001/api/quiz/generate",
-        { text, lang, courseId, count: 10 },
+        { text, lang, courseId, count },
         { timeout: 120000 }
       );
       if (Array.isArray(res.data?.questions) && res.data.questions.length > 0) {
@@ -274,12 +279,20 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
             correctOptionIds: getCorrectIds(q),
           }))
         );
-        toast.success(`Platform AI drafted ${res.data.questions.length} MCQs!`);
+        toast.success(
+          lang === "ar"
+            ? `قام ذكاء المنصة بتوليد ${res.data.questions.length} سؤال اختيار من متعدد!`
+            : `Platform AI drafted ${res.data.questions.length} MCQs!`
+        );
       }
     } catch {
-      toast.error("Platform AI service is offline right now — you can still add questions manually.");
+      toast.error(
+        lang === "ar"
+          ? "خدمة ذكاء المنصة غير متصلة حالياً — يمكنك إضافة الأسئلة يدوياً."
+          : "Platform AI service is offline right now — you can still add questions manually."
+      );
     } finally {
-      setDraftingAI(false);
+      setDraftingAI(null);
     }
   };
 
@@ -753,16 +766,80 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 pt-1">
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 pt-1">
+            {/* Draft 10 Questions */}
             <button
               type="button"
-              onClick={handleDraftWithAI}
-              disabled={draftingAI}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white text-xs font-bold shadow-lg shadow-purple-500/25 active:scale-95 transition-all cursor-pointer disabled:opacity-60"
+              onClick={() => handleDraftWithAI(10)}
+              disabled={Boolean(draftingAI)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white text-xs font-bold shadow-lg shadow-purple-500/25 active:scale-95 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+              title={
+                lang === "ar"
+                  ? "توليد 10 أسئلة اختيار من متعدد بواسطة ذكاء المنصة"
+                  : "Draft 10 MCQs with Platform AI"
+              }
             >
-              <Sparkles className="h-4 w-4" />
-              {draftingAI ? t("app.loading") : t("quizzes.draftWithAI")}
+              {draftingAI === 10 ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="h-4 w-4" />
+              )}
+              {draftingAI === 10 ? (
+                <span>{lang === "ar" ? "جارٍ التوليد (10)..." : "Drafting 10..."}</span>
+              ) : (
+                <span>{t("quizzes.draft10WithAI") || "Draft 10 Questions with AI"}</span>
+              )}
             </button>
+
+            {/* Draft 15 Questions */}
+            <button
+              type="button"
+              onClick={() => handleDraftWithAI(15)}
+              disabled={Boolean(draftingAI)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white text-xs font-bold shadow-lg shadow-violet-500/25 active:scale-95 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+              title={
+                lang === "ar"
+                  ? "توليد 15 سؤالاً اختيار من متعدد بواسطة ذكاء المنصة"
+                  : "Draft 15 MCQs with Platform AI"
+              }
+            >
+              {draftingAI === 15 ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="h-4 w-4" />
+              )}
+              {draftingAI === 15 ? (
+                <span>{lang === "ar" ? "جارٍ التوليد (15)..." : "Drafting 15..."}</span>
+              ) : (
+                <span>{t("quizzes.draft15WithAI") || "Draft 15 Questions with AI"}</span>
+              )}
+            </button>
+
+            {/* Draft 20 Questions */}
+            <button
+              type="button"
+              onClick={() => handleDraftWithAI(20)}
+              disabled={Boolean(draftingAI)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 hover:from-purple-500 hover:to-rose-500 text-white text-xs font-bold shadow-lg shadow-pink-500/25 active:scale-95 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+              title={
+                lang === "ar"
+                  ? "توليد 20 سؤالاً اختيار من متعدد بواسطة ذكاء المنصة"
+                  : "Draft 20 MCQs with Platform AI"
+              }
+            >
+              {draftingAI === 20 ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="h-4 w-4" />
+              )}
+              {draftingAI === 20 ? (
+                <span>{lang === "ar" ? "جارٍ التوليد (20)..." : "Drafting 20..."}</span>
+              ) : (
+                <span>{t("quizzes.draft20WithAI") || "Draft 20 Questions with AI"}</span>
+              )}
+            </button>
+
+            {/* Manual Add Question */}
             <button
               type="button"
               onClick={() => setQuestions((prev) => [...prev, EMPTY_QUESTION()])}

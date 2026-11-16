@@ -10,6 +10,7 @@ import {
   updateUserRecord,
 } from "../../services/platformService";
 import { useLang } from "../../context/LangContext";
+import { validateUsername } from "../../utils/validators";
 
 const INITIAL_FORM = {
   nameEn: "",
@@ -53,6 +54,13 @@ export default function InstructorsModule() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!editingUid) {
+      const uCheck = validateUsername(form.username, lang);
+      if (!uCheck.isValid) {
+        toast.error(uCheck.error);
+        return;
+      }
+    }
     setSaving(true);
     try {
       if (editingUid) {
@@ -194,15 +202,39 @@ export default function InstructorsModule() {
               />
             </div>
             <div>
-              <label className="glass-form-label">{t("auth.username")}</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="glass-form-label mb-0">
+                  {t("auth.username")} <span className="text-rose-500">*</span>
+                </label>
+                {!editingUid && (
+                  <span
+                    className={`text-[10px] font-mono font-bold px-1.5 py-0.2 rounded ${
+                      form.username.length >= 8 &&
+                      /[@_]/.test(form.username) &&
+                      !/[^a-zA-Z0-9@_]/.test(form.username)
+                        ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                        : "bg-slate-200/60 dark:bg-slate-800 text-slate-500"
+                    }`}
+                  >
+                    {form.username.length >= 8 ? `${form.username.length} chars` : `${form.username.length}/8 min`}
+                  </span>
+                )}
+              </div>
               <input
                 required
                 disabled={Boolean(editingUid)}
                 value={form.username}
-                onChange={(e) => setForm({ ...form, username: e.target.value })}
-                placeholder="teacher1"
-                className="w-full px-3.5 py-2.5 glass-input text-sm disabled:opacity-60"
+                onChange={(e) => setForm({ ...form, username: e.target.value.replace(/[^a-zA-Z0-9@_]/g, "") })}
+                placeholder="e.g. teacher_01 or teacher@1"
+                className="w-full px-3.5 py-2.5 glass-input text-sm disabled:opacity-60 font-mono tracking-wide"
               />
+              {!editingUid && (
+                <p className="text-[11px] text-slate-400 mt-1">
+                  {lang === "ar"
+                    ? "8 أحرف على الأقل، ويجب أن يحتوي على رمز (@ أو _) فقط دون مسافات."
+                    : "Min 8 chars, must include special character (@ or _) only, no spaces."}
+                </p>
+              )}
             </div>
             <div>
               <label className="glass-form-label">{t("auth.email")}</label>

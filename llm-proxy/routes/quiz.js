@@ -13,7 +13,7 @@ const PREFERRED_MODEL = process.env.OLLAMA_MODEL || "academy-tutor";
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash";
 
-async function generateQuizWithGemini(text, lang = "en", count = 5) {
+async function generateQuizWithGemini(text, lang = "en", count = 10) {
   if (!GEMINI_API_KEY) return null;
   const prompt = [
     `You are an expert educational exam designer.`,
@@ -102,7 +102,7 @@ function generateGroundedLocalQuiz(rawText, lang = "en", count = 10) {
     .filter((s) => s.length >= 28 && s.length <= 220);
 
   const pool = sentences.length > 0 ? sentences : [clean.slice(0, 140).trim()];
-  const total = Math.min(Math.max(Number(count) || 10, 1), 15);
+  const total = Math.min(Math.max(Number(count) || 10, 1), 30);
   const questions = [];
 
   for (let i = 0; i < total; i += 1) {
@@ -153,6 +153,7 @@ function generateGroundedLocalQuiz(rawText, lang = "en", count = 10) {
  */
 router.post("/generate", upload.single("file"), async (req, res) => {
   let { text = "", lang = "en", count = 10 } = req.body;
+  count = Math.min(Math.max(parseInt(count, 10) || 10, 1), 30);
 
   try {
     if (req.file && req.file.mimetype === "application/pdf") {
