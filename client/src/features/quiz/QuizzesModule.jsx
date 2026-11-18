@@ -95,6 +95,19 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
   const [privacyRestricted, setPrivacyRestricted] = useState(false);
   const [privacyCount, setPrivacyCount] = useState(0);
 
+  // Webcam Proctoring State
+  const camStreamRef = useRef(null);
+  const camVideoRef = useRef(null);
+  const camDetectorRef = useRef(null);
+  const camDetectionLoopRef = useRef(null);
+  const camWarningShownRef = useRef(false);
+  const [camState, setCamState] = useState("idle"); // "idle"|"requesting"|"active"|"denied"|"lost"
+  const [showCamPreview, setShowCamPreview] = useState(false);
+  const [showCamGate, setShowCamGate] = useState(false);
+  const [pendingQuiz, setPendingQuiz] = useState(null);
+  const [camWarningVisible, setCamWarningVisible] = useState(false);
+  const camGateVideoRef = useRef(null);
+
   const loadAll = async () => {
     setLoading(true);
     try {
@@ -224,6 +237,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
       setPrivacyRestricted(false);
       setPrivacyCount(0);
       strikeCountRef.current = 0;
+      stopCamera();
 
       try {
         await markQuizCheatingTerminated(quizToTerminate.id, user.uid, {
@@ -271,6 +285,173 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
     // Short 1.5s grace for window blur only (allowing window focus to settle without blocking shortcuts)
     resumeGraceUntilRef.current = Date.now() + 1500;
     lastViolationTimeRef.current = 0;
+  };
+
+  // ── Webcam Helpers ─────────────────────────────────────────────────────────
+  const stopCamera = () => {
+    if (camDetectionLoopRef.current) {
+      cancelAnimationFrame(camDetectionLoopRef.current);
+      camDetectionLoopRef.current = null;
+    }
+    if (camStreamRef.current) {
+      camStreamRef.current.getTracks().forEach((t) => t.stop());
+      camStreamRef.current = null;
+    }
+    setCamState("idle");
+    setShowCamPreview(false);
+    camWarningShownRef.current = false;
+  };
+
+  const startCamera = async (videoEl) => {
+    setCamState("requesting");
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user", width: { ideal: 320 }, height: { ideal: 240 } },
+        audio: false,
+      });
+      camStreamRef.current = stream;
+      if (videoEl) {
+        videoEl.srcObject = stream;
+        await videoEl.play().catch(() => {});
+      }
+      if (camVideoRef.current) {
+        camVideoRef.current.srcObject = stream;
+        await camVideoRef.current.play().catch(() => {});
+      }
+      setCamState("active");
+      setShowCamPreview(true);
+      return true;
+    } catch {
+      setCamState("denied");
+      return false;
+    }
+  };
+
+  const loadCocoSsd = async () => {
+    if (camDetectorRef.current) return camDetectorRef.current;
+    // Load TF.js and COCO-SSD via CDN if not already loaded
+    if (!window.cocoSsd) {
+      await new Promise((resolve, reject) => {
+        if (document.getElementById("tfjs-cdn")) { resolve(); return; }
+        const s1 = document.createElement("script");
+        s1.id = "tfjs-cdn";
+        s1.src = "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js";
+        s1.onload = () => {
+          const s2 = document.createElement("script");
+          s2.src = "https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js";
+          s2.onload = resolve;
+          s2.onerror = reject;
+          document.head.appendChild(s2);
+        };
+        s1.onerror = reject;
+        document.head.appendChild(s1);
+      });
+    }
+    // Wait for cocoSsd to be available on window
+    let attempts = 0;
+    while (!window.cocoSsd && attempts < 50) {
+      await new Promise((r) => setTimeout(r, 200));
+      attempts++;
+    }
+    if (window.cocoSsd) {
+      camDetectorRef.current = await window.cocoSsd.load();
+    }
+    return camDetectorRef.current;
+  };
+
+  const startMobileDetection = async () => {
+    const detector = await loadCocoSsd().catch(() => null);
+    if (!detector) return; // If CDN fails, skip detection gracefully
+    const detect = async () => {
+      if (!camVideoRef.current || !camStreamRef.current) return;
+      try {
+        const predictions = await detector.detect(camVideoRef.current);
+        const hasPhone = predictions.some(
+          (p) => p.class === "cell phone" && p.score > 0.55
+        );
+        if (hasPhone) {
+          // Immediate termination - mobile detected
+          stopCamera();
+          // Force 2nd strike to trigger immediate termination
+          strikeCountRef.current = 1; // next call will make it 2
+          handlePrivacyViolation("mobile_phone_detected");
+          return;
+        }
+      } catch { /* ignore frame errors */ }
+      camDetectionLoopRef.current = requestAnimationFrame(detect);
+    };
+    camDetectionLoopRef.current = requestAnimationFrame(detect);
+  };
+
+  const handleCamLost = async () => {
+    if (!camWarningShownRef.current) {
+      // First camera loss: show warning
+      camWarningShownRef.current = true;
+      setCamState("lost");
+      setCamWarningVisible(true);
+      setShowCamPreview(false);
+    } else {
+      // Second camera loss: terminate quiz
+      stopCamera();
+      strikeCountRef.current = 1; // ensure next violation terminates
+      handlePrivacyViolation("camera_lost_second");
+    }
+  };
+
+  const handleCamGateAllow = async () => {
+    const ok = await startCamera(camGateVideoRef.current);
+    if (ok) {
+      setShowCamGate(false);
+      const qz = pendingQuiz;
+      setPendingQuiz(null);
+      // Now actually start the quiz
+      await markQuizEntered(qz.id, user.uid, {
+        studentName: user.displayName || user.email,
+        quizTitle: qz.title,
+        courseId: qz.courseId,
+        instructorId: qz.instructorId,
+      });
+      await loadAll();
+      try { sessionStorage.removeItem(`quiz_strikes_${qz.id}_${user?.uid || "guest"}`); } catch {}
+      strikeCountRef.current = 0;
+      privacyRestrictedRef.current = false;
+      lastViolationTimeRef.current = 0;
+      resumeGraceUntilRef.current = Date.now() + 1500;
+      setLastReview(null);
+      setPrivacyRestricted(false);
+      setPrivacyCount(0);
+      setActiveQuiz(qz);
+      setAnswers({});
+      setSecondsLeft(Math.max((Number(qz.durationMinutes) || 10) * 60, 60));
+      window.scrollTo({ top: 0, behavior: "instant" });
+      // Start mobile detection after a short delay
+      setTimeout(() => startMobileDetection(), 2000);
+    } else {
+      toast.error(
+        lang === "ar"
+          ? "لا يمكن بدء الاختبار: تعذر الوصول إلى الكاميرا. يرجى السماح باستخدام الكاميرا في إعدادات المتصفح."
+          : "Cannot start quiz: Camera access denied. Please allow camera access in your browser settings."
+      );
+    }
+  };
+
+  const handleCamGateCancel = () => {
+    setShowCamGate(false);
+    setPendingQuiz(null);
+  };
+
+  const handleResumeCamWarning = async () => {
+    setCamWarningVisible(false);
+    // Try to restart camera
+    const ok = await startCamera(camVideoRef.current);
+    if (ok) {
+      setTimeout(() => startMobileDetection(), 1000);
+    } else {
+      // Camera still not available - this counts as second loss
+      stopCamera();
+      strikeCountRef.current = 1;
+      handlePrivacyViolation("camera_unavailable");
+    }
   };
 
   // Anti-Screenshot & Content Privacy Restriction listeners while a quiz is active
@@ -353,6 +534,16 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
       document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, [activeQuiz]);
+
+  // Camera track ended monitor
+  useEffect(() => {
+    if (!camStreamRef.current || camState !== "active") return;
+    const track = camStreamRef.current.getVideoTracks()[0];
+    if (!track) return;
+    const handleTrackEnded = () => handleCamLost();
+    track.addEventListener("ended", handleTrackEnded);
+    return () => track.removeEventListener("ended", handleTrackEnded);
+  }, [camState]);
 
   const selectedCourse = courses.find((c) => c.id === courseId);
 
@@ -534,29 +725,9 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
       }
       return;
     }
-
-    await markQuizEntered(qz.id, user.uid, {
-      studentName: user.displayName || user.email,
-      quizTitle: qz.title,
-      courseId: qz.courseId,
-      instructorId: qz.instructorId,
-    });
-    await loadAll();
-
-    try {
-      sessionStorage.removeItem(`quiz_strikes_${qz.id}_${user?.uid || "guest"}`);
-    } catch {}
-    strikeCountRef.current = 0;
-    privacyRestrictedRef.current = false;
-    lastViolationTimeRef.current = 0;
-    resumeGraceUntilRef.current = Date.now() + 1500;
-    setLastReview(null);
-    setPrivacyRestricted(false);
-    setPrivacyCount(0);
-    setActiveQuiz(qz);
-    setAnswers({});
-    setSecondsLeft(Math.max((Number(qz.durationMinutes) || 10) * 60, 60));
-    window.scrollTo({ top: 0, behavior: "instant" });
+    // Show camera gate modal FIRST - quiz cannot start without camera
+    setPendingQuiz(qz);
+    setShowCamGate(true);
   };
 
   useEffect(() => {
@@ -698,6 +869,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
       setActiveQuiz(null);
       setAnswers({});
       setSecondsLeft(0);
+      stopCamera();
       await loadAll();
     } finally {
       setSubmittingQuiz(false);
@@ -728,6 +900,90 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
 
   return (
     <div className="space-y-6">
+      {/* Camera Gate Modal */}
+      {showCamGate && pendingQuiz && createPortal(
+        <div style={{ position: "fixed", inset: 0, zIndex: 100000, background: "rgba(2,6,23,0.95)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+          <div style={{ background: "#0f172a", border: "2px solid #38bdf8", borderRadius: 20, padding: 32, maxWidth: 440, width: "100%", textAlign: "center", color: "#fff", boxShadow: "0 24px 80px rgba(0,0,0,0.8)" }}>
+            <div style={{ fontSize: 48, marginBottom: 12 }}>📷</div>
+            <h2 style={{ fontSize: 22, fontWeight: 900, marginBottom: 8 }}>
+              {lang === "ar" ? "الكاميرا مطلوبة لبدء الاختبار" : "Camera Required to Start Quiz"}
+            </h2>
+            <p style={{ fontSize: 13, color: "#94a3b8", marginBottom: 20, lineHeight: 1.6 }}>
+              {lang === "ar"
+                ? "لا يمكن بدء الاختبار إلا بعد تفعيل الكاميرا. سيتم مراقبتك طوال فترة الاختبار للتحقق من عدم استخدام أي أجهزة غش. إذا اكتشف النظام هاتفاً أمام الكاميرا، سيتم إنهاء الاختبار فوراً."
+                : "The quiz cannot start without your camera. You will be monitored throughout the exam to prevent cheating. If a mobile phone is detected in front of the camera, the quiz will be immediately terminated."}
+            </p>
+            <div style={{ width: "100%", aspectRatio: "4/3", background: "#1e293b", borderRadius: 12, overflow: "hidden", marginBottom: 20, border: "1px solid #334155" }}>
+              <video ref={camGateVideoRef} autoPlay muted playsInline style={{ width: "100%", height: "100%", objectFit: "cover", transform: "scaleX(-1)" }} />
+            </div>
+            <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+              <button
+                type="button"
+                onClick={handleCamGateCancel}
+                style={{ padding: "10px 24px", borderRadius: 12, background: "#1e293b", border: "1px solid #334155", color: "#94a3b8", fontSize: 13, fontWeight: 700, cursor: "pointer" }}
+              >
+                {lang === "ar" ? "إلغاء" : "Cancel"}
+              </button>
+              <button
+                type="button"
+                onClick={handleCamGateAllow}
+                style={{ padding: "10px 24px", borderRadius: 12, background: "linear-gradient(135deg, #0ea5e9, #6366f1)", border: "none", color: "#fff", fontSize: 13, fontWeight: 900, cursor: "pointer", boxShadow: "0 4px 20px rgba(99,102,241,0.4)" }}
+              >
+                {lang === "ar" ? "تفعيل الكاميرا وبدء الاختبار 🎥" : "Enable Camera & Start Quiz 🎥"}
+              </button>
+            </div>
+            {camState === "denied" && (
+              <p style={{ marginTop: 12, color: "#f87171", fontSize: 12, fontWeight: 700 }}>
+                {lang === "ar" ? "⚠️ تم رفض إذن الكاميرا. يرجى السماح باستخدامها في إعدادات المتصفح." : "⚠️ Camera permission denied. Please allow it in browser settings."}
+              </p>
+            )}
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Camera Lost Warning Overlay */}
+      {activeQuiz && camWarningVisible && createPortal(
+        <div style={{ position: "fixed", inset: 0, zIndex: 99998, background: "rgba(2,6,23,0.92)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+          <div style={{ background: "#0f172a", border: "2px solid #f97316", borderRadius: 20, padding: 32, maxWidth: 400, width: "100%", textAlign: "center", color: "#fff", boxShadow: "0 24px 80px rgba(0,0,0,0.8)" }}>
+            <div style={{ fontSize: 48, marginBottom: 12 }}>⚠️</div>
+            <h2 style={{ fontSize: 20, fontWeight: 900, marginBottom: 8, color: "#fb923c" }}>
+              {lang === "ar" ? "تحذير: الكاميرا أُغلقت!" : "Warning: Camera Disconnected!"}
+            </h2>
+            <p style={{ fontSize: 13, color: "#cbd5e1", marginBottom: 20, lineHeight: 1.6 }}>
+              {lang === "ar"
+                ? "يجب إبقاء الكاميرا مفتوحة طوال فترة الاختبار. هذا تحذير أول وأخير — أي إغلاق ثانٍ للكاميرا سيؤدي إلى إنهاء الاختبار فوراً."
+                : "Your camera must remain active throughout the quiz. This is your FIRST and ONLY warning — a second camera closure will immediately terminate your quiz."}
+            </p>
+            <button
+              type="button"
+              onClick={handleResumeCamWarning}
+              style={{ padding: "12px 32px", borderRadius: 12, background: "linear-gradient(135deg, #f97316, #ef4444)", border: "none", color: "#fff", fontSize: 14, fontWeight: 900, cursor: "pointer", boxShadow: "0 4px 20px rgba(249,115,22,0.4)" }}
+            >
+              {lang === "ar" ? "إعادة تفعيل الكاميرا والمتابعة 🎥" : "Re-enable Camera & Continue 🎥"}
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Floating Camera PiP Preview */}
+      {activeQuiz && showCamPreview && createPortal(
+        <div style={{ position: "fixed", bottom: 80, right: 16, zIndex: 99997, width: 180, height: 135, borderRadius: 14, overflow: "hidden", border: "2px solid #38bdf8", boxShadow: "0 8px 32px rgba(0,0,0,0.6)", background: "#0f172a" }}>
+          <video
+            ref={camVideoRef}
+            autoPlay
+            muted
+            playsInline
+            style={{ width: "100%", height: "100%", objectFit: "cover", transform: "scaleX(-1)" }}
+          />
+          <div style={{ position: "absolute", top: 4, left: 4, fontSize: 9, color: "#34d399", fontWeight: 700, background: "rgba(0,0,0,0.65)", padding: "2px 6px", borderRadius: 4, letterSpacing: 1 }}>
+            🔴 LIVE
+          </div>
+        </div>,
+        document.body
+      )}
+
       {/* 1. Student Active Quiz Player with Timer & Privacy Protection (PROMINENTLY AT THE VERY TOP — ZERO SCROLLING) */}
       {activeQuiz && (
         <>
@@ -853,6 +1109,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                         setAnswers({});
                         setPrivacyRestricted(false);
                         document.body.classList.remove("quiz-privacy-obscured");
+                        stopCamera();
                       }}
                       className="px-3 py-1 rounded-xl bg-slate-200/80 dark:bg-slate-700/80 hover:bg-slate-300 dark:hover:bg-slate-600 text-xs font-bold text-slate-700 dark:text-slate-200 transition-all cursor-pointer border border-slate-300 dark:border-slate-600"
                     >
