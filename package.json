@@ -2,11 +2,15 @@
   "name": "ai-training-assessment-platform",
   "version": "1.0.0",
   "private": true,
+  "workspaces": [
+    "client"
+  ],
   "scripts": {
+    "postinstall": "npm --prefix client install",
     "start": "node scripts/start-platform.mjs",
     "dev": "node scripts/start-platform.mjs",
     "dev:client": "npm --prefix client run dev",
-    "build": "npm --prefix client run build",
+    "build": "npm --prefix client run build && node -e \"const fs = require('fs'); fs.cpSync('client/dist', 'dist', {recursive: true});\"",
     "test": "node scripts/test-platform.mjs",
     "proxy": "npm --prefix llm-proxy start",
     "proxy:dev": "npm --prefix llm-proxy run dev"
