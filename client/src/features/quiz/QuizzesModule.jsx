@@ -211,6 +211,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
 
     const isInstantTermination =
       reason === "mobile_phone_detected" ||
+      reason === "camera_covered_detected" ||
       reason === "camera_lost_second" ||
       reason === "camera_unavailable";
 
@@ -265,7 +266,12 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
           courseId: quizToTerminate.courseId,
           instructorId: quizToTerminate.instructorId,
           violationReason: reason,
-          cheatingType: reason === "mobile_phone_detected" ? "mobile_phone" : "privacy_shortcut",
+          cheatingType:
+            reason === "mobile_phone_detected"
+              ? "mobile_phone"
+              : reason === "camera_covered_detected"
+              ? "camera_blackout_covered"
+              : "privacy_shortcut",
         });
         await loadAll();
       } catch (err) {
@@ -288,6 +294,15 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
           lang === "ar"
             ? "تم إنهاء الاختبار فوراً وإلغاء محاولتك بالكامل دون احتساب أي درجة بسبب رصد استخدام هاتف محمول أمام الكاميرا أثناء الحل (مخالفة غش صريحة). تم تسجيل محاولتك كحالة غش في سجل الاختبارات، ولا يحق لك استكمال الاختبار أو إعادته إلا بعد موافقة رسمية من المحاضر."
             : "Your quiz has been terminated immediately and cancelled without grading because a mobile phone was detected in front of the camera (strict cheating violation). Your attempt is permanently marked as cheating and cannot be retaken without instructor review and approval.";
+      } else if (reason === "camera_covered_detected") {
+        popupTitle =
+          lang === "ar"
+            ? "تم إنهاء الاختبار بسبب الغش (تغطية أو حجب الكاميرا)"
+            : "Quiz Terminated Due to Cheating (Camera Obscured/Covered)";
+        popupMessage =
+          lang === "ar"
+            ? "تم إنهاء الاختبار فوراً وإلغاء محاولتك بالكامل دون احتساب أي درجة بسبب تعمد تغطية الكاميرا أو حجبها (رصد شاشة سوداء بالكامل) أثناء الاختبار لمحاولة الغش. تم تسجيل المحاولة كمخالفة غش صريحة، ولا يمكنك إعادة الاختبار إلا بعد موافقة رسمية من المحاضر."
+            : "Your quiz has been terminated immediately and cancelled without grading because the camera was covered or obscured (full black screen detected) to cheat. Recorded as a strict cheating violation; retake requires instructor approval.";
       } else if (reason === "camera_lost_second" || reason === "camera_unavailable") {
         popupTitle =
           lang === "ar" ? "تم إنهاء الاختبار لإغلاق الكاميرا" : "Quiz Terminated (Camera Disconnected)";
@@ -315,6 +330,10 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
           ? (lang === "ar"
               ? "تم إنهاء الاختبار وإلغاؤه فوراً بسبب الغش (استخدام هاتف محمول)!"
               : "Quiz terminated immediately due to cheating: Mobile phone detected!")
+          : reason === "camera_covered_detected"
+          ? (lang === "ar"
+              ? "تم إنهاء الاختبار وإلغاؤه فوراً بسبب حجب الكاميرا (شاشة سوداء)!"
+              : "Quiz terminated immediately due to cheating: Camera covered/obscured!")
           : (lang === "ar"
               ? "تم إغلاق الاختبار وإلغاؤه لمحاولة الغش (2/2)!"
               : "Quiz terminated without submitting due to repeated violation (2/2)!")
@@ -418,40 +437,86 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
     }
 
     const detector = await loadCocoSsd().catch(() => null);
-    if (!detector) {
-      console.warn("Mobile detection: COCO-SSD detector not available");
-      return;
-    }
+
+    // Offscreen canvas for instant black screen / covered camera luminance analysis
+    const offscreenCanvas = document.createElement("canvas");
+    offscreenCanvas.width = 32;
+    offscreenCanvas.height = 24;
+    const offscreenCtx = offscreenCanvas.getContext("2d", { willReadFrequently: true });
 
     let active = true;
+    let blackFrameCount = 0;
+
     const runDetection = async () => {
       if (!active || !camStreamRef.current) return;
 
       const video = camVideoRef.current;
       if (video && video.readyState >= 2 && video.videoWidth > 0 && !video.paused) {
+        // 1. Black Screen / Covered Camera Detection (Cheating prevention)
         try {
-          const predictions = await detector.detect(video);
-          const hasPhone = predictions.some(
-            (p) =>
-              (p.class === "cell phone" || p.class === "remote") &&
-              p.score >= 0.40
-          );
-          if (hasPhone) {
-            console.warn("🚨 Mobile phone detected in camera feed! Terminating quiz immediately.");
-            active = false;
-            if (camDetectionLoopRef.current) {
-              clearTimeout(camDetectionLoopRef.current);
-              camDetectionLoopRef.current = null;
+          if (offscreenCtx) {
+            offscreenCtx.drawImage(video, 0, 0, 32, 24);
+            const imgData = offscreenCtx.getImageData(0, 0, 32, 24);
+            const data = imgData.data;
+            let totalLuma = 0;
+            const pixels = 32 * 24;
+            for (let i = 0; i < data.length; i += 4) {
+              totalLuma += 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
             }
-            if (handlePrivacyViolationRef.current) {
-              handlePrivacyViolationRef.current("mobile_phone_detected");
+            const avgBrightness = totalLuma / pixels;
+
+            // If average brightness is below 15 (pitch dark / camera covered by tape, finger, or dark screen)
+            if (avgBrightness < 15) {
+              blackFrameCount++;
+              if (blackFrameCount >= 4) {
+                // ~1.2 seconds of sustained black screen -> immediate cheating termination
+                console.warn("🚨 Camera covered / black screen detected! Terminating quiz.");
+                active = false;
+                if (camDetectionLoopRef.current) {
+                  clearTimeout(camDetectionLoopRef.current);
+                  camDetectionLoopRef.current = null;
+                }
+                if (handlePrivacyViolationRef.current) {
+                  handlePrivacyViolationRef.current("camera_covered_detected");
+                } else {
+                  handlePrivacyViolation("camera_covered_detected");
+                }
+                return;
+              }
             } else {
-              handlePrivacyViolation("mobile_phone_detected");
+              blackFrameCount = 0;
             }
-            return;
           }
         } catch {
-          // Frame read exception, ignore and continue
+          // ignore frame read exception
+        }
+
+        // 2. Mobile Phone Detection via COCO-SSD
+        if (detector) {
+          try {
+            const predictions = await detector.detect(video);
+            const hasPhone = predictions.some(
+              (p) =>
+                (p.class === "cell phone" || p.class === "remote") &&
+                p.score >= 0.40
+            );
+            if (hasPhone) {
+              console.warn("🚨 Mobile phone detected in camera feed! Terminating quiz immediately.");
+              active = false;
+              if (camDetectionLoopRef.current) {
+                clearTimeout(camDetectionLoopRef.current);
+                camDetectionLoopRef.current = null;
+              }
+              if (handlePrivacyViolationRef.current) {
+                handlePrivacyViolationRef.current("mobile_phone_detected");
+              } else {
+                handlePrivacyViolation("mobile_phone_detected");
+              }
+              return;
+            }
+          } catch {
+            // Frame read exception, ignore and continue
+          }
         }
       }
 
@@ -1028,8 +1093,8 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
             </h2>
             <p style={{ fontSize: 13, color: "#94a3b8", marginBottom: 20, lineHeight: 1.6 }}>
               {lang === "ar"
-                ? "لا يمكن بدء الاختبار إلا بعد تفعيل الكاميرا. سيتم مراقبتك طوال فترة الاختبار للتحقق من عدم استخدام أي أجهزة غش. إذا اكتشف النظام هاتفاً أمام الكاميرا، سيتم إنهاء الاختبار فوراً."
-                : "The quiz cannot start without your camera. You will be monitored throughout the exam to prevent cheating. If a mobile phone is detected in front of the camera, the quiz will be immediately terminated."}
+                ? "لا يمكن بدء الاختبار إلا بعد تفعيل الكاميرا. سيتم مراقبتك طوال فترة الاختبار للتحقق من عدم استخدام أي أجهزة غش. إذا اكتشف النظام هاتفاً محمولاً أو تعمد حجب وتغطية الكاميرا (شاشة سوداء)، سيتم إنهاء الاختبار فوراً كحالة غش."
+                : "The quiz cannot start without your camera. You will be monitored throughout the exam. If a mobile phone is detected or the camera is covered/obscured (black screen), the quiz will be immediately terminated for cheating."}
             </p>
             <div style={{ width: "100%", aspectRatio: "4/3", background: "#1e293b", borderRadius: 12, overflow: "hidden", marginBottom: 20, border: "1px solid #334155" }}>
               <video ref={camGateVideoRef} autoPlay muted playsInline style={{ width: "100%", height: "100%", objectFit: "cover", transform: "scaleX(-1)" }} />
