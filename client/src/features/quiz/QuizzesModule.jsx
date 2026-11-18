@@ -430,15 +430,13 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
     return null;
   };
 
-  const startMobileDetection = async () => {
+  const startMobileDetection = () => {
     if (camDetectionLoopRef.current) {
       clearTimeout(camDetectionLoopRef.current);
       camDetectionLoopRef.current = null;
     }
 
-    const detector = await loadCocoSsd().catch(() => null);
-
-    // Offscreen canvas for instant black screen / covered camera luminance analysis
+    // Offscreen canvas for instant black screen / covered camera luminance & variance analysis
     const offscreenCanvas = document.createElement("canvas");
     offscreenCanvas.width = 32;
     offscreenCanvas.height = 24;
@@ -446,76 +444,118 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
 
     let active = true;
     let blackFrameCount = 0;
+    let detector = camDetectorRef.current || null;
+
+    // Load COCO-SSD asynchronously in background without blocking the covered camera loop
+    if (!detector) {
+      loadCocoSsd()
+        .then((d) => {
+          detector = d;
+        })
+        .catch(() => {});
+    }
 
     const runDetection = async () => {
       if (!active || !camStreamRef.current) return;
 
       const video = camVideoRef.current;
-      if (video && video.readyState >= 2 && video.videoWidth > 0 && !video.paused) {
-        // 1. Black Screen / Covered Camera Detection (Cheating prevention)
-        try {
-          if (offscreenCtx) {
-            offscreenCtx.drawImage(video, 0, 0, 32, 24);
-            const imgData = offscreenCtx.getImageData(0, 0, 32, 24);
-            const data = imgData.data;
-            let totalLuma = 0;
-            const pixels = 32 * 24;
-            for (let i = 0; i < data.length; i += 4) {
-              totalLuma += 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-            }
-            const avgBrightness = totalLuma / pixels;
+      if (video) {
+        if (video.paused) {
+          video.play().catch(() => {});
+        }
 
-            // If average brightness is below 15 (pitch dark / camera covered by tape, finger, or dark screen)
-            if (avgBrightness < 15) {
-              blackFrameCount++;
-              if (blackFrameCount >= 4) {
-                // ~1.2 seconds of sustained black screen -> immediate cheating termination
-                console.warn("🚨 Camera covered / black screen detected! Terminating quiz.");
+        if (video.readyState >= 2 && video.videoWidth > 0) {
+          // 1. Black Screen / Covered Camera Detection (Cheating prevention)
+          try {
+            if (offscreenCtx) {
+              offscreenCtx.drawImage(video, 0, 0, 32, 24);
+              const imgData = offscreenCtx.getImageData(0, 0, 32, 24);
+              const data = imgData.data;
+              const pixels = 32 * 24;
+              let totalLuma = 0;
+              const lumas = [];
+
+              for (let i = 0; i < data.length; i += 4) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                const luma = 0.299 * r + 0.587 * g + 0.114 * b;
+                totalLuma += luma;
+                lumas.push(luma);
+              }
+              const avgBrightness = totalLuma / pixels;
+
+              let varianceSum = 0;
+              for (let i = 0; i < pixels; i++) {
+                const diff = lumas[i] - avgBrightness;
+                varianceSum += diff * diff;
+              }
+              const stdDev = Math.sqrt(varianceSum / pixels);
+
+              // Camera is covered or obscured if:
+              // - Extremely dark / blacked out (avgBrightness < 35)
+              // - Dark uniform surface like finger/hand covering lens (avgBrightness < 60 && stdDev < 15)
+              // - Flat textureless solid color like paper/tape over lens (stdDev < 6 && avgBrightness < 160)
+              const isCovered =
+                avgBrightness < 35 ||
+                (avgBrightness < 60 && stdDev < 15) ||
+                (stdDev < 6 && avgBrightness < 160);
+
+              if (isCovered) {
+                blackFrameCount++;
+                if (blackFrameCount >= 3) {
+                  // ~0.9 - 1s of covered camera -> Immediate cheating termination!
+                  console.warn(
+                    `🚨 Camera covered / blackout detected (brightness: ${avgBrightness.toFixed(
+                      1
+                    )}, stdDev: ${stdDev.toFixed(1)})! Terminating quiz.`
+                  );
+                  active = false;
+                  if (camDetectionLoopRef.current) {
+                    clearTimeout(camDetectionLoopRef.current);
+                    camDetectionLoopRef.current = null;
+                  }
+                  if (handlePrivacyViolationRef.current) {
+                    handlePrivacyViolationRef.current("camera_covered_detected");
+                  } else {
+                    handlePrivacyViolation("camera_covered_detected");
+                  }
+                  return;
+                }
+              } else {
+                blackFrameCount = Math.max(0, blackFrameCount - 1);
+              }
+            }
+          } catch (err) {
+            console.warn("Covered camera check error:", err);
+          }
+
+          // 2. Mobile Phone Detection via COCO-SSD
+          if (detector) {
+            try {
+              const predictions = await detector.detect(video);
+              const hasPhone = predictions.some(
+                (p) =>
+                  (p.class === "cell phone" || p.class === "remote") &&
+                  p.score >= 0.40
+              );
+              if (hasPhone) {
+                console.warn("🚨 Mobile phone detected in camera feed! Terminating quiz immediately.");
                 active = false;
                 if (camDetectionLoopRef.current) {
                   clearTimeout(camDetectionLoopRef.current);
                   camDetectionLoopRef.current = null;
                 }
                 if (handlePrivacyViolationRef.current) {
-                  handlePrivacyViolationRef.current("camera_covered_detected");
+                  handlePrivacyViolationRef.current("mobile_phone_detected");
                 } else {
-                  handlePrivacyViolation("camera_covered_detected");
+                  handlePrivacyViolation("mobile_phone_detected");
                 }
                 return;
               }
-            } else {
-              blackFrameCount = 0;
+            } catch {
+              // Frame read exception, ignore and continue
             }
-          }
-        } catch {
-          // ignore frame read exception
-        }
-
-        // 2. Mobile Phone Detection via COCO-SSD
-        if (detector) {
-          try {
-            const predictions = await detector.detect(video);
-            const hasPhone = predictions.some(
-              (p) =>
-                (p.class === "cell phone" || p.class === "remote") &&
-                p.score >= 0.40
-            );
-            if (hasPhone) {
-              console.warn("🚨 Mobile phone detected in camera feed! Terminating quiz immediately.");
-              active = false;
-              if (camDetectionLoopRef.current) {
-                clearTimeout(camDetectionLoopRef.current);
-                camDetectionLoopRef.current = null;
-              }
-              if (handlePrivacyViolationRef.current) {
-                handlePrivacyViolationRef.current("mobile_phone_detected");
-              } else {
-                handlePrivacyViolation("mobile_phone_detected");
-              }
-              return;
-            }
-          } catch {
-            // Frame read exception, ignore and continue
           }
         }
       }
@@ -524,7 +564,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
       camDetectionLoopRef.current = setTimeout(runDetection, 300);
     };
 
-    camDetectionLoopRef.current = setTimeout(runDetection, 500);
+    camDetectionLoopRef.current = setTimeout(runDetection, 250);
   };
 
   const handleCamLost = async () => {
