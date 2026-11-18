@@ -187,24 +187,34 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
     if (privacyRestrictedRef.current) return;
 
     const now = Date.now();
-    // 2. Ignore any strike triggers during the resume grace period (12s cooldown after clicking Resume)
-    // This completely prevents Windows notification toasts / closing Snipping Tool from locking the quiz!
-    if (now < resumeGraceUntilRef.current) return;
+    // 2. Ignore stray window blur during a short 1.5s window refocus grace period after clicking Resume
+    if (reason === "window_blur" && now < resumeGraceUntilRef.current) return;
 
-    // 3. Debounce cooldown: ignore duplicate triggers fired within 8 seconds
-    if (now - lastViolationTimeRef.current < 8000) return;
+    // 3. Debounce cooldown: ignore duplicate triggers fired from the same keypress within 1.2s
+    if (now - lastViolationTimeRef.current < 1200) return;
     lastViolationTimeRef.current = now;
 
     // 4. Wipe clipboard to destroy any captured image or text data
     destroyClipboard();
 
-    // 5. Increment atomic strike count (Strict 2-attempt limit)
-    const nextStrikes = strikeCountRef.current + 1;
+    // 5. Increment atomic strike count (Strict 2-attempt limit, backed by sessionStorage)
+    const storageKey = `quiz_strikes_${activeQuiz.id}_${user?.uid || "guest"}`;
+    const currentStrikes = Math.max(
+      strikeCountRef.current,
+      Number(sessionStorage.getItem(storageKey)) || 0
+    );
+    const nextStrikes = currentStrikes + 1;
     strikeCountRef.current = nextStrikes;
     setPrivacyCount(nextStrikes);
+    try {
+      sessionStorage.setItem(storageKey, String(nextStrikes));
+    } catch {}
 
     if (nextStrikes >= 2) {
       // Reached 2 distinct violations: IMMEDIATELY close quiz without submitting
+      try {
+        sessionStorage.removeItem(storageKey);
+      } catch {}
       privacyRestrictedRef.current = false;
       document.body.classList.remove("quiz-privacy-obscured");
       const quizToTerminate = activeQuiz;
@@ -257,9 +267,9 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
     privacyRestrictedRef.current = false;
     setPrivacyRestricted(false);
     document.body.classList.remove("quiz-privacy-obscured");
-    // Generous 12-second grace period: prevents Snipping Tool notifications or closing toasts from locking the quiz!
-    resumeGraceUntilRef.current = Date.now() + 12000;
-    lastViolationTimeRef.current = Date.now();
+    // Short 1.5s grace for window blur only (allowing window focus to settle without blocking shortcuts)
+    resumeGraceUntilRef.current = Date.now() + 1500;
+    lastViolationTimeRef.current = 0;
   };
 
   // Anti-Screenshot & Content Privacy Restriction listeners while a quiz is active
@@ -532,6 +542,9 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
     });
     await loadAll();
 
+    try {
+      sessionStorage.removeItem(`quiz_strikes_${qz.id}_${user?.uid || "guest"}`);
+    } catch {}
     strikeCountRef.current = 0;
     privacyRestrictedRef.current = false;
     lastViolationTimeRef.current = 0;
