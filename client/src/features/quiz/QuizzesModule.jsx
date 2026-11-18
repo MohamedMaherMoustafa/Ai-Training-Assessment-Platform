@@ -88,6 +88,9 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
 
   // Student quiz player + timer + instant review
   const [activeQuiz, setActiveQuiz] = useState(null);
+  const activeQuizRef = useRef(null);
+  const handlePrivacyViolationRef = useRef(null);
+  const [terminationModal, setTerminationModal] = useState(null);
   const [answers, setAnswers] = useState({});
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [submittingQuiz, setSubmittingQuiz] = useState(false);
@@ -101,12 +104,17 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
   const camDetectorRef = useRef(null);
   const camDetectionLoopRef = useRef(null);
   const camWarningShownRef = useRef(false);
+  const isIntentionalStopRef = useRef(false);
   const [camState, setCamState] = useState("idle"); // "idle"|"requesting"|"active"|"denied"|"lost"
   const [showCamPreview, setShowCamPreview] = useState(false);
   const [showCamGate, setShowCamGate] = useState(false);
   const [pendingQuiz, setPendingQuiz] = useState(null);
   const [camWarningVisible, setCamWarningVisible] = useState(false);
   const camGateVideoRef = useRef(null);
+
+  useEffect(() => {
+    activeQuizRef.current = activeQuiz;
+  }, [activeQuiz]);
 
   const loadAll = async () => {
     setLoading(true);
@@ -191,7 +199,11 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
 
   // Anti-Screenshot & Cheating Protection (Closes quiz immediately on 2nd violation or instant mobile detection)
   const handlePrivacyViolation = async (reason = "shortcut") => {
-    if (!activeQuiz) return;
+    const currentQuiz = activeQuizRef.current || activeQuiz;
+    if (!currentQuiz) {
+      console.warn("handlePrivacyViolation: no active quiz running");
+      return;
+    }
 
     // Immediately apply synchronous privacy blackout to DOM before anything else
     document.body.classList.add("quiz-privacy-obscured");
@@ -217,7 +229,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
     destroyClipboard();
 
     // 5. Increment atomic strike count (Strict 2-attempt limit, backed by sessionStorage)
-    const storageKey = `quiz_strikes_${activeQuiz.id}_${user?.uid || "guest"}`;
+    const storageKey = `quiz_strikes_${currentQuiz.id}_${user?.uid || "guest"}`;
     const currentStrikes = Math.max(
       strikeCountRef.current,
       Number(sessionStorage.getItem(storageKey)) || 0
@@ -236,7 +248,9 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
       } catch {}
       privacyRestrictedRef.current = false;
       document.body.classList.remove("quiz-privacy-obscured");
-      const quizToTerminate = activeQuiz;
+      const quizToTerminate = currentQuiz;
+      activeQuizRef.current = null;
+      activeQuizRef.current = null;
       setActiveQuiz(null);
       setAnswers({});
       setPrivacyRestricted(false);
@@ -251,6 +265,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
           courseId: quizToTerminate.courseId,
           instructorId: quizToTerminate.instructorId,
           violationReason: reason,
+          cheatingType: reason === "mobile_phone_detected" ? "mobile_phone" : "privacy_shortcut",
         });
         await loadAll();
       } catch (err) {
@@ -266,11 +281,13 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
 
       if (reason === "mobile_phone_detected") {
         popupTitle =
-          lang === "ar" ? "تم إنهاء الاختبار لرصد هاتف محمول" : "Quiz Terminated (Mobile Phone Detected)";
+          lang === "ar"
+            ? "تم إنهاء الاختبار بسبب الغش (استخدام هاتف محمول)"
+            : "Quiz Terminated Due to Cheating (Mobile Phone)";
         popupMessage =
           lang === "ar"
-            ? "تم إنهاء الاختبار فوراً وإلغاء محاولتك دون إرسال الإجابات بسبب رصد هاتف محمول أمام الكاميرا (مخالفة فورية غير مسموح بها). لا يمكنك إعادة الاختبار إلا بعد موافقة المحاضر."
-            : "Your quiz has been closed immediately and cancelled without submitting because a mobile phone was detected in front of the camera. You cannot re-enter without instructor approval.";
+            ? "تم إنهاء الاختبار فوراً وإلغاء محاولتك بالكامل دون احتساب أي درجة بسبب رصد استخدام هاتف محمول أمام الكاميرا أثناء الحل (مخالفة غش صريحة). تم تسجيل محاولتك كحالة غش في سجل الاختبارات، ولا يحق لك استكمال الاختبار أو إعادته إلا بعد موافقة رسمية من المحاضر."
+            : "Your quiz has been terminated immediately and cancelled without grading because a mobile phone was detected in front of the camera (strict cheating violation). Your attempt is permanently marked as cheating and cannot be retaken without instructor review and approval.";
       } else if (reason === "camera_lost_second" || reason === "camera_unavailable") {
         popupTitle =
           lang === "ar" ? "تم إنهاء الاختبار لإغلاق الكاميرا" : "Quiz Terminated (Camera Disconnected)";
@@ -279,6 +296,12 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
             ? "تم إنهاء الاختبار فوراً بسبب تكرار إغلاق أو فقدان اتصال الكاميرا أثناء الاختبار. لا يمكنك إعادة الاختبار إلا بعد موافقة المحاضر."
             : "Your quiz has been closed immediately because the camera was disconnected or turned off multiple times. You cannot re-enter without instructor approval.";
       }
+
+      setTerminationModal({
+        title: popupTitle,
+        message: popupMessage,
+        reason,
+      });
 
       showPopup({
         type: "error",
@@ -290,8 +313,8 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
       toast.error(
         reason === "mobile_phone_detected"
           ? (lang === "ar"
-              ? "تم إلغاء الاختبار فوراً لرصد هاتف محمول أمام الكاميرا!"
-              : "Quiz terminated immediately: Mobile phone detected in front of camera!")
+              ? "تم إنهاء الاختبار وإلغاؤه فوراً بسبب الغش (استخدام هاتف محمول)!"
+              : "Quiz terminated immediately due to cheating: Mobile phone detected!")
           : (lang === "ar"
               ? "تم إغلاق الاختبار وإلغاؤه لمحاولة الغش (2/2)!"
               : "Quiz terminated without submitting due to repeated violation (2/2)!")
@@ -308,6 +331,8 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
     }
   };
 
+  handlePrivacyViolationRef.current = handlePrivacyViolation;
+
   const handleResumeFromWarning = () => {
     privacyRestrictedRef.current = false;
     setPrivacyRestricted(false);
@@ -319,13 +344,19 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
 
   // ── Webcam Helpers ─────────────────────────────────────────────────────────
   const stopCamera = () => {
+    isIntentionalStopRef.current = true;
     if (camDetectionLoopRef.current) {
       clearTimeout(camDetectionLoopRef.current);
       cancelAnimationFrame(camDetectionLoopRef.current);
       camDetectionLoopRef.current = null;
     }
     if (camStreamRef.current) {
-      camStreamRef.current.getTracks().forEach((t) => t.stop());
+      camStreamRef.current.getTracks().forEach((t) => {
+        try {
+          t.onended = null;
+          t.stop();
+        } catch {}
+      });
       camStreamRef.current = null;
     }
     setCamState("idle");
@@ -334,6 +365,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
   };
 
   const startCamera = async (videoEl) => {
+    isIntentionalStopRef.current = false;
     setCamState("requesting");
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -411,8 +443,11 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
               clearTimeout(camDetectionLoopRef.current);
               camDetectionLoopRef.current = null;
             }
-            stopCamera();
-            handlePrivacyViolation("mobile_phone_detected");
+            if (handlePrivacyViolationRef.current) {
+              handlePrivacyViolationRef.current("mobile_phone_detected");
+            } else {
+              handlePrivacyViolation("mobile_phone_detected");
+            }
             return;
           }
         } catch {
@@ -437,7 +472,11 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
     } else {
       // Second camera loss: terminate quiz
       stopCamera();
-      handlePrivacyViolation("camera_lost_second");
+      if (handlePrivacyViolationRef.current) {
+        handlePrivacyViolationRef.current("camera_lost_second");
+      } else {
+        handlePrivacyViolation("camera_lost_second");
+      }
     }
   };
 
@@ -463,6 +502,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
       setLastReview(null);
       setPrivacyRestricted(false);
       setPrivacyCount(0);
+      activeQuizRef.current = qz;
       setActiveQuiz(qz);
       setAnswers({});
       setSecondsLeft(Math.max((Number(qz.durationMinutes) || 10) * 60, 60));
@@ -614,7 +654,10 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
     if (!camStreamRef.current || camState !== "active") return;
     const track = camStreamRef.current.getVideoTracks()[0];
     if (!track) return;
-    const handleTrackEnded = () => handleCamLost();
+    const handleTrackEnded = () => {
+      if (isIntentionalStopRef.current) return;
+      handleCamLost();
+    };
     track.addEventListener("ended", handleTrackEnded);
     return () => track.removeEventListener("ended", handleTrackEnded);
   }, [camState]);
@@ -940,6 +983,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
           ? `تم تسليم الاختبار! النقاط: ${correctCount} / ${qs.length}`
           : `Quiz submitted! Points: ${correctCount} / ${qs.length} pts`
       );
+      activeQuizRef.current = null;
       setActiveQuiz(null);
       setAnswers({});
       setSecondsLeft(0);
@@ -1011,6 +1055,127 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                 {lang === "ar" ? "⚠️ تم رفض إذن الكاميرا. يرجى السماح باستخدامها في إعدادات المتصفح." : "⚠️ Camera permission denied. Please allow it in browser settings."}
               </p>
             )}
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Quiz Cheating / Security Termination Modal (Unmissable Fullscreen Overlay) */}
+      {terminationModal && createPortal(
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 100010,
+            background: "rgba(2, 6, 23, 0.95)",
+            backdropFilter: "blur(12px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 24,
+            textAlign: "center",
+            color: "#ffffff",
+          }}
+        >
+          <div
+            style={{
+              background: "#0f172a",
+              border: "2px solid #ef4444",
+              borderRadius: 24,
+              padding: "36px 28px",
+              maxWidth: 480,
+              width: "100%",
+              boxShadow: "0 25px 80px rgba(239, 68, 68, 0.35)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 16,
+            }}
+          >
+            <div
+              style={{
+                width: 76,
+                height: 76,
+                borderRadius: 24,
+                background: "rgba(239, 68, 68, 0.15)",
+                border: "2px solid #ef4444",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 36,
+                boxShadow: "0 0 25px rgba(239, 68, 68, 0.5)",
+              }}
+            >
+              🚫
+            </div>
+
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "4px 14px",
+                borderRadius: 9999,
+                background: "rgba(239, 68, 68, 0.2)",
+                border: "1px solid rgba(239, 68, 68, 0.6)",
+                color: "#fca5a5",
+                fontSize: 12,
+                fontWeight: 800,
+                textTransform: "uppercase",
+                letterSpacing: 1,
+              }}
+            >
+              <span>{lang === "ar" ? "مخالفة غش صريحة — تم إنهاء الاختبار" : "Cheating Violation — Quiz Terminated"}</span>
+            </div>
+
+            <h2 style={{ fontSize: 22, fontWeight: 900, color: "#ffffff", margin: 0, lineHeight: 1.3 }}>
+              {terminationModal.title}
+            </h2>
+
+            <p style={{ fontSize: 13.5, color: "#cbd5e1", lineHeight: 1.7, margin: 0 }}>
+              {terminationModal.message}
+            </p>
+
+            <div
+              style={{
+                width: "100%",
+                padding: 12,
+                borderRadius: 14,
+                background: "rgba(239, 68, 68, 0.1)",
+                border: "1px dashed rgba(239, 68, 68, 0.4)",
+                fontSize: 12,
+                color: "#fca5a5",
+                fontWeight: 600,
+              }}
+            >
+              {lang === "ar"
+                ? "⚠️ تم تسجيل المحاولة في لوحة تحكم المحاضر كحالة غش ولن يتم اعتماد أو تصحيح أي إجابات."
+                : "⚠️ Attempt logged in instructor dashboard as cheating. Answers will not be counted."}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setTerminationModal(null)}
+              style={{
+                marginTop: 8,
+                padding: "12px 36px",
+                borderRadius: 14,
+                background: "linear-gradient(135deg, #ef4444, #b91c1c)",
+                border: "none",
+                color: "#ffffff",
+                fontSize: 14,
+                fontWeight: 800,
+                cursor: "pointer",
+                boxShadow: "0 8px 24px rgba(239, 68, 68, 0.4)",
+                transition: "all 0.2s ease",
+              }}
+            >
+              {lang === "ar" ? "أقر بالمخالفة — العودة للاختبارات" : "I Understand — Return to Quizzes"}
+            </button>
+
+            <span style={{ fontSize: 11, color: "#64748b" }}>
+              Athar Educational Platform · Security & Integrity System
+            </span>
           </div>
         </div>,
         document.body
@@ -1227,7 +1392,8 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                     <button
                       type="button"
                       onClick={() => {
-                        setActiveQuiz(null);
+                        activeQuizRef.current = null;
+      setActiveQuiz(null);
                         setAnswers({});
                         setPrivacyRestricted(false);
                         document.body.classList.remove("quiz-privacy-obscured");
