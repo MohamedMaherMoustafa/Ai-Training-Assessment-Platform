@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -748,65 +749,77 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
             onCut={(e) => e.preventDefault()}
             className="quiz-privacy-protected relative glass-card border-sky-400/70 p-6 space-y-5 select-none"
           >
-            {/* Full-cover Content Privacy Restricted Overlay (High contrast solid dark surface, visible & legible in both light and dark modes) */}
-            <div
-              className={`quiz-privacy-shield-overlay fixed inset-0 z-[100] overflow-y-auto flex flex-col items-center justify-center p-6 sm:p-10 text-center space-y-4 ${
-                privacyRestricted ? "!flex !opacity-100 !visible" : ""
-              }`}
-              style={{
-                backgroundColor: "#020617",
-                color: "#ffffff",
-                boxShadow: "inset 0 0 100px rgba(0,0,0,0.85)",
-              }}
-            >
-              <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-3xl bg-rose-500/20 border-2 border-rose-500/60 text-rose-400 flex items-center justify-center shadow-2xl shadow-rose-950/80">
-                <ShieldAlert className="h-9 w-9 sm:h-10 sm:w-10 animate-pulse text-rose-400" />
-              </div>
-              <div className="space-y-3 max-w-xl">
-                <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-rose-500/25 border border-rose-400/50 text-rose-300 text-xs font-black tracking-wider uppercase">
-                  <Lock className="h-3.5 w-3.5 text-rose-300" />
-                  <span>{lang === "ar" ? "حجب محتوى الاختبار — خصوصية مشددة" : "Content Privacy Blocked"}</span>
-                </div>
-                <h3 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-white drop-shadow-md">
-                  {lang === "ar"
-                    ? "تم حجب أسئلة الاختبار بواسطة منصة أثر التعليمية"
-                    : "Quiz Content Privacy Protected by Athar Educational Platform"}
-                </h3>
-                <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-semibold">
-                  {lang === "ar"
-                    ? "محاولات تصوير الشاشة (Win+Shift+S / PrintScreen) أو مغادرة نافذة الاختبار محظورة تماماً لمنع تسريب الأسئلة أو الغش. تم حجب وتعتيم المحتوى بالكامل."
-                    : "Screen capture attempts (Win+Shift+S / PrintScreen) and leaving the test window are strictly prohibited. The assessment content was instantly masked and obscured."}
-                </p>
-
-                <div className="p-4 rounded-2xl bg-slate-900/95 border-2 border-rose-500/40 text-white text-xs sm:text-sm font-bold space-y-2 mt-2 shadow-xl text-center">
-                  <div className="text-amber-300 font-black text-sm sm:text-base flex items-center justify-center gap-2">
-                    <AlertTriangle className="h-4 w-4 text-amber-300 shrink-0" />
-                    <span>
+            {/* Full-cover Content Privacy Restricted Overlay (Portal into document.body to ensure true fixed viewport centering with zero gap) */}
+            {typeof document !== "undefined" &&
+              createPortal(
+                <div
+                  className={`quiz-privacy-shield-overlay fixed inset-0 z-[99999] overflow-y-auto flex flex-col items-center justify-center p-6 sm:p-10 text-center space-y-4 ${
+                    privacyRestricted ? "!flex !opacity-100 !visible" : ""
+                  }`}
+                  style={{
+                    backgroundColor: "#020617",
+                    color: "#ffffff",
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    width: "100vw",
+                    height: "100vh",
+                    zIndex: 99999,
+                    boxShadow: "inset 0 0 100px rgba(0,0,0,0.85)",
+                  }}
+                >
+                  <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-3xl bg-rose-500/20 border-2 border-rose-500/60 text-rose-400 flex items-center justify-center shadow-2xl shadow-rose-950/80">
+                    <ShieldAlert className="h-9 w-9 sm:h-10 sm:w-10 animate-pulse text-rose-400" />
+                  </div>
+                  <div className="space-y-3 max-w-xl">
+                    <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-rose-500/25 border border-rose-400/50 text-rose-300 text-xs font-black tracking-wider uppercase">
+                      <Lock className="h-3.5 w-3.5 text-rose-300" />
+                      <span>{lang === "ar" ? "حجب محتوى الاختبار — خصوصية مشددة" : "Content Privacy Blocked"}</span>
+                    </div>
+                    <h3 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-white drop-shadow-md">
                       {lang === "ar"
-                        ? `سجل مخالفات الخصوصية: (المحاولة ${privacyCount || 1} من 2)`
-                        : `Privacy Warning: Attempt (${privacyCount || 1} of 2)`}
-                    </span>
-                  </div>
-                  <div className="text-[12px] sm:text-xs text-slate-200 font-normal leading-relaxed text-center">
-                    {lang === "ar"
-                      ? "تنبيه أمان: لديك محاولة تحذيرية واحدة فقط! أي محاولة تصوير أخرى (المحاولة 2 من 2) ستؤدي فوراً إلى إنهاء الاختبار وإلغائه دون تسليم الإجابات كحالة غش!"
-                      : "Security Alert: You are allowed only 1 warning! Any second capture attempt (Attempt 2 of 2) will immediately terminate and cancel your test without submission as a cheating violation!"}
-                  </div>
-                </div>
-              </div>
+                        ? "تم حجب أسئلة الاختبار بواسطة منصة أثر التعليمية"
+                        : "Quiz Content Privacy Protected by Athar Educational Platform"}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-semibold">
+                      {lang === "ar"
+                        ? "محاولات تصوير الشاشة (Win+Shift+S / PrintScreen) أو مغادرة نافذة الاختبار محظورة تماماً لمنع تسريب الأسئلة أو الغش. تم حجب وتعتيم المحتوى بالكامل."
+                        : "Screen capture attempts (Win+Shift+S / PrintScreen) and leaving the test window are strictly prohibited. The assessment content was instantly masked and obscured."}
+                    </p>
 
-              <button
-                type="button"
-                onClick={handleResumeFromWarning}
-                className="mt-3 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-sky-500 via-indigo-600 to-violet-600 hover:from-sky-400 hover:via-indigo-500 hover:to-violet-500 text-white text-xs sm:text-sm font-black shadow-xl shadow-indigo-600/40 hover:scale-105 active:scale-95 transition-all cursor-pointer border border-white/20"
-              >
-                {lang === "ar" ? "أدركت ذلك — العودة ومتابعة الاختبار" : "I Understand — Resume Quiz"}
-              </button>
+                    <div className="p-4 rounded-2xl bg-slate-900/95 border-2 border-rose-500/40 text-white text-xs sm:text-sm font-bold space-y-2 mt-2 shadow-xl text-center">
+                      <div className="text-amber-300 font-black text-sm sm:text-base flex items-center justify-center gap-2">
+                        <AlertTriangle className="h-4 w-4 text-amber-300 shrink-0" />
+                        <span>
+                          {lang === "ar"
+                            ? `سجل مخالفات الخصوصية: (المحاولة ${privacyCount || 1} من 2)`
+                            : `Privacy Warning: Attempt (${privacyCount || 1} of 2)`}
+                        </span>
+                      </div>
+                      <div className="text-[12px] sm:text-xs text-slate-200 font-normal leading-relaxed text-center">
+                        {lang === "ar"
+                          ? "تنبيه أمان: لديك محاولة تحذيرية واحدة فقط! أي محاولة تصوير أخرى (المحاولة 2 من 2) ستؤدي فوراً إلى إنهاء الاختبار وإلغائه دون تسليم الإجابات كحالة غش!"
+                          : "Security Alert: You are allowed only 1 warning! Any second capture attempt (Attempt 2 of 2) will immediately terminate and cancel your test without submission as a cheating violation!"}
+                      </div>
+                    </div>
+                  </div>
 
-              <div className="text-[11px] text-slate-400 font-mono tracking-wide">
-                Athar Educational Platform · Anti-Cheat & Screen Protection Active
-              </div>
-            </div>
+                  <button
+                    type="button"
+                    onClick={handleResumeFromWarning}
+                    className="mt-3 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-sky-500 via-indigo-600 to-violet-600 hover:from-sky-400 hover:via-indigo-500 hover:to-violet-500 text-white text-xs sm:text-sm font-black shadow-xl shadow-indigo-600/40 hover:scale-105 active:scale-95 transition-all cursor-pointer border border-white/20"
+                  >
+                    {lang === "ar" ? "أدركت ذلك — العودة ومتابعة الاختبار" : "I Understand — Resume Quiz"}
+                  </button>
+
+                  <div className="text-[11px] text-slate-400 font-mono tracking-wide">
+                    Athar Educational Platform · Anti-Cheat & Screen Protection Active
+                  </div>
+                </div>,
+                document.body
+              )}
 
             <div className={`quiz-questions-wrapper relative ${privacyRestricted ? "opacity-0 pointer-events-none select-none filter blur-3xl space-y-5" : "space-y-5 transition-all"}`}>
               {/* Security Watermark across the active test canvas */}
