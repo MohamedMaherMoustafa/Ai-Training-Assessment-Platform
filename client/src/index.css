@@ -257,6 +257,66 @@
   animation: robot-arm-right 0.55s ease-in-out infinite;
 }
 
+@keyframes robot-wave-arm {
+  0%, 100% {
+    transform: rotate(-130deg);
+  }
+  25% {
+    transform: rotate(-165deg);
+  }
+  50% {
+    transform: rotate(-115deg);
+  }
+  75% {
+    transform: rotate(-165deg);
+  }
+}
+
+@keyframes hand-wave-wiggle {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  20% {
+    transform: rotate(20deg);
+  }
+  40% {
+    transform: rotate(-16deg);
+  }
+  60% {
+    transform: rotate(16deg);
+  }
+  80% {
+    transform: rotate(-8deg);
+  }
+}
+
+@keyframes bubble-fade-swap {
+  0% {
+    opacity: 0;
+    transform: translateY(4px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.robot-arm-wave {
+  transform-box: fill-box;
+  transform-origin: top center;
+  animation: robot-wave-arm 1.25s ease-in-out infinite;
+}
+
+.animate-hand-wave {
+  display: inline-block;
+  transform-origin: 70% 70%;
+  animation: hand-wave-wiggle 1.25s ease-in-out infinite;
+}
+
+.bubble-text-swap {
+  animation: bubble-fade-swap 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 .robot-eye-blink {
   transform-box: fill-box;
   transform-origin: center;

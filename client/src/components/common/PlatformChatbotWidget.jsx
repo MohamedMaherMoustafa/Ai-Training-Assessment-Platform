@@ -4,11 +4,15 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import {
   Bot,
+  BookOpen,
   CheckCircle2,
+  Flame,
+  HelpCircle,
   Maximize2,
   Minimize2,
   Send,
   Sparkles,
+  Trophy,
   Trash2,
   X,
   ArrowUpRight,
@@ -250,6 +254,69 @@ function parseInlineFormatting(str) {
   return parts.length > 0 ? parts : str;
 }
 
+const HELP_CALLOUTS = [
+  {
+    titleEn: "Need help?",
+    descEn: "Ask me anything!",
+    titleAr: "تحتاج مساعدة؟",
+    descAr: "اسألني أي شيء!",
+    icon: Sparkles,
+    color: "text-amber-500 dark:text-amber-300",
+    bgColor: "bg-amber-50 dark:bg-amber-950/60",
+    emoji: "👋",
+  },
+  {
+    titleEn: "Stuck on a question?",
+    descEn: "I'll explain step-by-step!",
+    titleAr: "محتار في سؤال؟",
+    descAr: "أشرحه لك خطوة بخطوة!",
+    icon: HelpCircle,
+    color: "text-sky-500 dark:text-sky-300",
+    bgColor: "bg-sky-50 dark:bg-sky-950/60",
+    emoji: "🙋‍♂️",
+  },
+  {
+    titleEn: "Want a practice quiz?",
+    descEn: "Generate one in seconds!",
+    titleAr: "تريد كويز تدريبي؟",
+    descAr: "أنشئه لك في ثوانٍ معدودة!",
+    icon: Flame,
+    color: "text-rose-500 dark:text-rose-300",
+    bgColor: "bg-rose-50 dark:bg-rose-950/60",
+    emoji: "⚡",
+  },
+  {
+    titleEn: "Review your lessons?",
+    descEn: "I can summarize any PDF!",
+    titleAr: "تراجع دروسك ومذكراتك؟",
+    descAr: "ألخص لك أي ملف PDF!",
+    icon: BookOpen,
+    color: "text-emerald-500 dark:text-emerald-300",
+    bgColor: "bg-emerald-50 dark:bg-emerald-950/60",
+    emoji: "📖",
+  },
+  {
+    titleEn: "Check your rank?",
+    descEn: "Ask about your scoreboard!",
+    titleAr: "تعرف على ترتيبك؟",
+    descAr: "اسألني عن نقاطك وترتيبك!",
+    icon: Trophy,
+    color: "text-purple-500 dark:text-purple-300",
+    bgColor: "bg-purple-50 dark:bg-purple-950/60",
+    emoji: "🏆",
+  },
+  {
+    titleEn: "I'm your AI Coach!",
+    descEn: "Tap me to get started 🚀",
+    titleAr: "أنا مدربك ومساعدك الذكي!",
+    descAr: "اضغط هنا لنبدأ فوراً 🚀",
+    icon: Bot,
+    color: "text-indigo-600 dark:text-cyan-400",
+    bgColor: "bg-indigo-50 dark:bg-indigo-950/60",
+    emoji: "✨",
+  },
+];
+
 export default function PlatformChatbotWidget() {
   const { user } = useAuth();
   const { lang } = useLang();
@@ -259,6 +326,18 @@ export default function PlatformChatbotWidget() {
   const [expanded, setExpanded] = useState(false);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
+  const [calloutIndex, setCalloutIndex] = useState(0);
+
+  useEffect(() => {
+    if (open) return undefined;
+    const interval = setInterval(() => {
+      setCalloutIndex((prev) => (prev + 1) % HELP_CALLOUTS.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [open]);
+
+  const activeCallout = HELP_CALLOUTS[calloutIndex];
+  const CalloutIcon = activeCallout.icon;
   const [attachments, setAttachments] = useState([]);
   const [recording, setRecording] = useState(false);
   const [recordSeconds, setRecordSeconds] = useState(0);
@@ -629,23 +708,36 @@ export default function PlatformChatbotWidget() {
           title={lang === "ar" ? "اضغط للتحدث مع المساعد الذكي" : "Click to open AI Assistant"}
           aria-label="Open AI Robot Chatbot"
         >
-          {/* Floating Speech Bubble matching screenshot */}
-          <div className="hidden sm:flex items-center gap-2.5 px-3.5 py-2 rounded-2xl bg-white/95 dark:bg-slate-900/90 shadow-xl border border-slate-200/80 dark:border-white/10 text-start group-hover:scale-105 transition-transform backdrop-blur-md">
-            <div className="h-7 w-7 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 flex items-center justify-center text-indigo-600 dark:text-cyan-400 shrink-0 shadow-inner">
-              <Sparkles className="h-3.5 w-3.5 text-indigo-600 dark:text-cyan-400 animate-pulse" />
+          {/* Floating Speech Bubble matching screenshot with 3s rotating help messages */}
+          <div className="flex items-center gap-2.5 px-3 sm:px-3.5 py-2 rounded-2xl bg-white/95 dark:bg-slate-900/90 shadow-xl border border-slate-200/80 dark:border-white/10 text-start group-hover:scale-105 transition-all backdrop-blur-md ring-2 ring-sky-400/20 max-w-[210px] sm:max-w-xs">
+            <div
+              className={`h-7 w-7 rounded-xl ${activeCallout.bgColor} flex items-center justify-center ${activeCallout.color} shrink-0 shadow-inner`}
+            >
+              <CalloutIcon className="h-3.5 w-3.5 animate-pulse" />
             </div>
-            <div>
-              <div className="font-extrabold text-[11px] text-slate-900 dark:text-white leading-tight">
-                {lang === "ar" ? "تحتاج مساعدة؟" : "Need help?"}
+            <div key={calloutIndex} className="bubble-text-swap min-w-0">
+              <div className="font-extrabold text-[11px] text-slate-900 dark:text-white leading-tight flex items-center gap-1">
+                <span className="truncate">
+                  {lang === "ar" ? activeCallout.titleAr : activeCallout.titleEn}
+                </span>
+                <span className="text-xs inline-block animate-hand-wave shrink-0">
+                  {activeCallout.emoji}
+                </span>
               </div>
-              <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
-                {lang === "ar" ? "اسألني أي شيء!" : "Ask me anything!"}
+              <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium truncate">
+                {lang === "ar" ? activeCallout.descAr : activeCallout.descEn}
               </div>
             </div>
           </div>
 
-          {/* Live Walking Robot SVG */}
-          <div className="flex flex-col items-center">
+          {/* Live Walking & Waving Robot with Hand Raise & Signs */}
+          <div className="flex flex-col items-center relative">
+            {/* Attention-Catching Floating Sign / Hand Gesture */}
+            <div className="absolute -top-3.5 -end-1.5 z-10 flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 text-white font-black text-[9px] sm:text-[10px] shadow-lg animate-bounce select-none border border-white">
+              <span className="inline-block animate-hand-wave">👋</span>
+              <span>{lang === "ar" ? "أنا هنا!" : "Hi!"}</span>
+            </div>
+
             <div className="robot-face-flip">
               <div className="robot-bob-anim drop-shadow-[0_8px_16px_rgba(2,132,199,0.4)] group-hover:scale-110 transition-transform">
                 <svg
@@ -667,18 +759,27 @@ export default function PlatformChatbotWidget() {
                     </linearGradient>
                   </defs>
 
-                  {/* Antenna with Graduation Cap Accent */}
+                  {/* Antenna with Glowing Rotating Accent */}
                   <line x1="40" y1="14" x2="40" y2="6" stroke="#38bdf8" strokeWidth="3" strokeLinecap="round" />
                   <circle cx="40" cy="5" r="4" fill="#fbbf24" stroke="#ffffff" strokeWidth="1.5" />
+                  <circle cx="40" cy="5" r="6.5" stroke="#fbbf24" strokeWidth="1" strokeDasharray="2 2" className="animate-spin opacity-80" />
 
-                  {/* Arms */}
+                  {/* Left Arm: Natural Swing */}
                   <g className="robot-arm-l">
                     <rect x="12" y="42" width="8" height="19" rx="4" fill="url(#botMetalGrad)" stroke="#0284c7" strokeWidth="1.5" />
                     <circle cx="16" cy="61" r="3.5" fill="#38bdf8" />
                   </g>
-                  <g className="robot-arm-r">
-                    <rect x="60" y="42" width="8" height="19" rx="4" fill="url(#botMetalGrad)" stroke="#0284c7" strokeWidth="1.5" />
-                    <circle cx="64" cy="61" r="3.5" fill="#38bdf8" />
+
+                  {/* Right Arm: Raised Hand Waving enthusiastically */}
+                  <g className="robot-arm-wave">
+                    <rect x="60" y="42" width="8" height="20" rx="4" fill="url(#botMetalGrad)" stroke="#0284c7" strokeWidth="1.5" />
+                    <circle cx="64" cy="62" r="4.5" fill="#38bdf8" stroke="#ffffff" strokeWidth="1" />
+                    {/* Waving Palm & Finger Lines */}
+                    <path d="M61 62 L58 58 M64 62 L64 56 M67 62 L70 58" stroke="#38bdf8" strokeWidth="1.4" strokeLinecap="round" />
+                    {/* Mini Help Flag / Sign held in hand */}
+                    <line x1="64" y1="62" x2="64" y2="76" stroke="#0284c7" strokeWidth="1.5" strokeLinecap="round" />
+                    <rect x="52" y="74" width="24" height="11" rx="3" fill="#2563eb" stroke="#bae6fd" strokeWidth="1" />
+                    <text x="64" y="82.5" fill="#ffffff" fontSize="6.5" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">HELP</text>
                   </g>
 
                   {/* Legs */}
