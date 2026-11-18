@@ -334,6 +334,12 @@ export default function LiveAnnotationModal({
     snapshotCurrentPage();
     const merged = [];
     for (let i = 0; i < pages.length; i += 1) {
+      const inkSrc = inkSnapshotsRef.current[i];
+      // Performance optimization: If no ink annotations exist on this page, preserve the original page directly
+      if (!inkSrc) {
+        merged.push(pages[i]);
+        continue;
+      }
       const bgImg = await loadImage(pages[i]);
       const outCanvas = document.createElement("canvas");
       outCanvas.width = bgImg.naturalWidth || 1050;
@@ -343,12 +349,9 @@ export default function LiveAnnotationModal({
       ctx.fillRect(0, 0, outCanvas.width, outCanvas.height);
       ctx.drawImage(bgImg, 0, 0, outCanvas.width, outCanvas.height);
 
-      const inkSrc = inkSnapshotsRef.current[i];
-      if (inkSrc) {
-        const inkImg = await loadImage(inkSrc);
-        ctx.drawImage(inkImg, 0, 0, outCanvas.width, outCanvas.height);
-      }
-      merged.push(outCanvas.toDataURL("image/jpeg", 0.8));
+      const inkImg = await loadImage(inkSrc);
+      ctx.drawImage(inkImg, 0, 0, outCanvas.width, outCanvas.height);
+      merged.push(outCanvas.toDataURL("image/jpeg", 0.78));
     }
     return merged;
   };
@@ -500,27 +503,42 @@ export default function LiveAnnotationModal({
 
           <div className="flex items-center gap-2">
             {/* Multi-Page Controls */}
-            <div className="flex items-center gap-1 glass-subtle px-2 py-1 rounded-xl text-xs font-bold">
-              <button
-                type="button"
-                disabled={pageIdx === 0}
-                onClick={() => goToPage(pageIdx - 1)}
-                className="p-1 rounded-lg hover:bg-white/50 disabled:opacity-35"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-              <span className="px-2">
-                {pageIdx + 1} / {pages.length}
-              </span>
-              <button
-                type="button"
-                disabled={pageIdx >= pages.length - 1}
-                onClick={() => goToPage(pageIdx + 1)}
-                className="p-1 rounded-lg hover:bg-white/50 disabled:opacity-35"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </button>
-            </div>
+            {pages.length > 1 && (
+              <div className="flex items-center gap-1 glass-subtle px-2 py-1 rounded-xl text-xs font-bold">
+                <button
+                  type="button"
+                  disabled={pageIdx === 0}
+                  onClick={() => goToPage(pageIdx - 1)}
+                  className="p-1 rounded-lg hover:bg-white/50 disabled:opacity-35 transition-colors"
+                  title={lang === "ar" ? "الصفحة السابقة" : "Previous Page"}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <div className="flex items-center gap-1 px-1">
+                  <select
+                    value={pageIdx}
+                    onChange={(e) => goToPage(Number(e.target.value))}
+                    className="bg-transparent font-bold cursor-pointer text-xs py-0.5 px-1 rounded hover:bg-white/40 focus:outline-none dark:bg-slate-900 dark:text-white"
+                    title={lang === "ar" ? "انتقال سريع لرقم الصفحة" : "Jump to page"}
+                  >
+                    {pages.map((_, i) => (
+                      <option key={i} value={i} className="text-slate-900 bg-white dark:bg-slate-800 dark:text-white">
+                        {lang === "ar" ? `صفحة ${i + 1} / ${pages.length}` : `Page ${i + 1} of ${pages.length}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <button
+                  type="button"
+                  disabled={pageIdx >= pages.length - 1}
+                  onClick={() => goToPage(pageIdx + 1)}
+                  className="p-1 rounded-lg hover:bg-white/50 disabled:opacity-35 transition-colors"
+                  title={lang === "ar" ? "الصفحة التالية" : "Next Page"}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            )}
 
             <button
               type="button"

@@ -159,7 +159,24 @@ export default function AssignmentsModule({
         fileSize: file.size,
         title: lang === "ar" ? "رفع وتجهيز ملف الواجب (PDF)" : "Uploading Assignment PDF",
         action: async (reportProgress) => {
-          return await renderPdfFileToPages(file, { onProgress: reportProgress });
+          return await renderPdfFileToPages(file, {
+            onProgress: ({ percent, stage }) => {
+              reportProgress({
+                percent,
+                stage: lang === "ar"
+                  ? stage
+                      .replace("Rendering & preparing page", "تجهيز الصفحة")
+                      .replace("Completed page", "اكتملت الصفحة")
+                      .replace("of", "من")
+                      .replace("Opening PDF document...", "فتح ملف PDF...")
+                      .replace("Reading file from disk...", "قراءة الملف من القرص...")
+                      .replace("Finalizing pages...", "اللمسات الأخيرة للصفحات...")
+                      .replace("All", "جميع")
+                      .replace("pages rendered successfully!", "صفحات تم تجهيزها بنجاح!")
+                  : stage,
+              });
+            },
+          });
         },
       });
       setForm((prev) => ({

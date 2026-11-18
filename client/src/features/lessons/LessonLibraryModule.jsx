@@ -126,10 +126,42 @@ export default function LessonLibraryModule({
         fileSize: file.size,
         title: lang === "ar" ? "رفع وتجهيز ملف الدرس (PDF)" : "Uploading Lesson PDF",
         action: async (reportProgress) => {
-          return await Promise.all([
-            renderPdfFileToPages(file, { onProgress: reportProgress }),
-            extractTextFromPdfFile(file, { onProgress: reportProgress }).catch(() => ""),
-          ]);
+          reportProgress({
+            percent: 5,
+            stage: lang === "ar" ? "بدء معالجة ملف الدرس..." : "Reading lesson file...",
+          });
+          const rend = await renderPdfFileToPages(file, {
+            onProgress: ({ percent, stage }) => {
+              reportProgress({
+                percent: Math.round(5 + (percent * 0.7)),
+                stage: lang === "ar"
+                  ? stage
+                      .replace("Rendering & preparing page", "تجهيز الصفحة")
+                      .replace("Completed page", "اكتملت الصفحة")
+                      .replace("of", "من")
+                      .replace("Opening PDF document...", "فتح ملف PDF...")
+                      .replace("Reading file from disk...", "قراءة الملف من القرص...")
+                      .replace("Finalizing pages...", "اللمسات الأخيرة للصفحات...")
+                      .replace("All", "جميع")
+                      .replace("pages rendered successfully!", "صفحات تم تجهيزها بنجاح!")
+                  : stage,
+              });
+            },
+          });
+          let txt = "";
+          try {
+            txt = await extractTextFromPdfFile(file, {
+              onProgress: ({ percent }) => {
+                reportProgress({
+                  percent: Math.round(75 + (percent * 0.25)),
+                  stage: lang === "ar" ? "استخراج نصوص المحتوى للذكاء الاصطناعي..." : "Extracting text content for AI...",
+                });
+              },
+            });
+          } catch {
+            txt = "";
+          }
+          return [rend, txt];
         },
       });
       setForm((prev) => ({
