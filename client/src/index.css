@@ -171,6 +171,18 @@ body.quiz-privacy-obscured .quiz-privacy-shield-overlay {
   }
 }
 
+@keyframes robot-face-dir-rtl {
+  0%, 46% {
+    transform: scaleX(1);
+  }
+  50%, 96% {
+    transform: scaleX(-1);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+
 @keyframes robot-bob {
   0%, 100% {
     transform: translateY(0px);
@@ -252,13 +264,22 @@ body.quiz-privacy-obscured .quiz-privacy-shield-overlay {
   animation: robot-face-dir 9s steps(1) infinite;
 }
 
-.robot-sign-text-group {
-  transform-origin: 0px 0px;
+[dir="rtl"] .robot-face-flip {
+  animation: robot-face-dir-rtl 9s steps(1) infinite;
+}
+
+.robot-sign-text {
+  transform-box: fill-box;
+  transform-origin: center;
   animation: robot-face-dir 9s steps(1) infinite;
 }
 
+[dir="rtl"] .robot-sign-text {
+  animation: robot-face-dir-rtl 9s steps(1) infinite;
+}
+
 .robot-patrol-track:hover .robot-face-flip,
-.robot-patrol-track:hover .robot-sign-text-group {
+.robot-patrol-track:hover .robot-sign-text {
   animation-play-state: paused;
 }
 

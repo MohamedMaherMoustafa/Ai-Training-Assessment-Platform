@@ -792,12 +792,21 @@ export default function PlatformChatbotWidget() {
                       <rect x="62" y="2" width="52" height="23" rx="6.5" fill="url(#botSignGrad)" stroke="#ffffff" strokeWidth="1.6" />
                       {/* Active Indicator LED */}
                       <circle cx="69" cy="8" r="2" fill="#34d399" />
-                      {/* Sign Text (Protected against horizontal mirror flip so text always reads correctly) */}
-                      <g className="robot-sign-text-group" transform="translate(91, 16.5)">
-                        <text x="0" y="0" fill="#ffffff" fontSize="10.5" fontWeight="900" textAnchor="middle" fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" letterSpacing="0.6">
-                          {lang === "ar" ? "مساعدة!" : "HELP!"}
-                        </text>
-                      </g>
+                      {/* Sign Text: perfectly centered inside the sign box & protected from displacement */}
+                      <text
+                        x="91"
+                        y="14.5"
+                        fill="#ffffff"
+                        fontSize="10.5"
+                        fontWeight="900"
+                        textAnchor="middle"
+                        dominantBaseline="central"
+                        className="robot-sign-text"
+                        fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+                        letterSpacing="0.6"
+                      >
+                        {lang === "ar" ? "مساعدة!" : "HELP!"}
+                      </text>
                     </g>
                   </g>
 
