@@ -17,6 +17,7 @@ import {
   UserCheck,
   UserX,
   ShieldAlert,
+  AlertTriangle,
   Loader2,
 } from "lucide-react";
 import {
@@ -151,12 +152,36 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
     return () => clearInterval(timer);
   }, [activeQuiz, secondsLeft]);
 
-  // Anti-Screenshot & Cheating Protection (Closes quiz immediately on 3rd distinct violation without submitting)
+  // Helper to destroy and overwrite Windows clipboard to prevent pasting captured screenshots or text
+  const destroyClipboard = () => {
+    const notice =
+      "⚠️ محتوى الاختبار محمي — تم حجب لقطة الشاشة ومنعها بواسطة منصة أثر التعليمية\nAssessment Content Protected — Screenshots are strictly blocked by Athar Educational Platform.";
+    try {
+      if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(notice).catch(() => {});
+      }
+    } catch {}
+    try {
+      const dummy = document.createElement("textarea");
+      dummy.value = notice;
+      dummy.style.position = "fixed";
+      dummy.style.opacity = "0";
+      dummy.style.left = "-9999px";
+      document.body.appendChild(dummy);
+      dummy.focus();
+      dummy.select();
+      document.execCommand("copy");
+      document.body.removeChild(dummy);
+    } catch {}
+  };
+
+  // Anti-Screenshot & Cheating Protection (Closes quiz immediately on 2nd violation without submitting)
   const handlePrivacyViolation = async (reason = "shortcut") => {
     if (!activeQuiz) return;
 
     // Immediately apply synchronous privacy blackout to DOM before anything else
     document.body.classList.add("quiz-privacy-obscured");
+    destroyClipboard();
 
     // 1. If warning overlay is ALREADY displayed, ignore all subsequent events!
     if (privacyRestrictedRef.current) return;
@@ -171,19 +196,15 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
     lastViolationTimeRef.current = now;
 
     // 4. Wipe clipboard to destroy any captured image or text data
-    try {
-      navigator.clipboard?.writeText?.("").catch(() => {});
-    } catch {
-      // ignore
-    }
+    destroyClipboard();
 
-    // 5. Increment atomic strike count
+    // 5. Increment atomic strike count (Strict 2-attempt limit)
     const nextStrikes = strikeCountRef.current + 1;
     strikeCountRef.current = nextStrikes;
     setPrivacyCount(nextStrikes);
 
-    if (nextStrikes >= 3) {
-      // Reached 3 distinct violations: IMMEDIATELY close quiz without submitting
+    if (nextStrikes >= 2) {
+      // Reached 2 distinct violations: IMMEDIATELY close quiz without submitting
       privacyRestrictedRef.current = false;
       document.body.classList.remove("quiz-privacy-obscured");
       const quizToTerminate = activeQuiz;
@@ -210,24 +231,24 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
         title: lang === "ar" ? "تم إنهاء الاختبار لمحاولة الغش" : "Quiz Terminated (Cheating Violation)",
         message:
           lang === "ar"
-            ? "تم إغلاق الاختبار فوراً وإلغاء محاولتك دون إرسال الإجابات بسبب تكرار محاولة تصوير الشاشة (مخالفة 3 من 3). لا يمكنك إعادة الاختبار إلا بعد مراجعة وموافقة المحاضر."
-            : "Your quiz has been closed immediately and cancelled without submitting because screenshot attempts were detected 3 times. You cannot re-enter without instructor approval.",
+            ? "تم إغلاق الاختبار فوراً وإلغاء محاولتك دون إرسال الإجابات بسبب تكرار محاولة تصوير الشاشة (مخالفة 2 من 2). لا يمكنك إعادة الاختبار إلا بعد مراجعة وموافقة المحاضر."
+            : "Your quiz has been closed immediately and cancelled without submitting because screenshot attempts were detected (Attempt 2 of 2). You cannot re-enter without instructor approval.",
         confirmLabel: lang === "ar" ? "أدركت ذلك" : "I Understand",
       });
 
       toast.error(
         lang === "ar"
-          ? "تم إغلاق الاختبار وإلغاؤه لمحاولة تصوير الشاشة (3/3)!"
-          : "Quiz terminated without submitting due to repeated screenshot attempts (3/3)!"
+          ? "تم إغلاق الاختبار وإلغاؤه لمحاولة تصوير الشاشة (2/2)!"
+          : "Quiz terminated without submitting due to repeated screenshot attempts (2/2)!"
       );
     } else {
-      // Strike 1 or 2: Show blackout privacy screen & warning
+      // Strike 1: Show blackout privacy screen & warning (Attempt 1 of 2)
       privacyRestrictedRef.current = true;
       setPrivacyRestricted(true);
       toast.error(
         lang === "ar"
-          ? `تحذير (${nextStrikes}/3): محاولة تصوير الشاشة محظورة! تم حجب المحتوى لحماية خصوصية الاختبار.`
-          : `Warning (Strike ${nextStrikes}/3): Taking screenshots is prohibited! Content has been privacy-shielded.`
+          ? `تحذير (المحاولة ${nextStrikes}/2): محاولة تصوير الشاشة محظورة! تم حجب المحتوى لحماية خصوصية الاختبار.`
+          : `Warning (Attempt ${nextStrikes}/2): Taking screenshots is prohibited! Content has been privacy-shielded.`
       );
     }
   };
@@ -250,18 +271,21 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
 
     const handleKeyCapture = (e) => {
       const k = (e.key || "").toLowerCase();
-      const isPrintScreen = e.key === "PrintScreen" || e.keyCode === 44;
+      const code = e.code || "";
+      const isPrintScreen = e.key === "PrintScreen" || code === "PrintScreen" || e.keyCode === 44;
       const isWinSnip = (e.metaKey || e.ctrlKey) && e.shiftKey && k === "s";
       const isMacSnip = e.metaKey && e.shiftKey && ["3", "4", "5"].includes(k);
       const isPrintOrSave = (e.ctrlKey || e.metaKey) && (k === "p" || k === "s");
       const isDevTools =
         e.key === "F12" || ((e.ctrlKey || e.metaKey) && e.shiftKey && k === "i");
       const isMetaKey = e.key === "Meta" || e.keyCode === 91 || e.keyCode === 92;
+      const isAltKey = e.key === "Alt" || e.keyCode === 18;
 
       // INSTANT PREEMPTIVE SYNCHRONOUS SHIELD:
       // When Win key, PrintScreen, or capture combination is touched, hide questions in 0ms!
-      if (isPrintScreen || isWinSnip || isMacSnip || isPrintOrSave || isDevTools || isMetaKey) {
+      if (isPrintScreen || isWinSnip || isMacSnip || isPrintOrSave || isDevTools || isMetaKey || (isAltKey && isPrintScreen)) {
         document.body.classList.add("quiz-privacy-obscured");
+        destroyClipboard();
       }
 
       if (isPrintScreen || isWinSnip || isMacSnip || isPrintOrSave || isDevTools) {
@@ -271,9 +295,21 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
       }
     };
 
+    const handleKeyUpCapture = (e) => {
+      const code = e.code || "";
+      const isPrintScreen = e.key === "PrintScreen" || code === "PrintScreen" || e.keyCode === 44;
+      if (isPrintScreen) {
+        // When PrintScreen is released (the primary event Chrome reliably fires on Windows for PrtScn):
+        document.body.classList.add("quiz-privacy-obscured");
+        destroyClipboard();
+        handlePrivacyViolation("print_screen");
+      }
+    };
+
     const handleVisibility = () => {
       if (document.hidden) {
         document.body.classList.add("quiz-privacy-obscured");
+        destroyClipboard();
         handlePrivacyViolation("visibility_hidden");
       }
     };
@@ -281,17 +317,28 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
     const handleWindowBlur = () => {
       // Synchronously mask quiz before OS snip overlay can grab canvas
       document.body.classList.add("quiz-privacy-obscured");
+      destroyClipboard();
       handlePrivacyViolation("window_blur");
     };
 
+    const handleCopyAttempt = (e) => {
+      e.preventDefault();
+      destroyClipboard();
+      handlePrivacyViolation("clipboard_copy");
+    };
+
     window.addEventListener("keydown", handleKeyCapture, true);
+    window.addEventListener("keyup", handleKeyUpCapture, true);
     window.addEventListener("blur", handleWindowBlur);
+    window.addEventListener("copy", handleCopyAttempt, true);
     document.addEventListener("visibilitychange", handleVisibility);
 
     return () => {
       document.body.classList.remove("quiz-privacy-obscured");
       window.removeEventListener("keydown", handleKeyCapture, true);
+      window.removeEventListener("keyup", handleKeyUpCapture, true);
       window.removeEventListener("blur", handleWindowBlur);
+      window.removeEventListener("copy", handleCopyAttempt, true);
       document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, [activeQuiz]);
@@ -1015,39 +1062,49 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
             onCut={(e) => e.preventDefault()}
             className="quiz-privacy-protected relative glass-card border-sky-400/70 p-6 space-y-5 select-none"
           >
-            {/* Full-cover Content Privacy Restricted Overlay (Always in DOM for instant composite capture shielding) */}
-            <div className={`quiz-privacy-shield-overlay absolute inset-0 z-40 rounded-2xl bg-slate-950/98 backdrop-blur-3xl flex-col items-center justify-center p-6 text-center text-white space-y-4 ${privacyRestricted ? "!flex !opacity-100 !visible" : ""}`}>
-              <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-3xl bg-rose-500/20 border border-rose-400/60 text-rose-400 flex items-center justify-center shadow-2xl shadow-rose-950/60">
-                <ShieldAlert className="h-9 w-9 sm:h-10 sm:w-10 animate-pulse" />
+            {/* Full-cover Content Privacy Restricted Overlay (High contrast solid dark surface, visible & legible in both light and dark modes) */}
+            <div
+              className={`quiz-privacy-shield-overlay absolute inset-0 z-50 rounded-2xl flex flex-col items-center justify-center p-6 sm:p-10 text-center space-y-4 ${
+                privacyRestricted ? "!flex !opacity-100 !visible" : ""
+              }`}
+              style={{
+                backgroundColor: "#020617",
+                color: "#ffffff",
+                boxShadow: "inset 0 0 100px rgba(0,0,0,0.85)",
+              }}
+            >
+              <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-3xl bg-rose-500/20 border-2 border-rose-500/60 text-rose-400 flex items-center justify-center shadow-2xl shadow-rose-950/80">
+                <ShieldAlert className="h-9 w-9 sm:h-10 sm:w-10 animate-pulse text-rose-400" />
               </div>
-              <div className="space-y-2 max-w-lg">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-400/40 text-rose-300 text-xs font-black tracking-wider uppercase">
-                  <Lock className="h-3.5 w-3.5" />
+              <div className="space-y-3 max-w-xl">
+                <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-rose-500/25 border border-rose-400/50 text-rose-300 text-xs font-black tracking-wider uppercase">
+                  <Lock className="h-3.5 w-3.5 text-rose-300" />
                   <span>{lang === "ar" ? "حجب محتوى الاختبار — خصوصية مشددة" : "Content Privacy Blocked"}</span>
                 </div>
-                <h3 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+                <h3 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-white drop-shadow-md">
                   {lang === "ar"
                     ? "تم حجب أسئلة الاختبار بواسطة منصة أثر التعليمية"
                     : "Quiz Content Privacy Protected by Athar Educational Platform"}
                 </h3>
-                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-medium">
+                <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-semibold">
                   {lang === "ar"
                     ? "محاولات تصوير الشاشة (Win+Shift+S / PrintScreen) أو مغادرة نافذة الاختبار محظورة تماماً لمنع تسريب الأسئلة أو الغش. تم حجب وتعتيم المحتوى بالكامل."
-                    : "Screen capture shortcuts (Win+Shift+S / PrintScreen) and leaving the test window are strictly restricted. The assessment content was instantly masked and obscured."}
+                    : "Screen capture attempts (Win+Shift+S / PrintScreen) and leaving the test window are strictly prohibited. The assessment content was instantly masked and obscured."}
                 </p>
 
-                <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-rose-500/30 text-rose-200 text-xs font-bold space-y-1.5 mt-2">
-                  <div className="text-amber-300 font-black text-sm flex items-center justify-center gap-1.5">
+                <div className="p-4 rounded-2xl bg-slate-900/95 border-2 border-rose-500/40 text-white text-xs sm:text-sm font-bold space-y-2 mt-2 shadow-xl text-center">
+                  <div className="text-amber-300 font-black text-sm sm:text-base flex items-center justify-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-amber-300 shrink-0" />
                     <span>
                       {lang === "ar"
-                        ? `سجل مخالفات الخصوصية: (${privacyCount || 1} من 3)`
-                        : `Privacy Warning: Strike (${privacyCount || 1} of 3)`}
+                        ? `سجل مخالفات الخصوصية: (المحاولة ${privacyCount || 1} من 2)`
+                        : `Privacy Warning: Attempt (${privacyCount || 1} of 2)`}
                     </span>
                   </div>
-                  <div className="text-[11px] text-slate-300 font-normal leading-relaxed">
+                  <div className="text-[12px] sm:text-xs text-slate-200 font-normal leading-relaxed text-center">
                     {lang === "ar"
-                      ? "تنبيه أمان: استمرار محاولات التصوير حتى المخالفة الثالثة (3/3) سيؤدي إلى إنهاء الاختبار وإلغائه فوراً دون تسليم الإجابات كحالة غش!"
-                      : "Security Alert: Continued capture attempts up to strike 3 will automatically terminate and cancel your test without submission as a cheating violation!"}
+                      ? "تنبيه أمان: لديك محاولة تحذيرية واحدة فقط! أي محاولة تصوير أخرى (المحاولة 2 من 2) ستؤدي فوراً إلى إنهاء الاختبار وإلغائه دون تسليم الإجابات كحالة غش!"
+                      : "Security Alert: You are allowed only 1 warning! Any second capture attempt (Attempt 2 of 2) will immediately terminate and cancel your test without submission as a cheating violation!"}
                   </div>
                 </div>
               </div>
@@ -1055,17 +1112,25 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
               <button
                 type="button"
                 onClick={handleResumeFromWarning}
-                className="mt-2 px-7 py-3 rounded-2xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white text-xs sm:text-sm font-black shadow-xl shadow-sky-600/30 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                className="mt-3 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-sky-500 via-indigo-600 to-violet-600 hover:from-sky-400 hover:via-indigo-500 hover:to-violet-500 text-white text-xs sm:text-sm font-black shadow-xl shadow-indigo-600/40 hover:scale-105 active:scale-95 transition-all cursor-pointer border border-white/20"
               >
                 {lang === "ar" ? "أدركت ذلك — العودة ومتابعة الاختبار" : "I Understand — Resume Quiz"}
               </button>
 
-              <div className="text-[11px] text-slate-500 font-mono tracking-wide">
+              <div className="text-[11px] text-slate-400 font-mono tracking-wide">
                 Athar Educational Platform · Anti-Cheat & Screen Protection Active
               </div>
             </div>
 
-            <div className={`quiz-questions-wrapper ${privacyRestricted ? "opacity-0 pointer-events-none select-none filter blur-3xl space-y-5" : "space-y-5 transition-all"}`}>
+            <div className={`quiz-questions-wrapper relative ${privacyRestricted ? "opacity-0 pointer-events-none select-none filter blur-3xl space-y-5" : "space-y-5 transition-all"}`}>
+              {/* Security Watermark across the active test canvas */}
+              <div className="absolute inset-0 pointer-events-none select-none overflow-hidden opacity-[0.035] dark:opacity-[0.05] flex flex-wrap gap-12 items-center justify-around z-0 rotate-[-12deg]">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <span key={i} className="text-xs sm:text-sm font-black tracking-widest uppercase">
+                    منصة أثر التعليمية · Athar Platform · {user?.displayName || user?.email || "Student"}
+                  </span>
+                ))}
+              </div>
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <h2 className="text-lg font-extrabold">{activeQuiz.title}</h2>

@@ -82,7 +82,7 @@
 
 /* Instant Synchronous Content Privacy Protection for Active Quizzes */
 body.quiz-privacy-obscured .quiz-questions-wrapper {
-  filter: blur(55px) brightness(0) !important;
+  filter: blur(65px) brightness(0) !important;
   opacity: 0 !important;
   visibility: hidden !important;
   pointer-events: none !important;
@@ -94,6 +94,8 @@ body.quiz-privacy-obscured .quiz-privacy-shield-overlay {
   opacity: 1 !important;
   visibility: visible !important;
   pointer-events: auto !important;
+  background-color: #020617 !important;
+  color: #ffffff !important;
 }
 
 .quiz-privacy-shield-overlay {
@@ -101,6 +103,8 @@ body.quiz-privacy-obscured .quiz-privacy-shield-overlay {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
+  background-color: #020617 !important;
+  color: #ffffff !important;
 }
 
 @media print {
