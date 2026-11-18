@@ -259,16 +259,16 @@
 
 @keyframes robot-wave-arm {
   0%, 100% {
-    transform: rotate(-130deg);
+    transform: rotate(0deg);
   }
   25% {
-    transform: rotate(-165deg);
+    transform: rotate(-14deg);
   }
   50% {
-    transform: rotate(-115deg);
+    transform: rotate(10deg);
   }
   75% {
-    transform: rotate(-165deg);
+    transform: rotate(-14deg);
   }
 }
 
@@ -303,7 +303,7 @@
 
 .robot-arm-wave {
   transform-box: fill-box;
-  transform-origin: top center;
+  transform-origin: bottom left;
   animation: robot-wave-arm 1.25s ease-in-out infinite;
 }
 

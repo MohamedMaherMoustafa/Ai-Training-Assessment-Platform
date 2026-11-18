@@ -734,20 +734,15 @@ export default function PlatformChatbotWidget() {
 
           {/* Live Walking & Waving Robot with Hand Raise & Signs */}
           <div className="flex flex-col items-center relative">
-            {/* Attention-Catching Floating Sign / Hand Gesture */}
-            <div className="absolute -top-3.5 -end-1.5 z-10 flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 text-white font-black text-[9px] sm:text-[10px] shadow-lg animate-bounce select-none border border-white">
-              <span className="inline-block animate-hand-wave">👋</span>
-              <span>{lang === "ar" ? "أنا هنا!" : "Hi!"}</span>
-            </div>
-
             <div className="robot-face-flip">
-              <div className="robot-bob-anim drop-shadow-[0_8px_16px_rgba(2,132,199,0.4)] group-hover:scale-110 transition-transform">
+              <div className="robot-bob-anim drop-shadow-[0_10px_20px_rgba(2,132,199,0.45)] group-hover:scale-105 transition-transform">
                 <svg
-                  width="72"
-                  height="78"
-                  viewBox="0 0 80 88"
+                  width="104"
+                  height="112"
+                  viewBox="0 0 118 104"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
+                  className="w-[96px] h-[104px] sm:w-[110px] sm:h-[118px] overflow-visible"
                 >
                   <defs>
                     <linearGradient id="botBodyGrad" x1="18" y1="16" x2="62" y2="66" gradientUnits="userSpaceOnUse">
@@ -759,58 +754,78 @@ export default function PlatformChatbotWidget() {
                       <stop stopColor="#f8fafc" />
                       <stop offset="1" stopColor="#cbd5e1" />
                     </linearGradient>
+                    <linearGradient id="botSignGrad" x1="62" y1="2" x2="114" y2="25" gradientUnits="userSpaceOnUse">
+                      <stop stopColor="#38bdf8" />
+                      <stop offset="0.5" stopColor="#2563eb" />
+                      <stop offset="1" stopColor="#4f46e5" />
+                    </linearGradient>
+                    <filter id="signDropShadow" x="-10%" y="-10%" width="130%" height="130%">
+                      <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="#0284c7" floodOpacity="0.35" />
+                    </filter>
                   </defs>
 
                   {/* Antenna with Glowing Rotating Accent */}
-                  <line x1="40" y1="14" x2="40" y2="6" stroke="#38bdf8" strokeWidth="3" strokeLinecap="round" />
-                  <circle cx="40" cy="5" r="4" fill="#fbbf24" stroke="#ffffff" strokeWidth="1.5" />
-                  <circle cx="40" cy="5" r="6.5" stroke="#fbbf24" strokeWidth="1" strokeDasharray="2 2" className="animate-spin opacity-80" />
+                  <line x1="44" y1="17" x2="44" y2="8" stroke="#38bdf8" strokeWidth="3" strokeLinecap="round" />
+                  <circle cx="44" cy="7" r="4.5" fill="#fbbf24" stroke="#ffffff" strokeWidth="1.5" />
+                  <circle cx="44" cy="7" r="7.5" stroke="#fbbf24" strokeWidth="1" strokeDasharray="2 2" className="animate-spin opacity-80" />
 
                   {/* Left Arm: Natural Swing */}
                   <g className="robot-arm-l">
-                    <rect x="12" y="42" width="8" height="19" rx="4" fill="url(#botMetalGrad)" stroke="#0284c7" strokeWidth="1.5" />
-                    <circle cx="16" cy="61" r="3.5" fill="#38bdf8" />
+                    <rect x="16" y="45" width="8" height="19" rx="4" fill="url(#botMetalGrad)" stroke="#0284c7" strokeWidth="1.5" />
+                    <circle cx="20" cy="64" r="3.5" fill="#38bdf8" />
                   </g>
 
-                  {/* Right Arm: Raised Hand Waving enthusiastically */}
+                  {/* Right Arm & Big Sign: Raised Waving Arm with Prominent Handheld Sign */}
                   <g className="robot-arm-wave">
-                    <rect x="60" y="42" width="8" height="20" rx="4" fill="url(#botMetalGrad)" stroke="#0284c7" strokeWidth="1.5" />
-                    <circle cx="64" cy="62" r="4.5" fill="#38bdf8" stroke="#ffffff" strokeWidth="1" />
-                    {/* Waving Palm & Finger Lines */}
-                    <path d="M61 62 L58 58 M64 62 L64 56 M67 62 L70 58" stroke="#38bdf8" strokeWidth="1.4" strokeLinecap="round" />
-                    {/* Mini Help Flag / Sign held in hand */}
-                    <line x1="64" y1="62" x2="64" y2="76" stroke="#0284c7" strokeWidth="1.5" strokeLinecap="round" />
-                    <rect x="52" y="74" width="24" height="11" rx="3" fill="#2563eb" stroke="#bae6fd" strokeWidth="1" />
-                    <text x="64" y="82.5" fill="#ffffff" fontSize="6.5" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">HELP</text>
+                    {/* Upper Arm raised up and right */}
+                    <rect x="58" y="27" width="9" height="21" rx="4.5" fill="url(#botMetalGrad)" stroke="#0284c7" strokeWidth="1.5" transform="rotate(-36 60 44)" />
+                    {/* Robot Hand holding sign pole */}
+                    <circle cx="75" cy="27" r="5" fill="#38bdf8" stroke="#ffffff" strokeWidth="1.2" />
+                    <path d="M72 26 L69 22 M75 25 L75 20 M78 26 L81 23" stroke="#38bdf8" strokeWidth="1.5" strokeLinecap="round" />
+
+                    {/* Sign Pole */}
+                    <line x1="75" y1="32" x2="82" y2="4" stroke="#0284c7" strokeWidth="2.5" strokeLinecap="round" />
+                    <circle cx="82" cy="4" r="2.5" fill="#fbbf24" stroke="#ffffff" strokeWidth="1" />
+
+                    {/* BIG Prominent Sign Board */}
+                    <g filter="url(#signDropShadow)">
+                      <rect x="62" y="2" width="52" height="23" rx="6.5" fill="url(#botSignGrad)" stroke="#ffffff" strokeWidth="1.6" />
+                      {/* Active Indicator LED */}
+                      <circle cx="69" cy="8" r="2" fill="#34d399" />
+                      {/* Sign Text */}
+                      <text x="91" y="16.5" fill="#ffffff" fontSize="10.5" fontWeight="900" textAnchor="middle" fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" letterSpacing="0.6">
+                        {lang === "ar" ? "مساعدة!" : "HELP!"}
+                      </text>
+                    </g>
                   </g>
 
                   {/* Legs */}
                   <g className="robot-leg-l">
-                    <rect x="27" y="64" width="9" height="15" rx="4" fill="#334155" />
-                    <rect x="25" y="75" width="13" height="6" rx="3" fill="#0284c7" />
+                    <rect x="30" y="67" width="9" height="15" rx="4" fill="#334155" />
+                    <rect x="28" y="78" width="13" height="6" rx="3" fill="#0284c7" />
                   </g>
                   <g className="robot-leg-r">
-                    <rect x="44" y="64" width="9" height="15" rx="4" fill="#334155" />
-                    <rect x="42" y="75" width="13" height="6" rx="3" fill="#0284c7" />
+                    <rect x="47" y="67" width="9" height="15" rx="4" fill="#334155" />
+                    <rect x="45" y="78" width="13" height="6" rx="3" fill="#0284c7" />
                   </g>
 
                   {/* Robot Torso */}
-                  <rect x="22" y="40" width="36" height="27" rx="10" fill="url(#botBodyGrad)" stroke="#bae6fd" strokeWidth="2" />
-                  <rect x="30" y="47" width="20" height="12" rx="4" fill="#0f172a" fillOpacity="0.65" />
-                  <circle cx="35" cy="53" r="2.2" fill="#34d399" />
-                  <circle cx="40" cy="53" r="2.2" fill="#38bdf8" />
-                  <circle cx="45" cy="53" r="2.2" fill="#fbbf24" />
+                  <rect x="25" y="43" width="36" height="27" rx="10" fill="url(#botBodyGrad)" stroke="#bae6fd" strokeWidth="2" />
+                  <rect x="33" y="50" width="20" height="12" rx="4" fill="#0f172a" fillOpacity="0.65" />
+                  <circle cx="38" cy="56" r="2.2" fill="#34d399" />
+                  <circle cx="43" cy="56" r="2.2" fill="#38bdf8" />
+                  <circle cx="48" cy="56" r="2.2" fill="#fbbf24" />
 
                   {/* Robot Head */}
-                  <rect x="19" y="13" width="42" height="28" rx="11" fill="url(#botMetalGrad)" stroke="#38bdf8" strokeWidth="2.2" />
-                  <rect x="24" y="18" width="32" height="17" rx="6" fill="#0f172a" />
-                  <circle cx="33" cy="25" r="3.2" fill="#38bdf8" className="robot-eye-blink" />
-                  <circle cx="47" cy="25" r="3.2" fill="#38bdf8" className="robot-eye-blink" />
-                  <path d="M35 30.5C37 32.5 43 32.5 45 30.5" stroke="#34d399" strokeWidth="2" strokeLinecap="round" />
+                  <rect x="22" y="16" width="42" height="28" rx="11" fill="url(#botMetalGrad)" stroke="#38bdf8" strokeWidth="2.2" />
+                  <rect x="27" y="21" width="32" height="17" rx="6" fill="#0f172a" />
+                  <circle cx="36" cy="28" r="3.2" fill="#38bdf8" className="robot-eye-blink" />
+                  <circle cx="50" cy="28" r="3.2" fill="#38bdf8" className="robot-eye-blink" />
+                  <path d="M38 33.5C40 35.5 46 35.5 48 33.5" stroke="#34d399" strokeWidth="2" strokeLinecap="round" />
                 </svg>
               </div>
             </div>
-            <div className="w-12 h-2.5 -mt-1 rounded-full bg-slate-900/25 dark:bg-sky-400/20 blur-[2px]" />
+            <div className="w-16 h-3 -mt-1 rounded-full bg-slate-900/30 dark:bg-sky-400/25 blur-[3px]" />
           </div>
         </button>
       ) : (
