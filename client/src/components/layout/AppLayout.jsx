@@ -150,11 +150,11 @@ export default function AppLayout({ navItems, children }) {
             </button>
 
             {/* Glowing Brand Logo Container */}
-            <div className="relative mx-auto mb-2.5 h-15 w-15 rounded-2xl bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-indigo-950/50 dark:via-slate-800/80 dark:to-purple-950/40 p-2.5 border border-indigo-150/80 dark:border-white/10 shadow-[0_4px_16px_rgba(79,70,229,0.12)] flex items-center justify-center transition-transform hover:scale-105 group">
+            <div className="relative mx-auto mb-2.5 h-20 w-20 sm:h-22 sm:w-22 rounded-2xl bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-indigo-950/50 dark:via-slate-800/80 dark:to-purple-950/40 p-2 border border-indigo-150/80 dark:border-white/10 shadow-[0_4px_16px_rgba(79,70,229,0.12)] flex items-center justify-center transition-transform hover:scale-105 group">
               <img
                 src={logoSrc}
-                alt="Platform Logo"
-                className="w-full h-full object-contain filter drop-shadow-md group-hover:brightness-105 transition-all"
+                alt="Athar Educational Platform"
+                className="w-full h-full object-contain filter drop-shadow-md group-hover:brightness-105 transition-all scale-105"
               />
             </div>
 
@@ -267,8 +267,8 @@ export default function AppLayout({ navItems, children }) {
             >
               <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
-            <div className="rounded-full border border-slate-200/90 dark:border-slate-700 bg-slate-50/90 dark:bg-slate-800 px-2.5 sm:px-3.5 py-1 sm:py-1.5 flex items-center gap-1.5 text-xs font-black text-slate-900 dark:text-slate-100 shadow-xs shrink-0 max-w-[130px] sm:max-w-none">
-              <img src={logoSrc} alt="Platform Logo" className="h-4 w-4 object-contain shrink-0 drop-shadow-xs" />
+            <div className="rounded-full border border-slate-200/90 dark:border-slate-700 bg-slate-50/90 dark:bg-slate-800 px-2 sm:px-3 py-1 flex items-center gap-2 text-xs font-black text-slate-900 dark:text-slate-100 shadow-xs shrink-0 max-w-[150px] sm:max-w-none">
+              <img src={logoSrc} alt="Athar Educational Platform" className="h-7 w-7 sm:h-8 sm:w-8 object-contain shrink-0 drop-shadow-sm filter hover:scale-105 transition-transform" />
               <span className="truncate">{t(`roles.${user?.role || "student"}`)}</span>
             </div>
             {/* Breadcrumb for tablet & desktop */}

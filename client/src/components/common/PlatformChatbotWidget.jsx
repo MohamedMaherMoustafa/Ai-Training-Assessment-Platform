@@ -355,12 +355,12 @@ export default function PlatformChatbotWidget() {
   const welcomeText = (() => {
     if (user?.role === "instructor" || user?.role === "admin") {
       return lang === "ar"
-        ? "مرحباً! أنا المساعد الذكي للمنصة متعدد الوسائط.\n\nيمكنك الآن:\n• إرسال **صور ومخططات** أو **ملفات PDF** أو **تسجيلات صوتية** لتحليلها وشرحها فورا.\n• طلب إنشاء اختبار: *«اعمل اختبار للطلاب على درس ...»*\n• الاستفسار عن درجات ونقاط أي طالب أو ملخص المقررات.\n• طرح أي سؤال تعليمي أو أكاديمي عام."
-        : "Hi! I am the Platform AI Educational Assistant.\n\nYou can now:\n• Attach **photos & diagrams**, **PDF documents**, or record **voice queries** for instant multimodal analysis.\n• Author quizzes instantly: *\"Make a quiz for students on lesson ...\"*\n• Look up student points, scoreboard rankings, and course analytics.\n• Ask any educational, scientific, or programming questions.";
+        ? "مرحباً! أنا أثر AI (Athar AI) — المساعد الذكي للمنصة.\n\nيمكنك الآن:\n• إرسال **صور ومخططات** أو **ملفات PDF** أو **تسجيلات صوتية** لتحليلها وشرحها فورا.\n• طلب إنشاء اختبار: *«اعمل اختبار للطلاب على درس ...»*\n• الاستفسار عن درجات ونقاط أي طالب أو ملخص المقررات.\n• طرح أي سؤال تعليمي أو أكاديمي عام."
+        : "Hi! I am Athar AI, your Educational Assistant.\n\nYou can now:\n• Attach **photos & diagrams**, **PDF documents**, or record **voice queries** for instant multimodal analysis.\n• Author quizzes instantly: *\"Make a quiz for students on lesson ...\"*\n• Look up student points, scoreboard rankings, and course analytics.\n• Ask any educational, scientific, or programming questions.";
     }
     return lang === "ar"
-      ? "مرحباً! أنا مساعدك التعليمي الذكي متعدد الوسائط.\n\nكيف يمكنني مساعدتك اليوم؟\n• أرسل **صورة مسألة أو مخطط** أو **ملف PDF** أو **سجل صوتك** وسأقوم بتحليله وشرحه لك خطوة بخطوة.\n• تلخيص أي درس أو مقرر دراسي.\n• مراجعة مجموع نقاطك ودرجاتك في الاختبارات والواجبات.\n• الإجابة على أي استفسار دراسي أو تقني."
-      : "Hi! I am your Smart AI Learning Assistant.\n\nHow can I help you today?\n• Upload **photos/diagrams**, **PDF lesson files**, or record **voice notes** for step-by-step analysis.\n• Summarize any course lesson or technical document.\n• Check your earned points, scoreboard ranking, and grades.\n• Ask any study, science, or programming question.";
+      ? "مرحباً! أنا أثر AI (Athar AI) — مساعدك التعليمي الذكي.\n\nكيف يمكنني مساعدتك اليوم؟\n• أرسل **صورة مسألة أو مخطط** أو **ملف PDF** أو **سجل صوتك** وسأقوم بتحليله وشرحه لك خطوة بخطوة.\n• تلخيص أي درس أو مقرر دراسي.\n• مراجعة مجموع نقاطك ودرجاتك في الاختبارات والواجبات.\n• الإجابة على أي استفسار دراسي أو تقني."
+      : "Hi! I am Athar AI, your Learning Assistant.\n\nHow can I help you today?\n• Upload **photos/diagrams**, **PDF lesson files**, or record **voice notes** for step-by-step analysis.\n• Summarize any course lesson or technical document.\n• Check your earned points, scoreboard ranking, and grades.\n• Ask any study, science, or programming question.";
   })();
 
   const [messages, setMessages] = useState([
@@ -573,7 +573,7 @@ export default function PlatformChatbotWidget() {
           sender: "bot",
           text: result.reply,
           provider: "ai",
-          model: lang === "ar" ? "المساعد الذكي" : "AI Assistant",
+          model: lang === "ar" ? "أثر AI" : "Athar AI",
           actionCard: result.actionCard || null,
           quickActions: result.quickActions || null,
           timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
@@ -838,18 +838,18 @@ export default function PlatformChatbotWidget() {
         >
           {/* Header */}
           <div className="px-4 py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white flex items-center justify-between gap-2 shadow-sm">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="h-9 w-9 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/20 p-1">
-                <img src={logoSrc} alt="Platform Logo" className="h-full w-full object-contain drop-shadow-sm" />
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="h-12 w-12 sm:h-13 sm:w-13 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/25 p-1 shadow-md">
+                <img src={logoSrc} alt="Athar AI Logo" className="h-full w-full object-contain filter drop-shadow-md scale-110" />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs sm:text-sm font-extrabold truncate">
-                    {lang === "ar" ? "المساعد الذكي للمنصة" : "Platform AI Assistant"}
+                  <span className="text-sm sm:text-base font-black truncate tracking-wide">
+                    {lang === "ar" ? "أثر AI" : "Athar AI"}
                   </span>
                   <span className="h-2 w-2 rounded-full bg-emerald-400 ring-4 ring-emerald-400/20 shrink-0" />
                 </div>
-                <div className="text-[10px] text-sky-100/90 font-medium truncate">
+                <div className="text-[10px] sm:text-[11px] text-sky-100/90 font-medium truncate">
                   {lang === "ar"
                     ? "تحليل صور • مستندات PDF • رسائل صوتية • بيانات حية"
                     : "Multimodal: Photos · PDFs · Voice · Live Grounding"}
@@ -968,7 +968,7 @@ export default function PlatformChatbotWidget() {
                     <div className="mt-2.5 pt-2 border-t border-slate-200/60 dark:border-white/10 flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500">
                       <span className="flex items-center gap-1 font-semibold text-indigo-600 dark:text-cyan-400">
                         <Sparkles className="h-3 w-3" />
-                        {m.model || (lang === "ar" ? "المساعد الذكي" : "AI Assistant")}
+                        {m.model || (lang === "ar" ? "أثر AI" : "Athar AI")}
                       </span>
                       <div className="flex items-center gap-2">
                         {/* Translate to Arabic Button (Beside Copy Button) */}
@@ -1079,8 +1079,8 @@ export default function PlatformChatbotWidget() {
                 <Sparkles className="h-4 w-4 animate-spin text-indigo-500 dark:text-cyan-400" />
                 <span>
                   {lang === "ar"
-                    ? "الذكاء الاصطناعي يحلل البيانات ويصيغ الإجابة بدقة..."
-                    : "AI Assistant is analyzing input & preparing your response..."}
+                    ? "أثر AI يحلل البيانات ويصيغ الإجابة بدقة..."
+                    : "Athar AI is analyzing input & preparing your response..."}
                 </span>
               </div>
             )}

@@ -185,8 +185,8 @@ export default function RegisterPage() {
       {/* Top Floating Pill Navigation Bar */}
       <header className="shrink-0 max-w-5xl xl:max-w-6xl w-full mx-auto bg-white/95 dark:bg-slate-900/90 backdrop-blur-md rounded-full px-4 sm:px-6 py-2 flex items-center justify-between gap-3 shadow-sm border border-slate-200/80 dark:border-white/10">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="h-8 w-8 sm:h-9 sm:w-9 shrink-0 flex items-center justify-center">
-            <img src={logoSrc} alt="Platform Logo" className="w-full h-full object-contain drop-shadow-sm" />
+          <div className="h-9 w-9 sm:h-11 sm:w-11 shrink-0 flex items-center justify-center">
+            <img src={logoSrc} alt="Athar Educational Platform" className="w-full h-full object-contain filter drop-shadow-sm hover:scale-105 transition-transform" />
           </div>
           <div className="min-w-0">
             <h1 className="font-extrabold text-xs sm:text-sm text-slate-900 dark:text-white truncate">

@@ -88,8 +88,8 @@ function StudentInstructorSelector({
                 : "Select which instructor workspace you want to open. All courses, lesson PDFs, assignments, quizzes, grades, and top-3 scoreboards will filter to that instructor."}
             </p>
           </div>
-          <div className="hidden sm:flex h-14 w-14 rounded-2xl bg-white/15 backdrop-blur-md p-2 border border-white/25 shrink-0 items-center justify-center shadow-lg">
-            <img src={logoSrc} alt="Platform Logo" className="w-full h-full object-contain drop-shadow" />
+          <div className="flex h-16 w-16 sm:h-20 sm:w-20 rounded-2xl bg-white/20 backdrop-blur-md p-1.5 border border-white/30 shrink-0 items-center justify-center shadow-xl hover:scale-105 transition-transform">
+            <img src={logoSrc} alt="Athar Educational Platform" className="w-full h-full object-contain filter drop-shadow-md scale-105" />
           </div>
         </div>
       </div>
