@@ -259,23 +259,27 @@ export default function AppLayout({ navItems, children }) {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 h-screen lg:h-full overflow-y-auto px-2 sm:px-4 lg:px-1">
         {/* Top Header Bar */}
-        <header className="min-h-[52px] shrink-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-full mt-2 lg:mt-0 px-3.5 sm:px-5 py-1.5 flex items-center justify-between gap-2 shadow-[0_4px_20px_rgba(30,41,59,0.06)] dark:shadow-xl border border-slate-200/90 dark:border-white/10 sticky top-2 lg:top-0 z-20">
-          <div className="flex items-center gap-2 min-w-0">
+        <header className="min-h-[48px] sm:min-h-[52px] shrink-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-2xl sm:rounded-full mt-1.5 sm:mt-2 lg:mt-0 px-2.5 sm:px-5 py-1.5 flex items-center justify-between gap-1.5 sm:gap-2 shadow-[0_4px_20px_rgba(30,41,59,0.06)] dark:shadow-xl border border-slate-200/90 dark:border-white/10 sticky top-1 sm:top-2 lg:top-0 z-20">
+          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
             <button
               onClick={() => setSidebarOpen(true)}
               aria-label="Open menu"
-              className="lg:hidden p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0 cursor-pointer"
+              className="lg:hidden h-8 w-8 sm:h-9 sm:w-9 rounded-full border border-slate-200/90 dark:border-slate-700 bg-slate-50/90 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shrink-0 cursor-pointer shadow-xs"
             >
-              <Menu className="h-5 w-5" />
+              <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
-            <div className="rounded-full border border-slate-200/90 dark:border-slate-700 bg-slate-50/90 dark:bg-slate-800 px-3.5 py-1.5 flex items-center gap-2 text-xs font-black text-slate-900 dark:text-slate-100 shadow-xs">
-              <GraduationCap className="h-3.5 w-3.5 text-indigo-600 dark:text-cyan-400" />
-              <span>{t(`roles.${user?.role || "student"}`)}</span>
-              <ChevronDown className="h-3 w-3 text-slate-400" />
+            <div className="rounded-full border border-slate-200/90 dark:border-slate-700 bg-slate-50/90 dark:bg-slate-800 px-2.5 sm:px-3.5 py-1 sm:py-1.5 flex items-center gap-1.5 text-xs font-black text-slate-900 dark:text-slate-100 shadow-xs shrink-0 max-w-[130px] sm:max-w-none">
+              <GraduationCap className="h-3.5 w-3.5 text-indigo-600 dark:text-cyan-400 shrink-0" />
+              <span className="truncate">{t(`roles.${user?.role || "student"}`)}</span>
             </div>
+            {/* Breadcrumb for tablet & desktop */}
+            <span className="hidden md:inline-block text-slate-300 dark:text-slate-700 font-bold">/</span>
+            <span className="hidden md:inline-block text-xs font-bold text-slate-500 dark:text-slate-400 truncate max-w-[180px]">
+              {currentBreadcrumb}
+            </span>
           </div>
 
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             {/* Notification Bell */}
             <div className="relative" ref={notifBoxRef}>
               <button
@@ -292,7 +296,7 @@ export default function AppLayout({ navItems, children }) {
               </button>
 
               {notifOpen && (
-                <div className="fixed sm:absolute inset-x-3 sm:inset-x-auto sm:end-0 top-[70px] sm:top-auto sm:mt-2 sm:w-96 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-white/15 overflow-hidden z-50">
+                <div className="fixed sm:absolute inset-x-2.5 sm:inset-x-auto sm:end-0 top-[56px] sm:top-auto sm:mt-2 sm:w-96 max-h-[80vh] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-white/15 overflow-hidden z-50">
                   <div className="px-4 py-3 border-b border-slate-200/60 dark:border-white/10 flex items-center justify-between">
                     <span className="font-bold text-xs flex items-center gap-1.5">
                       <Bell className="h-3.5 w-3.5 text-indigo-600" />
@@ -391,16 +395,16 @@ export default function AppLayout({ navItems, children }) {
             <button
               onClick={toggleTheme}
               aria-label="Toggle theme"
-              className="rounded-full border border-slate-200/90 dark:border-slate-700 bg-slate-50/90 dark:bg-slate-800 px-3 sm:px-3.5 py-1.5 text-xs font-black text-slate-800 dark:text-slate-200 shadow-xs flex items-center gap-1.5 hover:bg-indigo-50/70 dark:hover:bg-slate-700 hover:border-indigo-300 transition-all cursor-pointer"
+              className="h-8 w-8 sm:h-9 sm:w-auto sm:px-3.5 py-1.5 rounded-full border border-slate-200/90 dark:border-slate-700 bg-slate-50/90 dark:bg-slate-800 flex items-center justify-center gap-1.5 text-xs font-black text-slate-800 dark:text-slate-200 shadow-xs hover:bg-indigo-50/70 dark:hover:bg-slate-700 hover:border-indigo-300 transition-all cursor-pointer shrink-0"
             >
               {theme === "dark" ? (
                 <>
-                  <Sun className="h-3.5 w-3.5 text-amber-400" />
+                  <Sun className="h-4 w-4 text-amber-400 shrink-0" />
                   <span className="hidden sm:inline">{t("app.light")}</span>
                 </>
               ) : (
                 <>
-                  <Moon className="h-3.5 w-3.5 text-indigo-600" />
+                  <Moon className="h-4 w-4 text-indigo-600 shrink-0" />
                   <span className="hidden sm:inline">{t("app.dark")}</span>
                 </>
               )}
@@ -410,20 +414,20 @@ export default function AppLayout({ navItems, children }) {
 
         {/* Welcome Hero Banner with 3D Books Artwork */}
         <div
-          className={`my-3 rounded-[26px] bg-gradient-to-r from-[#edf0fe] via-[#f2f4fe] to-[#e4e9fd] dark:from-slate-900 dark:via-indigo-950/30 dark:to-slate-900 border border-slate-200/80 dark:border-white/10 ${
+          className={`my-2 sm:my-3 rounded-2xl sm:rounded-[26px] bg-gradient-to-r from-[#edf0fe] via-[#f2f4fe] to-[#e4e9fd] dark:from-slate-900 dark:via-indigo-950/30 dark:to-slate-900 border border-slate-200/80 dark:border-white/10 ${
             user?.role === "instructor"
-              ? "py-6 px-6 sm:px-8 min-h-[96px] sm:min-h-[108px]"
-              : "p-5 sm:p-6 min-h-[96px] sm:min-h-[108px]"
-          } shadow-sm relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4`}
+              ? "py-4 sm:py-6 px-4 sm:px-8 min-h-[76px] sm:min-h-[108px]"
+              : "p-4 sm:p-6 min-h-[76px] sm:min-h-[108px]"
+          } shadow-sm relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4`}
         >
           <div className="relative z-10 flex-1">
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-snug">
+            <h2 className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-snug">
               {lang === "ar"
                 ? `مرحباً بعودتك، ${displayName || t(`roles.${user?.role || "student"}`)}!`
                 : `Welcome Back, ${displayName || t(`roles.${user?.role || "student"}`)}!`}
             </h2>
             {user?.role === "student" && (
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1.5 font-medium leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 sm:mt-1.5 font-medium leading-relaxed">
                 {lang === "ar"
                   ? "تابع رحلتك التعليمية وحقق أهدافك الدراسية 🚀"
                   : "Continue your learning journey and achieve your goals 🚀"}

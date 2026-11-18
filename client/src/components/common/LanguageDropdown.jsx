@@ -76,12 +76,14 @@ export default function LanguageDropdown({ buttonClassName = "" }) {
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className={`flex items-center gap-2 px-3 py-1 sm:py-1.5 rounded-full border border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/60 text-xs font-bold text-slate-700 dark:text-slate-200 shadow-sm transition-all select-none ${buttonClassName}`}
+        className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/60 text-xs font-bold text-slate-700 dark:text-slate-200 shadow-sm transition-all select-none ${buttonClassName}`}
         aria-haspopup="true"
         aria-expanded={open}
+        title={currentLang.name}
       >
         <CurrentFlag />
-        <span>{currentLang.name}</span>
+        <span className="hidden sm:inline">{currentLang.name}</span>
+        <span className="sm:hidden uppercase font-black text-[11px]">{currentLang.code}</span>
         <ChevronDown
           className={`h-3 w-3 text-slate-400 transition-transform duration-200 ${
             open ? "rotate-180" : ""
