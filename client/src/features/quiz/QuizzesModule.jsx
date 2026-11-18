@@ -189,7 +189,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
     } catch {}
   };
 
-  // Anti-Screenshot & Cheating Protection (Closes quiz immediately on 2nd violation without submitting)
+  // Anti-Screenshot & Cheating Protection (Closes quiz immediately on 2nd violation or instant mobile detection)
   const handlePrivacyViolation = async (reason = "shortcut") => {
     if (!activeQuiz) return;
 
@@ -197,15 +197,20 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
     document.body.classList.add("quiz-privacy-obscured");
     destroyClipboard();
 
-    // 1. If warning overlay is ALREADY displayed, ignore all subsequent events!
-    if (privacyRestrictedRef.current) return;
+    const isInstantTermination =
+      reason === "mobile_phone_detected" ||
+      reason === "camera_lost_second" ||
+      reason === "camera_unavailable";
+
+    // 1. If warning overlay is ALREADY displayed, ignore duplicate events (unless instant mobile/camera termination)!
+    if (privacyRestrictedRef.current && !isInstantTermination) return;
 
     const now = Date.now();
     // 2. Ignore stray window blur during a short 1.5s window refocus grace period after clicking Resume
     if (reason === "window_blur" && now < resumeGraceUntilRef.current) return;
 
-    // 3. Debounce cooldown: ignore duplicate triggers fired from the same keypress within 1.2s
-    if (now - lastViolationTimeRef.current < 1200) return;
+    // 3. Debounce cooldown: ignore duplicate triggers fired from the same keypress within 1.2s (unless instant termination)
+    if (!isInstantTermination && now - lastViolationTimeRef.current < 1200) return;
     lastViolationTimeRef.current = now;
 
     // 4. Wipe clipboard to destroy any captured image or text data
@@ -217,7 +222,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
       strikeCountRef.current,
       Number(sessionStorage.getItem(storageKey)) || 0
     );
-    const nextStrikes = currentStrikes + 1;
+    const nextStrikes = isInstantTermination ? 2 : currentStrikes + 1;
     strikeCountRef.current = nextStrikes;
     setPrivacyCount(nextStrikes);
     try {
@@ -225,7 +230,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
     } catch {}
 
     if (nextStrikes >= 2) {
-      // Reached 2 distinct violations: IMMEDIATELY close quiz without submitting
+      // Reached 2 distinct violations or instant termination: IMMEDIATELY close quiz without submitting
       try {
         sessionStorage.removeItem(storageKey);
       } catch {}
@@ -245,26 +250,51 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
           quizTitle: quizToTerminate.title,
           courseId: quizToTerminate.courseId,
           instructorId: quizToTerminate.instructorId,
+          violationReason: reason,
         });
         await loadAll();
       } catch (err) {
         console.error("Failed to mark cheating status:", err);
       }
 
+      let popupTitle =
+        lang === "ar" ? "تم إنهاء الاختبار لمحاولة الغش" : "Quiz Terminated (Cheating Violation)";
+      let popupMessage =
+        lang === "ar"
+          ? "تم إغلاق الاختبار فوراً وإلغاء محاولتك دون إرسال الإجابات بسبب تكرار محاولة تصوير الشاشة (مخالفة 2 من 2). لا يمكنك إعادة الاختبار إلا بعد مراجعة وموافقة المحاضر."
+          : "Your quiz has been closed immediately and cancelled without submitting because screenshot attempts were detected (Attempt 2 of 2). You cannot re-enter without instructor approval.";
+
+      if (reason === "mobile_phone_detected") {
+        popupTitle =
+          lang === "ar" ? "تم إنهاء الاختبار لرصد هاتف محمول" : "Quiz Terminated (Mobile Phone Detected)";
+        popupMessage =
+          lang === "ar"
+            ? "تم إنهاء الاختبار فوراً وإلغاء محاولتك دون إرسال الإجابات بسبب رصد هاتف محمول أمام الكاميرا (مخالفة فورية غير مسموح بها). لا يمكنك إعادة الاختبار إلا بعد موافقة المحاضر."
+            : "Your quiz has been closed immediately and cancelled without submitting because a mobile phone was detected in front of the camera. You cannot re-enter without instructor approval.";
+      } else if (reason === "camera_lost_second" || reason === "camera_unavailable") {
+        popupTitle =
+          lang === "ar" ? "تم إنهاء الاختبار لإغلاق الكاميرا" : "Quiz Terminated (Camera Disconnected)";
+        popupMessage =
+          lang === "ar"
+            ? "تم إنهاء الاختبار فوراً بسبب تكرار إغلاق أو فقدان اتصال الكاميرا أثناء الاختبار. لا يمكنك إعادة الاختبار إلا بعد موافقة المحاضر."
+            : "Your quiz has been closed immediately because the camera was disconnected or turned off multiple times. You cannot re-enter without instructor approval.";
+      }
+
       showPopup({
         type: "error",
-        title: lang === "ar" ? "تم إنهاء الاختبار لمحاولة الغش" : "Quiz Terminated (Cheating Violation)",
-        message:
-          lang === "ar"
-            ? "تم إغلاق الاختبار فوراً وإلغاء محاولتك دون إرسال الإجابات بسبب تكرار محاولة تصوير الشاشة (مخالفة 2 من 2). لا يمكنك إعادة الاختبار إلا بعد مراجعة وموافقة المحاضر."
-            : "Your quiz has been closed immediately and cancelled without submitting because screenshot attempts were detected (Attempt 2 of 2). You cannot re-enter without instructor approval.",
+        title: popupTitle,
+        message: popupMessage,
         confirmLabel: lang === "ar" ? "أدركت ذلك" : "I Understand",
       });
 
       toast.error(
-        lang === "ar"
-          ? "تم إغلاق الاختبار وإلغاؤه لمحاولة تصوير الشاشة (2/2)!"
-          : "Quiz terminated without submitting due to repeated screenshot attempts (2/2)!"
+        reason === "mobile_phone_detected"
+          ? (lang === "ar"
+              ? "تم إلغاء الاختبار فوراً لرصد هاتف محمول أمام الكاميرا!"
+              : "Quiz terminated immediately: Mobile phone detected in front of camera!")
+          : (lang === "ar"
+              ? "تم إغلاق الاختبار وإلغاؤه لمحاولة الغش (2/2)!"
+              : "Quiz terminated without submitting due to repeated violation (2/2)!")
       );
     } else {
       // Strike 1: Show blackout privacy screen & warning (Attempt 1 of 2)
@@ -290,6 +320,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
   // ── Webcam Helpers ─────────────────────────────────────────────────────────
   const stopCamera = () => {
     if (camDetectionLoopRef.current) {
+      clearTimeout(camDetectionLoopRef.current);
       cancelAnimationFrame(camDetectionLoopRef.current);
       camDetectionLoopRef.current = null;
     }
@@ -306,7 +337,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
     setCamState("requesting");
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user", width: { ideal: 320 }, height: { ideal: 240 } },
+        video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } },
         audio: false,
       });
       camStreamRef.current = stream;
@@ -329,58 +360,71 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
 
   const loadCocoSsd = async () => {
     if (camDetectorRef.current) return camDetectorRef.current;
-    // Load TF.js and COCO-SSD via CDN if not already loaded
-    if (!window.cocoSsd) {
-      await new Promise((resolve, reject) => {
-        if (document.getElementById("tfjs-cdn")) { resolve(); return; }
-        const s1 = document.createElement("script");
-        s1.id = "tfjs-cdn";
-        s1.src = "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js";
-        s1.onload = () => {
-          const s2 = document.createElement("script");
-          s2.src = "https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js";
-          s2.onload = resolve;
-          s2.onerror = reject;
-          document.head.appendChild(s2);
-        };
-        s1.onerror = reject;
-        document.head.appendChild(s1);
-      });
-    }
-    // Wait for cocoSsd to be available on window
-    let attempts = 0;
-    while (!window.cocoSsd && attempts < 50) {
-      await new Promise((r) => setTimeout(r, 200));
-      attempts++;
+    try {
+      const cocoSsd = await import("@tensorflow-models/coco-ssd");
+      await import("@tensorflow/tfjs");
+      camDetectorRef.current = await cocoSsd.load({ base: "lite_mobilenet_v2" });
+      return camDetectorRef.current;
+    } catch (err) {
+      console.warn("Local coco-ssd dynamic import error, checking CDN:", err);
     }
     if (window.cocoSsd) {
-      camDetectorRef.current = await window.cocoSsd.load();
+      try {
+        camDetectorRef.current = await window.cocoSsd.load();
+        return camDetectorRef.current;
+      } catch (e) {
+        console.warn("window.cocoSsd load error:", e);
+      }
     }
-    return camDetectorRef.current;
+    return null;
   };
 
   const startMobileDetection = async () => {
+    if (camDetectionLoopRef.current) {
+      clearTimeout(camDetectionLoopRef.current);
+      camDetectionLoopRef.current = null;
+    }
+
     const detector = await loadCocoSsd().catch(() => null);
-    if (!detector) return; // If CDN fails, skip detection gracefully
-    const detect = async () => {
-      if (!camVideoRef.current || !camStreamRef.current) return;
-      try {
-        const predictions = await detector.detect(camVideoRef.current);
-        const hasPhone = predictions.some(
-          (p) => p.class === "cell phone" && p.score > 0.55
-        );
-        if (hasPhone) {
-          // Immediate termination - mobile detected
-          stopCamera();
-          // Force 2nd strike to trigger immediate termination
-          strikeCountRef.current = 1; // next call will make it 2
-          handlePrivacyViolation("mobile_phone_detected");
-          return;
+    if (!detector) {
+      console.warn("Mobile detection: COCO-SSD detector not available");
+      return;
+    }
+
+    let active = true;
+    const runDetection = async () => {
+      if (!active || !camStreamRef.current) return;
+
+      const video = camVideoRef.current;
+      if (video && video.readyState >= 2 && video.videoWidth > 0 && !video.paused) {
+        try {
+          const predictions = await detector.detect(video);
+          const hasPhone = predictions.some(
+            (p) =>
+              (p.class === "cell phone" || p.class === "remote") &&
+              p.score >= 0.40
+          );
+          if (hasPhone) {
+            console.warn("🚨 Mobile phone detected in camera feed! Terminating quiz immediately.");
+            active = false;
+            if (camDetectionLoopRef.current) {
+              clearTimeout(camDetectionLoopRef.current);
+              camDetectionLoopRef.current = null;
+            }
+            stopCamera();
+            handlePrivacyViolation("mobile_phone_detected");
+            return;
+          }
+        } catch {
+          // Frame read exception, ignore and continue
         }
-      } catch { /* ignore frame errors */ }
-      camDetectionLoopRef.current = requestAnimationFrame(detect);
+      }
+
+      // Check frame ~3 times per second for smooth non-blocking execution
+      camDetectionLoopRef.current = setTimeout(runDetection, 300);
     };
-    camDetectionLoopRef.current = requestAnimationFrame(detect);
+
+    camDetectionLoopRef.current = setTimeout(runDetection, 500);
   };
 
   const handleCamLost = async () => {
@@ -393,7 +437,6 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
     } else {
       // Second camera loss: terminate quiz
       stopCamera();
-      strikeCountRef.current = 1; // ensure next violation terminates
       handlePrivacyViolation("camera_lost_second");
     }
   };
@@ -424,8 +467,15 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
       setAnswers({});
       setSecondsLeft(Math.max((Number(qz.durationMinutes) || 10) * 60, 60));
       window.scrollTo({ top: 0, behavior: "instant" });
-      // Start mobile detection after a short delay
-      setTimeout(() => startMobileDetection(), 2000);
+
+      // Ensure stream is bound to live preview once mounted and start mobile detection
+      setTimeout(() => {
+        if (camVideoRef.current && camStreamRef.current) {
+          camVideoRef.current.srcObject = camStreamRef.current;
+          camVideoRef.current.play().catch(() => {});
+        }
+        startMobileDetection();
+      }, 400);
     } else {
       toast.error(
         lang === "ar"
@@ -436,6 +486,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
   };
 
   const handleCamGateCancel = () => {
+    stopCamera();
     setShowCamGate(false);
     setPendingQuiz(null);
   };
@@ -445,14 +496,37 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
     // Try to restart camera
     const ok = await startCamera(camVideoRef.current);
     if (ok) {
-      setTimeout(() => startMobileDetection(), 1000);
+      setTimeout(() => {
+        if (camVideoRef.current && camStreamRef.current) {
+          camVideoRef.current.srcObject = camStreamRef.current;
+          camVideoRef.current.play().catch(() => {});
+        }
+        startMobileDetection();
+      }, 500);
     } else {
       // Camera still not available - this counts as second loss
       stopCamera();
-      strikeCountRef.current = 1;
       handlePrivacyViolation("camera_unavailable");
     }
   };
+
+  // Automatically start camera preview when gate modal opens
+  useEffect(() => {
+    if (showCamGate) {
+      startCamera(camGateVideoRef.current);
+      loadCocoSsd().catch(() => {});
+    }
+  }, [showCamGate]);
+
+  // Ensure live PiP video element always has the camera stream bound
+  useEffect(() => {
+    if (activeQuiz && showCamPreview && camStreamRef.current && camVideoRef.current) {
+      if (camVideoRef.current.srcObject !== camStreamRef.current) {
+        camVideoRef.current.srcObject = camStreamRef.current;
+        camVideoRef.current.play().catch(() => {});
+      }
+    }
+  }, [activeQuiz, showCamPreview]);
 
   // Anti-Screenshot & Content Privacy Restriction listeners while a quiz is active
   useEffect(() => {
@@ -967,18 +1041,66 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
         document.body
       )}
 
-      {/* Floating Camera PiP Preview */}
+      {/* Floating Camera PiP Preview (Top Center to keep question choices completely unobstructed) */}
       {activeQuiz && showCamPreview && createPortal(
-        <div style={{ position: "fixed", bottom: 80, right: 16, zIndex: 99997, width: 180, height: 135, borderRadius: 14, overflow: "hidden", border: "2px solid #38bdf8", boxShadow: "0 8px 32px rgba(0,0,0,0.6)", background: "#0f172a" }}>
+        <div
+          style={{
+            position: "fixed",
+            top: 14,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 99997,
+            width: 160,
+            height: 110,
+            borderRadius: 14,
+            overflow: "hidden",
+            border: "2px solid #38bdf8",
+            boxShadow: "0 8px 30px rgba(0,0,0,0.7), 0 0 16px rgba(56,189,248,0.25)",
+            background: "#0f172a",
+          }}
+        >
           <video
-            ref={camVideoRef}
+            ref={(el) => {
+              camVideoRef.current = el;
+              if (el && camStreamRef.current && el.srcObject !== camStreamRef.current) {
+                el.srcObject = camStreamRef.current;
+                el.play().catch(() => {});
+              }
+            }}
             autoPlay
             muted
             playsInline
-            style={{ width: "100%", height: "100%", objectFit: "cover", transform: "scaleX(-1)" }}
+            style={{ width: "100%", height: "100%", objectFit: "cover", transform: "scaleX(-1)", display: "block" }}
           />
-          <div style={{ position: "absolute", top: 4, left: 4, fontSize: 9, color: "#34d399", fontWeight: 700, background: "rgba(0,0,0,0.65)", padding: "2px 6px", borderRadius: 4, letterSpacing: 1 }}>
-            🔴 LIVE
+          <div
+            style={{
+              position: "absolute",
+              top: 5,
+              left: 6,
+              fontSize: 9,
+              color: "#34d399",
+              fontWeight: 800,
+              background: "rgba(15, 23, 42, 0.75)",
+              backdropFilter: "blur(4px)",
+              padding: "2px 6px",
+              borderRadius: 6,
+              letterSpacing: 0.5,
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+            }}
+          >
+            <span
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: "#ef4444",
+                display: "inline-block",
+                boxShadow: "0 0 6px #ef4444",
+              }}
+            />
+            LIVE
           </div>
         </div>,
         document.body

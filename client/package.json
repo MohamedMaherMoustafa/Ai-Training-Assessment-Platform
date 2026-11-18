@@ -10,6 +10,8 @@
     "preview": "node ./node_modules/vite/bin/vite.js preview"
   },
   "dependencies": {
+    "@tensorflow-models/coco-ssd": "^2.2.3",
+    "@tensorflow/tfjs": "^4.22.0",
     "axios": "^1.21.1",
     "firebase": "^13.2.0",
     "i18next": "^27.1.1",
