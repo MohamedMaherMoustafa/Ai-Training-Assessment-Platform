@@ -223,28 +223,32 @@ export function generateStudentProgressReportPdf({
   // Student & Report Interval Card
   doc.setFillColor(248, 250, 252);
   doc.setDrawColor(203, 213, 225);
-  doc.roundedRect(14, 43, pageW - 28, 23, 2.5, 2.5, "FD");
+  doc.roundedRect(14, 43, pageW - 28, 24, 2.5, 2.5, "FD");
   doc.setFillColor(79, 70, 229);
-  doc.rect(14, 43, 2.2, 23, "F");
+  doc.rect(14, 43, 2.5, 24, "F");
+
+  // Vertical divider line between student profile and interval
+  doc.setDrawColor(226, 232, 240);
+  doc.line(106, 46, 106, 64);
 
   const stName = toPdfAscii(student?.displayName || student?.email || "Student", 40);
   const stEmail = toPdfAscii(student?.email || student?.uid || "", 48);
   const instLabel = toPdfAscii(instructorName || "Instructor", 36);
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8.5);
+  doc.setFontSize(8);
   doc.setTextColor(100, 116, 139);
-  doc.text("STUDENT PROFILE", 20, 49.5);
-  doc.text("REPORT INTERVAL & INSTRUCTOR", 112, 49.5);
+  doc.text("STUDENT IDENTITY", 20, 49.5);
+  doc.text("ACADEMIC INTERVAL & INSTRUCTOR", 112, 49.5);
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
   doc.setTextColor(15, 23, 42);
-  drawSmartText(doc, stName, 20, 56, { maxWidthMm: 82, fontSizePt: 11, bold: true, color: "#0f172a" });
+  drawSmartText(doc, stName, 20, 56, { maxWidthMm: 80, fontSizePt: 11, bold: true, color: "#0f172a" });
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.5);
   doc.setTextColor(71, 85, 105);
-  drawSmartText(doc, stEmail, 20, 61.5, { maxWidthMm: 82, fontSizePt: 8.5, color: "#475569" });
+  drawSmartText(doc, stEmail, 20, 62, { maxWidthMm: 80, fontSizePt: 8.5, color: "#475569" });
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9.5);
@@ -253,7 +257,7 @@ export function generateStudentProgressReportPdf({
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.5);
   doc.setTextColor(71, 85, 105);
-  drawSmartText(doc, `Instructor: ${instLabel}`, 112, 61.5, {
+  drawSmartText(doc, `Instructor: ${instLabel}`, 112, 62, {
     maxWidthMm: 78,
     fontSizePt: 8.5,
     color: "#475569",
@@ -285,30 +289,33 @@ export function generateStudentProgressReportPdf({
   kpis.forEach((k, i) => {
     const x = 14 + i * (cardW + 3);
     doc.setFillColor(255, 255, 255);
-    doc.setDrawColor(203, 213, 225);
-    doc.roundedRect(x, 70, cardW, 21, 2.5, 2.5, "FD");
+    doc.setDrawColor(218, 226, 237);
+    doc.roundedRect(x, 71, cardW, 22.5, 2.5, 2.5, "FD");
     doc.setFillColor(...k.accent);
-    doc.rect(x, 70, cardW, 2.2, "F");
+    doc.rect(x, 71, cardW, 2.4, "F");
 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(7.2);
     doc.setTextColor(100, 116, 139);
-    doc.text(k.label.toUpperCase(), x + 3.5, 77);
+    doc.text(k.label.toUpperCase(), x + 3.8, 78.5);
 
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(11);
+    doc.setFontSize(11.5);
     doc.setTextColor(15, 23, 42);
-    doc.text(k.value, x + 3.5, 84.5);
+    doc.text(k.value, x + 3.8, 85.8);
+
+    doc.setDrawColor(241, 245, 249);
+    doc.line(x + 3.5, 87.5, x + cardW - 3.5, 87.5);
 
     if (k.sub) {
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(7);
+      doc.setFontSize(7.2);
       doc.setTextColor(100, 116, 139);
-      doc.text(k.sub, x + 3.5, 88.5);
+      doc.text(k.sub, x + 3.8, 91.2);
     }
   });
 
-  let y = 97;
+  let y = 98.5;
 
   // Course Points Summary Table (if present)
   if (courseBreakdown && courseBreakdown.length > 0) {

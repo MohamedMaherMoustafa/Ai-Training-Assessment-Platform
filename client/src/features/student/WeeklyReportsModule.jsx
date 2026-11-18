@@ -313,100 +313,110 @@ export default function WeeklyReportsModule({ mode = "student", activeInstructor
             </div>
 
             {/* 4 Stat KPI Grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Quizzes Accuracy */}
-              <div className="p-4 sm:p-5 rounded-[22px] bg-gradient-to-br from-white/95 to-slate-50/80 dark:from-slate-800/80 dark:to-slate-900/90 border border-slate-200/90 dark:border-white/10 shadow-sm flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all text-start">
+              <div className="p-5 rounded-[22px] bg-gradient-to-br from-white/95 to-slate-50/80 dark:from-slate-800/80 dark:to-slate-900/90 border border-slate-200/90 dark:border-white/10 shadow-sm flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all text-start">
                 <div>
-                  <div className="flex items-center justify-between text-indigo-600 dark:text-indigo-400 mb-2.5">
-                    <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-2xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 shadow-xs">
+                  <div className="flex items-center justify-between text-indigo-600 dark:text-indigo-400 mb-3">
+                    <div className="h-11 w-11 rounded-2xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 shadow-xs">
                       <ClipboardCheck className="h-5 w-5" />
                     </div>
-                    <span className="text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-750 text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-white/5 uppercase tracking-wide">
+                    <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/60 uppercase tracking-wide">
                       {activeReport.quizzesCount} {lang === "ar" ? "اختبار" : "Quizzes"}
                     </span>
                   </div>
-                  <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
+                  <div className="text-3xl sm:text-4xl font-black text-indigo-600 dark:text-indigo-400 font-mono tracking-tight">
                     {activeReport.quizAvgScore > 0 ? `${activeReport.quizAvgScore}%` : "—"}
                   </div>
                   <div className="text-xs sm:text-[13px] font-bold text-slate-700 dark:text-slate-200 mt-1">
                     {t("weeklyReports.quizzesAccuracy")}
                   </div>
                 </div>
-                <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-2 pt-2 border-t border-slate-100 dark:border-white/5">
-                  {activeReport.quizPoints} / {activeReport.quizMaxPoints || "0"}{" "}
-                  {t("weeklyReports.points")}
+                <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-3 pt-2.5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
+                  <span>{t("weeklyReports.points")}</span>
+                  <span className="font-mono font-bold text-slate-700 dark:text-slate-300">
+                    {activeReport.quizPoints} / {activeReport.quizMaxPoints || "0"}
+                  </span>
                 </div>
               </div>
 
               {/* Assignments Mastery */}
-              <div className="p-4 sm:p-5 rounded-[22px] bg-gradient-to-br from-white/95 to-slate-50/80 dark:from-slate-800/80 dark:to-slate-900/90 border border-slate-200/90 dark:border-white/10 shadow-sm flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all text-start">
+              <div className="p-5 rounded-[22px] bg-gradient-to-br from-white/95 to-slate-50/80 dark:from-slate-800/80 dark:to-slate-900/90 border border-slate-200/90 dark:border-white/10 shadow-sm flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all text-start">
                 <div>
-                  <div className="flex items-center justify-between text-purple-600 dark:text-purple-400 mb-2.5">
-                    <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-2xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0 shadow-xs">
+                  <div className="flex items-center justify-between text-purple-600 dark:text-purple-400 mb-3">
+                    <div className="h-11 w-11 rounded-2xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0 shadow-xs">
                       <ClipboardList className="h-5 w-5" />
                     </div>
-                    <span className="text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-750 text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-white/5 uppercase tracking-wide">
+                    <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200/60 dark:border-purple-800/60 uppercase tracking-wide">
                       {activeReport.assignmentsCount} {lang === "ar" ? "واجب" : "Tasks"}
                     </span>
                   </div>
-                  <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
+                  <div className="text-3xl sm:text-4xl font-black text-purple-600 dark:text-purple-400 font-mono tracking-tight">
                     {activeReport.assignmentAvgScore > 0 ? `${activeReport.assignmentAvgScore}%` : "—"}
                   </div>
                   <div className="text-xs sm:text-[13px] font-bold text-slate-700 dark:text-slate-200 mt-1">
                     {t("weeklyReports.assignmentsMastery")}
                   </div>
                 </div>
-                <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-2 pt-2 border-t border-slate-100 dark:border-white/5">
-                  {activeReport.assignmentPoints} / {activeReport.assignmentMaxMarks || "0"}{" "}
-                  {t("weeklyReports.points")}
+                <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-3 pt-2.5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
+                  <span>{t("weeklyReports.points")}</span>
+                  <span className="font-mono font-bold text-slate-700 dark:text-slate-300">
+                    {activeReport.assignmentPoints} / {activeReport.assignmentMaxMarks || "0"}
+                  </span>
                 </div>
               </div>
 
               {/* Total Weekly Points */}
-              <div className="p-4 sm:p-5 rounded-[22px] bg-gradient-to-br from-white/95 to-slate-50/80 dark:from-slate-800/80 dark:to-slate-900/90 border border-slate-200/90 dark:border-white/10 shadow-sm flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all text-start">
+              <div className="p-5 rounded-[22px] bg-gradient-to-br from-white/95 to-slate-50/80 dark:from-slate-800/80 dark:to-slate-900/90 border border-slate-200/90 dark:border-white/10 shadow-sm flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all text-start">
                 <div>
-                  <div className="flex items-center justify-between text-cyan-600 dark:text-cyan-400 mb-2.5">
-                    <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-2xl bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0 shadow-xs">
+                  <div className="flex items-center justify-between text-cyan-600 dark:text-cyan-400 mb-3">
+                    <div className="h-11 w-11 rounded-2xl bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0 shadow-xs">
                       <Award className="h-5 w-5" />
                     </div>
-                    <span className="text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded-full bg-cyan-50 dark:bg-cyan-950/50 text-cyan-700 dark:text-cyan-300 border border-cyan-200/60 uppercase">
+                    <span className="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-cyan-50 dark:bg-cyan-950/50 text-cyan-700 dark:text-cyan-300 border border-cyan-200/60 uppercase tracking-wide">
                       PTS
                     </span>
                   </div>
-                  <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono tracking-tight text-cyan-600 dark:text-cyan-400">
+                  <div className="text-3xl sm:text-4xl font-black text-cyan-600 dark:text-cyan-400 font-mono tracking-tight">
                     +{activeReport.totalWeeklyPoints}
                   </div>
                   <div className="text-xs sm:text-[13px] font-bold text-slate-700 dark:text-slate-200 mt-1">
                     {t("weeklyReports.totalPointsEarned")}
                   </div>
                 </div>
-                <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-2 pt-2 border-t border-slate-100 dark:border-white/5">
-                  {lang === "ar" ? "مجموع نقاط الدورة" : "Cycle points total"}
+                <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-3 pt-2.5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
+                  <span>{lang === "ar" ? "دورة الـ 7 أيام" : "7-Day Cycle"}</span>
+                  <span className="font-mono font-bold text-cyan-700 dark:text-cyan-300">
+                    +{activeReport.totalWeeklyPoints} pts
+                  </span>
                 </div>
               </div>
 
               {/* Overall Grade Tier */}
-              <div className="p-4 sm:p-5 rounded-[22px] bg-gradient-to-br from-white/95 to-slate-50/80 dark:from-slate-800/80 dark:to-slate-900/90 border border-slate-200/90 dark:border-white/10 shadow-sm flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all text-start">
+              <div className="p-5 rounded-[22px] bg-gradient-to-br from-white/95 to-slate-50/80 dark:from-slate-800/80 dark:to-slate-900/90 border border-slate-200/90 dark:border-white/10 shadow-sm flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all text-start">
                 <div>
-                  <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400 mb-2.5">
-                    <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-xs">
+                  <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400 mb-3">
+                    <div className="h-11 w-11 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-xs">
                       <ShieldCheck className="h-5 w-5" />
                     </div>
                     <span
-                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${activeReport.tier.colorClass}`}
+                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${activeReport.tier.colorClass}`}
                     >
                       {lang === "ar" ? activeReport.tier.labelAr : activeReport.tier.labelEn}
                     </span>
                   </div>
-                  <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
+                  <div className="text-3xl sm:text-4xl font-black text-emerald-600 dark:text-emerald-400 font-mono tracking-tight">
                     {activeReport.overallScore > 0 ? `${activeReport.overallScore}%` : "—"}
                   </div>
                   <div className="text-xs sm:text-[13px] font-bold text-slate-700 dark:text-slate-200 mt-1">
                     {t("weeklyReports.overallScore")} ({activeReport.tier.grade})
                   </div>
                 </div>
-                <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-2 pt-2 border-t border-slate-100 dark:border-white/5">
-                  {lang === "ar" ? "التقييم الشامل" : "Weighted 7-day score"}
+                <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-3 pt-2.5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
+                  <span>{lang === "ar" ? "الرتبة المكتسبة" : "Standing Tier"}</span>
+                  <span className="font-bold text-slate-700 dark:text-slate-300">
+                    Grade {activeReport.tier.grade}
+                  </span>
                 </div>
               </div>
             </div>
