@@ -14,7 +14,6 @@ import {
   Trash2,
   Volume2,
   VolumeX,
-  Home,
   Globe,
   ChevronDown,
   Settings,
@@ -463,13 +462,6 @@ export default function AppLayout({ navItems, children }) {
               <polygon points="113,72 117,72 118,78 112,78" fill="url(#wbGold)" />
             </svg>
           </div>
-        </div>
-
-        {/* Breadcrumb Navigation */}
-        <div className="flex items-center gap-2 text-xs font-bold text-indigo-600 dark:text-indigo-400 mb-3 px-1">
-          <Home className="h-3.5 w-3.5" />
-          <span>›</span>
-          <span>{currentBreadcrumb}</span>
         </div>
 
         {/* Dynamic Main Workspace Content */}
