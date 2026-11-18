@@ -248,7 +248,13 @@ body.quiz-privacy-obscured .quiz-privacy-shield-overlay {
   animation: robot-face-dir 9s steps(1) infinite;
 }
 
-.robot-patrol-track:hover .robot-face-flip {
+.robot-sign-text-group {
+  transform-origin: 0px 0px;
+  animation: robot-face-dir 9s steps(1) infinite;
+}
+
+.robot-patrol-track:hover .robot-face-flip,
+.robot-patrol-track:hover .robot-sign-text-group {
   animation-play-state: paused;
 }
 
