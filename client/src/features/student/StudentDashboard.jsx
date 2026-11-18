@@ -26,6 +26,7 @@ import ScoreboardModule from "../scoreboard/ScoreboardModule";
 import WeeklyReportsModule from "./WeeklyReportsModule";
 import { useAuth } from "../../context/AuthContext";
 import { useLang } from "../../context/LangContext";
+import { useTheme } from "../../context/ThemeContext";
 import {
   listActiveInstructors,
   requestAdditionalInstructor,
@@ -40,6 +41,7 @@ function StudentInstructorSelector({
   const { user, refreshProfile } = useAuth();
   const { lang } = useLang();
   const { t } = useTranslation();
+  const { logoSrc } = useTheme();
   const navigate = useNavigate();
   const [requestingId, setRequestingId] = useState(null);
 
@@ -87,7 +89,7 @@ function StudentInstructorSelector({
             </p>
           </div>
           <div className="hidden sm:flex h-14 w-14 rounded-2xl bg-white/15 backdrop-blur-md p-2 border border-white/25 shrink-0 items-center justify-center shadow-lg">
-            <img src="/Logo.png" alt="Platform Logo" className="w-full h-full object-contain drop-shadow" />
+            <img src={logoSrc} alt="Platform Logo" className="w-full h-full object-contain drop-shadow" />
           </div>
         </div>
       </div>

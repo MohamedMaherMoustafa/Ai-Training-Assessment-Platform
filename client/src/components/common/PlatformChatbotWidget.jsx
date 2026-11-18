@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useLang } from "../../context/LangContext";
+import { useTheme } from "../../context/ThemeContext";
 import { processChatbotMessage } from "../../utils/platformChatbotEngine";
 
 // Lightweight beautiful markdown formatter for AI responses
@@ -320,6 +321,7 @@ const HELP_CALLOUTS = [
 export default function PlatformChatbotWidget() {
   const { user } = useAuth();
   const { lang } = useLang();
+  const { logoSrc } = useTheme();
   const navigate = useNavigate();
 
   const [open, setOpen] = useState(false);
@@ -823,7 +825,7 @@ export default function PlatformChatbotWidget() {
           <div className="px-4 py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white flex items-center justify-between gap-2 shadow-sm">
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="h-9 w-9 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/20 p-1">
-                <img src="/Logo.png" alt="Platform Logo" className="h-full w-full object-contain drop-shadow-sm" />
+                <img src={logoSrc} alt="Platform Logo" className="h-full w-full object-contain drop-shadow-sm" />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">

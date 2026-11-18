@@ -29,7 +29,7 @@ import LanguageDropdown from "../../components/common/LanguageDropdown";
 export default function LoginPage() {
   const { t, i18n } = useTranslation();
   const { login } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, logoSrc } = useTheme();
   const { showPopup } = usePopup();
   const navigate = useNavigate();
 
@@ -88,7 +88,7 @@ export default function LoginPage() {
       <header className="shrink-0 max-w-6xl xl:max-w-7xl w-full mx-auto bg-white/95 dark:bg-slate-900/90 backdrop-blur-md rounded-full px-4 sm:px-6 py-2 flex items-center justify-between gap-3 shadow-sm border border-slate-200/80 dark:border-white/10">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="h-8 w-8 sm:h-9 sm:w-9 shrink-0 flex items-center justify-center">
-            <img src="/Logo.png" alt="Platform Logo" className="w-full h-full object-contain drop-shadow-sm" />
+            <img src={logoSrc} alt="Platform Logo" className="w-full h-full object-contain drop-shadow-sm" />
           </div>
           <div className="min-w-0">
             <h1 className="font-extrabold text-xs sm:text-sm text-slate-900 dark:text-white truncate">
@@ -136,7 +136,7 @@ export default function LoginPage() {
             <div className="relative z-10 flex flex-col items-center text-center w-full">
               {/* Floating Glowing Glass Logo Container */}
               <div className="h-16 w-16 sm:h-18 sm:w-18 rounded-2xl bg-white/15 backdrop-blur-xl border border-white/25 flex items-center justify-center shadow-xl shadow-black/20 p-2.5 mb-2 hover:scale-105 transition-transform">
-                <img src="/Logo.png" alt="Platform Logo" className="w-full h-full object-contain drop-shadow-md" />
+                <img src={logoSrc} alt="Platform Logo" className="w-full h-full object-contain drop-shadow-md" />
               </div>
 
               {/* Platform Title */}
