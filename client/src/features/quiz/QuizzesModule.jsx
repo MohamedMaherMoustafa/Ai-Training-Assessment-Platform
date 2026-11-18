@@ -66,6 +66,9 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
   const { showPopup } = usePopup();
 
   const lastViolationTimeRef = useRef(0);
+  const strikeCountRef = useRef(0);
+  const privacyRestrictedRef = useRef(false);
+  const resumeGraceUntilRef = useRef(0);
 
   const [quizzes, setQuizzes] = useState([]);
   const [courses, setCourses] = useState([]);
@@ -148,30 +151,44 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
     return () => clearInterval(timer);
   }, [activeQuiz, secondsLeft]);
 
-  // Anti-Screenshot & Cheating Protection (Closes quiz immediately on 2nd violation without submitting)
-  const handlePrivacyViolation = async () => {
+  // Anti-Screenshot & Cheating Protection (Closes quiz immediately on 2nd distinct violation without submitting)
+  const handlePrivacyViolation = async (reason = "shortcut") => {
     if (!activeQuiz) return;
+
+    // 1. If warning overlay is ALREADY displayed for Strike 1, ignore all subsequent events!
+    // The student is already seeing the Strike 1 warning screen; duplicate events from the same
+    // action (e.g. keydown -> blur -> snip tool drag) MUST NEVER count as a 2nd strike.
+    if (privacyRestrictedRef.current) return;
+
     const now = Date.now();
-    // Cooldown debounce: ignore duplicate triggers fired by the same shortcut within 1.5s
-    if (now - lastViolationTimeRef.current < 1500) return;
+    // 2. Ignore any events during the resume grace period (e.g. right after clicking Resume)
+    if (now < resumeGraceUntilRef.current) return;
+
+    // 3. Debounce cooldown: ignore duplicate triggers fired within 2.5 seconds
+    if (now - lastViolationTimeRef.current < 2500) return;
     lastViolationTimeRef.current = now;
 
+    // 4. Wipe clipboard to destroy any captured image or text data
     try {
       navigator.clipboard?.writeText?.("").catch(() => {});
     } catch {
       // ignore
     }
 
-    const nextCount = privacyCount + 1;
-    setPrivacyCount(nextCount);
+    // 5. Increment atomic strike count
+    const nextStrikes = strikeCountRef.current + 1;
+    strikeCountRef.current = nextStrikes;
+    setPrivacyCount(nextStrikes);
 
-    if (nextCount >= 2) {
-      // Reached 2 violations: IMMEDIATELY close quiz without submitting
+    if (nextStrikes >= 2) {
+      // Reached 2 distinct violations: IMMEDIATELY close quiz without submitting
+      privacyRestrictedRef.current = false;
       const quizToTerminate = activeQuiz;
       setActiveQuiz(null);
       setAnswers({});
       setPrivacyRestricted(false);
       setPrivacyCount(0);
+      strikeCountRef.current = 0;
 
       try {
         await markQuizCheatingTerminated(quizToTerminate.id, user.uid, {
@@ -201,7 +218,8 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
           : "Quiz terminated without submitting due to repeated screenshot attempts (2/2)!"
       );
     } else {
-      // Strike 1
+      // Strike 1: Show blackout privacy screen & warning
+      privacyRestrictedRef.current = true;
       setPrivacyRestricted(true);
       toast.error(
         lang === "ar"
@@ -209,6 +227,13 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
           : "Warning (Strike 1/2): Taking screenshots is prohibited! Repeating will close your quiz immediately without submitting."
       );
     }
+  };
+
+  const handleResumeFromWarning = () => {
+    privacyRestrictedRef.current = false;
+    setPrivacyRestricted(false);
+    resumeGraceUntilRef.current = Date.now() + 2000;
+    lastViolationTimeRef.current = Date.now();
   };
 
   // Anti-Screenshot & Content Privacy Restriction listeners while a quiz is active
@@ -227,30 +252,28 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
       if (isPrintScreen || isWinSnip || isMacSnip || isPrintOrSave || isDevTools) {
         e.preventDefault();
         e.stopPropagation();
-        handlePrivacyViolation();
+        handlePrivacyViolation("key_shortcut");
       }
     };
 
     const handleVisibility = () => {
-      if (document.hidden) handlePrivacyViolation();
+      if (document.hidden) handlePrivacyViolation("visibility_hidden");
     };
 
     const handleWindowBlur = () => {
-      handlePrivacyViolation();
+      handlePrivacyViolation("window_blur");
     };
 
     window.addEventListener("keydown", handleKeyCapture, true);
-    window.addEventListener("keyup", handleKeyCapture, true);
     window.addEventListener("blur", handleWindowBlur);
     document.addEventListener("visibilitychange", handleVisibility);
 
     return () => {
       window.removeEventListener("keydown", handleKeyCapture, true);
-      window.removeEventListener("keyup", handleKeyCapture, true);
       window.removeEventListener("blur", handleWindowBlur);
       document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, [activeQuiz, privacyCount]);
+  }, [activeQuiz]);
 
   const selectedCourse = courses.find((c) => c.id === courseId);
 
@@ -441,6 +464,10 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
     });
     await loadAll();
 
+    strikeCountRef.current = 0;
+    privacyRestrictedRef.current = false;
+    lastViolationTimeRef.current = 0;
+    resumeGraceUntilRef.current = Date.now() + 1500;
     setLastReview(null);
     setPrivacyRestricted(false);
     setPrivacyCount(0);
@@ -1001,7 +1028,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                 </div>
                 <button
                   type="button"
-                  onClick={() => setPrivacyRestricted(false)}
+                  onClick={handleResumeFromWarning}
                   className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold shadow-lg cursor-pointer"
                 >
                   {lang === "ar" ? "أدركت ذلك — العودة ومتابعة الاختبار" : "I Understand — Resume Quiz"}
