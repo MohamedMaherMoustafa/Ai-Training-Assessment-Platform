@@ -108,15 +108,16 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
       } else if (mode === "student") {
         const targetInst = activeInstructorId
           ? [activeInstructorId]
-          : user.instructorIds || [];
-        const visibleCourses =
-          targetInst.length > 0
-            ? allCourses.filter((c) => targetInst.includes(c.instructorId))
-            : [];
-        const visibleIds = visibleCourses.map((c) => c.id);
-        setCourses(visibleCourses);
+          : user?.instructorIds || [];
+        const enrolledCourses = allCourses.filter((c) => {
+          const matchesInst = targetInst.length === 0 || targetInst.includes(c.instructorId);
+          const isEnrolled = Array.isArray(c.enrolledStudents) && c.enrolledStudents.includes(user?.uid);
+          return matchesInst && isEnrolled;
+        });
+        const enrolledIds = enrolledCourses.map((c) => c.id);
+        setCourses(enrolledCourses);
         setQuizzes(
-          allQuizzes.filter((q) => q.status === "published" && visibleIds.includes(q.courseId))
+          allQuizzes.filter((q) => q.status === "published" && enrolledIds.includes(q.courseId))
         );
       } else {
         setCourses(allCourses);
@@ -1153,8 +1154,22 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
       {loading ? (
         <div className="text-sm text-slate-500 py-8 text-center">{t("app.loading")}</div>
       ) : quizzes.length === 0 ? (
-        <div className="glass-card p-8 text-center text-sm text-slate-500">
-          {t("app.noData")}
+        <div className="glass-card p-10 text-center text-sm text-slate-500 space-y-1">
+          <ClipboardCheck className="h-8 w-8 mx-auto text-slate-400 mb-2 opacity-60" />
+          <div className="font-bold">
+            {mode === "student"
+              ? lang === "ar"
+                ? "لا توجد اختبارات منشورة للمقررات المسجل بها حالياً."
+                : "No published quizzes available for your enrolled courses."
+              : t("app.noData")}
+          </div>
+          {mode === "student" && (
+            <p className="text-xs text-slate-400">
+              {lang === "ar"
+                ? "سجّل في مقررات المحاضر أولاً من صفحة المقررات لخوض اختباراتها."
+                : "Enroll in instructor courses from the Courses tab to take their quizzes."}
+            </p>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

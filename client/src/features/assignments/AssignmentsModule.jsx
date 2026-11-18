@@ -94,17 +94,21 @@ export default function AssignmentsModule({
       const myCourses = allCourses.filter((c) => c.instructorId === user.uid);
       setCourses(myCourses);
       setAssignments(allAssn.filter((a) => a.instructorId === user.uid));
-    } else {
+    } else if (mode === "student") {
       const targetInst = activeInstructorId
         ? [activeInstructorId]
-        : user.instructorIds || [];
-      const visibleCourses =
-        targetInst.length > 0
-          ? allCourses.filter((c) => targetInst.includes(c.instructorId))
-          : [];
-      const visibleIds = visibleCourses.map((c) => c.id);
-      setCourses(visibleCourses);
-      setAssignments(allAssn.filter((a) => visibleIds.includes(a.courseId)));
+        : user?.instructorIds || [];
+      const enrolledCourses = allCourses.filter((c) => {
+        const matchesInst = targetInst.length === 0 || targetInst.includes(c.instructorId);
+        const isEnrolled = Array.isArray(c.enrolledStudents) && c.enrolledStudents.includes(user?.uid);
+        return matchesInst && isEnrolled;
+      });
+      const enrolledIds = enrolledCourses.map((c) => c.id);
+      setCourses(enrolledCourses);
+      setAssignments(allAssn.filter((a) => enrolledIds.includes(a.courseId)));
+    } else {
+      setCourses(allCourses);
+      setAssignments(allAssn);
     }
   };
 
@@ -117,17 +121,21 @@ export default function AssignmentsModule({
           const myCourses = allCourses.filter((c) => c.instructorId === user.uid);
           setCourses(myCourses);
           setAssignments(allAssn.filter((a) => a.instructorId === user.uid));
-        } else {
+        } else if (mode === "student") {
           const targetInst = activeInstructorId
             ? [activeInstructorId]
-            : user.instructorIds || [];
-          const visibleCourses =
-            targetInst.length > 0
-              ? allCourses.filter((c) => targetInst.includes(c.instructorId))
-              : [];
-          const visibleIds = visibleCourses.map((c) => c.id);
-          setCourses(visibleCourses);
-          setAssignments(allAssn.filter((a) => visibleIds.includes(a.courseId)));
+            : user?.instructorIds || [];
+          const enrolledCourses = allCourses.filter((c) => {
+            const matchesInst = targetInst.length === 0 || targetInst.includes(c.instructorId);
+            const isEnrolled = Array.isArray(c.enrolledStudents) && c.enrolledStudents.includes(user?.uid);
+            return matchesInst && isEnrolled;
+          });
+          const enrolledIds = enrolledCourses.map((c) => c.id);
+          setCourses(enrolledCourses);
+          setAssignments(allAssn.filter((a) => enrolledIds.includes(a.courseId)));
+        } else {
+          setCourses(allCourses);
+          setAssignments(allAssn);
         }
       })
       .finally(() => {
@@ -581,8 +589,22 @@ export default function AssignmentsModule({
       {loading ? (
         <div className="text-sm text-slate-500 py-8 text-center">{t("app.loading")}</div>
       ) : assignments.length === 0 ? (
-        <div className="glass-card p-8 text-center text-sm text-slate-500">
-          {t("app.noData")}
+        <div className="glass-card p-10 text-center text-sm text-slate-500 space-y-1">
+          <ClipboardList className="h-8 w-8 mx-auto text-slate-400 mb-2 opacity-60" />
+          <div className="font-bold">
+            {mode === "student"
+              ? lang === "ar"
+                ? "لا توجد واجبات للمقررات المسجل بها حالياً."
+                : "No assignments posted for your enrolled courses."
+              : t("app.noData")}
+          </div>
+          {mode === "student" && (
+            <p className="text-xs text-slate-400">
+              {lang === "ar"
+                ? "سجّل في مقررات المحاضر أولاً من صفحة المقررات لمتابعة واجباتها."
+                : "Enroll in instructor courses from the Courses tab to receive their assignments."}
+            </p>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

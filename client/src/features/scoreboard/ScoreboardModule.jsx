@@ -114,8 +114,12 @@ export default function ScoreboardModule({ mode = "admin", activeInstructorId = 
     if (mode === "instructor") {
       return courses.filter((c) => c.instructorId === user?.uid);
     }
-    if (mode === "student" && activeInstructorId) {
-      return courses.filter((c) => c.instructorId === activeInstructorId);
+    if (mode === "student") {
+      return courses.filter((c) => {
+        const matchesInst = activeInstructorId ? c.instructorId === activeInstructorId : true;
+        const isEnrolled = Array.isArray(c.enrolledStudents) && c.enrolledStudents.includes(user?.uid);
+        return matchesInst && isEnrolled;
+      });
     }
     return courses;
   }, [courses, mode, user?.uid, activeInstructorId]);
@@ -257,10 +261,24 @@ export default function ScoreboardModule({ mode = "admin", activeInstructorId = 
           {lang === "ar" ? "جاري تحميل لوحة المتصدرين..." : "Loading scoreboard..."}
         </div>
       ) : courseBoards.length === 0 ? (
-        <div className="glass-card p-10 text-center text-sm text-slate-500">
-          {lang === "ar"
-            ? "لا توجد مقررات متاحة للعرض حالياً."
-            : "No courses available to display yet."}
+        <div className="glass-card p-10 text-center text-sm text-slate-500 space-y-1">
+          <Trophy className="h-8 w-8 mx-auto text-amber-500/60 mb-2" />
+          <div className="font-bold">
+            {mode === "student"
+              ? lang === "ar"
+                ? "لا توجد لوحات متصدرين للمقررات المسجل بها حالياً."
+                : "No scoreboards available for your enrolled courses."
+              : lang === "ar"
+              ? "لا توجد مقررات متاحة للعرض حالياً."
+              : "No courses available to display yet."}
+          </div>
+          {mode === "student" && (
+            <p className="text-xs text-slate-400">
+              {lang === "ar"
+                ? "سجّل في مقررات المحاضر أولاً من صفحة المقررات للمنافسة في لوحة المتصدرين."
+                : "Enroll in instructor courses from the Courses tab to compete on their leaderboards."}
+            </p>
+          )}
         </div>
       ) : (
         <div className="space-y-8">

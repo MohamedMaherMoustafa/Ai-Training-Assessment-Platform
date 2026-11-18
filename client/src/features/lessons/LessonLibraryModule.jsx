@@ -67,17 +67,21 @@ export default function LessonLibraryModule({
       const myCourses = allCourses.filter((c) => c.instructorId === user.uid);
       setCourses(myCourses);
       setMaterials(allMaterials.filter((m) => m.instructorId === user.uid));
-    } else {
+    } else if (mode === "student") {
       const targetInst = activeInstructorId
         ? [activeInstructorId]
-        : user.instructorIds || [];
-      const visibleCourses =
-        targetInst.length > 0
-          ? allCourses.filter((c) => targetInst.includes(c.instructorId))
-          : [];
-      const visibleIds = visibleCourses.map((c) => c.id);
-      setCourses(visibleCourses);
-      setMaterials(allMaterials.filter((m) => visibleIds.includes(m.courseId)));
+        : user?.instructorIds || [];
+      const enrolledCourses = allCourses.filter((c) => {
+        const matchesInst = targetInst.length === 0 || targetInst.includes(c.instructorId);
+        const isEnrolled = Array.isArray(c.enrolledStudents) && c.enrolledStudents.includes(user?.uid);
+        return matchesInst && isEnrolled;
+      });
+      const enrolledIds = enrolledCourses.map((c) => c.id);
+      setCourses(enrolledCourses);
+      setMaterials(allMaterials.filter((m) => enrolledIds.includes(m.courseId)));
+    } else {
+      setCourses(allCourses);
+      setMaterials(allMaterials);
     }
   };
 
@@ -90,17 +94,21 @@ export default function LessonLibraryModule({
           const myCourses = allCourses.filter((c) => c.instructorId === user.uid);
           setCourses(myCourses);
           setMaterials(allMaterials.filter((m) => m.instructorId === user.uid));
-        } else {
+        } else if (mode === "student") {
           const targetInst = activeInstructorId
             ? [activeInstructorId]
-            : user.instructorIds || [];
-          const visibleCourses =
-            targetInst.length > 0
-              ? allCourses.filter((c) => targetInst.includes(c.instructorId))
-              : [];
-          const visibleIds = visibleCourses.map((c) => c.id);
-          setCourses(visibleCourses);
-          setMaterials(allMaterials.filter((m) => visibleIds.includes(m.courseId)));
+            : user?.instructorIds || [];
+          const enrolledCourses = allCourses.filter((c) => {
+            const matchesInst = targetInst.length === 0 || targetInst.includes(c.instructorId);
+            const isEnrolled = Array.isArray(c.enrolledStudents) && c.enrolledStudents.includes(user?.uid);
+            return matchesInst && isEnrolled;
+          });
+          const enrolledIds = enrolledCourses.map((c) => c.id);
+          setCourses(enrolledCourses);
+          setMaterials(allMaterials.filter((m) => enrolledIds.includes(m.courseId)));
+        } else {
+          setCourses(allCourses);
+          setMaterials(allMaterials);
         }
       })
       .finally(() => {
@@ -395,10 +403,24 @@ export default function LessonLibraryModule({
       {loading ? (
         <div className="text-sm text-slate-500 py-8 text-center">{t("app.loading")}</div>
       ) : materials.length === 0 ? (
-        <div className="glass-card p-8 text-center text-sm text-slate-500">
-          {lang === "ar"
-            ? "لم يتم رفع ملفات دروس PDF بعد."
-            : "No lesson PDFs uploaded yet."}
+        <div className="glass-card p-10 text-center text-sm text-slate-500 space-y-1">
+          <FileText className="h-8 w-8 mx-auto text-slate-400 mb-2 opacity-60" />
+          <div className="font-bold">
+            {mode === "student"
+              ? lang === "ar"
+                ? "لا توجد ملفات دروس في المقررات المسجل بها حالياً."
+                : "No lesson PDFs available for your enrolled courses."
+              : lang === "ar"
+              ? "لم يتم رفع ملفات دروس PDF بعد."
+              : "No lesson PDFs uploaded yet."}
+          </div>
+          {mode === "student" && (
+            <p className="text-xs text-slate-400">
+              {lang === "ar"
+                ? "سجّل في مقررات المحاضر أولاً من صفحة المقررات لعرض ملفات دروسها."
+                : "Enroll in instructor courses from the Courses tab to access their PDF lessons."}
+            </p>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

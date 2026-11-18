@@ -8,6 +8,7 @@ import {
   FileText,
   CheckCircle2,
   ExternalLink,
+  Lock,
 } from "lucide-react";
 import {
   addLessonToCourse,
@@ -33,6 +34,7 @@ export default function CoursesModule({ mode = "admin", activeInstructorId = nul
   const [loading, setLoading] = useState(true);
   const [showCourseForm, setShowCourseForm] = useState(false);
   const [lessonCourseId, setLessonCourseId] = useState(null);
+  const [studentCourseFilter, setStudentCourseFilter] = useState("all"); // "all" | "enrolled"
   const [readingLesson, setReadingLesson] = useState(null);
 
   const [courseForm, setCourseForm] = useState({
@@ -429,11 +431,45 @@ export default function CoursesModule({ mode = "admin", activeInstructorId = nul
                 </p>
               </div>
             </div>
+
+            {mode === "student" && (
+              <div className="flex items-center gap-1.5 p-1 rounded-2xl glass-subtle text-xs font-bold">
+                <button
+                  type="button"
+                  onClick={() => setStudentCourseFilter("all")}
+                  className={`px-3 py-1.5 rounded-xl transition-all ${
+                    studentCourseFilter === "all"
+                      ? "bg-indigo-600 text-white shadow-sm"
+                      : "text-slate-600 dark:text-slate-300 hover:bg-white/50"
+                  }`}
+                >
+                  {lang === "ar" ? "جميع المقررات" : "All Courses"} ({courses.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStudentCourseFilter("enrolled")}
+                  className={`px-3 py-1.5 rounded-xl transition-all ${
+                    studentCourseFilter === "enrolled"
+                      ? "bg-emerald-600 text-white shadow-sm"
+                      : "text-slate-600 dark:text-slate-300 hover:bg-white/50"
+                  }`}
+                >
+                  {lang === "ar" ? "مقرراتي المسجلة" : "My Enrolled Courses"} (
+                  {courses.filter((c) => c.enrolledStudents.includes(user?.uid)).length})
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="space-y-5">
-            {courses.map((c) => {
-              const isEnrolled = c.enrolledStudents.includes(user?.uid);
+            {courses
+              .filter((c) =>
+                mode === "student" && studentCourseFilter === "enrolled"
+                  ? c.enrolledStudents.includes(user?.uid)
+                  : true
+              )
+              .map((c) => {
+                const isEnrolled = c.enrolledStudents.includes(user?.uid);
               return (
                 <div
                   key={c.id}
@@ -495,23 +531,47 @@ export default function CoursesModule({ mode = "admin", activeInstructorId = nul
                       {c.lessons.map((l) => (
                         <div
                           key={l.id}
-                          onClick={() => setReadingLesson(l)}
-                          className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
-                            isEnrolled
-                              ? "bg-[#f0fdf4] dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/40 hover:bg-emerald-50/70"
-                              : "bg-white dark:bg-slate-800/60 border-slate-200/70 hover:bg-indigo-50/40"
+                          onClick={() => {
+                            if (mode === "student" && !isEnrolled) {
+                              toast.error(
+                                lang === "ar"
+                                  ? "يجب التسجيل في المقرر أولاً للوصول إلى محتوى الدرس"
+                                  : "Please enroll in this course first to access its lessons"
+                              );
+                              return;
+                            }
+                            setReadingLesson(l);
+                          }}
+                          className={`p-3 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
+                            mode === "student" && !isEnrolled
+                              ? "bg-slate-100/60 dark:bg-slate-900/40 border-dashed border-slate-300 dark:border-white/10 opacity-75 cursor-not-allowed"
+                              : isEnrolled
+                              ? "bg-[#f0fdf4] dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/40 hover:bg-emerald-50/70 cursor-pointer"
+                              : "bg-white dark:bg-slate-800/60 border-slate-200/70 hover:bg-indigo-50/40 cursor-pointer"
                           }`}
                         >
                           <div className="flex items-start gap-2.5 min-w-0">
-                            <FileText className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
+                            {mode === "student" && !isEnrolled ? (
+                              <Lock className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+                            ) : (
+                              <FileText className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
+                            )}
                             <div className="min-w-0">
                               <div className="font-bold text-xs text-slate-900 dark:text-white truncate">
                                 {l.title?.[lang] || l.title?.en}
                               </div>
-                              {l.content && (
-                                <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
-                                  {l.content}
+                              {mode === "student" && !isEnrolled ? (
+                                <p className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold mt-0.5">
+                                  {lang === "ar"
+                                    ? "مغلق — يتطلب التسجيل في المقرر"
+                                    : "Locked — Requires course enrollment"}
                                 </p>
+                              ) : (
+                                l.content && (
+                                  <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
+                                    {l.content}
+                                  </p>
+                                )
                               )}
                             </div>
                           </div>
@@ -523,7 +583,7 @@ export default function CoursesModule({ mode = "admin", activeInstructorId = nul
                                 <span>{lang === "ar" ? "مسجّل" : "Enrolled"}</span>
                               </span>
                             )}
-                            {l.fileUrl && (
+                            {l.fileUrl && (isEnrolled || mode !== "student") && (
                               <a
                                 href={l.fileUrl}
                                 target="_blank"
