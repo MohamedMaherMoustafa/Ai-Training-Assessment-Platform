@@ -640,68 +640,68 @@ export default function StudentProgressTrackerModule() {
         <>
           {/* 4 Interval KPI Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="glass-card p-4 flex items-center gap-3.5">
-              <div className="h-11 w-11 rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-300 flex items-center justify-center shrink-0">
-                <Award className="h-5 w-5" />
+            <div className="glass-card p-5 rounded-[22px] flex items-center gap-4 hover:-translate-y-0.5 transition-all text-start">
+              <div className="h-12 w-12 rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-300 flex items-center justify-center shrink-0 shadow-xs">
+                <Award className="h-6 w-6" />
               </div>
-              <div>
-                <div className="text-[11px] font-bold text-slate-500">
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-slate-500 dark:text-slate-400">
                   {lang === "ar" ? "إجمالي النقاط المكتسبة" : "Total Points Earned"}
                 </div>
-                <div className="text-2xl font-black text-slate-900 dark:text-white">
+                <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight mt-0.5">
                   {summary.totalPoints}{" "}
-                  <span className="text-xs font-bold text-amber-600">
+                  <span className="text-xs font-bold text-amber-600 dark:text-amber-400">
                     {lang === "ar" ? "نقطة" : "pts"}
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="glass-card p-4 flex items-center gap-3.5">
-              <div className="h-11 w-11 rounded-2xl bg-sky-500/15 text-sky-600 dark:text-sky-300 flex items-center justify-center shrink-0">
-                <ClipboardCheck className="h-5 w-5" />
+            <div className="glass-card p-5 rounded-[22px] flex items-center gap-4 hover:-translate-y-0.5 transition-all text-start">
+              <div className="h-12 w-12 rounded-2xl bg-sky-500/15 text-sky-600 dark:text-sky-300 flex items-center justify-center shrink-0 shadow-xs">
+                <ClipboardCheck className="h-6 w-6" />
               </div>
-              <div>
-                <div className="text-[11px] font-bold text-slate-500">
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-slate-500 dark:text-slate-400">
                   {lang === "ar" ? "نقاط الاختبارات" : "Quiz Points"}
                 </div>
-                <div className="text-2xl font-black text-slate-900 dark:text-white">
+                <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight mt-0.5">
                   {summary.quizPoints}{" "}
-                  <span className="text-xs font-normal text-slate-500">
-                    pts · {summary.quizCount} {lang === "ar" ? "اختبار" : "quizzes"}
+                  <span className="text-xs font-semibold text-slate-500">
+                    pts ({summary.quizCount} {lang === "ar" ? "اختبار" : "quizzes"})
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="glass-card p-4 flex items-center gap-3.5">
-              <div className="h-11 w-11 rounded-2xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-300 flex items-center justify-center shrink-0">
-                <ClipboardList className="h-5 w-5" />
+            <div className="glass-card p-5 rounded-[22px] flex items-center gap-4 hover:-translate-y-0.5 transition-all text-start">
+              <div className="h-12 w-12 rounded-2xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-300 flex items-center justify-center shrink-0 shadow-xs">
+                <ClipboardList className="h-6 w-6" />
               </div>
-              <div>
-                <div className="text-[11px] font-bold text-slate-500">
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-slate-500 dark:text-slate-400">
                   {lang === "ar" ? "نقاط الواجبات" : "Assignment Points"}
                 </div>
-                <div className="text-2xl font-black text-slate-900 dark:text-white">
+                <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight mt-0.5">
                   {summary.assignmentPoints}{" "}
-                  <span className="text-xs font-normal text-slate-500">
-                    pts · {summary.gradedAssignments}/{summary.assignmentCount}
+                  <span className="text-xs font-semibold text-slate-500">
+                    pts ({summary.gradedAssignments}/{summary.assignmentCount})
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="glass-card p-4 flex items-center gap-3.5">
-              <div className="h-11 w-11 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 flex items-center justify-center shrink-0">
-                <Activity className="h-5 w-5" />
+            <div className="glass-card p-5 rounded-[22px] flex items-center gap-4 hover:-translate-y-0.5 transition-all text-start">
+              <div className="h-12 w-12 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 flex items-center justify-center shrink-0 shadow-xs">
+                <Activity className="h-6 w-6" />
               </div>
-              <div>
-                <div className="text-[11px] font-bold text-slate-500">
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-slate-500 dark:text-slate-400">
                   {lang === "ar" ? "الأنشطة المسجلة" : "Recorded Logs"}
                 </div>
-                <div className="text-2xl font-black text-slate-900 dark:text-white">
+                <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight mt-0.5">
                   {filteredLogs.length}{" "}
-                  <span className="text-xs font-normal text-emerald-600">
+                  <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                     ({summary.passRate}% pass)
                   </span>
                 </div>

@@ -313,100 +313,118 @@ export default function WeeklyReportsModule({ mode = "student", activeInstructor
             </div>
 
             {/* 4 Stat KPI Grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
               {/* Quizzes Accuracy */}
-              <div className="p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200/70 dark:border-white/10">
-                <div className="flex items-center justify-between text-indigo-600 dark:text-indigo-400 mb-2">
-                  <ClipboardCheck className="h-5 w-5" />
-                  <span className="text-[10px] uppercase font-bold text-slate-400">
-                    {activeReport.quizzesCount} {lang === "ar" ? "اختبار" : "Quizzes"}
-                  </span>
+              <div className="p-4 sm:p-5 rounded-[22px] bg-gradient-to-br from-white/95 to-slate-50/80 dark:from-slate-800/80 dark:to-slate-900/90 border border-slate-200/90 dark:border-white/10 shadow-sm flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all text-start">
+                <div>
+                  <div className="flex items-center justify-between text-indigo-600 dark:text-indigo-400 mb-2.5">
+                    <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-2xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 shadow-xs">
+                      <ClipboardCheck className="h-5 w-5" />
+                    </div>
+                    <span className="text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-750 text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-white/5 uppercase tracking-wide">
+                      {activeReport.quizzesCount} {lang === "ar" ? "اختبار" : "Quizzes"}
+                    </span>
+                  </div>
+                  <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
+                    {activeReport.quizAvgScore > 0 ? `${activeReport.quizAvgScore}%` : "—"}
+                  </div>
+                  <div className="text-xs sm:text-[13px] font-bold text-slate-700 dark:text-slate-200 mt-1">
+                    {t("weeklyReports.quizzesAccuracy")}
+                  </div>
                 </div>
-                <div className="text-2xl font-black text-slate-900 dark:text-white font-mono">
-                  {activeReport.quizAvgScore > 0 ? `${activeReport.quizAvgScore}%` : "—"}
-                </div>
-                <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
-                  {t("weeklyReports.quizzesAccuracy")}
-                </div>
-                <div className="text-[10px] text-slate-400 mt-1">
+                <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-2 pt-2 border-t border-slate-100 dark:border-white/5">
                   {activeReport.quizPoints} / {activeReport.quizMaxPoints || "0"}{" "}
                   {t("weeklyReports.points")}
                 </div>
               </div>
 
               {/* Assignments Mastery */}
-              <div className="p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200/70 dark:border-white/10">
-                <div className="flex items-center justify-between text-purple-600 dark:text-purple-400 mb-2">
-                  <ClipboardList className="h-5 w-5" />
-                  <span className="text-[10px] uppercase font-bold text-slate-400">
-                    {activeReport.assignmentsCount} {lang === "ar" ? "واجب" : "Tasks"}
-                  </span>
+              <div className="p-4 sm:p-5 rounded-[22px] bg-gradient-to-br from-white/95 to-slate-50/80 dark:from-slate-800/80 dark:to-slate-900/90 border border-slate-200/90 dark:border-white/10 shadow-sm flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all text-start">
+                <div>
+                  <div className="flex items-center justify-between text-purple-600 dark:text-purple-400 mb-2.5">
+                    <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-2xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0 shadow-xs">
+                      <ClipboardList className="h-5 w-5" />
+                    </div>
+                    <span className="text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-750 text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-white/5 uppercase tracking-wide">
+                      {activeReport.assignmentsCount} {lang === "ar" ? "واجب" : "Tasks"}
+                    </span>
+                  </div>
+                  <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
+                    {activeReport.assignmentAvgScore > 0 ? `${activeReport.assignmentAvgScore}%` : "—"}
+                  </div>
+                  <div className="text-xs sm:text-[13px] font-bold text-slate-700 dark:text-slate-200 mt-1">
+                    {t("weeklyReports.assignmentsMastery")}
+                  </div>
                 </div>
-                <div className="text-2xl font-black text-slate-900 dark:text-white font-mono">
-                  {activeReport.assignmentAvgScore > 0 ? `${activeReport.assignmentAvgScore}%` : "—"}
-                </div>
-                <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
-                  {t("weeklyReports.assignmentsMastery")}
-                </div>
-                <div className="text-[10px] text-slate-400 mt-1">
+                <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-2 pt-2 border-t border-slate-100 dark:border-white/5">
                   {activeReport.assignmentPoints} / {activeReport.assignmentMaxMarks || "0"}{" "}
                   {t("weeklyReports.points")}
                 </div>
               </div>
 
               {/* Total Weekly Points */}
-              <div className="p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200/70 dark:border-white/10">
-                <div className="flex items-center justify-between text-cyan-600 dark:text-cyan-400 mb-2">
-                  <Award className="h-5 w-5" />
-                  <span className="text-[10px] uppercase font-bold text-slate-400">PTS</span>
+              <div className="p-4 sm:p-5 rounded-[22px] bg-gradient-to-br from-white/95 to-slate-50/80 dark:from-slate-800/80 dark:to-slate-900/90 border border-slate-200/90 dark:border-white/10 shadow-sm flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all text-start">
+                <div>
+                  <div className="flex items-center justify-between text-cyan-600 dark:text-cyan-400 mb-2.5">
+                    <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-2xl bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0 shadow-xs">
+                      <Award className="h-5 w-5" />
+                    </div>
+                    <span className="text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded-full bg-cyan-50 dark:bg-cyan-950/50 text-cyan-700 dark:text-cyan-300 border border-cyan-200/60 uppercase">
+                      PTS
+                    </span>
+                  </div>
+                  <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono tracking-tight text-cyan-600 dark:text-cyan-400">
+                    +{activeReport.totalWeeklyPoints}
+                  </div>
+                  <div className="text-xs sm:text-[13px] font-bold text-slate-700 dark:text-slate-200 mt-1">
+                    {t("weeklyReports.totalPointsEarned")}
+                  </div>
                 </div>
-                <div className="text-2xl font-black text-slate-900 dark:text-white font-mono">
-                  +{activeReport.totalWeeklyPoints}
-                </div>
-                <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
-                  {t("weeklyReports.totalPointsEarned")}
-                </div>
-                <div className="text-[10px] text-slate-400 mt-1">
+                <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-2 pt-2 border-t border-slate-100 dark:border-white/5">
                   {lang === "ar" ? "مجموع نقاط الدورة" : "Cycle points total"}
                 </div>
               </div>
 
               {/* Overall Grade Tier */}
-              <div className="p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200/70 dark:border-white/10">
-                <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400 mb-2">
-                  <ShieldCheck className="h-5 w-5" />
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${activeReport.tier.colorClass}`}
-                  >
-                    {lang === "ar" ? activeReport.tier.labelAr : activeReport.tier.labelEn}
-                  </span>
+              <div className="p-4 sm:p-5 rounded-[22px] bg-gradient-to-br from-white/95 to-slate-50/80 dark:from-slate-800/80 dark:to-slate-900/90 border border-slate-200/90 dark:border-white/10 shadow-sm flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all text-start">
+                <div>
+                  <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400 mb-2.5">
+                    <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-xs">
+                      <ShieldCheck className="h-5 w-5" />
+                    </div>
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${activeReport.tier.colorClass}`}
+                    >
+                      {lang === "ar" ? activeReport.tier.labelAr : activeReport.tier.labelEn}
+                    </span>
+                  </div>
+                  <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
+                    {activeReport.overallScore > 0 ? `${activeReport.overallScore}%` : "—"}
+                  </div>
+                  <div className="text-xs sm:text-[13px] font-bold text-slate-700 dark:text-slate-200 mt-1">
+                    {t("weeklyReports.overallScore")} ({activeReport.tier.grade})
+                  </div>
                 </div>
-                <div className="text-2xl font-black text-slate-900 dark:text-white font-mono">
-                  {activeReport.overallScore > 0 ? `${activeReport.overallScore}%` : "—"}
-                </div>
-                <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
-                  {t("weeklyReports.overallScore")} ({activeReport.tier.grade})
-                </div>
-                <div className="text-[10px] text-slate-400 mt-1">
+                <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-2 pt-2 border-t border-slate-100 dark:border-white/5">
                   {lang === "ar" ? "التقييم الشامل" : "Weighted 7-day score"}
                 </div>
               </div>
             </div>
 
             {/* AI Smart Coaching Box */}
-            <div className="relative overflow-hidden p-5 rounded-2xl bg-gradient-to-br from-indigo-50/80 via-purple-50/60 to-cyan-50/40 dark:from-indigo-950/40 dark:via-purple-950/30 dark:to-cyan-950/20 border border-indigo-200/80 dark:border-indigo-800/60 shadow-xs">
-              <div className="flex items-start gap-3">
-                <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-indigo-500/20">
+            <div className="relative overflow-hidden p-5 sm:p-6 rounded-[24px] bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-cyan-500/10 dark:from-indigo-950/40 dark:via-purple-950/30 dark:to-cyan-950/20 border border-indigo-200/90 dark:border-indigo-800/60 shadow-sm">
+              <div className="flex items-start gap-3.5">
+                <div className="h-11 w-11 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white flex items-center justify-center shrink-0 shadow-lg shadow-indigo-500/25">
                   <Sparkles className="h-5 w-5 animate-pulse" />
                 </div>
-                <div className="space-y-1">
-                  <div className="text-xs font-black text-indigo-950 dark:text-indigo-200 flex items-center gap-1.5">
+                <div className="space-y-1.5 flex-1 min-w-0">
+                  <div className="text-xs sm:text-sm font-black text-indigo-950 dark:text-indigo-200 flex items-center gap-2">
                     <span>{t("weeklyReports.aiCoachTitle")}</span>
-                    <span className="text-[10px] px-2 py-0.2 rounded-full bg-indigo-200/60 dark:bg-indigo-900/60 text-indigo-800 dark:text-indigo-300 font-bold">
+                    <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-indigo-600 text-white font-bold shadow-xs">
                       Platform AI
                     </span>
                   </div>
-                  <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
+                  <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-medium text-start">
                     {lang === "ar" ? activeReport.aiFeedbackAr : activeReport.aiFeedbackEn}
                   </p>
                 </div>
@@ -428,17 +446,17 @@ export default function WeeklyReportsModule({ mode = "student", activeInstructor
                   {activeReport.quizzes.map((q) => (
                     <div
                       key={q.id}
-                      className="p-3.5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200/70 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                      className="p-4 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-white/10 shadow-xs hover:shadow-sm transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-start"
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-xl bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 font-bold text-xs">
+                      <div className="flex items-center gap-3.5 min-w-0">
+                        <div className="h-10 w-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-cyan-400 font-black text-xs flex items-center justify-center shrink-0 border border-indigo-200/60 dark:border-indigo-800/60 shadow-xs">
                           {q.score}%
                         </div>
-                        <div>
-                          <div className="text-xs font-bold text-slate-900 dark:text-white">
+                        <div className="min-w-0">
+                          <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
                             {q.quizTitle}
                           </div>
-                          <div className="text-[10px] text-slate-400 font-mono">
+                          <div className="text-[11px] text-slate-400 font-mono mt-0.5">
                             {new Date(q.createdAt).toLocaleDateString([], {
                               month: "short",
                               day: "numeric",
@@ -449,8 +467,8 @@ export default function WeeklyReportsModule({ mode = "student", activeInstructor
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 self-end sm:self-auto">
-                        <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200/60">
+                      <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+                        <span className="text-xs font-black text-indigo-700 dark:text-indigo-300 px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200/80 dark:border-indigo-800/60 shadow-xs">
                           +{q.points} {t("weeklyReports.points")}
                         </span>
                       </div>
@@ -472,17 +490,17 @@ export default function WeeklyReportsModule({ mode = "student", activeInstructor
                   {activeReport.assignments.map((a) => (
                     <div
                       key={a.assignmentId}
-                      className="p-3.5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200/70 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                      className="p-4 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-white/10 shadow-xs hover:shadow-sm transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-start"
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-xl bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0 font-bold text-xs">
-                          <ClipboardList className="h-4 w-4" />
+                      <div className="flex items-center gap-3.5 min-w-0">
+                        <div className="h-10 w-10 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 font-black text-xs flex items-center justify-center shrink-0 border border-purple-200/60 dark:border-purple-800/60 shadow-xs">
+                          <ClipboardList className="h-5 w-5" />
                         </div>
-                        <div>
-                          <div className="text-xs font-bold text-slate-900 dark:text-white">
+                        <div className="min-w-0">
+                          <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
                             {a.title}
                           </div>
-                          <div className="text-[10px] text-slate-400 font-mono">
+                          <div className="text-[11px] text-slate-400 font-mono mt-0.5">
                             {new Date(a.submittedAt).toLocaleDateString([], {
                               month: "short",
                               day: "numeric",
@@ -493,8 +511,8 @@ export default function WeeklyReportsModule({ mode = "student", activeInstructor
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 self-end sm:self-auto">
-                        <span className="text-xs font-bold text-purple-600 dark:text-purple-400 px-2.5 py-1 rounded-lg bg-purple-50 dark:bg-purple-950/50 border border-purple-200/60">
+                      <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+                        <span className="text-xs font-black text-purple-700 dark:text-purple-300 px-3 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-950/60 border border-purple-200/80 dark:border-purple-800/60 shadow-xs">
                           {a.score !== null ? `${a.score} / ${a.maxMarks}` : "Submitted"} {t("weeklyReports.points")}
                         </span>
                       </div>

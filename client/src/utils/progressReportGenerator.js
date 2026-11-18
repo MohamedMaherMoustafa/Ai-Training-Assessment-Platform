@@ -261,20 +261,23 @@ export function generateStudentProgressReportPdf({
 
   // Executive KPI Summary Cards
   const kpis = [
-    { label: "Total Points Earned", value: `${summary.totalPoints} pts`, accent: [245, 158, 11] },
+    { label: "Total Points", value: `${summary.totalPoints} pts`, sub: "All categories", accent: [245, 158, 11] },
     {
       label: "Quiz Points",
-      value: `${summary.quizPoints} pts (${summary.quizCount})`,
+      value: `${summary.quizPoints} pts`,
+      sub: `${summary.quizCount} quizzes taken`,
       accent: [2, 132, 199],
     },
     {
       label: "Assignment Points",
-      value: `${summary.assignmentPoints} pts (${summary.gradedAssignments}/${summary.assignmentCount})`,
+      value: `${summary.assignmentPoints} pts`,
+      sub: `${summary.gradedAssignments}/${summary.assignmentCount} tasks graded`,
       accent: [79, 70, 229],
     },
     {
-      label: "Recorded Activities",
-      value: `${logs.length} logs (${summary.passRate}% pass)`,
+      label: "Activities Logged",
+      value: `${logs.length} logs`,
+      sub: `${summary.passRate}% pass rate`,
       accent: [16, 185, 129],
     },
   ];
@@ -283,19 +286,26 @@ export function generateStudentProgressReportPdf({
     const x = 14 + i * (cardW + 3);
     doc.setFillColor(255, 255, 255);
     doc.setDrawColor(203, 213, 225);
-    doc.roundedRect(x, 71, cardW, 18, 2.5, 2.5, "FD");
+    doc.roundedRect(x, 70, cardW, 21, 2.5, 2.5, "FD");
     doc.setFillColor(...k.accent);
-    doc.rect(x, 71, cardW, 1.6, "F");
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(7.4);
-    doc.setTextColor(100, 116, 139);
-    doc.text(k.label, x + 3, 77.5);
+    doc.rect(x, 70, cardW, 2.2, "F");
 
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(10.5);
+    doc.setFontSize(7.2);
+    doc.setTextColor(100, 116, 139);
+    doc.text(k.label.toUpperCase(), x + 3.5, 77);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
     doc.setTextColor(15, 23, 42);
-    doc.text(k.value, x + 3, 85);
+    doc.text(k.value, x + 3.5, 84.5);
+
+    if (k.sub) {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7);
+      doc.setTextColor(100, 116, 139);
+      doc.text(k.sub, x + 3.5, 88.5);
+    }
   });
 
   let y = 97;
