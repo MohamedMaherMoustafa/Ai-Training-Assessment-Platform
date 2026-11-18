@@ -4,7 +4,7 @@ let cachedLogoDataUrl = null;
 if (typeof window !== "undefined") {
   const img = new Image();
   img.crossOrigin = "anonymous";
-  img.src = "/Logo.png";
+  img.src = "/logo-light.png";
   img.onload = () => {
     try {
       const canvas = document.createElement("canvas");

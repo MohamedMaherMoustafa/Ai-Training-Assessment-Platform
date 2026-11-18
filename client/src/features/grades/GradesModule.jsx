@@ -10,20 +10,45 @@ import { useAuth } from "../../context/AuthContext";
  * a crisp high-DPI logo matching the platform's sky -> indigo gradient theme.
  */
 let cachedLogoDataUrl = null;
+
+export async function loadLightModeLogoPng() {
+  if (cachedLogoDataUrl) return cachedLogoDataUrl;
+  if (typeof window === "undefined") return "";
+
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = "/logo-light.png";
+    img.onload = () => {
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = 180;
+        canvas.height = 180;
+        const ctx = canvas.getContext("2d");
+
+        // Clean white rounded container badge for the light-mode logo
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        if (ctx.roundRect) {
+          ctx.roundRect(0, 0, 180, 180, 24);
+        } else {
+          ctx.rect(0, 0, 180, 180);
+        }
+        ctx.fill();
+
+        ctx.drawImage(img, 10, 10, 160, 160);
+        cachedLogoDataUrl = canvas.toDataURL("image/png");
+        resolve(cachedLogoDataUrl);
+      } catch {
+        resolve("");
+      }
+    };
+    img.onerror = () => resolve("");
+  });
+}
+
 if (typeof window !== "undefined") {
-  const img = new Image();
-  img.crossOrigin = "anonymous";
-  img.src = "/Logo.png";
-  img.onload = () => {
-    try {
-      const canvas = document.createElement("canvas");
-      canvas.width = 160;
-      canvas.height = 160;
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0, 160, 160);
-      cachedLogoDataUrl = canvas.toDataURL("image/png");
-    } catch {}
-  };
+  loadLightModeLogoPng().catch(() => {});
 }
 
 function createPlatformLogoPng() {
@@ -160,25 +185,31 @@ export default function GradesModule({ mode = "admin", activeInstructorId = null
       doc.setFillColor(2, 132, 199);
       doc.rect(0, 34, pageW, 1.8, "F");
 
+      // Crisp white rounded container badge for the light-mode logo
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(13, 5, 24, 24, 3.5, 3.5, "F");
+
       // Platform logo
-      doc.addImage(logoPng, "PNG", 14, 6, 21, 21);
+      if (logoPng) {
+        doc.addImage(logoPng, "PNG", 14.5, 6.5, 21, 21);
+      }
 
       // Platform Name & Report Title
       doc.setTextColor(255, 255, 255);
       doc.setFont("helvetica", "bold");
       doc.setFontSize(15);
-      doc.text("Athar Educational Platform", 40, 14.5);
+      doc.text("Athar Educational Platform", 42, 14.5);
 
       doc.setFont("helvetica", "normal");
       doc.setFontSize(9.5);
       doc.setTextColor(186, 230, 253);
-      doc.text("Official Assessment & Progress Report", 40, 21);
+      doc.text("Official Assessment & Progress Report", 42, 21);
 
       doc.setFontSize(8);
       doc.setTextColor(148, 163, 184);
       doc.text(
         `Generated: ${new Date().toLocaleString()}  |  Scope: ${mode.toUpperCase()}`,
-        40,
+        42,
         27.5
       );
     };

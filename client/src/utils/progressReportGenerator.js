@@ -1,20 +1,45 @@
 import { jsPDF } from "jspdf";
 
 let cachedLogoDataUrl = null;
+
+export async function loadLightModeLogoPng() {
+  if (cachedLogoDataUrl) return cachedLogoDataUrl;
+  if (typeof window === "undefined") return "";
+
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = "/logo-light.png";
+    img.onload = () => {
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = 180;
+        canvas.height = 180;
+        const ctx = canvas.getContext("2d");
+
+        // Clean white rounded container badge for the light-mode logo
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        if (ctx.roundRect) {
+          ctx.roundRect(0, 0, 180, 180, 24);
+        } else {
+          ctx.rect(0, 0, 180, 180);
+        }
+        ctx.fill();
+
+        ctx.drawImage(img, 10, 10, 160, 160);
+        cachedLogoDataUrl = canvas.toDataURL("image/png");
+        resolve(cachedLogoDataUrl);
+      } catch {
+        resolve("");
+      }
+    };
+    img.onerror = () => resolve("");
+  });
+}
+
 if (typeof window !== "undefined") {
-  const img = new Image();
-  img.crossOrigin = "anonymous";
-  img.src = "/Logo.png";
-  img.onload = () => {
-    try {
-      const canvas = document.createElement("canvas");
-      canvas.width = 160;
-      canvas.height = 160;
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0, 160, 160);
-      cachedLogoDataUrl = canvas.toDataURL("image/png");
-    } catch {}
-  };
+  loadLightModeLogoPng().catch(() => {});
 }
 
 function createPlatformLogoPng() {
@@ -187,21 +212,27 @@ export function generateStudentProgressReportPdf({
     doc.setFillColor(2, 132, 199);
     doc.rect(0, 36, pageW, 2, "F");
 
-    doc.addImage(logoPng, "PNG", 14, 7, 22, 22);
+    // Crisp white rounded container badge for the light-mode logo
+    doc.setFillColor(255, 255, 255);
+    doc.roundedRect(13, 5.5, 25, 25, 3.5, 3.5, "F");
+
+    if (logoPng) {
+      doc.addImage(logoPng, "PNG", 14.5, 7, 22, 22);
+    }
 
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(15);
-    doc.text("Athar Educational Platform", 41, 14.5);
+    doc.text("Athar Educational Platform", 43, 14.5);
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
     doc.setTextColor(186, 230, 253);
-    doc.text("Official Student Progress Tracker & Activity Report", 41, 21.5);
+    doc.text("Official Student Progress Tracker & Activity Report", 43, 21.5);
 
     doc.setFontSize(8);
     doc.setTextColor(148, 163, 184);
-    doc.text(`Period: ${periodLabel}  |  Generated: ${generatedAt}`, 41, 28.5);
+    doc.text(`Period: ${periodLabel}  |  Generated: ${generatedAt}`, 43, 28.5);
   };
 
   const drawFooter = (pageNum, totalPages) => {
