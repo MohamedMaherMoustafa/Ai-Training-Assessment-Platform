@@ -648,7 +648,7 @@ export default function AdminOverview() {
         </div>
       </div>
 
-      {/* Top 5 Students Scoreboard per Course */}
+      {/* Top 3 Students Scoreboard per Course */}
       <ScoreboardModule mode="admin" embedded />
     </div>
   );

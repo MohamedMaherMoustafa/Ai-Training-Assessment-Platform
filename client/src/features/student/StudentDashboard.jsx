@@ -82,7 +82,7 @@ function StudentInstructorSelector({
           <p className="text-xs sm:text-sm text-white/90 mt-1">
             {lang === "ar"
               ? "اختر المحاضر الذي تريد فتح مقرراته وواجباته واختباراته ولوحة متصدريه."
-              : "Select which instructor workspace you want to open. All courses, lesson PDFs, assignments, quizzes, grades, and top-5 scoreboards will filter to that instructor."}
+              : "Select which instructor workspace you want to open. All courses, lesson PDFs, assignments, quizzes, grades, and top-3 scoreboards will filter to that instructor."}
           </p>
         </div>
       </div>
