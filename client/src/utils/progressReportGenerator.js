@@ -192,7 +192,7 @@ export function generateStudentProgressReportPdf({
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(15);
-    doc.text("AI Training & Assessment Platform", 41, 14.5);
+    doc.text("Athar Educational Platform", 41, 14.5);
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
@@ -211,7 +211,7 @@ export function generateStudentProgressReportPdf({
     doc.setFontSize(8);
     doc.setTextColor(100, 116, 139);
     doc.text(
-      `AI Training & Assessment Platform — Student Progress Report (${periodLabel})`,
+      `Athar Educational Platform — Student Progress Report (${periodLabel})`,
       14,
       pageH - 7.5
     );

@@ -1,4 +1,4 @@
-# 🎓 AI Training & Assessment Platform
+# 🎓 Athar Educational Platform (منصة أثر التعليمية)
 ### *Learn · Develop · Achieve Your Goals*
 
 [![React 18](https://img.shields.io/badge/React-18-blue.svg)](https://react.dev/)
@@ -12,7 +12,7 @@
 
 ## 🌟 Overview
 
-The **AI Training & Assessment Platform** is an enterprise-grade, intelligent educational web application tailored for technical education, continuous skill assessment, and modern interactive learning. Built with a **modern glassmorphism (liquid glass)** design language, it bridges students, instructors, and system administrators into a seamless, high-performance learning ecosystem.
+The **Athar Educational Platform (منصة أثر التعليمية)** is an enterprise-grade, intelligent educational web application tailored for technical education, continuous skill assessment, and modern interactive learning. Built with a **modern glassmorphism (liquid glass)** design language, it bridges students, instructors, and system administrators into a seamless, high-performance learning ecosystem.
 
 The platform provides end-to-end support for coursework, lesson materials, digital PDF annotation, AI-generated quizzes with anti-cheating enforcement, automated weekly progress tracking, voice/photo AI assistance, and real-time live performance analytics.
 

@@ -200,7 +200,7 @@ export function generateTop3CertificatePdf({
   doc.setFont("helvetica", "bold");
   doc.setFontSize(13);
   doc.setTextColor(...theme.headerBg);
-  doc.text("AI TRAINING & ASSESSMENT PLATFORM", w / 2, 50, { align: "center" });
+  doc.text("ATHAR EDUCATIONAL PLATFORM", w / 2, 50, { align: "center" });
 
   // Rank Banner Pill
   doc.setFillColor(...theme.sealFill);

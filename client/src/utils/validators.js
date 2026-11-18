@@ -1,5 +1,5 @@
 /**
- * Username validation helper for AI Training & Assessment Platform
+ * Username validation helper for Athar Educational Platform
  * Requirements:
  * 1. Not less than 8 characters (length >= 8).
  * 2. Allowed characters are ONLY letters, numbers, and the special characters (@ or _).

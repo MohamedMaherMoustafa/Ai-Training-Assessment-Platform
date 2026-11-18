@@ -167,7 +167,7 @@ export default function GradesModule({ mode = "admin", activeInstructorId = null
       doc.setTextColor(255, 255, 255);
       doc.setFont("helvetica", "bold");
       doc.setFontSize(15);
-      doc.text("AI Training & Assessment Platform", 40, 14.5);
+      doc.text("Athar Educational Platform", 40, 14.5);
 
       doc.setFont("helvetica", "normal");
       doc.setFontSize(9.5);
@@ -190,7 +190,7 @@ export default function GradesModule({ mode = "admin", activeInstructorId = null
       doc.setFontSize(8);
       doc.setTextColor(100, 116, 139);
       doc.text(
-        "AI Training & Assessment Platform — Technical Education & Platform AI",
+        "Athar Educational Platform — Technical Education & Platform AI",
         14,
         pageH - 7.5
       );
@@ -318,7 +318,7 @@ export default function GradesModule({ mode = "admin", activeInstructorId = null
       drawFooter(p, totalPages);
     }
 
-    doc.save("AI_Training_Assessment_Report.pdf");
+    doc.save("Athar_Educational_Platform_Report.pdf");
   };
 
   return (

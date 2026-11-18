@@ -204,7 +204,10 @@ export default function ScoreboardModule({ mode = "admin", activeInstructorId = 
 
   const handleDownloadCertificate = (rank, entry, course, instructorName) => {
     if (!canPrintCertificates) return;
-    const courseTitle = course.title?.en || course.title?.[lang] || "AI Training Course";
+    const courseTitle =
+      course.title?.en ||
+      course.title?.[lang] ||
+      (lang === "ar" ? "مقرر أثر التعليمي" : "Athar Educational Course");
     generateTop3CertificatePdf({
       rank,
       studentName: entry.studentName,

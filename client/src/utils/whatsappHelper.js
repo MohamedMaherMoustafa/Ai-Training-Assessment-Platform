@@ -1,5 +1,5 @@
 /**
- * WhatsApp Integration Helper for AI Training & Assessment Platform
+ * WhatsApp Integration Helper for Athar Educational Platform
  * Handles conversion of Egyptian phone numbers to international format (+20)
  * and generates pre-populated WhatsApp chat URLs that require manual sending.
  */

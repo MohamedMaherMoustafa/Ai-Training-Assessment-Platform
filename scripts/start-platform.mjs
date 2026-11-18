@@ -200,7 +200,7 @@ process.on("SIGINT", () => shutdown(0));
 process.on("SIGTERM", () => shutdown(0));
 
 async function main() {
-  log("Platform", "Starting AI Training & Assessment Platform (LLM + AI Proxy + Web Client)...");
+  log("Platform", "Starting Athar Educational Platform (LLM + AI Proxy + Web Client)...");
   await ensureOllamaAndModel();
   startProxy();
   startClient();

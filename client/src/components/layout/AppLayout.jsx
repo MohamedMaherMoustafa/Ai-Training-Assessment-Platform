@@ -160,11 +160,11 @@ export default function AppLayout({ navItems, children }) {
             </div>
 
             {/* Platform Title */}
-            <div className="font-black text-sm sm:text-[14.5px] leading-snug tracking-tight text-slate-900 dark:text-white">
-              AI Training &amp; Assessment
+            <div className="font-black text-sm sm:text-[15px] leading-snug tracking-tight text-slate-900 dark:text-white">
+              {lang === "ar" ? "منصة أثر التعليمية" : "Athar Educational"}
             </div>
-            <div className="text-[11px] font-extrabold text-slate-700 dark:text-slate-300 tracking-wider uppercase mt-0.5">
-              Platform
+            <div className="text-[11px] font-extrabold text-indigo-600 dark:text-indigo-400 tracking-wider uppercase mt-0.5">
+              {lang === "ar" ? "Athar Educational Platform" : "Platform"}
             </div>
 
             {/* Platform Slogan Badge */}

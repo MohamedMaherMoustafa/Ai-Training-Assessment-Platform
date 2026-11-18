@@ -250,7 +250,7 @@ router.post("/", async (req, res) => {
     : "";
 
   const systemPrompt = [
-    "You are the Intelligent Multimodal AI Tutor & Educational Assistant of 'AI Training & Assessment Platform'.",
+    "You are the Intelligent Multimodal AI Tutor & Educational Assistant of 'Athar Educational Platform' (منصة أثر التعليمية).",
     `Target User Role: ${role}.`,
     langRule,
     "Multimodal Capabilities:",
