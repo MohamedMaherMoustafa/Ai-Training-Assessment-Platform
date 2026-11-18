@@ -542,7 +542,14 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
     setActiveQuiz(qz);
     setAnswers({});
     setSecondsLeft(Math.max((Number(qz.durationMinutes) || 10) * 60, 60));
+    window.scrollTo({ top: 0, behavior: "instant" });
   };
+
+  useEffect(() => {
+    if (activeQuiz || privacyRestricted) {
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }
+  }, [activeQuiz, privacyRestricted]);
 
   const handleRequestRetake = async (qz) => {
     await requestQuizRetake(qz.id, user.uid, {
@@ -707,7 +714,193 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
 
   return (
     <div className="space-y-6">
-      <div className="glass-panel rounded-[26px] p-5 flex flex-wrap items-center justify-between gap-3">
+      {/* 1. Student Active Quiz Player with Timer & Privacy Protection (PROMINENTLY AT THE VERY TOP — ZERO SCROLLING) */}
+      {activeQuiz && (
+        <>
+          <div className="quiz-print-notice">
+            {lang === "ar"
+              ? "المحتوى محمي — قيود الخصوصية تمنع التصوير أو الطباعة"
+              : "Content Privacy Restricted — Screenshots & Printing Are Disabled"}
+          </div>
+
+          <div
+            onContextMenu={(e) => {
+              e.preventDefault();
+              handlePrivacyViolation();
+            }}
+            onCopy={(e) => {
+              e.preventDefault();
+              handlePrivacyViolation();
+            }}
+            onCut={(e) => e.preventDefault()}
+            className="quiz-privacy-protected relative glass-card border-sky-400/70 p-6 space-y-5 select-none"
+          >
+            {/* Full-cover Content Privacy Restricted Overlay (High contrast solid dark surface, visible & legible in both light and dark modes) */}
+            <div
+              className={`quiz-privacy-shield-overlay fixed inset-0 z-[100] overflow-y-auto flex flex-col items-center justify-center p-6 sm:p-10 text-center space-y-4 ${
+                privacyRestricted ? "!flex !opacity-100 !visible" : ""
+              }`}
+              style={{
+                backgroundColor: "#020617",
+                color: "#ffffff",
+                boxShadow: "inset 0 0 100px rgba(0,0,0,0.85)",
+              }}
+            >
+              <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-3xl bg-rose-500/20 border-2 border-rose-500/60 text-rose-400 flex items-center justify-center shadow-2xl shadow-rose-950/80">
+                <ShieldAlert className="h-9 w-9 sm:h-10 sm:w-10 animate-pulse text-rose-400" />
+              </div>
+              <div className="space-y-3 max-w-xl">
+                <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-rose-500/25 border border-rose-400/50 text-rose-300 text-xs font-black tracking-wider uppercase">
+                  <Lock className="h-3.5 w-3.5 text-rose-300" />
+                  <span>{lang === "ar" ? "حجب محتوى الاختبار — خصوصية مشددة" : "Content Privacy Blocked"}</span>
+                </div>
+                <h3 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-white drop-shadow-md">
+                  {lang === "ar"
+                    ? "تم حجب أسئلة الاختبار بواسطة منصة أثر التعليمية"
+                    : "Quiz Content Privacy Protected by Athar Educational Platform"}
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-semibold">
+                  {lang === "ar"
+                    ? "محاولات تصوير الشاشة (Win+Shift+S / PrintScreen) أو مغادرة نافذة الاختبار محظورة تماماً لمنع تسريب الأسئلة أو الغش. تم حجب وتعتيم المحتوى بالكامل."
+                    : "Screen capture attempts (Win+Shift+S / PrintScreen) and leaving the test window are strictly prohibited. The assessment content was instantly masked and obscured."}
+                </p>
+
+                <div className="p-4 rounded-2xl bg-slate-900/95 border-2 border-rose-500/40 text-white text-xs sm:text-sm font-bold space-y-2 mt-2 shadow-xl text-center">
+                  <div className="text-amber-300 font-black text-sm sm:text-base flex items-center justify-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-amber-300 shrink-0" />
+                    <span>
+                      {lang === "ar"
+                        ? `سجل مخالفات الخصوصية: (المحاولة ${privacyCount || 1} من 2)`
+                        : `Privacy Warning: Attempt (${privacyCount || 1} of 2)`}
+                    </span>
+                  </div>
+                  <div className="text-[12px] sm:text-xs text-slate-200 font-normal leading-relaxed text-center">
+                    {lang === "ar"
+                      ? "تنبيه أمان: لديك محاولة تحذيرية واحدة فقط! أي محاولة تصوير أخرى (المحاولة 2 من 2) ستؤدي فوراً إلى إنهاء الاختبار وإلغائه دون تسليم الإجابات كحالة غش!"
+                      : "Security Alert: You are allowed only 1 warning! Any second capture attempt (Attempt 2 of 2) will immediately terminate and cancel your test without submission as a cheating violation!"}
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleResumeFromWarning}
+                className="mt-3 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-sky-500 via-indigo-600 to-violet-600 hover:from-sky-400 hover:via-indigo-500 hover:to-violet-500 text-white text-xs sm:text-sm font-black shadow-xl shadow-indigo-600/40 hover:scale-105 active:scale-95 transition-all cursor-pointer border border-white/20"
+              >
+                {lang === "ar" ? "أدركت ذلك — العودة ومتابعة الاختبار" : "I Understand — Resume Quiz"}
+              </button>
+
+              <div className="text-[11px] text-slate-400 font-mono tracking-wide">
+                Athar Educational Platform · Anti-Cheat & Screen Protection Active
+              </div>
+            </div>
+
+            <div className={`quiz-questions-wrapper relative ${privacyRestricted ? "opacity-0 pointer-events-none select-none filter blur-3xl space-y-5" : "space-y-5 transition-all"}`}>
+              {/* Security Watermark across the active test canvas */}
+              <div className="absolute inset-0 pointer-events-none select-none overflow-hidden opacity-[0.035] dark:opacity-[0.05] flex flex-wrap gap-12 items-center justify-around z-0 rotate-[-12deg]">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <span key={i} className="text-xs sm:text-sm font-black tracking-widest uppercase">
+                    منصة أثر التعليمية · Athar Platform · {user?.displayName || user?.email || "Student"}
+                  </span>
+                ))}
+              </div>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <h2 className="text-lg font-extrabold">{activeQuiz.title}</h2>
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-600 dark:text-rose-300">
+                    <Lock className="h-3 w-3" />
+                    {lang === "ar"
+                      ? "وضع الخصوصية مفعل — التصوير والنسخ معطلان"
+                      : "Privacy Protected — Screenshots, Print & Copy Disabled"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-800 dark:text-amber-200 text-xs font-bold">
+                    <Clock className="h-3.5 w-3.5" />
+                    {formatTime(secondsLeft)}
+                  </span>
+                  {canManage && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveQuiz(null);
+                        setAnswers({});
+                        setPrivacyRestricted(false);
+                        document.body.classList.remove("quiz-privacy-obscured");
+                      }}
+                      className="px-3 py-1 rounded-xl bg-slate-200/80 dark:bg-slate-700/80 hover:bg-slate-300 dark:hover:bg-slate-600 text-xs font-bold text-slate-700 dark:text-slate-200 transition-all cursor-pointer border border-slate-300 dark:border-slate-600"
+                    >
+                      {lang === "ar" ? "إغلاق المعاينة" : "Exit Preview"}
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {(activeQuiz.questions || []).map((q, idx) => {
+                  const isMulti = Boolean(q.allowMultiple) || getCorrectIds(q).length > 1;
+                  const selectedArr = Array.isArray(answers[q.id])
+                    ? answers[q.id]
+                    : answers[q.id]
+                    ? [answers[q.id]]
+                    : [];
+                  return (
+                    <div key={q.id} className="p-4 rounded-xl glass-subtle space-y-2">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="font-semibold text-sm">
+                          {idx + 1}. {q.text}
+                        </div>
+                        {isMulti && (
+                          <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-400/30">
+                            {lang === "ar" ? "اختر كل ما ينطبق" : "Select all that apply"}
+                          </span>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {(q.options || []).map((opt) => {
+                          const active = selectedArr.includes(opt.id);
+                          return (
+                            <label
+                              key={opt.id}
+                              className={`flex items-center gap-2 p-2.5 rounded-lg border cursor-pointer text-xs transition-all ${
+                                active
+                                  ? "bg-sky-500/20 border-sky-500 font-semibold"
+                                  : "glass-subtle"
+                              }`}
+                            >
+                              <input
+                                type={isMulti ? "checkbox" : "radio"}
+                                name={`ans_${q.id}`}
+                                checked={active}
+                                onChange={() => toggleStudentAnswer(q, opt.id)}
+                              />
+                              <span>{opt.text}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <button
+                onClick={handleStudentSubmit}
+                disabled={submittingQuiz}
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-sm font-semibold shadow-lg flex items-center gap-2 transition-all cursor-pointer"
+              >
+                <Send className="h-4 w-4" />
+                {submittingQuiz ? t("app.loading") : t("quizzes.submitQuiz")}
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* When NO quiz is active, render regular management & quiz list */}
+      {!activeQuiz && (
+        <>
+          <div className="glass-panel rounded-[26px] p-5 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-amber-500 via-orange-500 to-rose-500 text-white flex items-center justify-center shadow-lg shadow-orange-500/25">
             <Sparkles className="h-6 w-6" />
@@ -1041,173 +1234,6 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
         </form>
       )}
 
-      {/* Student Active Quiz Player with Timer & Privacy Protection */}
-      {activeQuiz && (
-        <>
-          <div className="quiz-print-notice">
-            {lang === "ar"
-              ? "المحتوى محمي — قيود الخصوصية تمنع التصوير أو الطباعة"
-              : "Content Privacy Restricted — Screenshots & Printing Are Disabled"}
-          </div>
-
-          <div
-            onContextMenu={(e) => {
-              e.preventDefault();
-              handlePrivacyViolation();
-            }}
-            onCopy={(e) => {
-              e.preventDefault();
-              handlePrivacyViolation();
-            }}
-            onCut={(e) => e.preventDefault()}
-            className="quiz-privacy-protected relative glass-card border-sky-400/70 p-6 space-y-5 select-none"
-          >
-            {/* Full-cover Content Privacy Restricted Overlay (High contrast solid dark surface, visible & legible in both light and dark modes) */}
-            <div
-              className={`quiz-privacy-shield-overlay absolute inset-0 z-50 rounded-2xl flex flex-col items-center justify-center p-6 sm:p-10 text-center space-y-4 ${
-                privacyRestricted ? "!flex !opacity-100 !visible" : ""
-              }`}
-              style={{
-                backgroundColor: "#020617",
-                color: "#ffffff",
-                boxShadow: "inset 0 0 100px rgba(0,0,0,0.85)",
-              }}
-            >
-              <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-3xl bg-rose-500/20 border-2 border-rose-500/60 text-rose-400 flex items-center justify-center shadow-2xl shadow-rose-950/80">
-                <ShieldAlert className="h-9 w-9 sm:h-10 sm:w-10 animate-pulse text-rose-400" />
-              </div>
-              <div className="space-y-3 max-w-xl">
-                <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-rose-500/25 border border-rose-400/50 text-rose-300 text-xs font-black tracking-wider uppercase">
-                  <Lock className="h-3.5 w-3.5 text-rose-300" />
-                  <span>{lang === "ar" ? "حجب محتوى الاختبار — خصوصية مشددة" : "Content Privacy Blocked"}</span>
-                </div>
-                <h3 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-white drop-shadow-md">
-                  {lang === "ar"
-                    ? "تم حجب أسئلة الاختبار بواسطة منصة أثر التعليمية"
-                    : "Quiz Content Privacy Protected by Athar Educational Platform"}
-                </h3>
-                <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-semibold">
-                  {lang === "ar"
-                    ? "محاولات تصوير الشاشة (Win+Shift+S / PrintScreen) أو مغادرة نافذة الاختبار محظورة تماماً لمنع تسريب الأسئلة أو الغش. تم حجب وتعتيم المحتوى بالكامل."
-                    : "Screen capture attempts (Win+Shift+S / PrintScreen) and leaving the test window are strictly prohibited. The assessment content was instantly masked and obscured."}
-                </p>
-
-                <div className="p-4 rounded-2xl bg-slate-900/95 border-2 border-rose-500/40 text-white text-xs sm:text-sm font-bold space-y-2 mt-2 shadow-xl text-center">
-                  <div className="text-amber-300 font-black text-sm sm:text-base flex items-center justify-center gap-2">
-                    <AlertTriangle className="h-4 w-4 text-amber-300 shrink-0" />
-                    <span>
-                      {lang === "ar"
-                        ? `سجل مخالفات الخصوصية: (المحاولة ${privacyCount || 1} من 2)`
-                        : `Privacy Warning: Attempt (${privacyCount || 1} of 2)`}
-                    </span>
-                  </div>
-                  <div className="text-[12px] sm:text-xs text-slate-200 font-normal leading-relaxed text-center">
-                    {lang === "ar"
-                      ? "تنبيه أمان: لديك محاولة تحذيرية واحدة فقط! أي محاولة تصوير أخرى (المحاولة 2 من 2) ستؤدي فوراً إلى إنهاء الاختبار وإلغائه دون تسليم الإجابات كحالة غش!"
-                      : "Security Alert: You are allowed only 1 warning! Any second capture attempt (Attempt 2 of 2) will immediately terminate and cancel your test without submission as a cheating violation!"}
-                  </div>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleResumeFromWarning}
-                className="mt-3 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-sky-500 via-indigo-600 to-violet-600 hover:from-sky-400 hover:via-indigo-500 hover:to-violet-500 text-white text-xs sm:text-sm font-black shadow-xl shadow-indigo-600/40 hover:scale-105 active:scale-95 transition-all cursor-pointer border border-white/20"
-              >
-                {lang === "ar" ? "أدركت ذلك — العودة ومتابعة الاختبار" : "I Understand — Resume Quiz"}
-              </button>
-
-              <div className="text-[11px] text-slate-400 font-mono tracking-wide">
-                Athar Educational Platform · Anti-Cheat & Screen Protection Active
-              </div>
-            </div>
-
-            <div className={`quiz-questions-wrapper relative ${privacyRestricted ? "opacity-0 pointer-events-none select-none filter blur-3xl space-y-5" : "space-y-5 transition-all"}`}>
-              {/* Security Watermark across the active test canvas */}
-              <div className="absolute inset-0 pointer-events-none select-none overflow-hidden opacity-[0.035] dark:opacity-[0.05] flex flex-wrap gap-12 items-center justify-around z-0 rotate-[-12deg]">
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <span key={i} className="text-xs sm:text-sm font-black tracking-widest uppercase">
-                    منصة أثر التعليمية · Athar Platform · {user?.displayName || user?.email || "Student"}
-                  </span>
-                ))}
-              </div>
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <h2 className="text-lg font-extrabold">{activeQuiz.title}</h2>
-                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-600 dark:text-rose-300">
-                    <Lock className="h-3 w-3" />
-                    {lang === "ar"
-                      ? "وضع الخصوصية مفعل — التصوير والنسخ معطلان"
-                      : "Privacy Protected — Screenshots, Print & Copy Disabled"}
-                  </span>
-                </div>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-800 dark:text-amber-200 text-xs font-bold">
-                  <Clock className="h-3.5 w-3.5" />
-                  {formatTime(secondsLeft)}
-                </span>
-              </div>
-
-              <div className="space-y-4">
-                {(activeQuiz.questions || []).map((q, idx) => {
-                  const isMulti = Boolean(q.allowMultiple) || getCorrectIds(q).length > 1;
-                  const selectedArr = Array.isArray(answers[q.id])
-                    ? answers[q.id]
-                    : answers[q.id]
-                    ? [answers[q.id]]
-                    : [];
-                  return (
-                    <div key={q.id} className="p-4 rounded-xl glass-subtle space-y-2">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <div className="font-semibold text-sm">
-                          {idx + 1}. {q.text}
-                        </div>
-                        {isMulti && (
-                          <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-400/30">
-                            {lang === "ar" ? "اختر كل ما ينطبق" : "Select all that apply"}
-                          </span>
-                        )}
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {(q.options || []).map((opt) => {
-                          const active = selectedArr.includes(opt.id);
-                          return (
-                            <label
-                              key={opt.id}
-                              className={`flex items-center gap-2 p-2.5 rounded-lg border cursor-pointer text-xs transition-all ${
-                                active
-                                  ? "bg-sky-500/20 border-sky-500 font-semibold"
-                                  : "glass-subtle"
-                              }`}
-                            >
-                              <input
-                                type={isMulti ? "checkbox" : "radio"}
-                                name={`ans_${q.id}`}
-                                checked={active}
-                                onChange={() => toggleStudentAnswer(q, opt.id)}
-                              />
-                              <span>{opt.text}</span>
-                            </label>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <button
-                onClick={handleStudentSubmit}
-                disabled={submittingQuiz}
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-sm font-semibold shadow-lg flex items-center gap-2 transition-all"
-              >
-                <Send className="h-4 w-4" />
-                {submittingQuiz ? t("app.loading") : t("quizzes.submitQuiz")}
-              </button>
-            </div>
-          </div>
-        </>
-      )}
-
       {/* Post-submission Per-Question Breakdown + AI Feedback Popup Modal */}
       {lastReview && (
         <div
@@ -1410,6 +1436,8 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
             );
           })}
         </div>
+      )}
+        </>
       )}
     </div>
   );
