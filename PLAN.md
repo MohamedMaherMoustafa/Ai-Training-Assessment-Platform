@@ -241,14 +241,30 @@ quizzes/{quizId}
   └── createdAt: timestamp
 ```
 
-### Phase 5 — Quiz Player & Grading *(Week 4–5)*
+### Phase 5 — Quiz Player, Camera Proctoring & Anti-Cheat Engine *(Week 4–5)*
 
 | Task | Details |
 |------|---------|
-| QuizPlayer component | Timed, MCQ, submit flow |
-| Auto-grading | Score calculated client-side, stored in Firestore |
+| QuizPlayer component | Timed, single/multiple MCQ, submit flow |
+| Camera Proctoring Gate | Mandatory webcam verification before quiz can start |
+| Top-Center Live PiP | 160×110px mirrored live video feed with glowing `LIVE` indicator |
+| Mobile Phone Detection | Real-time on-device TensorFlow.js + COCO-SSD object detection (immediate termination on first offense) |
+| Camera Covered / Black Screen Detection | Fast 2D canvas luminance analysis; terminates quiz if lens is covered/blacked out for ~1.2s |
+| Camera Disconnect Protection | 1 warning on camera drop; 2nd drop terminates attempt |
+| Screen Capture Shield | Blocks PrintScreen, Win+Shift+S, dev tools, and window blur with privacy blur & clipboard wipe |
+| Cheating Termination Modal | High-priority dialog (`z-index: 100010`) explaining violation and locking re-entry |
+| Auto-grading | Score calculated client-side, stored in Firebase RTDB |
 | Results view | Per-question breakdown + correct answers highlighted |
 | AI feedback | After submission → `POST /api/feedback` → study tips shown |
+
+**Firebase Schema — `quizAttempts` and `quizAccess`:**
+```
+quizAccess/{quizId}/{studentId}
+  ├── status: "entered" | "submitted" | "terminated_cheating"
+  ├── retakeStatus: "none" | "pending" | "approved" | "rejected"
+  ├── violationReason: "mobile_phone_detected" | "camera_covered_detected" | "print_screen" | ...
+  └── cheatingType: "mobile_phone" | "camera_blackout_covered" | "privacy_shortcut"
+```
 
 **Firestore Schema — `results` collection:**
 ```

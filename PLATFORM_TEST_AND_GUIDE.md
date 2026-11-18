@@ -25,9 +25,15 @@ A bilingual (English / Arabic RTL) **Aurora Prism Liquid-Glass** web platform ba
 - **Student Live Annotation (`LiveAnnotationModal.jsx`):** Freehand Pen, Highlighter, Text Tool, Eraser, Undo/Redo, Clear Page, multi-page navigation, and optional written note. Automatically locks and shows `Unavailable — Due date has passed` once the deadline expires.
 - **Instructor Correction:** Teachers click **Review & Correct PDF** to draw red/green correction marks directly on student submissions, award points (`0..maxMarks`), add feedback, and notify the student.
 
-### 5. Timed Multi-Answer Quizzes & Privacy Protection
+### 5. Timed Multi-Answer Quizzes, Camera Proctoring & Anti-Cheating
 - **Quiz Builder & Player (`client/src/features/quiz/QuizzesModule.jsx`):** Minute-based timer, single/multiple correct answers, AI-assisted drafting, single-entry lock with instructor retake approvals, and integer points scoring (`1, 2, 3... pts`).
-- **Anti-Screenshot & Privacy Shield:** Active quizzes block right-click/copy/cut, listen for `PrintScreen`, snipping shortcuts (`Win+Shift+S`, `Cmd+Shift+3/4/5`), `Ctrl+P`/`Ctrl+S`, `F12`, tab visibility loss, and window blur to hide questions under a **Content Privacy Restricted** overlay, plus `@media print` blocking in `index.css`.
+- **Webcam Proctoring Gate**: The quiz cannot be started without granting camera permission. A pre-quiz verification modal previews the live camera stream and outlines proctoring rules before entering.
+- **Top-Center Floating Proctoring Window (PiP)**: A mirrored live camera feed (160×110 px) fixed at `top: 14px; left: 50%` with a glowing red `LIVE` badge, ensuring the student's face remains monitored without obstructing questions or answer options.
+- **AI-Powered Real-Time Mobile Phone Detection**: Continuous client-side object detection using **TensorFlow.js** (`@tensorflow/tfjs`) and **COCO-SSD** (`@tensorflow-models/coco-ssd`). Detecting a `cell phone` in front of the camera triggers an **immediate first-offense quiz termination** without submission as a cheating violation.
+- **Camera Blackout & Lens Obscuration Detection**: Fast canvas luminance analysis evaluates frame brightness. If the student covers the camera lens (using hand, tape, or paper) or the feed remains black (`avgBrightness < 15`) for ~1.2 seconds, the quiz terminates immediately for cheating.
+- **Camera Disconnect Protection**: Tracks `MediaStreamTrack` status; disconnecting the camera triggers 1 warning, and a second camera closure causes immediate disqualification.
+- **Anti-Screenshot & Privacy Shield (Strict 2-Strike System)**: Active quizzes block right-click/copy/cut, listen for `PrintScreen`, snipping shortcuts (`Win+Shift+S`, `Cmd+Shift+3/4/5`), `Ctrl+P`/`Ctrl+S`, `F12`, tab visibility loss, and window blur to hide questions under a **Content Privacy Restricted** overlay with clipboard wiping.
+- **Dedicated High-Priority Termination Modal (`z-index: 100010`)**: Unmissable fullscreen modal displaying the exact violation reason (`mobile_phone`, `camera_blackout_covered`, or `privacy_shortcut`), recording the incident in RTDB, and locking re-entry until approved by the instructor.
 
 ### 6. Points-Based Top-5 Scoreboard & Top-3 PDF Certificates
 - **Stepped Liquid-Glass Podium (`client/src/features/scoreboard/ScoreboardModule.jsx`):** Ranks Top 5 students per course by total earned points (`Quiz pts + Assignment pts`).
