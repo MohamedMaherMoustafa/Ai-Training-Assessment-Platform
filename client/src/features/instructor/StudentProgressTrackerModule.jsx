@@ -687,7 +687,7 @@ export default function StudentProgressTrackerModule() {
               <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-3 pt-2.5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
                 <span>{lang === "ar" ? "المعدل" : "Average"}</span>
                 <span className="font-mono font-bold text-slate-700 dark:text-slate-300">
-                  {avgQuizPct}% ({passCount}/{summary.quizCount || 1} pass)
+                  {summary.avgQuizPct}% ({summary.passRate}% {lang === "ar" ? "نجاح" : "pass"})
                 </span>
               </div>
             </div>
