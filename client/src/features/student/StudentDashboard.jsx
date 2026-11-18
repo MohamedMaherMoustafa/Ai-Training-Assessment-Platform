@@ -73,17 +73,22 @@ function StudentInstructorSelector({
     <div className="space-y-6">
       <div className="relative overflow-hidden rounded-[28px] p-6 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600 text-white shadow-xl shadow-teal-500/20">
         <div className="pointer-events-none absolute -top-12 -end-12 h-44 w-44 rounded-full bg-white/15 blur-2xl" />
-        <div className="relative">
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
-            {lang === "ar"
-              ? `مرحباً ${user?.displayName} — اختر المحاضر لفتح مساحته`
-              : `Welcome, ${user?.displayName} — Choose an Instructor`}
-          </h1>
-          <p className="text-xs sm:text-sm text-white/90 mt-1">
-            {lang === "ar"
-              ? "اختر المحاضر الذي تريد فتح مقرراته وواجباته واختباراته ولوحة متصدريه."
-              : "Select which instructor workspace you want to open. All courses, lesson PDFs, assignments, quizzes, grades, and top-3 scoreboards will filter to that instructor."}
-          </p>
+        <div className="relative flex items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
+              {lang === "ar"
+                ? `مرحباً ${user?.displayName} — اختر المحاضر لفتح مساحته`
+                : `Welcome, ${user?.displayName} — Choose an Instructor`}
+            </h1>
+            <p className="text-xs sm:text-sm text-white/90 mt-1">
+              {lang === "ar"
+                ? "اختر المحاضر الذي تريد فتح مقرراته وواجباته واختباراته ولوحة متصدريه."
+                : "Select which instructor workspace you want to open. All courses, lesson PDFs, assignments, quizzes, grades, and top-3 scoreboards will filter to that instructor."}
+            </p>
+          </div>
+          <div className="hidden sm:flex h-14 w-14 rounded-2xl bg-white/15 backdrop-blur-md p-2 border border-white/25 shrink-0 items-center justify-center shadow-lg">
+            <img src="/Logo.png" alt="Platform Logo" className="w-full h-full object-contain drop-shadow" />
+          </div>
         </div>
       </div>
 

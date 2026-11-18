@@ -269,7 +269,7 @@ export default function AppLayout({ navItems, children }) {
               <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
             <div className="rounded-full border border-slate-200/90 dark:border-slate-700 bg-slate-50/90 dark:bg-slate-800 px-2.5 sm:px-3.5 py-1 sm:py-1.5 flex items-center gap-1.5 text-xs font-black text-slate-900 dark:text-slate-100 shadow-xs shrink-0 max-w-[130px] sm:max-w-none">
-              <GraduationCap className="h-3.5 w-3.5 text-indigo-600 dark:text-cyan-400 shrink-0" />
+              <img src="/Logo.png" alt="Platform Logo" className="h-4 w-4 object-contain shrink-0 drop-shadow-xs" />
               <span className="truncate">{t(`roles.${user?.role || "student"}`)}</span>
             </div>
             {/* Breadcrumb for tablet & desktop */}
