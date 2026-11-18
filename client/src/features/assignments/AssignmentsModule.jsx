@@ -639,6 +639,23 @@ export default function AssignmentsModule({
                       </span>
                       {mode === "instructor" && (
                         <>
+                          {hasPdf && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setModalState({
+                                  open: true,
+                                  assignment: a,
+                                  submission: null,
+                                  modalMode: "view",
+                                })
+                              }
+                              title={lang === "ar" ? "معاينة ورقة العمل PDF" : "Preview Worksheet PDF"}
+                              className="glass-btn-secondary p-1.5 rounded-lg text-indigo-600"
+                            >
+                              <Eye className="h-3.5 w-3.5" />
+                            </button>
+                          )}
                           <button
                             type="button"
                             onClick={() => startEditAssignment(a)}
@@ -678,10 +695,23 @@ export default function AssignmentsModule({
                     )}
 
                     {hasPdf && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 font-semibold">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setModalState({
+                            open: true,
+                            assignment: a,
+                            submission: mySub || null,
+                            modalMode: "view",
+                          })
+                        }
+                        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-500/25 transition-colors font-semibold"
+                        title={lang === "ar" ? "معاينة الملف" : "Preview PDF"}
+                      >
                         <FileText className="h-3 w-3" />
                         {a.pdfName || "Worksheet.pdf"} · {a.pdfPages.length}p
-                      </span>
+                        <Eye className="h-2.5 w-2.5 ms-0.5 opacity-70" />
+                      </button>
                     )}
                   </div>
 
@@ -795,7 +825,7 @@ export default function AssignmentsModule({
                               {mySub.score} / {maxMarks} {lang === "ar" ? "نقطة" : "pts"}
                             </span>
                           )}
-                          {(mySub.annotatedPages?.length > 0 || mySub.correctedPages?.length > 0) && (
+                          {(hasPdf || mySub.annotatedPages?.length > 0 || mySub.correctedPages?.length > 0) && (
                             <button
                               type="button"
                               onClick={() =>
@@ -813,21 +843,42 @@ export default function AssignmentsModule({
                                 ? lang === "ar"
                                   ? "عرض التصحيح"
                                   : "View Corrected"
+                                : mySub.annotatedPages?.length > 0
+                                ? lang === "ar"
+                                  ? "عرض إجابتي"
+                                  : "View Work"
                                 : lang === "ar"
-                                ? "عرض إجابتي"
-                                : "View Work"}
+                                ? "معاينة الملف"
+                                : "View Worksheet"}
                             </button>
                           )}
                         </div>
                       </>
                     ) : pastDue ? (
-                      <div className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-rose-500/10 border border-rose-400/30 text-rose-700 dark:text-rose-300 text-xs font-bold">
+                      <div className="w-full flex flex-wrap items-center justify-between gap-2 px-3 py-2 rounded-xl bg-rose-500/10 border border-rose-400/30 text-rose-700 dark:text-rose-300 text-xs font-bold">
                         <span className="inline-flex items-center gap-1.5">
-                          <Lock className="h-3.5 w-3.5" />
+                          <Lock className="h-3.5 w-3.5 shrink-0" />
                           {lang === "ar"
                             ? "غير متاح للإجابة — انتهى تاريخ التسليم"
                             : "Unavailable — Due date has passed"}
                         </span>
+                        {hasPdf && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setModalState({
+                                open: true,
+                                assignment: a,
+                                submission: null,
+                                modalMode: "view",
+                              })
+                            }
+                            className="glass-btn-secondary px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 shrink-0"
+                          >
+                            <Eye className="h-3.5 w-3.5 text-sky-600" />
+                            {lang === "ar" ? "معاينة الملف" : "View Worksheet"}
+                          </button>
+                        )}
                       </div>
                     ) : (
                       <button

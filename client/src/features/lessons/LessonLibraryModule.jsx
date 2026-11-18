@@ -495,20 +495,41 @@ export default function LessonLibraryModule({
                       </button>
                     </>
                   ) : (
-                    <button
-                      type="button"
-                      onClick={() => handleOpenStudentAnnotator(m)}
-                      className="glass-btn-primary px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5"
-                    >
-                      <PenTool className="h-3.5 w-3.5" />
-                      {hasSavedNotes
-                        ? lang === "ar"
-                          ? "متابعة التدوين الخاص على الدرس"
-                          : "Continue Private Annotation"
-                        : lang === "ar"
-                        ? "فتح وتدوين ملاحظاتي الخاصة"
-                        : "Open & Annotate Privately"}
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setModalState({
+                            open: true,
+                            material: m,
+                            modalMode: "view",
+                            initialInkSnapshots: mySaved?.inkSnapshots || null,
+                            initialNotes: mySaved?.notes || "",
+                          })
+                        }
+                        className="glass-btn-secondary px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5"
+                        title={lang === "ar" ? "قراءة ملف الدرس" : "Read PDF Document"}
+                      >
+                        <Eye className="h-3.5 w-3.5 text-sky-600" />
+                        <span>{lang === "ar" ? "قراءة" : "Read"}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenStudentAnnotator(m)}
+                        className="glass-btn-primary px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5"
+                      >
+                        <PenTool className="h-3.5 w-3.5" />
+                        <span>
+                          {hasSavedNotes
+                            ? lang === "ar"
+                              ? "متابعة التدوين"
+                              : "Continue Notes"
+                            : lang === "ar"
+                            ? "تدوين وملاحظات"
+                            : "Annotate"}
+                        </span>
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>

@@ -5,6 +5,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Eraser,
+  Eye,
+  FileText,
   Highlighter,
   Lock,
   Pen,
@@ -102,6 +104,7 @@ export default function LiveAnnotationModal({
   );
   const [feedbackText, setFeedbackText] = useState(submission?.feedback || "");
   const [saving, setSaving] = useState(false);
+  const [mobileTab, setMobileTab] = useState("canvas"); // "canvas" | "notes"
   const { trackUpload } = useUploadProgress();
 
   const [textDraft, setTextDraft] = useState(null); // { x, y, value }
@@ -459,205 +462,358 @@ export default function LiveAnnotationModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-2 sm:p-4"
+      className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-1 sm:p-4"
       onClick={onClose}
     >
       <div
-        className="glass-panel rounded-3xl w-full max-w-6xl h-[93vh] flex flex-col overflow-hidden shadow-2xl border border-white/25"
+        className="glass-panel rounded-2xl sm:rounded-3xl w-full max-w-6xl h-[98dvh] sm:h-[93vh] flex flex-col overflow-hidden shadow-2xl border border-white/25"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Modal Header */}
-        <div className="px-4 sm:px-6 py-3 border-b border-white/30 dark:border-white/10 flex flex-wrap items-center justify-between gap-3 bg-white/40 dark:bg-slate-900/50">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <h2 className="text-sm sm:text-base font-extrabold truncate">
+        <div className="px-3 sm:px-6 py-2.5 sm:py-3 border-b border-white/30 dark:border-white/10 flex flex-col gap-1.5 bg-white/40 dark:bg-slate-900/50">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <h2 className="text-xs sm:text-base font-extrabold truncate max-w-[200px] sm:max-w-md">
                 {assignment?.title}
               </h2>
               {mode === "lesson" ? (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-[11px] font-extrabold shrink-0">
-                  <Lock className="h-3 w-3" />
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-[10px] sm:text-[11px] font-extrabold shrink-0">
+                  <Lock className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                   {lang === "ar" ? "نسختك الخاصة فقط" : "Private to You Only"}
                 </span>
               ) : assignment?.maxMarks ? (
-                <span className="px-2.5 py-0.5 rounded-full bg-sky-500/15 text-sky-700 dark:text-sky-300 text-[11px] font-extrabold shrink-0">
-                  {lang === "ar" ? `الدرجة الكاملة: ${maxMarks}` : `Max: ${maxMarks} pts`}
+                <span className="px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-700 dark:text-sky-300 text-[10px] sm:text-[11px] font-extrabold shrink-0">
+                  {lang === "ar" ? `الدرجة: ${maxMarks}` : `Max: ${maxMarks} pts`}
                 </span>
               ) : null}
             </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-              {mode === "correct"
-                ? `${lang === "ar" ? "تصحيح إجابة الطالب:" : "Correcting submission by:"} ${submission?.studentName}`
-                : mode === "lesson"
-                ? lang === "ar"
-                  ? "دوّن ملاحظاتك وخطوطك الحرة على الدرس — تُحفظ لك وحدك بشكل خاص"
-                  : "Private Lesson Notebook — Draw, highlight, erase & save notes strictly for yourself"
-                : mode === "view"
-                ? lang === "ar"
-                  ? "معاينة المحتوى"
-                  : "Viewing Document"
-                : lang === "ar"
-                ? "نافذة الكتابة الحرة والتعليق المباشر بالقلم والممحاة"
-                : "Live Annotation Workspace — Freehand Pen, Highlighter, Text & Eraser"}
-            </p>
-          </div>
 
-          <div className="flex items-center gap-2">
-            {/* Multi-Page Controls */}
-            {pages.length > 1 && (
-              <div className="flex items-center gap-1 glass-subtle px-2 py-1 rounded-xl text-xs font-bold">
-                <button
-                  type="button"
-                  disabled={pageIdx === 0}
-                  onClick={() => goToPage(pageIdx - 1)}
-                  className="p-1 rounded-lg hover:bg-white/50 disabled:opacity-35 transition-colors"
-                  title={lang === "ar" ? "الصفحة السابقة" : "Previous Page"}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </button>
-                <div className="flex items-center gap-1 px-1">
+            <div className="flex items-center gap-1.5 shrink-0">
+              {/* Multi-Page Controls */}
+              {pages.length > 1 && (
+                <div className="flex items-center gap-0.5 sm:gap-1 glass-subtle px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-xl text-xs font-bold">
+                  <button
+                    type="button"
+                    disabled={pageIdx === 0}
+                    onClick={() => goToPage(pageIdx - 1)}
+                    className="p-1 rounded-lg hover:bg-white/50 disabled:opacity-30 transition-colors"
+                    title={lang === "ar" ? "الصفحة السابقة" : "Previous Page"}
+                  >
+                    <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  </button>
                   <select
                     value={pageIdx}
                     onChange={(e) => goToPage(Number(e.target.value))}
-                    className="bg-transparent font-bold cursor-pointer text-xs py-0.5 px-1 rounded hover:bg-white/40 focus:outline-none dark:bg-slate-900 dark:text-white"
+                    className="bg-transparent font-bold cursor-pointer text-[11px] sm:text-xs py-0.5 px-0.5 rounded hover:bg-white/40 focus:outline-none dark:bg-slate-900 dark:text-white"
                     title={lang === "ar" ? "انتقال سريع لرقم الصفحة" : "Jump to page"}
                   >
                     {pages.map((_, i) => (
                       <option key={i} value={i} className="text-slate-900 bg-white dark:bg-slate-800 dark:text-white">
-                        {lang === "ar" ? `صفحة ${i + 1} / ${pages.length}` : `Page ${i + 1} of ${pages.length}`}
+                        {i + 1} / {pages.length}
                       </option>
                     ))}
                   </select>
+                  <button
+                    type="button"
+                    disabled={pageIdx >= pages.length - 1}
+                    onClick={() => goToPage(pageIdx + 1)}
+                    className="p-1 rounded-lg hover:bg-white/50 disabled:opacity-30 transition-colors"
+                    title={lang === "ar" ? "الصفحة التالية" : "Next Page"}
+                  >
+                    <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  disabled={pageIdx >= pages.length - 1}
-                  onClick={() => goToPage(pageIdx + 1)}
-                  className="p-1 rounded-lg hover:bg-white/50 disabled:opacity-35 transition-colors"
-                  title={lang === "ar" ? "الصفحة التالية" : "Next Page"}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              </div>
-            )}
+              )}
 
-            <button
-              type="button"
-              onClick={onClose}
-              className="glass-btn-secondary p-2 rounded-xl text-slate-600 dark:text-slate-200"
-              aria-label="Close"
-            >
-              <X className="h-4 w-4" />
-            </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="glass-btn-secondary p-1.5 sm:p-2 rounded-xl text-slate-600 dark:text-slate-200"
+                aria-label="Close"
+              >
+                <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              </button>
+            </div>
           </div>
+
+          <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 truncate">
+            {mode === "correct"
+              ? `${lang === "ar" ? "تصحيح إجابة الطالب:" : "Correcting submission by:"} ${submission?.studentName}`
+              : mode === "lesson"
+              ? lang === "ar"
+                ? "دوّن ملاحظاتك وخطوطك الحرة على الدرس — تُحفظ لك وحدك بشكل خاص"
+                : "Private Lesson Notebook — Draw, highlight, erase & save notes strictly for yourself"
+              : mode === "view"
+              ? lang === "ar"
+                ? "معاينة المستند"
+                : "Viewing Document"
+              : lang === "ar"
+              ? "نافذة الكتابة الحرة والتعليق المباشر بالقلم والممحاة"
+              : "Live Annotation Workspace — Freehand Pen, Highlighter, Text & Eraser"}
+          </p>
         </div>
 
-        {/* Drawing & Annotation Toolbar */}
+        {/* Mobile View Switcher (lg:hidden) */}
+        <div className="lg:hidden px-2.5 py-1.5 bg-slate-100/90 dark:bg-slate-800/80 border-b border-slate-200 dark:border-white/10 flex items-center gap-1.5 shrink-0">
+          <button
+            type="button"
+            onClick={() => setMobileTab("canvas")}
+            className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
+              mobileTab === "canvas"
+                ? "bg-sky-600 text-white shadow-sm"
+                : "text-slate-600 dark:text-slate-300 hover:bg-white/40"
+            }`}
+          >
+            <Pen className="h-3.5 w-3.5" />
+            <span>{lang === "ar" ? "الورقة والرسم" : "Worksheet & Ink"}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobileTab("notes")}
+            className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
+              mobileTab === "notes"
+                ? "bg-sky-600 text-white shadow-sm"
+                : "text-slate-600 dark:text-slate-300 hover:bg-white/40"
+            }`}
+          >
+            <FileText className="h-3.5 w-3.5" />
+            <span>
+              {mode === "lesson"
+                ? lang === "ar"
+                  ? "ملاحظاتي والحفظ"
+                  : "My Notes & Save"
+                : mode === "student"
+                ? lang === "ar"
+                  ? "الملاحظات والتسليم"
+                  : "Notes & Submit"
+                : mode === "correct"
+                ? lang === "ar"
+                  ? "الدرجة والتصحيح"
+                  : "Grade & Feedback"
+                : lang === "ar"
+                ? "التفاصيل"
+                : "Details"}
+            </span>
+          </button>
+        </div>
+
+        {/* Drawing & Annotation Toolbar (Responsive) */}
         {!isReadOnly && (
-          <div className="px-4 py-2.5 border-b border-white/25 dark:border-white/10 flex flex-wrap items-center justify-between gap-2 bg-slate-900/5 dark:bg-white/5">
-            <div className="flex flex-wrap items-center gap-1.5">
-              {[
-                { id: "pen", icon: Pen, en: "Pen", ar: "قلم" },
-                { id: "highlighter", icon: Highlighter, en: "Highlight", ar: "تظليل" },
-                { id: "text", icon: Type, en: "Text", ar: "نص" },
-                { id: "eraser", icon: Eraser, en: "Eraser", ar: "ممحاة" },
-              ].map((item) => {
-                const Icon = item.icon;
-                const active = tool === item.id;
-                return (
+          <>
+            {/* Mobile Toolbar (md:hidden, visible only when on canvas) */}
+            <div
+              className={`md:hidden px-2.5 py-1.5 border-b border-white/25 dark:border-white/10 flex flex-col gap-1.5 bg-slate-900/5 dark:bg-white/5 shrink-0 ${
+                mobileTab === "notes" ? "hidden" : "flex"
+              }`}
+            >
+              {/* Row 1: Tools + Actions */}
+              <div className="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar">
+                <div className="flex items-center gap-1 shrink-0">
+                  {[
+                    { id: "pen", icon: Pen, en: "Pen", ar: "قلم" },
+                    { id: "highlighter", icon: Highlighter, en: "Highlight", ar: "تظليل" },
+                    { id: "text", icon: Type, en: "Text", ar: "نص" },
+                    { id: "eraser", icon: Eraser, en: "Eraser", ar: "ممحاة" },
+                  ].map((item) => {
+                    const Icon = item.icon;
+                    const active = tool === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => setTool(item.id)}
+                        className={`px-2 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-all ${
+                          active
+                            ? "bg-sky-600 text-white shadow-sm"
+                            : "glass-subtle text-slate-700 dark:text-slate-200"
+                        }`}
+                      >
+                        <Icon className="h-3 w-3" />
+                        <span>{lang === "ar" ? item.ar : item.en}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="flex items-center gap-1 shrink-0 ms-1">
                   <button
-                    key={item.id}
                     type="button"
-                    onClick={() => setTool(item.id)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
-                      active
-                        ? "bg-sky-600 text-white shadow-md shadow-sky-500/25"
-                        : "glass-subtle text-slate-700 dark:text-slate-200 hover:bg-white/60"
-                    }`}
+                    onClick={handleUndo}
+                    className="glass-btn-secondary p-1.5 rounded-lg text-slate-600 dark:text-slate-200"
+                    title="Undo"
                   >
-                    <Icon className="h-3.5 w-3.5" />
-                    {lang === "ar" ? item.ar : item.en}
+                    <RotateCcw className="h-3 w-3" />
                   </button>
-                );
-              })}
+                  <button
+                    type="button"
+                    onClick={handleRedo}
+                    className="glass-btn-secondary p-1.5 rounded-lg text-slate-600 dark:text-slate-200"
+                    title="Redo"
+                  >
+                    <Redo2 className="h-3 w-3" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleClearPage}
+                    className="px-2 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-700 dark:text-rose-300 text-[10px] font-bold"
+                  >
+                    {lang === "ar" ? "مسح" : "Clear"}
+                  </button>
+                </div>
+              </div>
 
-              <span className="h-5 w-px bg-slate-300 dark:bg-white/15 mx-1" />
+              {/* Row 2: Colors + Stroke Thickness */}
+              <div className="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar pt-0.5">
+                <div className="flex items-center gap-2 shrink-0">
+                  {PEN_COLORS.map((c) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      title={c.label}
+                      onClick={() => {
+                        setColor(c.hex);
+                        if (tool === "eraser") setTool("pen");
+                      }}
+                      className={`h-5 w-5 rounded-full border transition-transform ${
+                        color === c.hex && tool !== "eraser"
+                          ? "scale-125 ring-2 ring-sky-400 border-white"
+                          : "border-white/70 opacity-80"
+                      }`}
+                      style={{ backgroundColor: c.hex }}
+                    />
+                  ))}
+                </div>
 
-              {/* Color Swatches */}
+                <div className="flex items-center gap-1 shrink-0">
+                  {STROKE_SIZES.map((s) => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => setSize(s.px)}
+                      className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                        size === s.px
+                          ? "bg-indigo-600 text-white"
+                          : "glass-subtle text-slate-600 dark:text-slate-300"
+                      }`}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Desktop Toolbar (md:flex) */}
+            <div className="hidden md:flex px-4 py-2.5 border-b border-white/25 dark:border-white/10 items-center justify-between gap-2 bg-slate-900/5 dark:bg-white/5 shrink-0">
+              <div className="flex flex-wrap items-center gap-1.5">
+                {[
+                  { id: "pen", icon: Pen, en: "Pen", ar: "قلم" },
+                  { id: "highlighter", icon: Highlighter, en: "Highlight", ar: "تظليل" },
+                  { id: "text", icon: Type, en: "Text", ar: "نص" },
+                  { id: "eraser", icon: Eraser, en: "Eraser", ar: "ممحاة" },
+                ].map((item) => {
+                  const Icon = item.icon;
+                  const active = tool === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setTool(item.id)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
+                        active
+                          ? "bg-sky-600 text-white shadow-md shadow-sky-500/25"
+                          : "glass-subtle text-slate-700 dark:text-slate-200 hover:bg-white/60"
+                      }`}
+                    >
+                      <Icon className="h-3.5 w-3.5" />
+                      {lang === "ar" ? item.ar : item.en}
+                    </button>
+                  );
+                })}
+
+                <span className="h-5 w-px bg-slate-300 dark:bg-white/15 mx-1" />
+
+                {/* Color Swatches */}
+                <div className="flex items-center gap-1.5">
+                  {PEN_COLORS.map((c) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      title={c.label}
+                      onClick={() => {
+                        setColor(c.hex);
+                        if (tool === "eraser") setTool("pen");
+                      }}
+                      className={`h-6 w-6 rounded-full border-2 transition-transform ${
+                        color === c.hex && tool !== "eraser"
+                          ? "scale-115 ring-2 ring-sky-400 border-white"
+                          : "border-white/70 opacity-80 hover:opacity-100"
+                      }`}
+                      style={{ backgroundColor: c.hex }}
+                    />
+                  ))}
+                </div>
+
+                <span className="h-5 w-px bg-slate-300 dark:bg-white/15 mx-1" />
+
+                {/* Stroke Thickness */}
+                <div className="flex items-center gap-1">
+                  {STROKE_SIZES.map((s) => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => setSize(s.px)}
+                      className={`px-2 py-1 rounded-lg text-[11px] font-bold ${
+                        size === s.px
+                          ? "bg-indigo-600 text-white"
+                          : "glass-subtle text-slate-600 dark:text-slate-300"
+                      }`}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="flex items-center gap-1.5">
-                {PEN_COLORS.map((c) => (
-                  <button
-                    key={c.id}
-                    type="button"
-                    title={c.label}
-                    onClick={() => {
-                      setColor(c.hex);
-                      if (tool === "eraser") setTool("pen");
-                    }}
-                    className={`h-6 w-6 rounded-full border-2 transition-transform ${
-                      color === c.hex && tool !== "eraser"
-                        ? "scale-115 ring-2 ring-sky-400 border-white"
-                        : "border-white/70 opacity-80 hover:opacity-100"
-                    }`}
-                    style={{ backgroundColor: c.hex }}
-                  />
-                ))}
-              </div>
-
-              <span className="h-5 w-px bg-slate-300 dark:bg-white/15 mx-1" />
-
-              {/* Stroke Thickness */}
-              <div className="flex items-center gap-1">
-                {STROKE_SIZES.map((s) => (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => setSize(s.px)}
-                    className={`px-2 py-1 rounded-lg text-[11px] font-bold ${
-                      size === s.px
-                        ? "bg-indigo-600 text-white"
-                        : "glass-subtle text-slate-600 dark:text-slate-300"
-                    }`}
-                  >
-                    {s.label}
-                  </button>
-                ))}
+                <button
+                  type="button"
+                  onClick={handleUndo}
+                  className="glass-btn-secondary px-2.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1"
+                  title="Undo"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  {lang === "ar" ? "تراجع" : "Undo"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleRedo}
+                  className="glass-btn-secondary px-2.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1"
+                  title="Redo"
+                >
+                  <Redo2 className="h-3.5 w-3.5" />
+                  {lang === "ar" ? "إعادة" : "Redo"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleClearPage}
+                  className="px-2.5 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-700 dark:text-rose-300 text-xs font-bold"
+                >
+                  {lang === "ar" ? "مسح الصفحة" : "Clear Page"}
+                </button>
               </div>
             </div>
-
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={handleUndo}
-                className="glass-btn-secondary px-2.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1"
-                title="Undo"
-              >
-                <RotateCcw className="h-3.5 w-3.5" />
-                {lang === "ar" ? "تراجع" : "Undo"}
-              </button>
-              <button
-                type="button"
-                onClick={handleRedo}
-                className="glass-btn-secondary px-2.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1"
-                title="Redo"
-              >
-                <Redo2 className="h-3.5 w-3.5" />
-                {lang === "ar" ? "إعادة" : "Redo"}
-              </button>
-              <button
-                type="button"
-                onClick={handleClearPage}
-                className="px-2.5 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-700 dark:text-rose-300 text-xs font-bold"
-              >
-                {lang === "ar" ? "مسح الصفحة" : "Clear Page"}
-              </button>
-            </div>
-          </div>
+          </>
         )}
 
         {/* Main Workspace Canvas + Bottom/Side Action Panel */}
-        <div className="flex-1 min-h-0 flex flex-col lg:flex-row overflow-hidden">
+        <div className="flex-1 min-h-0 flex flex-col lg:flex-row overflow-hidden relative">
           {/* Scrollable Worksheet & Live Ink Canvas */}
-          <div className="flex-1 overflow-auto p-4 sm:p-6 bg-slate-200/70 dark:bg-slate-950/60 flex justify-center items-start">
+          <div
+            className={`flex-1 overflow-auto p-1.5 sm:p-4 md:p-6 bg-slate-200/70 dark:bg-slate-950/60 flex flex-col justify-start items-center relative ${
+              mobileTab === "notes" ? "hidden lg:flex" : "flex"
+            }`}
+          >
             <div className="relative shadow-2xl rounded-xl overflow-hidden bg-white max-w-3xl w-full select-none">
               <img
                 src={pages[pageIdx]}
@@ -686,7 +842,10 @@ export default function LiveAnnotationModal({
               {/* Inline Text Box Popup when Text tool clicked */}
               {textDraft && (
                 <div
-                  style={{ left: `${textDraft.cssX}px`, top: `${textDraft.cssY}px` }}
+                  style={{
+                    left: `${Math.min(textDraft.cssX, 200)}px`,
+                    top: `${textDraft.cssY}px`,
+                  }}
                   className="absolute z-20 flex items-center gap-1 bg-white/95 dark:bg-slate-900/95 p-1.5 rounded-xl shadow-xl border border-sky-400"
                 >
                   <input
@@ -704,7 +863,7 @@ export default function LiveAnnotationModal({
                       }
                     }}
                     placeholder={lang === "ar" ? "اكتب هنا..." : "Type note..."}
-                    className="px-2.5 py-1 text-xs glass-input w-40"
+                    className="px-2.5 py-1 text-xs glass-input w-36 sm:w-40"
                   />
                   <button
                     type="button"
@@ -716,11 +875,72 @@ export default function LiveAnnotationModal({
                 </div>
               )}
             </div>
+
+            {/* Mobile Bottom Quick Switcher Pill (lg:hidden) */}
+            <div className="lg:hidden sticky bottom-2 mt-3 z-10 flex items-center gap-2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg border border-slate-200 dark:border-white/20 text-xs shrink-0">
+              {pages.length > 1 && (
+                <div className="flex items-center gap-1 font-bold text-[11px] text-slate-700 dark:text-slate-200">
+                  <button
+                    type="button"
+                    disabled={pageIdx === 0}
+                    onClick={() => goToPage(pageIdx - 1)}
+                    className="p-1 rounded hover:bg-black/10 disabled:opacity-30"
+                  >
+                    <ChevronLeft className="h-3.5 w-3.5" />
+                  </button>
+                  <span>
+                    {pageIdx + 1} / {pages.length}
+                  </span>
+                  <button
+                    type="button"
+                    disabled={pageIdx >= pages.length - 1}
+                    onClick={() => goToPage(pageIdx + 1)}
+                    className="p-1 rounded hover:bg-black/10 disabled:opacity-30"
+                  >
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={() => setMobileTab("notes")}
+                className="px-3 py-1 rounded-full bg-sky-600 text-white font-bold text-[11px] flex items-center gap-1 shadow-sm"
+              >
+                <FileText className="h-3 w-3" />
+                <span>
+                  {mode === "lesson"
+                    ? lang === "ar"
+                      ? "الملاحظات والحفظ"
+                      : "Notes & Save"
+                    : mode === "student"
+                    ? lang === "ar"
+                      ? "الملاحظات والتسليم"
+                      : "Notes & Submit"
+                    : lang === "ar"
+                    ? "التفاصيل"
+                    : "Details"}
+                </span>
+              </button>
+            </div>
           </div>
 
           {/* Right Panel: Student Notes / Teacher Correction & Marks / Graded View */}
-          <div className="w-full lg:w-80 border-t lg:border-t-0 lg:border-s border-white/25 dark:border-white/10 p-4 flex flex-col justify-between gap-4 bg-white/45 dark:bg-slate-900/55 overflow-y-auto">
-            <div className="space-y-4">
+          <div
+            className={`w-full lg:w-80 border-t lg:border-t-0 lg:border-s border-white/25 dark:border-white/10 p-3.5 sm:p-4 flex flex-col justify-between gap-3 sm:gap-4 bg-white/55 dark:bg-slate-900/65 overflow-y-auto ${
+              mobileTab === "canvas" ? "hidden lg:flex" : "flex"
+            }`}
+          >
+            <div className="space-y-3.5">
+              {/* Mobile Back Button to Worksheet */}
+              <button
+                type="button"
+                onClick={() => setMobileTab("canvas")}
+                className="lg:hidden w-full py-1.5 px-3 rounded-xl glass-subtle text-xs font-bold text-sky-600 dark:text-sky-300 flex items-center justify-center gap-1.5"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                <span>{lang === "ar" ? "العودة لتصفح ورقة العمل والرسم" : "Back to Worksheet & Drawing"}</span>
+              </button>
+
               {assignment?.instructions && (
                 <div className="p-3 rounded-2xl glass-subtle space-y-1">
                   <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
@@ -744,7 +964,7 @@ export default function LiveAnnotationModal({
                       : "Written Notes / Summary (Optional)"}
                   </label>
                   <textarea
-                    rows={5}
+                    rows={4}
                     value={answerText}
                     onChange={(e) => setAnswerText(e.target.value)}
                     placeholder={
@@ -759,24 +979,6 @@ export default function LiveAnnotationModal({
                     className="w-full px-3 py-2 rounded-xl glass-input text-xs"
                   />
                 </div>
-              )}
-
-              {mode === "lesson" && (
-                <button
-                  type="button"
-                  disabled={saving}
-                  onClick={handleFinish}
-                  className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg disabled:opacity-50"
-                >
-                  <Save className="h-4 w-4" />
-                  {saving
-                    ? lang === "ar"
-                      ? "جاري الحفظ..."
-                      : "Saving..."
-                    : lang === "ar"
-                    ? "حفظ ملاحظاتي الخاصة"
-                    : "Save My Private Annotations"}
-                </button>
               )}
 
               {mode === "correct" && (
