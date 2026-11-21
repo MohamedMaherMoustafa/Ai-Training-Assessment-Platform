@@ -157,6 +157,8 @@ export default function DirectChatModule({
 
     const unsub = subscribeDirectChatMessages(channelId, (incomingMessages) => {
       setMessages(incomingMessages);
+      // If currently actively chatting in this channel, mark incoming messages as read
+      markDirectChatRead(channelId, mode);
       // Auto-scroll to bottom on new messages
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

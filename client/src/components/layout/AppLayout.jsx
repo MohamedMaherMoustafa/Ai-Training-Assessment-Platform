@@ -30,6 +30,7 @@ import {
   markAllNotificationsRead,
   markNotificationRead,
   subscribeNotifications,
+  subscribeUserDirectChats,
 } from "../../services/platformService";
 
 export default function AppLayout({ navItems, children }) {
@@ -43,6 +44,7 @@ export default function AppLayout({ navItems, children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  const [unreadChatCount, setUnreadChatCount] = useState(0);
   const [soundOn, setSoundOn] = useState(isSoundEnabled());
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const notifBoxRef = useRef(null);
@@ -61,6 +63,23 @@ export default function AppLayout({ navItems, children }) {
     });
     return () => unsub && unsub();
   }, [user?.uid]);
+
+  // Real-time unread Direct Chat counter across all conversations
+  useEffect(() => {
+    if (!user?.uid) return;
+    const unsub = subscribeUserDirectChats(user.uid, (chatList) => {
+      const isInstructor = user.role === "instructor";
+      const totalUnread = (chatList || []).reduce((sum, item) => {
+        const meta = item.metadata || {};
+        const unread = isInstructor
+          ? Number(meta.unreadByInstructor || 0)
+          : Number(meta.unreadByStudent || 0);
+        return sum + unread;
+      }, 0);
+      setUnreadChatCount(totalUnread);
+    });
+    return () => unsub && unsub();
+  }, [user?.uid, user?.role]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -179,6 +198,7 @@ export default function AppLayout({ navItems, children }) {
           <nav className="flex-1 px-3 py-3.5 space-y-1 overflow-y-auto">
             {navItems.map((item) => {
               const Icon = item.icon;
+              const isChat = item.to.endsWith("/chat") || item.isChat;
               return (
                 <NavLink
                   key={item.to}
@@ -206,6 +226,30 @@ export default function AppLayout({ navItems, children }) {
                         }`}
                       />
                       <span className="truncate">{item.label}</span>
+
+                      {/* Direct Chat Live Unread Counter Badge */}
+                      {isChat && unreadChatCount > 0 && (
+                        <span className="ms-auto flex items-center gap-1.5 shrink-0">
+                          <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500" />
+                          </span>
+                          <span
+                            className={`min-w-[20px] h-5 px-1.5 rounded-full text-[10.5px] font-black flex items-center justify-center shadow-md transition-all ${
+                              isActive
+                                ? "bg-white text-indigo-700 shadow-white/30"
+                                : "bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-rose-500/30 animate-pulse"
+                            }`}
+                            title={
+                              lang === "ar"
+                                ? `${unreadChatCount} رسائل جديدة غير مقروءة`
+                                : `${unreadChatCount} unread direct messages`
+                            }
+                          >
+                            {unreadChatCount > 99 ? "99+" : unreadChatCount}
+                          </span>
+                        </span>
+                      )}
                     </>
                   )}
                 </NavLink>
@@ -263,9 +307,15 @@ export default function AppLayout({ navItems, children }) {
             <button
               onClick={() => setSidebarOpen(true)}
               aria-label="Open menu"
-              className="lg:hidden h-8 w-8 sm:h-9 sm:w-9 rounded-full border border-slate-200/90 dark:border-slate-700 bg-slate-50/90 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shrink-0 cursor-pointer shadow-xs"
+              className="lg:hidden relative h-8 w-8 sm:h-9 sm:w-9 rounded-full border border-slate-200/90 dark:border-slate-700 bg-slate-50/90 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shrink-0 cursor-pointer shadow-xs"
             >
               <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
+              {unreadChatCount > 0 && (
+                <span className="absolute -top-1 -end-1 flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500 ring-2 ring-white dark:ring-slate-900" />
+                </span>
+              )}
             </button>
             <div className="rounded-full border border-slate-200/90 dark:border-slate-700 bg-slate-50/90 dark:bg-slate-800 px-2 sm:px-3 py-1 flex items-center gap-2 text-xs font-black text-slate-900 dark:text-slate-100 shadow-xs shrink-0 max-w-[150px] sm:max-w-none">
               <img src={logoSrc} alt="Athar Educational Platform" className="h-7 w-7 sm:h-8 sm:w-8 object-contain shrink-0 drop-shadow-sm filter hover:scale-105 transition-transform" />
