@@ -33,6 +33,7 @@ import { useLang } from "../../context/LangContext";
 import { usePopup } from "../../context/PopupContext";
 import { useUploadProgress } from "../../context/UploadProgressContext";
 import LiveAnnotationModal from "./LiveAnnotationModal";
+import UploadSolvedAssignmentModal from "./UploadSolvedAssignmentModal";
 
 const MARK_PRESETS = [5, 10, 15, 20, 25, 50];
 
@@ -91,6 +92,7 @@ export default function AssignmentsModule({
     submission: null,
     modalMode: "student",
   });
+  const [uploadModalAssignment, setUploadModalAssignment] = useState(null);
 
   const refreshData = async () => {
     const [allAssn, allCourses] = await Promise.all([listAssignments(), listCourses()]);
@@ -961,24 +963,43 @@ export default function AssignmentsModule({
                         )}
                       </div>
                     ) : (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setModalState({
-                            open: true,
-                            assignment: a,
-                            submission: null,
-                            modalMode: "student",
-                          })
-                        }
-                        className="glass-btn-primary px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 ms-auto shadow-md shadow-indigo-500/20 active:scale-95 cursor-pointer"
-                      >
-                        <FileText className="h-3.5 w-3.5" />
-                        <Sparkles className="h-3.5 w-3.5 text-amber-300" />
-                        {lang === "ar"
-                          ? "حل ورقة الواجب PDF"
-                          : "Open & Answer Assignment PDF"}
-                      </button>
+                      <div className="flex flex-wrap items-center gap-2 ms-auto">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setModalState({
+                              open: true,
+                              assignment: a,
+                              submission: null,
+                              modalMode: "student",
+                            })
+                          }
+                          className="glass-btn-secondary px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer border border-indigo-400/30 text-indigo-700 dark:text-cyan-300 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/40"
+                          title={
+                            lang === "ar"
+                              ? "حل وتأشير تفاعلي بالقلم والأدوات على ورقة الواجب (Live Annotation)"
+                              : "Solve with digital pen & annotation tools on worksheet"
+                          }
+                        >
+                          <PenTool className="h-3.5 w-3.5 text-indigo-500 dark:text-cyan-400" />
+                          <span>{lang === "ar" ? "حل بالتأشير (Annotation)" : "Solve via Annotation"}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setUploadModalAssignment(a)}
+                          className="glass-btn-primary px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md shadow-indigo-500/20 active:scale-95 cursor-pointer bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                          title={
+                            lang === "ar"
+                              ? "رفع الحل كملف PDF محلول أو صورة ورقة الإجابة لتصحيحها ذكياً"
+                              : "Upload completed PDF or image solution for AI grading"
+                          }
+                        >
+                          <Upload className="h-3.5 w-3.5 text-white" />
+                          <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+                          <span>{lang === "ar" ? "رفع الحل (Upload Solved)" : "Upload Solved File"}</span>
+                        </button>
+                      </div>
                     )}
                   </div>
                 )}
@@ -1053,6 +1074,16 @@ export default function AssignmentsModule({
             );
             await refreshData();
           }}
+        />
+      )}
+
+      {/* Upload Solved Assignment Modal */}
+      {uploadModalAssignment && (
+        <UploadSolvedAssignmentModal
+          open={Boolean(uploadModalAssignment)}
+          onClose={() => setUploadModalAssignment(null)}
+          assignment={uploadModalAssignment}
+          onSuccess={refreshData}
         />
       )}
     </div>

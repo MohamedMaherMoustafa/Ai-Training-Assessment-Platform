@@ -5,8 +5,8 @@ const router = express.Router();
 
 const OLLAMA_BASE = process.env.OLLAMA_BASE_URL || "http://localhost:11434";
 const PREFERRED_MODEL = process.env.OLLAMA_MODEL || "academy-tutor";
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash";
+const getGeminiApiKey = () => process.env.GEMINI_API_KEY || "";
+const getGeminiModel = () => process.env.GEMINI_MODEL || "gemini-flash-lite-latest";
 
 async function resolveAvailableModel() {
   try {
@@ -110,7 +110,8 @@ function gradeSingleQuestionSemantic(q, lang = "en") {
  * Grade full question sheet using Google Gemini API if configured
  */
 async function gradeWithGemini(questions, lang = "en") {
-  if (!GEMINI_API_KEY) return null;
+  const apiKey = getGeminiApiKey();
+  if (!apiKey) return null;
 
   const questionsPayload = questions.map((q, idx) => ({
     questionIndex: idx + 1,
@@ -140,26 +141,45 @@ async function gradeWithGemini(questions, lang = "en") {
     `Questions & Student Answers to grade:\n${JSON.stringify(questionsPayload, null, 2)}`,
   ].join("\n\n");
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
-  const res = await axios.post(
-    url,
-    {
-      contents: [{ role: "user", parts: [{ text: systemPrompt }] }],
-      generationConfig: {
-        responseMimeType: "application/json",
-        temperature: 0.3,
-      },
-    },
-    {
-      headers: { "Content-Type": "application/json" },
-      timeout: 60000,
-    }
+  const candidateModels = [getGeminiModel(), "gemini-3.5-flash-lite", "gemini-flash-latest"].filter(
+    (m, idx, arr) => m && arr.indexOf(m) === idx
   );
 
-  const rawJson = res.data?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!rawJson) return null;
-  const parsed = JSON.parse(rawJson);
-  return parsed;
+  const payload = {
+    contents: [{ role: "user", parts: [{ text: systemPrompt }] }],
+    generationConfig: {
+      responseMimeType: "application/json",
+      temperature: 0.3,
+    },
+  };
+
+  for (const model of candidateModels) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    try {
+      if (typeof fetch === "function") {
+        const fetchRes = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+          signal: AbortSignal.timeout(30000),
+        });
+        const data = await fetchRes.json();
+        const rawJson = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (rawJson) return JSON.parse(rawJson);
+      } else {
+        const res = await axios.post(url, payload, {
+          headers: { "Content-Type": "application/json" },
+          timeout: 30000,
+        });
+        const rawJson = res.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (rawJson) return JSON.parse(rawJson);
+      }
+    } catch (err) {
+      console.warn(`Gemini (${model}) gradeWithGemini attempt failed:`, err.message);
+    }
+  }
+
+  return null;
 }
 
 /**
@@ -221,13 +241,18 @@ async function gradePdfWithGemini({
   pdfText,
   instructions,
   studentAnswerText,
+  studentPages = [],
   maxMarks,
   lang,
 }) {
-  if (!GEMINI_API_KEY) return null;
+  const apiKey = getGeminiApiKey();
+  if (!apiKey) return null;
 
   const ans = String(studentAnswerText || "").trim();
-  if (!ans || ans.length < 5) {
+  const hasPages = Array.isArray(studentPages) && studentPages.length > 0;
+
+  // STRICT CHECK: If student answered nothing and attached no pages, award 0 points!
+  if (!ans && !hasPages) {
     return {
       score: 0,
       summary:
@@ -250,19 +275,39 @@ async function gradePdfWithGemini({
     };
   }
 
+  const parts = [];
+
+  // If student submitted annotated / solved page images, include them as visual inputs for Gemini Vision!
+  if (hasPages) {
+    for (const page of studentPages.slice(0, 5)) {
+      if (typeof page === "string" && page.startsWith("data:")) {
+        const cleanBase64 = page.replace(/^data:[^;]+;base64,/, "");
+        const mimeType = page.startsWith("data:image/png") ? "image/png" : "image/jpeg";
+        parts.push({
+          inlineData: {
+            mimeType,
+            data: cleanBase64,
+          },
+        });
+      }
+    }
+  }
+
   const systemPrompt = [
     `You are an expert academic evaluator and grading assistant for an online educational platform.`,
     `Your task is to grade a student's submission on a PDF assignment worksheet.`,
+    `The student may solve the assignment either via digital pen/text annotation directly on the worksheet pages, or by uploading their solved document/handwritten solution.`,
     `Assignment Title: "${assignmentTitle || "Assignment Worksheet"}"`,
     `Worksheet Content & Questions:`,
     pdfText ? pdfText.slice(0, 4000) : "General assignment questions",
     `Instructor Instructions / Expected Model Answer:`,
     instructions || "Evaluate based on correctness, depth of understanding, and completeness.",
     `Student Written Notes / Answers:`,
-    ans,
+    ans || (hasPages ? "(Student submitted solved worksheet pages / images above)" : "No written text"),
     `Total Points Possible: ${maxMarks}`,
     `Language: ${lang === "ar" ? "Arabic" : "English"}`,
     `CRITICAL INSTRUCTIONS:`,
+    `- Examine both the visual solved pages (handwriting, circled choices, formulas, drawings) AND any written answer notes.`,
     `- Grade strictly and fairly based on actual correctness. If answers are missing or incomplete, deduct points proportionally.`,
     `- For any mistakes, deductions, or missing concepts, produce "detailedMistakes": an array of items where each has:`,
     `    * "topicOrQuestion": name or number of the question/topic,`,
@@ -290,25 +335,47 @@ async function gradePdfWithGemini({
     `}`,
   ].join("\n\n");
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
-  const res = await axios.post(
-    url,
-    {
-      contents: [{ role: "user", parts: [{ text: systemPrompt }] }],
-      generationConfig: {
-        responseMimeType: "application/json",
-        temperature: 0.3,
-      },
-    },
-    {
-      headers: { "Content-Type": "application/json" },
-      timeout: 60000,
-    }
+  parts.push({ text: systemPrompt });
+
+  const candidateModels = [getGeminiModel(), "gemini-3.5-flash-lite", "gemini-flash-latest"].filter(
+    (m, idx, arr) => m && arr.indexOf(m) === idx
   );
 
-  const rawJson = res.data?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!rawJson) return null;
-  return JSON.parse(rawJson);
+  const payload = {
+    contents: [{ role: "user", parts }],
+    generationConfig: {
+      responseMimeType: "application/json",
+      temperature: 0.3,
+    },
+  };
+
+  for (const model of candidateModels) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    try {
+      if (typeof fetch === "function") {
+        const fetchRes = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+          signal: AbortSignal.timeout(30000),
+        });
+        const data = await fetchRes.json();
+        const rawJson = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (rawJson) return JSON.parse(rawJson);
+      } else {
+        const res = await axios.post(url, payload, {
+          headers: { "Content-Type": "application/json" },
+          timeout: 30000,
+        });
+        const rawJson = res.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (rawJson) return JSON.parse(rawJson);
+      }
+    } catch (err) {
+      console.warn(`Gemini (${model}) gradePdfWithGemini attempt failed:`, err.message);
+    }
+  }
+
+  return null;
 }
 
 function gradePdfSemanticFallback({
@@ -579,6 +646,7 @@ router.post("/grade-pdf", async (req, res) => {
     pdfText = "",
     instructions = "",
     studentAnswerText = "",
+    studentPages = [],
     maxMarks = 10,
     lang = "en",
   } = req.body;
@@ -592,6 +660,7 @@ router.post("/grade-pdf", async (req, res) => {
       pdfText,
       instructions,
       studentAnswerText,
+      studentPages: Array.isArray(studentPages) ? studentPages : [],
       maxMarks: numMax,
       lang,
     });

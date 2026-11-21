@@ -147,6 +147,7 @@ export async function gradePdfAssignmentWithAI({
   pdfText = "",
   instructions = "",
   studentAnswerText = "",
+  studentPages = [],
   maxMarks = 10,
   lang = "en",
 }) {
@@ -161,10 +162,11 @@ export async function gradePdfAssignmentWithAI({
         pdfText,
         instructions,
         studentAnswerText,
+        studentPages: Array.isArray(studentPages) ? studentPages.slice(0, 5) : [],
         maxMarks: numMax,
         lang,
       },
-      { timeout: 15000 }
+      { timeout: 30000 }
     );
     if (res.data?.success && res.data.score !== undefined) {
       return res.data;

@@ -608,6 +608,7 @@ export default function LiveAnnotationModal({
                 pdfText: assignment?.extractedText || "",
                 instructions: assignment?.instructions || "",
                 studentAnswerText: combinedStudentAnswer,
+                studentPages: annotatedPages,
                 maxMarks,
                 lang,
               });
