@@ -21,13 +21,21 @@ The frontend application for **Athar Educational Platform (منصة أثر ال�
 - **Admin**: Central platform oversight, instructor account management, platform metrics, and system broadcasts.
 
 ### 3. Smart Multimodal AI Chatbot (`src/components/common/PlatformChatbotWidget.jsx`)
-- Interactive walking robot mascot (RTL/LTR patrol-aware).
-- Text, audio/voice input, and image/PDF attachment support.
+- Interactive walking robot mascot (RTL/LTR patrol-aware) and website intro splash screen (`WalkingRobotIntro.jsx`).
+- Multimodal intelligence: high-speed text analysis and instant photo/PDF document parsing.
+- Lesson Summarization browser: lists all available course lessons with quick-action chips for instant AI summary generation.
 - Course lesson summarization, student grade lookup, and educational Q&A.
 
-### 4. Interactive Live PDF Annotation Canvas (`src/features/assignments/LiveAnnotationModal.jsx`)
+### 4. Direct Chat Real-Time Attention Badges (`src/components/layout/AppLayout.jsx`)
+- Real-time unread message counter badge on the sidebar Direct Chat navigation link.
+- Mobile hamburger menu notification indicator for unread direct messages.
+- Instant real-time unread clear when reading or actively chatting in a conversation.
+
+### 5. Interactive Live PDF Annotation Canvas & Solved Uploads
 - Multi-page PDF rendering via Mozilla PDF.js.
-- Dual-layer ink pen, highlighter, inline text notes, and eraser.
+- Dual-layer ink pen, highlighter, inline text notes, and eraser (`LiveAnnotationModal.jsx`).
+- Solved PDF / image upload modal (`UploadSolvedAssignmentModal.jsx`) with multi-page preview.
+- AI auto-grading with blank worksheet detection (0 pts), proportional scoring, diagnostic feedback, and teacher model answer keys.
 - Student private study notes and instructor homework grading with score presets.
 
 ---

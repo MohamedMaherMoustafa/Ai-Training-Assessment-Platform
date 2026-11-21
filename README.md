@@ -42,16 +42,38 @@ The platform provides end-to-end support for coursework, lesson materials, digit
 
 ---
 
-### 2. 📝 Interactive Live PDF Annotation Canvas
+### 2. 📝 Assignments Studio & Dual Solving Mode (Live Annotation + Upload Solved PDF/Image)
 - **Multi-page PDF Engine**: Renders high-resolution PDF pages directly onto an HTML5 canvas.
-- **Drawing Tools**: Smooth ink pen, translucent highlighter, inline text notes, and eraser.
-- **Color Palette**: Preset colors with custom stroke widths and smooth bezier interpolation.
-- **Private Student Study**: Private ink annotations and personal study notes for every lesson PDF.
+- **Dual Solving Options**:
+  - **Live Annotation Mode**: Smooth ink pen, translucent highlighter, inline text notes, and eraser on digital PDF worksheets with deadline lock (`Unavailable — Due date has passed`).
+  - **Upload Solved File Mode (`UploadSolvedAssignmentModal.jsx`)**: Students can upload their pre-solved PDF or scan/photo of handwritten sheets with instant page preview and verification.
+- **Automated AI Grading & Diagnostic Breakdown (`/api/assignment/grade`)**:
+  - Extracts and analyzes answers using Google Gemini multimodal vision.
+  - **Strict Blank Detection**: Blank/unanswered worksheets are accurately awarded 0 points with a clear "What Went Wrong" diagnostic report.
+  - **Proportional Scoring**: Evaluates completed work against question weights, generating detailed "What Went Right" and "What Went Wrong" reports.
+  - **Teacher Model Answer Key**: Provides instructors with a comprehensive summary breakdown, model answers, and exact reasons why students lost points.
 - **Instructor Grading Studio**: Dual-layer canvas viewing where teachers inspect student submissions, draw corrections, award points (0–max), write feedback, and notify students instantly.
 
 ---
 
-### 3. ⏱️ AI Quizzes & Advanced Anti-Cheating Proctoring
+### 3. 💬 Real-Time Direct Chat & Live Attention Badges
+- **1-on-1 Student-Instructor Chat**: Real-time direct messaging channels powered by Firebase RTDB (`directChats/`).
+- **Sidebar Unread Counter Badge**: Dynamically calculates unread messages based on user role (`unreadByInstructor` for instructors, `unreadByStudent` for students) and displays a vibrant gradient badge with a pulsing ping indicator beside the Direct Chat module.
+- **Mobile Menu Notification Indicator**: Floating red attention dot on the mobile hamburger menu button alerting users to unread messages even when the sidebar is collapsed.
+- **Instant Auto-Clear**: Automatically resets unread counters in real time when conversations are opened or while actively chatting.
+
+---
+
+### 4. 🤖 Platform AI Chatbot Assistant & Splash Intro
+- **Walking Mascot Splash Intro (`WalkingRobotIntro.jsx`)**: An animated robot walks across the center from left to right on website entry, dynamically writing **"ATHAR AI"** across the screen in futuristic glowing typography.
+- **Multimodal Intelligence**: Accepts text queries and instant file attachments (photos, diagrams, and PDF documents) with sub-3s response times powered by native global fetch to Gemini API.
+- **Course & Lesson Summarization Browser**: Clicking the **"Summarize a lesson"** action lists all available lessons in the course with interactive chips, allowing the user to select any lesson for an immediate AI summary.
+- **Course & Student Aware**: Can answer conceptual questions, look up student marks and rankings, and explain platform mechanics.
+- **Safe Guardrails**: Scoped strictly to educational topics without dumping raw internal data.
+
+---
+
+### 5. ⏱️ AI Quizzes & Advanced Anti-Cheating Proctoring
 - **Platform AI Quiz Generation**: Automatically generates context-aware multiple-choice questions (MCQs) directly from lesson contents in Arabic or English.
 - **Interactive Timer**: Configurable duration in minutes with a real-time countdown clock and auto-submit on time expiry.
 - **Pre-Quiz Webcam Gate**: Students cannot initiate an assessment without enabling their camera. A pre-quiz verification modal previews the video feed and confirms active proctoring before releasing questions.

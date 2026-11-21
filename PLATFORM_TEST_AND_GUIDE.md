@@ -20,10 +20,16 @@ A bilingual (English / Arabic RTL) **Aurora Prism Liquid-Glass** web platform ba
 - **Module (`client/src/features/lessons/LessonLibraryModule.jsx`):** Instructors upload PDF lessons (`renderPdfFileToPages.js` + `extractTextFromPdfFile.js`) stored in Firebase RTDB (`lessonMaterials/`).
 - **Private Student Notes:** Students open lesson PDFs in `LiveAnnotationModal.jsx` (`mode="lesson"`), draw/highlight/type/erase across pages, and save personal ink layers & study notes strictly to their own student record (`lessonMaterials/{id}/annotations/{studentId}`).
 
-### 4. PDF Assignments, Live Annotation, Teacher Correction & Due-Date Lock
+### 4. PDF Assignments, Dual Solving Mode, Live Annotation & Automated AI Grading
 - **Instructor Creation (`client/src/features/assignments/AssignmentsModule.jsx`):** Upload PDF worksheets, set total points (`maxMarks`), set future Due Date (`min={today}`) and Due Time, edit existing assignments (`updateAssignment`), or delete assignments with popup confirmation (`deleteAssignment`).
-- **Student Live Annotation (`LiveAnnotationModal.jsx`):** Freehand Pen, Highlighter, Text Tool, Eraser, Undo/Redo, Clear Page, multi-page navigation, and optional written note. Automatically locks and shows `Unavailable — Due date has passed` once the deadline expires.
-- **Instructor Correction:** Teachers click **Review & Correct PDF** to draw red/green correction marks directly on student submissions, award points (`0..maxMarks`), add feedback, and notify the student.
+- **Student Dual Solving Modes:**
+  - **Live Annotation Mode (`LiveAnnotationModal.jsx`):** Freehand Pen, Highlighter, Text Tool, Eraser, Undo/Redo, Clear Page, multi-page navigation, and optional written note. Automatically locks and shows `Unavailable — Due date has passed` once the deadline expires.
+  - **Upload Solved File Mode (`UploadSolvedAssignmentModal.jsx`):** Students can upload pre-solved PDF documents or clear photos/scans of their solved assignment pages with instant preview, canvas validation, and review before submission.
+- **Automated AI Grading Engine (`llm-proxy/routes/assignment.js` → `/api/assignment/grade`):**
+  - **Zero-Point Blank Detection**: Worksheets submitted blank or unanswered strictly receive 0 points along with a targeted "What Went Wrong" diagnostic report.
+  - **Proportional Scoring**: Submissions with answers receive proportional marks matching demonstrated accuracy, accompanied by detailed "What Went Right" and "What Went Wrong" feedback.
+  - **Teacher Model Answer Key**: Automatically provides instructors with model answers, step-by-step solutions, and specific reasons why the student lost points.
+- **Instructor Correction Studio:** Teachers can also click **Review & Correct PDF** to draw red/green correction marks directly on student submissions, override or award points (`0..maxMarks`), add feedback, and notify the student.
 
 ### 5. Timed Multi-Answer Quizzes, Camera Proctoring & Anti-Cheating
 - **Quiz Builder & Player (`client/src/features/quiz/QuizzesModule.jsx`):** Minute-based timer, single/multiple correct answers, AI-assisted drafting, single-entry lock with instructor retake approvals, and integer points scoring (`1, 2, 3... pts`).
@@ -43,13 +49,23 @@ A bilingual (English / Arabic RTL) **Aurora Prism Liquid-Glass** web platform ba
 - **Progress Tracker (`client/src/features/instructor/StudentProgressTrackerModule.jsx`):** Instructors choose a student and From/To interval (`To Date` cannot precede `From Date`) to view all quiz marks, assignment submissions, retake logs, Recharts points bar chart, and course breakdown.
 - **Report Extraction (`client/src/utils/progressReportGenerator.js`):** Generates branded multi-page PDF reports (with platform logo, `From ... To ...` date range, KPIs, course breakdown, chronological activity logs, and instructor signature) and CSV exports.
 
-### 8. Live Walking Robot Smart Platform Chatbot
-- **UI Mascot (`client/src/components/common/PlatformChatbotWidget.jsx`):** Animated walking SVG robot launcher (RTL/LTR patrol-aware) that opens a Liquid-Glass popup chat.
-- **Trained Intent & Grounded RAG Engine (`client/src/utils/chatbotCore.js`, `platformChatbotEngine.js`, `llm-proxy/routes/chat.js`, `llm-training/Modelfile`):**
+### 8. Live Walking Robot Smart Platform Chatbot & Lesson Summarizer
+- **UI Mascot & Ergonomics (`client/src/components/common/PlatformChatbotWidget.jsx`):** Animated walking SVG robot launcher positioned ergonomically lower on the screen that opens a Liquid-Glass popup chat.
+- **Lesson Summarization Browser**: Clicking the "Summarize a lesson" button lists all available course lessons and PDF materials with interactive chips, allowing the user to pick any lesson for an instant, high-quality AI summary.
+- **Sub-3s Multimodal Attachment Analysis**: Direct native fetch connection from backend to Google Gemini 2.5 Flash, providing step-by-step visual explanations of attached photos and PDFs in under 3 seconds.
+- **Trained Intent & Grounded RAG Engine (`client/src/utils/chatbotCore.js`, `platformChatbotEngine.js`, `llm-proxy/routes/chat.js`):**
   - Directly generates & publishes quizzes on named lessons for instructors/admins.
   - Answers exact student metrics (points, quizzes, assignments), course summaries, Top-5 scoreboard standings, assignments, and quiz retake queries.
   - Summarizes course lessons and Lesson PDFs or answers conceptual questions from lesson text in English and Arabic.
   - Never dumps raw database context strings on unrecognized prompts.
+
+### 9. Real-Time Direct Chat Attention Badges
+- **Live Sidebar Counters (`client/src/components/layout/AppLayout.jsx`):** Subscribes in real time to `directChats/` metadata and displays unread message counters with a pulsing ping badge beside the Direct Chat module for both students and instructors.
+- **Mobile Menu Notification Dot**: Alerts mobile users to new direct messages on the collapsed menu icon.
+- **Instant Clear**: Automatically marks messages as read when opening a conversation or while actively chatting (`client/src/features/chat/DirectChatModule.jsx`).
+
+### 10. Walking Robot Mascot Intro Splash Screen
+- **Intro Experience (`client/src/components/common/WalkingRobotIntro.jsx`):** On initial website entry, an animated mascot walks across the center from left to right while dynamically writing the glowing neon brand name **"ATHAR AI"** (منصة أثر التعليمية) across the background.
 
 ---
 
@@ -59,8 +75,8 @@ Executed from project root (`d:\DATA-1\STA\Grade 3\AI\Ai Training & Assessment P
 
 | Check | Command | Result |
 | --- | --- | --- |
-| Chatbot & Proxy Integration Suite | `npm test` (`node scripts/test-platform.mjs`) | **13 / 13 Passed** (`exit code 0`) |
-| Client Production Build | `npm run build` | **Passed** (`2810 modules transformed`, `client/dist` built) |
+| Chatbot, Proctoring & AI Grading Suite | `npm test` (`node scripts/test-platform.mjs`) | **16 / 16 Passed** (`exit code 0`) |
+| Client Production Build | `npm run build` | **Passed** (`client/dist` built with zero errors) |
 | Linter Check | `node ./client/node_modules/oxlint/bin/oxlint ./client/src` | **0 Errors** (`0` warnings in new/updated engine files) |
 
 ### Test Cases Verified (`scripts/test-platform.mjs`)
@@ -70,13 +86,16 @@ Executed from project root (`d:\DATA-1\STA\Grade 3\AI\Ai Training & Assessment P
 4. Student lookup by name returning exact Quiz pts + Assignment pts + Total pts
 5. Course details query (instructor, enrolled count, text & PDF lessons, quizzes, assignments)
 6. Live Top-5 scoreboard query
-7. Lesson summarization in English & Arabic
+7. Lesson summarization in English & Arabic (generic prompt displays all lesson chips; direct named lesson summarizes immediately)
 8. Conceptual Q&A extracted from lesson content
 9. Platform workflow guidance (Live Annotation & Quiz Screenshot Privacy)
 10. Out-of-scope query handled cleanly without dumping raw dataset strings
 11. Backend `/api/chat` grounded fallback unit check
 12. Live HTTP proxy verification (`/health`, `/api/chat`, `/api/quiz/generate`, `/api/feedback` returning HTTP `200`)
 13. Critical platform modules & built bundle file existence check
+14. PDF Blank Submission strictly returns 0 Pts & What-Went-Wrong Report
+15. PDF Answered Submission returns proportional score & diagnostic What-Went-Wrong / Right feedback
+16. AI Summary Breakdown for Teacher contains model answers & why student was wrong
 
 ---
 
