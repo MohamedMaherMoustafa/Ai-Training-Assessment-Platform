@@ -10,12 +10,16 @@ import {
   Trophy,
   TrendingUp,
   FileText,
+  Video,
+  MessageSquare,
 } from "lucide-react";
 import AppLayout from "../../components/layout/AppLayout";
 import InstructorAnalyticsDashboard from "./InstructorAnalyticsDashboard";
 import StudentProgressTrackerModule from "./StudentProgressTrackerModule";
 import CoursesModule from "../courses/CoursesModule";
 import LessonLibraryModule from "../lessons/LessonLibraryModule";
+import CourseSessionsModule from "../sessions/CourseSessionsModule";
+import DirectChatModule from "../chat/DirectChatModule";
 import StudentsModule from "../admin/StudentsModule";
 import AssignmentsModule from "../assignments/AssignmentsModule";
 import QuizzesModule from "../quiz/QuizzesModule";
@@ -37,6 +41,16 @@ export default function InstructorDashboard() {
       to: "/instructor/lesson-pdfs",
       label: lang === "ar" ? "ملفات الدروس PDF" : "Lesson PDFs",
       icon: FileText,
+    },
+    {
+      to: "/instructor/sessions",
+      label: lang === "ar" ? "جلسات المقررات" : "Course Sessions",
+      icon: Video,
+    },
+    {
+      to: "/instructor/chat",
+      label: lang === "ar" ? "المحادثات المباشرة" : "Direct Chat",
+      icon: MessageSquare,
     },
     {
       to: "/instructor/assignments",
@@ -72,6 +86,8 @@ export default function InstructorDashboard() {
         />
         <Route path="courses" element={<CoursesModule mode="instructor" />} />
         <Route path="lesson-pdfs" element={<LessonLibraryModule mode="instructor" />} />
+        <Route path="sessions" element={<CourseSessionsModule mode="instructor" />} />
+        <Route path="chat" element={<DirectChatModule mode="instructor" />} />
         <Route path="assignments" element={<AssignmentsModule mode="instructor" />} />
         <Route path="quizzes" element={<QuizzesModule mode="instructor" />} />
         <Route path="scoreboard" element={<ScoreboardModule mode="instructor" />} />

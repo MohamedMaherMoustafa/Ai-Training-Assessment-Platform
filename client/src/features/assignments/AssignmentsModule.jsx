@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import {
+  AlertTriangle,
   Award,
+  Bot,
   CheckCircle2,
   ClipboardList,
   Clock,
@@ -12,6 +14,7 @@ import {
   Lock,
   PenTool,
   Plus,
+  Sparkles,
   Trash2,
   Upload,
 } from "lucide-react";
@@ -76,6 +79,7 @@ export default function AssignmentsModule({
     maxMarks: 10,
     pdfName: "",
     pdfPages: [],
+    extractedText: "",
   });
   const [parsingPdf, setParsingPdf] = useState(false);
   const [gradeInputs, setGradeInputs] = useState({});
@@ -192,13 +196,12 @@ export default function AssignmentsModule({
         title: prev.title || file.name.replace(/\.pdf$/i, ""),
         pdfName: rendered.pdfName,
         pdfPages: rendered.pages,
+        extractedText: rendered.extractedText || "",
       }));
       toast.success(
         lang === "ar"
-          ? `تم تجهيز ملف PDF (${rendered.renderedCount} صفحات)`
-          : `PDF uploaded & prepared (${rendered.renderedCount} page${
-              rendered.renderedCount > 1 ? "s" : ""
-            })`
+          ? `تم تجهيز ملف PDF (${rendered.renderedCount} صفحات) وجاهز للتصحيح الذكي!`
+          : `PDF uploaded & prepared (${rendered.renderedCount} pages) — Ready for AI Auto-Grading!`
       );
     } catch (err) {
       console.error(err);
@@ -222,6 +225,7 @@ export default function AssignmentsModule({
       maxMarks: 10,
       pdfName: "",
       pdfPages: [],
+      extractedText: "",
     });
   };
 
@@ -236,6 +240,7 @@ export default function AssignmentsModule({
       maxMarks: Number(a.maxMarks) || 10,
       pdfName: a.pdfName || "",
       pdfPages: Array.isArray(a.pdfPages) ? a.pdfPages : [],
+      extractedText: a.extractedText || "",
     });
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -265,6 +270,7 @@ export default function AssignmentsModule({
   const handleCreate = async (e) => {
     e.preventDefault();
     if (!form.courseId || !form.title.trim()) return;
+
     if (form.pdfPages.length === 0 && !form.instructions.trim()) {
       toast.error(
         lang === "ar"
@@ -292,22 +298,31 @@ export default function AssignmentsModule({
         maxMarks: Number(form.maxMarks) || 10,
         pdfName: form.pdfName || "",
         pdfPages: Array.isArray(form.pdfPages) ? form.pdfPages : [],
+        extractedText: form.extractedText || "",
       });
       toast.success(
         lang === "ar" ? "تم تحديث الواجب بنجاح!" : "Assignment updated!"
       );
     } else {
       await createAssignment({
-        ...form,
+        courseId: form.courseId,
+        title: form.title.trim(),
+        instructions: form.instructions || "",
+        dueDate: form.dueDate,
+        dueTime: form.dueTime || "23:59",
         maxMarks: Number(form.maxMarks) || 10,
+        pdfName: form.pdfName || "",
+        pdfPages: Array.isArray(form.pdfPages) ? form.pdfPages : [],
+        extractedText: form.extractedText || "",
         instructorId: user.uid,
       });
       toast.success(
         lang === "ar"
-          ? "تم رفع الواجب وإرساله للطلاب بنجاح!"
-          : "Assignment uploaded & published to students!"
+          ? "تم رفع ونشر واجب PDF للطلاب بنجاح (مدعوم بالتصحيح الذكي الآلي)!"
+          : "PDF Assignment uploaded & published to students (AI Auto-Grading enabled)!"
       );
     }
+
     resetForm();
     setShowForm(false);
     await refreshData();
@@ -351,11 +366,11 @@ export default function AssignmentsModule({
             <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
               {mode === "instructor"
                 ? lang === "ar"
-                  ? "ارفع ملف الواجب PDF، حدد الدرجة الكاملة وتاريخ الإغلاق، وصحح حلول الطلاب مباشرة."
-                  : "Upload PDF worksheets, set total marks & due dates, and correct live-annotated submissions."
+                  ? "ارفع ملف الواجب PDF؛ يجيب الطلاب داخل الـ PDF نفسه وتصلك أوراقهم مصححة آلياً بالذكاء الاصطناعي مع إمكانية التعديل اليدوي للدرجات."
+                  : "Upload assignment PDF; students answer inside the PDF and submissions arrive to you AI auto-corrected with full manual grade editing."
                 : lang === "ar"
-                ? "افتح الواجب وأجب بالكتابة الحرة المباشرة بالقلم والممحاة قبل انتهاء موعد التسليم."
-                : "Open assignments and answer directly inside the Live Annotation workspace before the due date."}
+                ? "افتح ورقة الواجب PDF وأجب بالكتابة الحرة والقلم والنص مباشرة داخل الملف؛ يتم تصحيحها آلياً بالذكاء الاصطناعي فور التسليم."
+                : "Open the assignment PDF and answer directly inside the document using pen and text tools; auto-corrected by AI on submit."}
             </p>
           </div>
         </div>
@@ -371,7 +386,7 @@ export default function AssignmentsModule({
             className="glass-btn-primary flex items-center gap-2 px-4 py-2 rounded-xl text-sm"
           >
             <Plus className="h-4 w-4" />
-            {lang === "ar" ? "إنشاء ورفع واجب PDF" : "Add PDF Assignment"}
+            {lang === "ar" ? "رفع واجب PDF جديد" : "Upload PDF Assignment"}
           </button>
         )}
       </div>
@@ -387,16 +402,16 @@ export default function AssignmentsModule({
               <h2 className="text-base font-bold text-slate-900 dark:text-white">
                 {editingId
                   ? lang === "ar"
-                    ? "تعديل الواجب المرفوع"
-                    : "Edit Assignment"
+                    ? "تعديل واجب PDF"
+                    : "Edit PDF Assignment"
                   : lang === "ar"
-                  ? "إضافة واجب PDF جديد"
-                  : "New PDF Assignment"}
+                  ? "رفع واجب PDF جديد (بتصحيح ذكي آلي)"
+                  : "Upload New PDF Assignment (AI Auto-Grading Enabled)"}
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 {lang === "ar"
-                  ? "حدد الدورة والدرجات وموعد الإغلاق وارفع ملف الواجب للطلاب"
-                  : "Specify course, deadline, max points and upload assignment PDF sheet"}
+                  ? "حدد المقرر والدرجة وتاريخ الإغلاق وارفع ملف الواجب PDF"
+                  : "Specify course, total points, deadline and upload assignment PDF sheet"}
               </p>
             </div>
           </div>
@@ -511,8 +526,8 @@ export default function AssignmentsModule({
                   <Upload className="h-4 w-4 text-sky-600" />
                   {parsingPdf
                     ? lang === "ar"
-                      ? "جاري المعالجة..."
-                      : "Processing PDF..."
+                      ? "جاري المعالجة واستخراج النصوص..."
+                      : "Processing PDF & extracting text..."
                     : lang === "ar"
                     ? "اختر ملف PDF"
                     : "Choose PDF File"}
@@ -532,8 +547,8 @@ export default function AssignmentsModule({
                 ) : (
                   <span className="text-xs text-slate-500">
                     {lang === "ar"
-                      ? "سيظهر للطلاب داخل نافذة الكتابة الحرة"
-                      : "Rendered inside students' Live Annotation canvas"}
+                      ? "سيظهر للطلاب للإجابة داخله مباشرة"
+                      : "Students will open and answer directly inside this PDF"}
                   </span>
                 )}
               </div>
@@ -542,19 +557,28 @@ export default function AssignmentsModule({
 
           <div>
             <label className="glass-form-label">
-              {lang === "ar" ? "تعليمات إضافية (اختياري مع PDF)" : "Instructions (Optional with PDF)"}
+              {lang === "ar" ? "تعليمات إضافية / إجابة نموذجية لمساعدة الذكاء الاصطناعي (اختياري)" : "Instructions / Model Rubric for AI Grading (Optional)"}
             </label>
             <textarea
-              rows={3}
+              rows={2}
               value={form.instructions}
               onChange={(e) => setForm({ ...form, instructions: e.target.value })}
               placeholder={
                 lang === "ar"
-                  ? "اكتب أي ملاحظات أو إرشادات للطلاب..."
-                  : "Optional notes or guidance for students..."
+                  ? "اكتب أي إرشادات للطلاب أو معايير إجابة نموذجية لمساعدة المصحح الآلي..."
+                  : "Optional guidance or model answer criteria to guide the AI auto-grader..."
               }
               className="w-full px-3.5 py-2.5 glass-input text-sm"
             />
+          </div>
+
+          <div className="p-3 rounded-xl bg-indigo-500/10 border border-indigo-400/25 flex items-center gap-2 text-xs text-indigo-700 dark:text-indigo-300">
+            <Bot className="h-4 w-4 shrink-0 text-indigo-500" />
+            <span>
+              {lang === "ar"
+                ? "🤖 مدعوم بالتصحيح الذكي الآلي: يفتح الطالب ورقة الـ PDF ويجيب داخلها مباشرة بالقلم أو النص، وتصلك الورقة مصححة آلياً مع إمكانية تعديل الدرجات يدوياً."
+                : "🤖 AI Auto-Grading: Students answer directly inside the PDF; submissions arrive to you pre-corrected with full manual grade editing."}
+            </span>
           </div>
 
           <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-200/60 dark:border-white/10">
@@ -610,7 +634,7 @@ export default function AssignmentsModule({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {assignments.map((a) => {
             const c = courses.find((cr) => cr.id === a.courseId);
-            const mySub = a.submissions.find(
+            const mySub = a.submissions?.find(
               (s) => s.studentId === user?.uid || s.id === user?.uid
             );
             const maxMarks = Number(a.maxMarks) || 10;
@@ -623,7 +647,7 @@ export default function AssignmentsModule({
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div className="h-9 w-9 rounded-xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-300 flex items-center justify-center shrink-0">
-                        <ClipboardList className="h-5 w-5" />
+                        <FileText className="h-5 w-5" />
                       </div>
                       <div className="min-w-0">
                         <h3 className="font-bold text-sm truncate">{a.title}</h3>
@@ -724,10 +748,11 @@ export default function AssignmentsModule({
                   <div className="pt-3 border-t border-white/50 dark:border-white/10 text-xs space-y-2.5">
                     <div className="font-semibold flex items-center justify-between">
                       <span>
-                        {lang === "ar" ? "تسليمات الطلاب" : "Submissions"} ({a.submissions.length})
+                        {lang === "ar" ? "تسليمات الطلاب" : "Submissions"} (
+                        {a.submissions?.length || 0})
                       </span>
                     </div>
-                    {a.submissions.length === 0 ? (
+                    {!a.submissions || a.submissions.length === 0 ? (
                       <div className="text-slate-400 text-[11px]">
                         {lang === "ar" ? "لم يسلم أي طالب بعد." : "No submissions yet."}
                       </div>
@@ -741,29 +766,68 @@ export default function AssignmentsModule({
                             : sub.score ?? "";
                         const hasAnnotated =
                           Array.isArray(sub.annotatedPages) && sub.annotatedPages.length > 0;
+
                         return (
                           <div key={stuId} className="p-3 rounded-xl glass-subtle space-y-2">
                             <div className="flex items-center justify-between gap-2">
                               <span className="font-bold">{sub.studentName}</span>
-                              {sub.score !== undefined ? (
-                                <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-bold">
-                                  {sub.score} / {maxMarks} {lang === "ar" ? "نقطة" : "pts"}
-                                </span>
-                              ) : (
-                                <span className="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 font-bold">
-                                  {lang === "ar" ? "بانتظار التصحيح" : "Needs Correction"}
-                                </span>
-                              )}
+                              <div className="flex items-center gap-1.5">
+                                {sub.status === "teacher_reviewed" ? (
+                                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-[11px] font-bold">
+                                    {lang === "ar" ? "✅ معتمد من المعلم" : "✅ Reviewed"}
+                                  </span>
+                                ) : sub.status === "ai_graded" || sub.aiGrading ? (
+                                  <span className="px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 text-[11px] font-bold flex items-center gap-1">
+                                    <Bot className="h-3 w-3" />
+                                    {lang === "ar" ? "🤖 مصحح آلياً بـ AI" : "🤖 AI Graded"}
+                                  </span>
+                                ) : null}
+
+                                {sub.score !== undefined ? (
+                                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-bold">
+                                    {sub.score} / {maxMarks} {lang === "ar" ? "نقطة" : "pts"}
+                                  </span>
+                                ) : (
+                                  <span className="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 font-bold">
+                                    {lang === "ar" ? "بانتظار التصحيح" : "Needs Correction"}
+                                  </span>
+                                )}
+                              </div>
                             </div>
 
-                            {sub.answerText && (
-                              <div className="text-slate-600 dark:text-slate-300">
-                                {sub.answerText}
+                            {/* AI Diagnostic Summary & What went wrong preview */}
+                            {sub.aiGrading && (
+                              <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-400/20 text-xs space-y-1.5">
+                                <div className="flex items-center gap-1.5 font-bold text-indigo-700 dark:text-indigo-300">
+                                  <Bot className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
+                                  <span>{lang === "ar" ? "ملخص التشخيص الذكي:" : "AI Diagnostic Summary:"}</span>
+                                </div>
+                                {sub.aiGrading.summary && (
+                                  <p className="text-slate-700 dark:text-slate-300 text-[11px] leading-relaxed">
+                                    {sub.aiGrading.summary}
+                                  </p>
+                                )}
+                                {Array.isArray(sub.aiGrading.whatWentWrong) && sub.aiGrading.whatWentWrong.length > 0 && (
+                                  <div className="p-2 rounded-lg bg-rose-500/15 border border-rose-500/25 text-[11px] text-rose-800 dark:text-rose-200 space-y-1">
+                                    <div className="font-extrabold flex items-center gap-1">
+                                      <AlertTriangle className="h-3 w-3 text-rose-600 shrink-0" />
+                                      <span>
+                                        {lang === "ar" ? "ما أخطأ فيه الطالب / النقاط المخصومة:" : "What the student got wrong / deductions:"}
+                                      </span>
+                                    </div>
+                                    <ul className="list-disc list-inside space-y-0.5 ps-1">
+                                      {sub.aiGrading.whatWentWrong.map((item, idx) => (
+                                        <li key={idx}>{item}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
                               </div>
                             )}
 
+                            {/* Submission actions */}
                             <div className="flex flex-wrap items-center gap-2 pt-1">
-                              {hasAnnotated && (
+                              {(hasAnnotated || sub.correctedPages?.length > 0) && (
                                 <button
                                   type="button"
                                   onClick={() =>
@@ -774,10 +838,15 @@ export default function AssignmentsModule({
                                       modalMode: "correct",
                                     })
                                   }
-                                  className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold flex items-center gap-1.5"
+                                  className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-sky-600 hover:opacity-95 text-white font-extrabold flex items-center gap-1.5 text-xs shadow-md shadow-indigo-500/20 active:scale-95 cursor-pointer"
                                 >
+                                  <Bot className="h-3.5 w-3.5 text-sky-200" />
                                   <PenTool className="h-3.5 w-3.5" />
-                                  {lang === "ar"
+                                  {sub.status === "ai_graded" || sub.aiGrading
+                                    ? lang === "ar"
+                                      ? "مراجعة وتعديل التصحيح الذكي"
+                                      : "Review & Edit AI Correction"
+                                    : lang === "ar"
                                     ? "مراجعة وتصحيح الحل"
                                     : "Review & Correct PDF"}
                                 </button>
@@ -788,6 +857,7 @@ export default function AssignmentsModule({
                                   type="number"
                                   min={0}
                                   max={maxMarks}
+                                  step={0.5}
                                   value={val}
                                   onChange={(e) =>
                                     setGradeInputs({ ...gradeInputs, [key]: e.target.value })
@@ -798,7 +868,7 @@ export default function AssignmentsModule({
                                 <button
                                   type="button"
                                   onClick={() => handleSaveGrade(a, stuId, sub.score)}
-                                  className="px-3 py-1 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-semibold"
+                                  className="px-3 py-1 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-semibold cursor-pointer"
                                 >
                                   {lang === "ar" ? "حفظ" : "Save"}
                                 </button>
@@ -810,21 +880,35 @@ export default function AssignmentsModule({
                     )}
                   </div>
                 ) : (
+                  /* Student View Actions */
                   <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-white/50 dark:border-white/10">
                     {mySub ? (
                       <>
-                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600">
-                          <CheckCircle2 className="h-4 w-4" />
-                          {lang === "ar" ? "تم التسليم" : "Submitted"}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600">
+                            <CheckCircle2 className="h-4 w-4" />
+                            {lang === "ar" ? "تم التسليم" : "Submitted"}
+                          </span>
+
+                          {mySub.status === "teacher_reviewed" ? (
+                            <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-[11px] font-bold">
+                              {lang === "ar" ? "معتمد من المعلم" : "Reviewed"}
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 text-[11px] font-bold">
+                              {lang === "ar" ? "قيد مراجعة المعلم" : "Pending Review"}
+                            </span>
+                          )}
+                        </div>
 
                         <div className="flex items-center gap-2 ms-auto">
-                          {mySub.score !== undefined && (
+                          {mySub.status === "teacher_reviewed" && mySub.score !== undefined && (
                             <span className="inline-flex items-center gap-1 text-xs font-extrabold text-sky-600 dark:text-sky-300">
                               <Award className="h-3.5 w-3.5" />
                               {mySub.score} / {maxMarks} {lang === "ar" ? "نقطة" : "pts"}
                             </span>
                           )}
+
                           {(hasPdf || mySub.annotatedPages?.length > 0 || mySub.correctedPages?.length > 0) && (
                             <button
                               type="button"
@@ -838,18 +922,14 @@ export default function AssignmentsModule({
                               }
                               className="glass-btn-secondary px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1"
                             >
-                              <Eye className="h-3.5 w-3.5" />
-                              {mySub.correctedPages?.length > 0
+                              <Eye className="h-3.5 w-3.5 text-sky-600" />
+                              {mySub.status === "teacher_reviewed" && mySub.correctedPages?.length > 0
                                 ? lang === "ar"
-                                  ? "عرض التصحيح"
-                                  : "View Corrected"
-                                : mySub.annotatedPages?.length > 0
-                                ? lang === "ar"
-                                  ? "عرض إجابتي"
-                                  : "View Work"
+                                  ? "عرض ورقة الواجب المصححة"
+                                  : "View Corrected PDF"
                                 : lang === "ar"
-                                ? "معاينة الملف"
-                                : "View Worksheet"}
+                                ? "عرض إجابتي"
+                                : "View My Submission"}
                             </button>
                           )}
                         </div>
@@ -891,12 +971,13 @@ export default function AssignmentsModule({
                             modalMode: "student",
                           })
                         }
-                        className="glass-btn-primary px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 ms-auto"
+                        className="glass-btn-primary px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 ms-auto shadow-md shadow-indigo-500/20 active:scale-95 cursor-pointer"
                       >
-                        <PenTool className="h-3.5 w-3.5" />
+                        <FileText className="h-3.5 w-3.5" />
+                        <Sparkles className="h-3.5 w-3.5 text-amber-300" />
                         {lang === "ar"
-                          ? "فتح نافذة الكتابة الحرة والحل"
-                          : "Open Live Annotation & Answer"}
+                          ? "حل ورقة الواجب PDF"
+                          : "Open & Answer Assignment PDF"}
                       </button>
                     )}
                   </div>
@@ -907,7 +988,7 @@ export default function AssignmentsModule({
         </div>
       )}
 
-      {/* Live Annotation / Teacher Correction Modal */}
+      {/* Live Annotation / Teacher Correction Modal (PDF) */}
       {modalState.open && (
         <LiveAnnotationModal
           key={`${modalState.assignment?.id || "none"}_${modalState.submission?.id || "none"}_${modalState.modalMode}`}
@@ -919,37 +1000,52 @@ export default function AssignmentsModule({
           submission={modalState.submission}
           mode={modalState.modalMode}
           lang={lang}
-        onSubmitStudent={async ({ answerText, annotatedPages }) => {
-          const a = modalState.assignment;
-          if (!a) return;
-          await submitAssignmentWork(a.id, {
-            studentId: user.uid,
-            studentName: user.displayName || user.email,
+          onSubmitStudent={async ({
             answerText,
             annotatedPages,
-            instructorId: a.instructorId,
-            assignmentTitle: a.title,
-          });
-          toast.success(
-            lang === "ar"
-              ? "تم إرسال الحل المصور للمحاضر!"
-              : "Annotated assignment submitted to instructor!"
-          );
-          await refreshData();
-        }}
-        onSaveCorrection={async ({ score, feedback, correctedPages }) => {
-          const a = modalState.assignment;
-          const sub = modalState.submission;
-          if (!a || !sub) return;
-          const stuId = sub.studentId || sub.id;
-          await gradeAssignmentSubmission(
-            a.id,
-            stuId,
+            correctedPages,
             score,
             feedback,
-            correctedPages,
-            Number(a.maxMarks) || 10
-          );
+            aiGrading,
+          }) => {
+            const a = modalState.assignment;
+            if (!a) return;
+            await submitAssignmentWork(a.id, {
+              studentId: user.uid,
+              studentName: user.displayName || user.email,
+              answerText,
+              annotatedPages,
+              correctedPages,
+              score,
+              feedback,
+              aiGrading,
+              instructorId: a.instructorId,
+              assignmentTitle: a.title,
+            });
+            toast.success(
+              lang === "ar"
+                ? "تم تسليم ورقة الواجب بنجاح! إجابتك بانتظار مراجعة وتصحيح المعلم."
+                : "Assignment worksheet submitted successfully! Pending instructor review."
+            );
+            await refreshData();
+          }}
+          onSaveCorrection={async ({ score, feedback, correctedPages, aiGrading, answerText }) => {
+            const a = modalState.assignment;
+            const sub = modalState.submission;
+            if (!a || !sub) return;
+            const stuId = sub.studentId || sub.id;
+            await gradeAssignmentSubmission(
+              a.id,
+              stuId,
+              score,
+              feedback,
+              correctedPages,
+              Number(a.maxMarks) || 10,
+              null,
+              "instructor",
+              aiGrading,
+              answerText
+            );
             toast.success(
               lang === "ar"
                 ? "تم حفظ التصحيح والدرجة وإخطار الطالب!"

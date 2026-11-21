@@ -12,6 +12,7 @@ const { processChatbotMessageWithDataset } = await import(
   "../client/src/utils/chatbotCore.js"
 );
 const chatRouter = require("../llm-proxy/routes/chat.js");
+const assignmentRouter = require("../llm-proxy/routes/assignment.js");
 
 const SAMPLE_DATASET = {
   role: "instructor",
@@ -388,6 +389,55 @@ await runCase("13. Structural Check: Critical Feature Files Exist & Client Dist 
   for (const rel of required) {
     assert.ok(fs.existsSync(path.join(ROOT, rel)), `Missing file: ${rel}`);
   }
+});
+
+await runCase("14. PDF Blank Submission Strictly Returns 0 Pts & What-Went-Wrong Report", async () => {
+  const blankEvaluation = assignmentRouter._test.gradePdfSemanticFallback({
+    assignmentTitle: "Worksheet Unit 2",
+    pdfText: "Explain neural network backpropagation and ReLU activation functions",
+    instructions: "Answer in detail",
+    studentAnswerText: "",
+    maxMarks: 20,
+    lang: "en",
+  });
+  assert.equal(blankEvaluation.score, 0, "Blank answer must score strictly 0 points (not 14/20!)");
+  assert.ok(Array.isArray(blankEvaluation.whatWentWrong) && blankEvaluation.whatWentWrong.length > 0);
+  assert.equal(blankEvaluation.whatWentRight.length, 0);
+  assert.match(blankEvaluation.summary, /blank|no answers/i);
+  assert.ok(Array.isArray(blankEvaluation.detailedMistakes) && blankEvaluation.detailedMistakes.length > 0);
+  assert.ok(blankEvaluation.detailedMistakes[0].whyWrong && blankEvaluation.detailedMistakes[0].correctAnswer);
+});
+
+await runCase("15. PDF Answered Submission Returns Proportional Score & Diagnostic What-Went-Wrong / Right", async () => {
+  const answeredEvaluation = assignmentRouter._test.gradePdfSemanticFallback({
+    assignmentTitle: "Worksheet Unit 2",
+    pdfText: "Neural networks consist of input, hidden, and output layers. ReLU is a popular non-linear activation function. Backpropagation computes gradients using the chain rule to minimize loss during training.",
+    instructions: "Explain layers and activation functions",
+    studentAnswerText: "Neural networks have layers and ReLU activation functions with backpropagation.",
+    maxMarks: 20,
+    lang: "en",
+  });
+  assert.ok(answeredEvaluation.score > 0, "Answered worksheet must receive positive points");
+  assert.ok(answeredEvaluation.score <= 20, "Score cannot exceed maxMarks");
+  assert.ok(Array.isArray(answeredEvaluation.whatWentRight) && answeredEvaluation.whatWentRight.length > 0);
+  assert.ok(answeredEvaluation.summary && answeredEvaluation.summary.length > 5);
+  assert.ok(Array.isArray(answeredEvaluation.detailedMistakes));
+});
+
+await runCase("16. AI Summary Breakdown for Teacher Contains Model Answers & Why Student Was Wrong", async () => {
+  const partialEvaluation = assignmentRouter._test.gradePdfSemanticFallback({
+    assignmentTitle: "Assignment 1: Foundations of Artificial Intelligence",
+    pdfText: "Part A: Concept Matching. Part B: Narrow vs General AI. Part C: Ethics.",
+    instructions: "Answer all questions",
+    studentAnswerText: "weak ai can make like simple tasks such as filtering while strong...",
+    maxMarks: 20,
+    lang: "en",
+  });
+  assert.ok(Array.isArray(partialEvaluation.detailedMistakes) && partialEvaluation.detailedMistakes.length > 0);
+  const q1 = partialEvaluation.detailedMistakes.find((m) => m.topicOrQuestion.includes("Part B - Q1"));
+  assert.ok(q1, "Must contain diagnostic for Part B - Q1");
+  assert.ok(q1.whyWrong && q1.whyWrong.length > 10, "Must explain why student got it wrong");
+  assert.ok(q1.correctAnswer && q1.correctAnswer.length > 10, "Must provide the correct model answer");
 });
 
 const passed = results.filter((r) => r.status === "PASS").length;

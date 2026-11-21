@@ -15,10 +15,14 @@ import {
   RefreshCw,
   FileText,
   CalendarCheck,
+  Video,
+  MessageSquare,
 } from "lucide-react";
 import AppLayout from "../../components/layout/AppLayout";
 import CoursesModule from "../courses/CoursesModule";
 import LessonLibraryModule from "../lessons/LessonLibraryModule";
+import CourseSessionsModule from "../sessions/CourseSessionsModule";
+import DirectChatModule from "../chat/DirectChatModule";
 import AssignmentsModule from "../assignments/AssignmentsModule";
 import QuizzesModule from "../quiz/QuizzesModule";
 import GradesModule from "../grades/GradesModule";
@@ -324,6 +328,16 @@ export default function StudentDashboard() {
       icon: FileText,
     },
     {
+      to: "/student/sessions",
+      label: lang === "ar" ? "جلسات المقررات" : "Course Sessions",
+      icon: Video,
+    },
+    {
+      to: "/student/chat",
+      label: lang === "ar" ? "محادثة المحاضر" : "Teacher Chat",
+      icon: MessageSquare,
+    },
+    {
       to: "/student/assignments",
       label: lang === "ar" ? "الواجبات" : "Assignments",
       icon: ClipboardList,
@@ -371,6 +385,18 @@ export default function StudentDashboard() {
           path="lesson-pdfs"
           element={wrapFiltered(
             <LessonLibraryModule mode="student" activeInstructorId={activeInstructorId} />
+          )}
+        />
+        <Route
+          path="sessions"
+          element={wrapFiltered(
+            <CourseSessionsModule mode="student" activeInstructorId={activeInstructorId} />
+          )}
+        />
+        <Route
+          path="chat"
+          element={wrapFiltered(
+            <DirectChatModule mode="student" activeInstructorId={activeInstructorId} />
           )}
         />
         <Route

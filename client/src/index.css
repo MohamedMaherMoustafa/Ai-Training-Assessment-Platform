@@ -269,66 +269,77 @@ body.quiz-privacy-obscured .quiz-privacy-shield-overlay {
 }
 
 .robot-patrol-track {
-  animation: robot-patrol 9s ease-in-out infinite;
+  animation: none !important;
+  transform: none !important;
 }
 
 [dir="rtl"] .robot-patrol-track {
-  animation: robot-patrol-rtl 9s ease-in-out infinite;
+  animation: none !important;
+  transform: none !important;
 }
 
 .robot-patrol-track:hover {
-  animation-play-state: paused;
+  animation: none !important;
 }
 
 .robot-face-flip {
-  animation: robot-face-dir 9s steps(1) infinite;
+  animation: none !important;
+  transform: none !important;
 }
 
 [dir="rtl"] .robot-face-flip {
-  animation: robot-face-dir-rtl 9s steps(1) infinite;
+  animation: none !important;
+  transform: none !important;
 }
 
 .robot-sign-text {
   transform-box: fill-box;
   transform-origin: center;
-  animation: robot-face-dir 9s steps(1) infinite;
+  animation: none !important;
+  transform: none !important;
 }
 
 [dir="rtl"] .robot-sign-text {
-  animation: robot-face-dir-rtl 9s steps(1) infinite;
+  animation: none !important;
+  transform: none !important;
 }
 
 .robot-patrol-track:hover .robot-face-flip,
 .robot-patrol-track:hover .robot-sign-text {
-  animation-play-state: paused;
+  animation: none !important;
 }
 
 .robot-bob-anim {
-  animation: robot-bob 0.55s ease-in-out infinite;
+  animation: none !important;
+  transform: none !important;
 }
 
 .robot-leg-l {
   transform-box: fill-box;
   transform-origin: top center;
-  animation: robot-leg-left 0.55s ease-in-out infinite;
+  animation: none !important;
+  transform: none !important;
 }
 
 .robot-leg-r {
   transform-box: fill-box;
   transform-origin: top center;
-  animation: robot-leg-right 0.55s ease-in-out infinite;
+  animation: none !important;
+  transform: none !important;
 }
 
 .robot-arm-l {
   transform-box: fill-box;
   transform-origin: top center;
-  animation: robot-arm-left 0.55s ease-in-out infinite;
+  animation: none !important;
+  transform: none !important;
 }
 
 .robot-arm-r {
   transform-box: fill-box;
   transform-origin: top center;
-  animation: robot-arm-right 0.55s ease-in-out infinite;
+  animation: none !important;
+  transform: none !important;
 }
 
 @keyframes robot-wave-arm {
@@ -378,23 +389,27 @@ body.quiz-privacy-obscured .quiz-privacy-shield-overlay {
 .robot-arm-wave {
   transform-box: fill-box;
   transform-origin: bottom left;
-  animation: robot-wave-arm 1.25s ease-in-out infinite;
+  animation: none !important;
+  transform: none !important;
 }
 
 .animate-hand-wave {
   display: inline-block;
   transform-origin: 70% 70%;
-  animation: hand-wave-wiggle 1.25s ease-in-out infinite;
+  animation: none !important;
+  transform: none !important;
 }
 
 .bubble-text-swap {
-  animation: bubble-fade-swap 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: none !important;
+  transform: none !important;
 }
 
 .robot-eye-blink {
   transform-box: fill-box;
   transform-origin: center;
-  animation: robot-blink 3.6s ease-in-out infinite;
+  animation: none !important;
+  transform: none !important;
 }
 
 .chatbot-pop-in {

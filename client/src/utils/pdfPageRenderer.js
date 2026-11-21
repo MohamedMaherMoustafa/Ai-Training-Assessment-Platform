@@ -35,6 +35,7 @@ export async function renderPdfFileToPages(
     ? Math.min(pdf.numPages, maxPages)
     : pdf.numPages;
   const pages = [];
+  let extractedText = "";
 
   // Determine dynamic compression quality based on page count to ensure smooth storage & fast rendering
   const effectiveQuality = quality !== null && quality !== undefined
@@ -56,6 +57,22 @@ export async function renderPdfFileToPages(
     }
 
     const page = await pdf.getPage(p);
+
+    // Extract text content from PDF page for AI assignment grading and indexing
+    try {
+      const textContent = await page.getTextContent();
+      const pageWords = textContent.items
+        .map((item) => item.str || "")
+        .join(" ")
+        .replace(/\s+/g, " ")
+        .trim();
+      if (pageWords) {
+        extractedText += (extractedText ? "\n\n" : "") + `[Page ${p}]: ${pageWords}`;
+      }
+    } catch (textErr) {
+      console.warn(`[pdfPageRenderer] Text extraction note on page ${p}:`, textErr.message);
+    }
+
     const unscaled = page.getViewport({ scale: 1 });
     const scale = Math.min(2.0, Math.max(0.85, targetWidth / unscaled.width));
     const viewport = page.getViewport({ scale });
@@ -94,6 +111,7 @@ export async function renderPdfFileToPages(
     pageCount: pdf.numPages,
     renderedCount: totalPages,
     pages,
+    extractedText,
   };
 }
 

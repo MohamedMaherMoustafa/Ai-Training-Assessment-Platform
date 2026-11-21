@@ -101,7 +101,9 @@
     "myQuizzes": "Quizzes",
     "myResults": "Grades & Feedback",
     "scoreboard": "Top 3 Scoreboard",
-    "weeklyReports": "Weekly Reports"
+    "weeklyReports": "Weekly Reports",
+    "sessions": "Course Sessions",
+    "chat": "Direct Chat"
   },
   "admin": {
     "title": "System Admin Control Center",

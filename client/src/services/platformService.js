@@ -496,8 +496,15 @@ export async function createAssignment({
   maxMarks = 10,
   pdfName = "",
   pdfPages = [],
+  questions = [],
+  assignmentType = "sheet",
 }) {
   const newRef = push(ref(rtdb, "assignments"));
+  const computedMaxMarks =
+    Array.isArray(questions) && questions.length > 0
+      ? questions.reduce((sum, q) => sum + (Number(q.maxMarks) || 5), 0)
+      : Number(maxMarks) || 10;
+
   const doc = {
     id: newRef.key,
     courseId,
@@ -506,9 +513,11 @@ export async function createAssignment({
     instructions: instructions || "",
     dueDate: dueDate || "",
     dueTime: dueTime || "23:59",
-    maxMarks: Number(maxMarks) || 10,
+    maxMarks: computedMaxMarks,
     pdfName: pdfName || "",
     pdfPages: Array.isArray(pdfPages) ? pdfPages : [],
+    questions: Array.isArray(questions) ? questions : [],
+    assignmentType: questions && questions.length > 0 ? "sheet" : assignmentType || "sheet",
     createdAt: Date.now(),
   };
   await set(newRef, doc);
@@ -546,15 +555,46 @@ export async function deleteAssignment(assignmentId) {
 
 export async function submitAssignmentWork(
   assignmentId,
-  { studentId, studentName, answerText, annotatedPages = [], instructorId = "", assignmentTitle = "" }
+  {
+    studentId,
+    studentName,
+    answerText,
+    annotatedPages = [],
+    correctedPages = [],
+    questionAnswers = {},
+    aiGrading = null,
+    score = null,
+    feedback = "",
+    instructorId = "",
+    assignmentTitle = "",
+  }
 ) {
-  await set(ref(rtdb, `assignments/${assignmentId}/submissions/${studentId}`), {
+  const submissionData = {
     studentId,
     studentName,
     answerText: answerText || "",
     annotatedPages: Array.isArray(annotatedPages) ? annotatedPages : [],
+    questionAnswers: questionAnswers || {},
     submittedAt: Date.now(),
-  });
+    status: "submitted",
+  };
+
+  if (Array.isArray(correctedPages) && correctedPages.length > 0) {
+    submissionData.correctedPages = correctedPages;
+  }
+  if (aiGrading) {
+    submissionData.aiGrading = aiGrading;
+  }
+  if (score !== null && score !== undefined) {
+    submissionData.score = Number(score);
+    submissionData.aiScore = Number(score);
+  }
+  if (feedback) {
+    submissionData.feedback = feedback;
+  }
+
+  await set(ref(rtdb, `assignments/${assignmentId}/submissions/${studentId}`), submissionData);
+
   await pushNotification("admin_123", {
     titleEn: "Assignment Submitted",
     titleAr: "تم تسليم واجب",
@@ -567,7 +607,7 @@ export async function submitAssignmentWork(
     await pushNotification(instructorId, {
       titleEn: "Assignment Ready for Correction",
       titleAr: "واجب جاهز للتصحيح",
-      bodyEn: `${studentName} submitted annotated work for "${assignmentTitle || "assignment"}".`,
+      bodyEn: `${studentName} submitted answers for "${assignmentTitle || "assignment"}".`,
       bodyAr: `سلّم الطالب ${studentName} حله في "${assignmentTitle || "الواجب"}" للتصحيح.`,
       type: "info",
       link: "/instructor/assignments",
@@ -581,15 +621,30 @@ export async function gradeAssignmentSubmission(
   score,
   feedback = "",
   correctedPages = null,
-  maxMarks = null
+  maxMarks = null,
+  questionGrades = null,
+  gradedBy = "instructor",
+  aiGrading = null,
+  answerText = null
 ) {
   const patch = {
     score: Number(score),
     feedback,
+    gradedBy,
     gradedAt: Date.now(),
+    status: "teacher_reviewed",
   };
   if (Array.isArray(correctedPages) && correctedPages.length > 0) {
     patch.correctedPages = correctedPages;
+  }
+  if (questionGrades) {
+    patch.questionGrades = questionGrades;
+  }
+  if (aiGrading) {
+    patch.aiGrading = aiGrading;
+  }
+  if (answerText) {
+    patch.answerText = answerText;
   }
   await update(ref(rtdb, `assignments/${assignmentId}/submissions/${studentId}`), patch);
 
@@ -1391,6 +1446,236 @@ export async function checkAndDispatchAutomatedWeeklyReports(studentId) {
     console.warn("Automated weekly report dispatch error:", err.message);
     return [];
   }
+}
+
+/* ==================== COURSES SESSIONS MODULE & CONTENT PROTECTION ==================== */
+
+export async function listCourseSessions(courseIdFilter = null) {
+  try {
+    const snap = await get(ref(rtdb, "courseSessions"));
+    if (!snap.exists()) return [];
+    let list = Object.entries(snap.val()).map(([id, data]) => ({
+      id,
+      ...data,
+      views: data.views ? (typeof data.views === "object" ? Object.values(data.views) : []) : [],
+    }));
+    if (courseIdFilter) {
+      list = list.filter((s) => s.courseId === courseIdFilter);
+    }
+    return list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  } catch (err) {
+    console.error("listCourseSessions error:", err);
+    return [];
+  }
+}
+
+export async function createCourseSession({
+  courseId,
+  courseTitle = {},
+  instructorId,
+  instructorName = "",
+  titleEn,
+  titleAr,
+  descriptionEn = "",
+  descriptionAr = "",
+  sessionDate = "",
+  duration = "",
+  videoUrl = "",
+  videoFileName = "",
+  videoType = "direct",
+  resources = [],
+}) {
+  const newRef = push(ref(rtdb, "courseSessions"));
+  const sessionItem = {
+    id: newRef.key,
+    courseId,
+    courseTitle: typeof courseTitle === "object" ? courseTitle : { en: courseTitle, ar: courseTitle },
+    instructorId,
+    instructorName,
+    title: {
+      en: titleEn || titleAr || "Course Session",
+      ar: titleAr || titleEn || "جلسة دراسية",
+    },
+    description: {
+      en: descriptionEn || "",
+      ar: descriptionAr || "",
+    },
+    sessionDate: sessionDate || new Date().toISOString().slice(0, 10),
+    duration: duration || "45 min",
+    videoUrl,
+    videoFileName,
+    videoType,
+    resources: Array.isArray(resources) ? resources : [],
+    views: {},
+    createdAt: Date.now(),
+  };
+
+  await set(newRef, sessionItem);
+
+  try {
+    await notifyStudentsOfInstructor(instructorId, {
+      titleEn: "New Course Session Uploaded",
+      titleAr: "تم رفع جلسة دراسية جديدة",
+      bodyEn: `Session "${sessionItem.title.en}" has been published for ${sessionItem.courseTitle?.en || "your course"}.`,
+      bodyAr: `تمت إضافة الجلسة "${sessionItem.title.ar}" لمقرر ${sessionItem.courseTitle?.ar || "المقرر"}.`,
+      type: "info",
+      link: "/student/sessions",
+    });
+  } catch (err) {
+    console.warn("Notification for session note:", err.message);
+  }
+
+  return sessionItem;
+}
+
+export async function updateCourseSession(sessionId, patch) {
+  if (!sessionId) return;
+  await update(ref(rtdb, `courseSessions/${sessionId}`), {
+    ...patch,
+    updatedAt: Date.now(),
+  });
+}
+
+export async function deleteCourseSession(sessionId) {
+  if (!sessionId) return;
+  await remove(ref(rtdb, `courseSessions/${sessionId}`));
+}
+
+export async function logSessionAttendance(sessionId, studentId, studentInfo = {}) {
+  if (!sessionId || !studentId) return;
+  const viewRecord = {
+    studentId,
+    studentName: studentInfo.displayName || studentInfo.name?.en || studentInfo.username || "Student",
+    studentEmail: studentInfo.email || "",
+    viewedAt: Date.now(),
+  };
+  await set(ref(rtdb, `courseSessions/${sessionId}/views/${studentId}`), viewRecord);
+}
+
+/* ==================== TEACHER-STUDENT DIRECT CHAT MODULE ==================== */
+
+export function getDirectChatChannelId(uidA, uidB) {
+  if (!uidA || !uidB) return null;
+  return [uidA, uidB].sort().join("__");
+}
+
+export function subscribeDirectChatMessages(channelId, callback) {
+  if (!channelId) {
+    callback([]);
+    return () => {};
+  }
+  const messagesRef = ref(rtdb, `directChats/${channelId}/messages`);
+  return onValue(messagesRef, (snap) => {
+    if (!snap.exists()) {
+      callback([]);
+      return;
+    }
+    const val = snap.val();
+    const list = Object.entries(val).map(([id, m]) => ({
+      id,
+      ...m,
+    }));
+    list.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+    callback(list);
+  });
+}
+
+export function subscribeUserDirectChats(userId, callback) {
+  if (!userId) {
+    callback([]);
+    return () => {};
+  }
+  const chatsRef = ref(rtdb, "directChats");
+  return onValue(chatsRef, (snap) => {
+    if (!snap.exists()) {
+      callback([]);
+      return;
+    }
+    const val = snap.val();
+    const list = Object.entries(val)
+      .map(([channelId, data]) => ({
+        channelId,
+        metadata: data.metadata || {},
+        lastMessage: data.metadata?.lastMessage || "",
+        lastMessageTimestamp: data.metadata?.lastMessageTimestamp || 0,
+      }))
+      .filter((c) => c.channelId.includes(userId))
+      .sort((a, b) => (b.lastMessageTimestamp || 0) - (a.lastMessageTimestamp || 0));
+    callback(list);
+  });
+}
+
+export async function sendDirectChatMessage({
+  channelId,
+  senderId,
+  senderName,
+  senderRole,
+  recipientId,
+  recipientName,
+  text,
+  attachments = [],
+}) {
+  if (!channelId || !senderId || !text.trim()) return null;
+
+  const msgRef = push(ref(rtdb, `directChats/${channelId}/messages`));
+  const newMsg = {
+    id: msgRef.key,
+    senderId,
+    senderName,
+    senderRole,
+    text: text.trim(),
+    attachments: Array.isArray(attachments) ? attachments : [],
+    createdAt: Date.now(),
+    read: false,
+  };
+  await set(msgRef, newMsg);
+
+  // Update conversation metadata
+  const metaRef = ref(rtdb, `directChats/${channelId}/metadata`);
+  const metaSnap = await get(metaRef);
+  const currentMeta = metaSnap.exists() ? metaSnap.val() : {};
+
+  const unreadField = senderRole === "instructor" ? "unreadByStudent" : "unreadByInstructor";
+  const nextUnread = (currentMeta[unreadField] || 0) + 1;
+
+  await set(metaRef, {
+    ...currentMeta,
+    instructorId: senderRole === "instructor" ? senderId : recipientId,
+    instructorName: senderRole === "instructor" ? senderName : recipientName,
+    studentId: senderRole === "student" ? senderId : recipientId,
+    studentName: senderRole === "student" ? senderName : recipientName,
+    lastMessage: text.trim(),
+    lastSenderId: senderId,
+    lastMessageTimestamp: Date.now(),
+    [unreadField]: nextUnread,
+    updatedAt: Date.now(),
+  });
+
+  // Push instant notification to recipient
+  try {
+    const isTeacherSender = senderRole === "instructor";
+    await pushNotification(recipientId, {
+      titleEn: isTeacherSender ? "New Message from Instructor" : "New Student Message",
+      titleAr: isTeacherSender ? "رسالة جديدة من المحاضر" : "رسالة جديدة من الطالب",
+      bodyEn: `${senderName}: ${text.slice(0, 90)}${text.length > 90 ? "..." : ""}`,
+      bodyAr: `${senderName}: ${text.slice(0, 90)}${text.length > 90 ? "..." : ""}`,
+      type: "info",
+      link: isTeacherSender ? "/student/chat" : "/instructor/chat",
+    });
+  } catch (e) {
+    console.warn("Direct chat notification note:", e.message);
+  }
+
+  return newMsg;
+}
+
+export async function markDirectChatRead(channelId, userRole) {
+  if (!channelId) return;
+  const metaRef = ref(rtdb, `directChats/${channelId}/metadata`);
+  const snap = await get(metaRef);
+  if (!snap.exists()) return;
+  const unreadField = userRole === "instructor" ? "unreadByInstructor" : "unreadByStudent";
+  await update(metaRef, { [unreadField]: 0 });
 }
 
 
