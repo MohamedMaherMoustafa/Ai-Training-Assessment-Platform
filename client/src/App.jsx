@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -8,6 +8,7 @@ import { PopupProvider } from "./context/PopupContext";
 import { UploadProgressProvider } from "./context/UploadProgressContext";
 import { playClickSound } from "./utils/soundEffects";
 import RoleGuard from "./components/common/RoleGuard";
+import RobotIntroSplash from "./components/common/RobotIntroSplash";
 import LoginPage from "./features/auth/LoginPage";
 import RegisterPage from "./features/auth/RegisterPage";
 import AdminDashboard from "./features/admin/AdminDashboard";
@@ -24,6 +25,8 @@ function RootRedirect() {
 }
 
 export default function App() {
+  const [showIntro, setShowIntro] = useState(true);
+
   useEffect(() => {
     const handleGlobalClick = (e) => {
       const interactive = e.target?.closest?.(
@@ -42,6 +45,7 @@ export default function App() {
         <AuthProvider>
           <PopupProvider>
             <UploadProgressProvider>
+              {showIntro && <RobotIntroSplash onComplete={() => setShowIntro(false)} />}
               <BrowserRouter>
                 <Toaster
                   position="top-center"
