@@ -126,6 +126,20 @@ export async function callDirectAI({
   return null;
 }
 
+function isGenericSummarizePrompt(text) {
+  const normalized = normalizeText(text);
+  if (!normalized) return true;
+  const genericTokens = new Set([
+    "summarize", "summary", "summaries", "sum", "up", "lesson", "lessons",
+    "course", "courses", "please", "can", "you", "could", "for", "me", "to",
+    "give", "show", "of", "want", "like", "i", "a", "an", "the", "any", "all",
+    "لخص", "لخصلي", "لخّص", "تلخيص", "ملخص", "درس", "الدرس", "دروس", "الدروس",
+    "من", "فضلك", "لي", "لو", "سمحت", "اريد", "عايز", "ممكن", "اي", "أي"
+  ]);
+  const tokens = normalized.split(" ").filter((t) => t.length > 0 && !genericTokens.has(t));
+  return tokens.length === 0;
+}
+
 function findBestMatch(query, candidates, getLabel) {
   const qNorm = normalizeText(query);
   if (!qNorm) return null;
@@ -652,6 +666,32 @@ export async function processChatbotMessageWithDataset({
     }
   }
 
+  if (explicitAction?.type === "request_summarize_lessons") {
+    if (dataset.lessons.length === 0) {
+      return {
+        reply:
+          lang === "ar"
+            ? "لا توجد دروس متاحة للتلخيص حالياً في مقرراتك. يرجى إضافة درس أو رفع ملف PDF أولاً."
+            : "There are no lessons available in your courses to summarize yet. Please add a lesson or upload a PDF first.",
+      };
+    }
+    const lessonList = dataset.lessons
+      .map((l, idx) => `${idx + 1}. **${l.title}**${l.courseTitle ? ` _(${l.courseTitle})_` : ""}`)
+      .join("\n");
+
+    return {
+      reply:
+        lang === "ar"
+          ? `أي درس تريدني أن ألخّصه لك؟ اختر من جميع الدروس المتاحة أدناه:\n\n${lessonList}\n\n💡 **اضغط على أي درس أدناه للبدء في تلخيصه فوراً:**`
+          : `Which lesson would you like me to summarize? Choose from all available lessons below:\n\n${lessonList}\n\n💡 **Click on any lesson below to summarize it immediately:**`,
+      quickActions: dataset.lessons.map((l) => ({
+        type: "summarize_lesson",
+        lessonId: l.id,
+        label: `${l.title}${l.courseTitle ? ` (${l.courseTitle})` : ""}`,
+      })),
+    };
+  }
+
   if (explicitAction?.type === "summarize_lesson") {
     const lesson = dataset.lessons.find((l) => l.id === explicitAction.lessonId);
     if (lesson) {
@@ -748,6 +788,32 @@ export async function processChatbotMessageWithDataset({
 
   const wantsSummarize = /(summarize|summary|sum up|ملخص|لخص|لخّص|تلخيص)/i.test(msgLower);
   if (wantsSummarize) {
+    if (isGenericSummarizePrompt(message)) {
+      if (dataset.lessons.length === 0) {
+        return {
+          reply:
+            lang === "ar"
+              ? "لا توجد دروس متاحة للتلخيص حالياً في مقرراتك."
+              : "There are no lessons available to summarize yet.",
+        };
+      }
+      const lessonList = dataset.lessons
+        .map((l, idx) => `${idx + 1}. **${l.title}**${l.courseTitle ? ` _(${l.courseTitle})_` : ""}`)
+        .join("\n");
+
+      return {
+        reply:
+          lang === "ar"
+            ? `أي درس تريدني أن ألخّصه لك؟ اختر من جميع الدروس المتاحة أدناه:\n\n${lessonList}\n\n💡 **اضغط على أي درس أدناه للبدء في تلخيصه فوراً:**`
+            : `Which lesson would you like me to summarize? Choose from all available lessons below:\n\n${lessonList}\n\n💡 **Click on any lesson below to summarize it immediately:**`,
+        quickActions: dataset.lessons.map((l) => ({
+          type: "summarize_lesson",
+          lessonId: l.id,
+          label: `${l.title}${l.courseTitle ? ` (${l.courseTitle})` : ""}`,
+        })),
+      };
+    }
+
     const matchedLesson = findBestMatch(message, dataset.lessons, (l) => `${l.title} ${l.titleAr}`);
     if (matchedLesson) {
       return summarizeLessonViaAI(matchedLesson, lang, useNetwork);
@@ -760,17 +826,42 @@ export async function processChatbotMessageWithDataset({
             : "There are no lessons available to summarize yet.",
       };
     }
+    const lessonList = dataset.lessons
+      .map((l, idx) => `${idx + 1}. **${l.title}**${l.courseTitle ? ` _(${l.courseTitle})_` : ""}`)
+      .join("\n");
+
     return {
       reply:
         lang === "ar"
-          ? "أي درس تريدني أن ألخّصه لك؟ اختر من القائمة:"
-          : "Which lesson would you like me to summarize? Choose one below:",
-      quickActions: dataset.lessons.slice(0, 6).map((l) => ({
+          ? `لم أجد درساً بهذا الاسم تماماً. اختر من جميع الدروس المتاحة أدناه:\n\n${lessonList}`
+          : `I couldn't find a lesson with that exact name. Choose from all available lessons below:\n\n${lessonList}`,
+      quickActions: dataset.lessons.map((l) => ({
         type: "summarize_lesson",
         lessonId: l.id,
-        label: `${l.title} (${l.courseTitle})`,
+        label: `${l.title}${l.courseTitle ? ` (${l.courseTitle})` : ""}`,
       })),
     };
+  }
+
+  // Check if user previously received the lesson list and responded with a number (#1, #2) or direct lesson name
+  const lastBotMsg = [...history].reverse().find((h) => h.sender === "bot" || h.role === "assistant");
+  const wasPromptedForLessonSummary =
+    lastBotMsg &&
+    (String(lastBotMsg.text || "").includes("Which lesson would you like me to summarize") ||
+      String(lastBotMsg.text || "").includes("أي درس تريدني أن ألخّصه لك"));
+
+  if (wasPromptedForLessonSummary) {
+    const numMatch = msgTrim.match(/^#?(\d+)$/);
+    if (numMatch) {
+      const idx = parseInt(numMatch[1], 10) - 1;
+      if (dataset.lessons[idx]) {
+        return summarizeLessonViaAI(dataset.lessons[idx], lang, useNetwork);
+      }
+    }
+    const matchedLesson = findBestMatch(message, dataset.lessons, (l) => `${l.title} ${l.titleAr}`);
+    if (matchedLesson) {
+      return summarizeLessonViaAI(matchedLesson, lang, useNetwork);
+    }
   }
 
   if (

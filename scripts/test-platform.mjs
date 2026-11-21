@@ -236,6 +236,32 @@ await runCase("6. Live Scoreboard Top-5 Query", async () => {
 });
 
 await runCase("7. Lesson Summarization (EN + AR)", async () => {
+  // Test 7a: Generic prompt / button click offers ALL available lessons
+  const resPicker = await processChatbotMessageWithDataset({
+    message: "Summarize a lesson",
+    user: STUDENT_USER,
+    lang: "en",
+    dataset: SAMPLE_DATASET,
+    useNetwork: false,
+  });
+  assert.ok(
+    Array.isArray(resPicker.quickActions) && resPicker.quickActions.length === SAMPLE_DATASET.lessons.length,
+    "Should return all lessons in quickActions when user asks to summarize a lesson"
+  );
+  assert.equal(resPicker.quickActions[0].type, "summarize_lesson");
+
+  // Test 7b: User selects a lesson via quick action
+  const resChosen = await processChatbotMessageWithDataset({
+    message: resPicker.quickActions[0].label,
+    user: STUDENT_USER,
+    lang: "en",
+    dataset: SAMPLE_DATASET,
+    explicitAction: resPicker.quickActions[0],
+    useNetwork: false,
+  });
+  assert.match(resChosen.reply, /Lesson Summary/);
+
+  // Test 7c: Direct named lesson summary
   const resEn = await processChatbotMessageWithDataset({
     message: "Summarize Deep Learning Slides PDF",
     user: STUDENT_USER,

@@ -411,6 +411,12 @@ export default function PlatformChatbotWidget() {
               lang === "ar"
                 ? "اعمل اختبار للطلاب على درس"
                 : "Make a quiz for students on lesson",
+            action: { type: "request_create_quiz" },
+          },
+          {
+            label: lang === "ar" ? "تلخيص درس" : "Summarize a lesson",
+            prompt: lang === "ar" ? "لخص لي درس" : "Summarize a lesson",
+            action: { type: "request_summarize_lessons" },
           },
           {
             label: lang === "ar" ? "بيانات المقررات والطلاب" : "Courses & students summary",
@@ -431,6 +437,7 @@ export default function PlatformChatbotWidget() {
           {
             label: lang === "ar" ? "تلخيص درس" : "Summarize a lesson",
             prompt: lang === "ar" ? "لخص لي درس" : "Summarize a lesson",
+            action: { type: "request_summarize_lessons" },
           },
           {
             label: lang === "ar" ? "نقاطي ودرجاتي" : "My points & marks",
@@ -1007,7 +1014,7 @@ export default function PlatformChatbotWidget() {
                 key={chip.label}
                 type="button"
                 disabled={busy}
-                onClick={() => handleSend(chip.prompt)}
+                onClick={() => handleSend(chip.prompt, chip.action || null)}
                 className="px-2.5 py-1 rounded-full bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-white/10 text-[10.5px] font-bold hover:border-indigo-500 text-slate-700 dark:text-slate-200 shadow-sm transition-all disabled:opacity-50"
               >
                 {chip.label}
