@@ -33,8 +33,9 @@ const DIRECT_AI_KEY =
   (typeof import.meta !== "undefined" && import.meta.env?.VITE_GEMINI_API_KEY) ||
   (typeof process !== "undefined" && process.env?.GEMINI_API_KEY) ||
   "";
-const DIRECT_AI_PRIMARY = "gemini-3.5-flash";
-const DIRECT_AI_FALLBACK = "gemini-flash-latest";
+const DIRECT_AI_PRIMARY = "gemini-flash-lite-latest";
+const DIRECT_AI_FALLBACK = "gemini-3.5-flash-lite";
+const DIRECT_AI_TERTIARY = "gemini-flash-latest";
 
 export async function callDirectAI({
   message = "",
@@ -54,11 +55,7 @@ export async function callDirectAI({
         const mimeType =
           att.mimeType ||
           att.type ||
-          (att.kind === "pdf"
-            ? "application/pdf"
-            : att.kind === "audio"
-            ? "audio/webm"
-            : "image/jpeg");
+          (att.kind === "pdf" ? "application/pdf" : "image/jpeg");
         parts.push({
           inlineData: {
             mimeType,
@@ -111,18 +108,19 @@ export async function callDirectAI({
     return text ? text.trim() : null;
   };
 
-  try {
-    const reply = await tryCall(DIRECT_AI_PRIMARY);
-    if (reply) return { reply, provider: "ai", model: "AI Assistant" };
-  } catch (err) {
-    console.warn("Direct primary AI call failed, trying fallback:", err.message);
-  }
+  const candidateModels = [
+    DIRECT_AI_PRIMARY,
+    DIRECT_AI_FALLBACK,
+    DIRECT_AI_TERTIARY,
+  ].filter(Boolean);
 
-  try {
-    const fallbackReply = await tryCall(DIRECT_AI_FALLBACK);
-    if (fallbackReply) return { reply: fallbackReply, provider: "ai", model: "AI Assistant" };
-  } catch (fErr) {
-    console.warn("Direct fallback AI call failed:", fErr.message);
+  for (const m of candidateModels) {
+    try {
+      const reply = await tryCall(m);
+      if (reply) return { reply, provider: "ai", model: "AI Assistant" };
+    } catch (err) {
+      console.warn(`Direct AI call (${m}) failed, trying next:`, err.message);
+    }
   }
 
   return null;
@@ -611,7 +609,7 @@ export async function processChatbotMessageWithDataset({
           history,
           contextSummary,
         },
-        { timeout: 15000 }
+        { timeout: 30000 }
       );
       if (res.data?.reply && res.data.model !== "platform-ai-grounded") {
         return {
@@ -982,7 +980,7 @@ export async function processChatbotMessageWithDataset({
           history,
           contextSummary,
         },
-        { timeout: 15000 }
+        { timeout: 30000 }
       );
       if (res.data?.reply && res.data.model !== "platform-ai-grounded") {
         return { reply: res.data.reply, provider: "ai", model: "AI Assistant" };

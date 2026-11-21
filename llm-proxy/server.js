@@ -1,12 +1,14 @@
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
+const path = require("path");
+
+dotenv.config({ path: path.join(__dirname, ".env") });
+
 const quizRouter = require("./routes/quiz");
 const feedbackRouter = require("./routes/feedback");
 const chatRouter = require("./routes/chat");
 const assignmentRouter = require("./routes/assignment");
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;

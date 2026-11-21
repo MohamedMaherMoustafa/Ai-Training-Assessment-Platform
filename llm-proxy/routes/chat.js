@@ -5,8 +5,8 @@ const router = express.Router();
 
 const OLLAMA_BASE = process.env.OLLAMA_BASE_URL || "http://localhost:11434";
 const PREFERRED_MODEL = process.env.OLLAMA_MODEL || "academy-tutor";
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash";
+const getGeminiApiKey = () => process.env.GEMINI_API_KEY || "";
+const getGeminiModel = () => process.env.GEMINI_MODEL || "gemini-flash-lite-latest";
 
 const STOP_WORDS = new Set([
   "the", "is", "are", "was", "were", "a", "an", "in", "on", "at", "to", "for", "of",
@@ -17,14 +17,14 @@ const STOP_WORDS = new Set([
 
 async function callGeminiChat({
   apiKey,
-  model = "gemini-3.5-flash",
+  model = "gemini-flash-lite-latest",
   systemPrompt,
   userPrompt,
   attachments = [],
 }) {
   const parts = [];
 
-  // Add attachments (photos, PDFs, voice recordings)
+  // Add attachments (photos, PDFs)
   if (Array.isArray(attachments) && attachments.length > 0) {
     for (const att of attachments) {
       if (att && att.data) {
@@ -32,11 +32,7 @@ async function callGeminiChat({
         const mimeType =
           att.mimeType ||
           att.type ||
-          (att.kind === "pdf"
-            ? "application/pdf"
-            : att.kind === "audio"
-            ? "audio/webm"
-            : "image/jpeg");
+          (att.kind === "pdf" ? "application/pdf" : "image/jpeg");
         parts.push({
           inlineData: {
             mimeType,
@@ -68,35 +64,38 @@ async function callGeminiChat({
     },
   };
 
-  const primaryModel = model || "gemini-3.5-flash";
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${primaryModel}:generateContent?key=${apiKey}`;
+  const candidateModels = [model, "gemini-3.5-flash-lite", "gemini-flash-latest"].filter(
+    (m, idx, arr) => m && arr.indexOf(m) === idx
+  );
 
-  try {
-    const res = await axios.post(url, payload, {
-      headers: { "Content-Type": "application/json" },
-      timeout: 60000,
-    });
-    const candidate = res.data?.candidates?.[0];
-    const text = candidate?.content?.parts?.map((p) => p.text).filter(Boolean).join("\n");
-    if (text) return { text, model: primaryModel };
-  } catch (err) {
-    console.warn(`Gemini (${primaryModel}) failed:`, err.response?.data?.error?.message || err.message);
-    if (primaryModel !== "gemini-flash-latest") {
-      try {
-        const fallbackUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
-        const res = await axios.post(fallbackUrl, payload, {
+  for (const m of candidateModels) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${apiKey}`;
+    try {
+      if (typeof fetch === "function") {
+        const fetchRes = await fetch(url, {
+          method: "POST",
           headers: { "Content-Type": "application/json" },
-          timeout: 60000,
+          body: JSON.stringify(payload),
+          signal: AbortSignal.timeout(30000),
+        });
+        const data = await fetchRes.json();
+        const candidate = data?.candidates?.[0];
+        const text = candidate?.content?.parts?.map((p) => p.text).filter(Boolean).join("\n");
+        if (text) return { text, model: m };
+      } else {
+        const res = await axios.post(url, payload, {
+          headers: { "Content-Type": "application/json" },
+          timeout: 30000,
         });
         const candidate = res.data?.candidates?.[0];
         const text = candidate?.content?.parts?.map((p) => p.text).filter(Boolean).join("\n");
-        if (text) return { text, model: "gemini-flash-latest" };
-      } catch (fErr) {
-        console.warn("Gemini fallback model also failed:", fErr.message);
+        if (text) return { text, model: m };
       }
+    } catch (err) {
+      console.warn(`Gemini (${m}) attempt failed:`, err.message);
     }
-    throw err;
   }
+
   return null;
 }
 
@@ -270,18 +269,21 @@ router.post("/", async (req, res) => {
     historyBlock ? `RECENT CHAT CONTEXT:\n${historyBlock}` : "",
     message ? `USER QUESTION: ${message}` : "",
     attachments.length > 0
-      ? `(User attached ${attachments.length} file(s): ${attachments.map((a) => `${a.kind || 'file'}: ${a.fileName || a.mimeType}`).join(", ")})`
+      ? `(User attached ${attachments.length} file(s): ${attachments.map((a) => `${a.kind || 'file'}: ${a.name || a.fileName || a.mimeType}`).join(", ")})`
       : "",
   ]
     .filter(Boolean)
     .join("\n\n");
 
+  const geminiKey = getGeminiApiKey();
+  const geminiModel = getGeminiModel();
+
   // Priority 1: Gemini Multimodal API if configured
-  if (GEMINI_API_KEY) {
+  if (geminiKey) {
     try {
       const geminiResult = await callGeminiChat({
-        apiKey: GEMINI_API_KEY,
-        model: GEMINI_MODEL,
+        apiKey: geminiKey,
+        model: geminiModel,
         systemPrompt,
         userPrompt,
         attachments,
