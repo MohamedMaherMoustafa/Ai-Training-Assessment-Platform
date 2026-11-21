@@ -693,17 +693,17 @@ export default function PlatformChatbotWidget() {
   };
 
   return (
-    <div className="fixed bottom-4 end-5 z-40">
+    <div className="fixed bottom-0.5 sm:bottom-1 end-3 sm:end-4 z-40">
       {!open ? (
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="group relative flex items-center gap-3 focus:outline-none cursor-pointer select-none"
+          className="group relative flex items-end pb-0.5 gap-2.5 focus:outline-none cursor-pointer select-none"
           title={lang === "ar" ? "اضغط للتحدث مع المساعد الذكي" : "Click to open AI Assistant"}
           aria-label="Open AI Robot Chatbot"
         >
           {/* Static Speech Bubble */}
-          <div className="flex items-center gap-2.5 px-3 sm:px-3.5 py-2 rounded-2xl bg-white/95 dark:bg-slate-900/90 shadow-xl border border-slate-200/80 dark:border-white/10 text-start backdrop-blur-md ring-2 ring-sky-400/20 max-w-[210px] sm:max-w-xs">
+          <div className="flex items-center gap-2.5 px-3 sm:px-3.5 py-2 rounded-2xl bg-white/95 dark:bg-slate-900/90 shadow-xl border border-slate-200/80 dark:border-white/10 text-start backdrop-blur-md ring-2 ring-sky-400/20 max-w-[210px] sm:max-w-xs mb-2">
             <div
               className={`h-7 w-7 rounded-xl ${activeCallout.bgColor} flex items-center justify-center ${activeCallout.color} shrink-0 shadow-inner`}
             >
