@@ -19,10 +19,8 @@ import {
   Paperclip,
   Image as ImageIcon,
   FileText,
-  Mic,
   Copy,
   Check,
-  Volume2,
   Languages,
   Loader2,
 } from "lucide-react";
@@ -333,26 +331,21 @@ export default function PlatformChatbotWidget() {
   const activeCallout = HELP_CALLOUTS[0];
   const CalloutIcon = activeCallout.icon;
   const [attachments, setAttachments] = useState([]);
-  const [recording, setRecording] = useState(false);
-  const [recordSeconds, setRecordSeconds] = useState(0);
   const [copiedMsgId, setCopiedMsgId] = useState(null);
   const [translatingMsgId, setTranslatingMsgId] = useState(null);
 
   const fileInputRef = useRef(null);
-  const mediaRecorderRef = useRef(null);
-  const audioChunksRef = useRef([]);
-  const timerRef = useRef(null);
   const scrollRef = useRef(null);
 
   const welcomeText = (() => {
     if (user?.role === "instructor" || user?.role === "admin") {
       return lang === "ar"
-        ? "مرحباً! أنا أثر AI (Athar AI) — المساعد الذكي للمنصة.\n\nيمكنك الآن:\n• إرسال **صور ومخططات** أو **ملفات PDF** أو **تسجيلات صوتية** لتحليلها وشرحها فورا.\n• طلب إنشاء اختبار: *«اعمل اختبار للطلاب على درس ...»*\n• الاستفسار عن درجات ونقاط أي طالب أو ملخص المقررات.\n• طرح أي سؤال تعليمي أو أكاديمي عام."
-        : "Hi! I am Athar AI, your Educational Assistant.\n\nYou can now:\n• Attach **photos & diagrams**, **PDF documents**, or record **voice queries** for instant multimodal analysis.\n• Author quizzes instantly: *\"Make a quiz for students on lesson ...\"*\n• Look up student points, scoreboard rankings, and course analytics.\n• Ask any educational, scientific, or programming questions.";
+        ? "مرحباً! أنا أثر AI (Athar AI) — المساعد الذكي للمنصة.\n\nيمكنك الآن:\n• إرسال **صور ومخططات** أو **ملفات PDF** لتحليلها وشرحها فورا.\n• طلب إنشاء اختبار: *«اعمل اختبار للطلاب على درس ...»*\n• الاستفسار عن درجات ونقاط أي طالب أو ملخص المقررات.\n• طرح أي سؤال تعليمي أو أكاديمي عام."
+        : "Hi! I am Athar AI, your Educational Assistant.\n\nYou can now:\n• Attach **photos & diagrams** or **PDF documents** for instant multimodal analysis.\n• Author quizzes instantly: *\"Make a quiz for students on lesson ...\"*\n• Look up student points, scoreboard rankings, and course analytics.\n• Ask any educational, scientific, or programming questions.";
     }
     return lang === "ar"
-      ? "مرحباً! أنا أثر AI (Athar AI) — مساعدك التعليمي الذكي.\n\nكيف يمكنني مساعدتك اليوم؟\n• أرسل **صورة مسألة أو مخطط** أو **ملف PDF** أو **سجل صوتك** وسأقوم بتحليله وشرحه لك خطوة بخطوة.\n• تلخيص أي درس أو مقرر دراسي.\n• مراجعة مجموع نقاطك ودرجاتك في الاختبارات والواجبات.\n• الإجابة على أي استفسار دراسي أو تقني."
-      : "Hi! I am Athar AI, your Learning Assistant.\n\nHow can I help you today?\n• Upload **photos/diagrams**, **PDF lesson files**, or record **voice notes** for step-by-step analysis.\n• Summarize any course lesson or technical document.\n• Check your earned points, scoreboard ranking, and grades.\n• Ask any study, science, or programming question.";
+      ? "مرحباً! أنا أثر AI (Athar AI) — مساعدك التعليمي الذكي.\n\nكيف يمكنني مساعدتك اليوم؟\n• أرسل **صورة مسألة أو مخطط** أو **ملف PDF** وسأقوم بتحليله وشرحه لك خطوة بخطوة.\n• تلخيص أي درس أو مقرر دراسي.\n• مراجعة مجموع نقاطك ودرجاتك في الاختبارات والواجبات.\n• الإجابة على أي استفسار دراسي أو تقني."
+      : "Hi! I am Athar AI, your Learning Assistant.\n\nHow can I help you today?\n• Upload **photos/diagrams** or **PDF lesson files** for step-by-step analysis.\n• Summarize any course lesson or technical document.\n• Check your earned points, scoreboard ranking, and grades.\n• Ask any study, science, or programming question.";
   })();
 
   const [messages, setMessages] = useState([
@@ -370,19 +363,6 @@ export default function PlatformChatbotWidget() {
     }
   }, [messages, open, busy]);
 
-  // Audio recording timer cleanup
-  useEffect(() => {
-    if (recording) {
-      setRecordSeconds(0);
-      timerRef.current = setInterval(() => {
-        setRecordSeconds((s) => s + 1);
-      }, 1000);
-    } else {
-      clearInterval(timerRef.current);
-    }
-    return () => clearInterval(timerRef.current);
-  }, [recording]);
-
   // File Upload Handlers (Photos & PDFs)
   const handleFileSelect = (e) => {
     const files = Array.from(e.target.files || []);
@@ -399,7 +379,6 @@ export default function PlatformChatbotWidget() {
         const base64 = event.target.result;
         const isImage = file.type.startsWith("image/");
         const isPdf = file.type === "application/pdf";
-        const isAudio = file.type.startsWith("audio/");
 
         setAttachments((prev) => [
           ...prev,
@@ -407,7 +386,7 @@ export default function PlatformChatbotWidget() {
             id: `att_${Date.now()}_${Math.random()}`,
             name: file.name,
             mimeType: file.type || (isPdf ? "application/pdf" : "image/jpeg"),
-            kind: isImage ? "image" : isPdf ? "pdf" : isAudio ? "audio" : "file",
+            kind: isImage ? "image" : isPdf ? "pdf" : "file",
             data: base64,
             sizeKb: Math.round(file.size / 1024),
           },
@@ -421,65 +400,6 @@ export default function PlatformChatbotWidget() {
 
   const removeAttachment = (id) => {
     setAttachments((prev) => prev.filter((a) => a.id !== id));
-  };
-
-  // Live Voice Recording
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      audioChunksRef.current = [];
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
-
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data && event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
-        }
-      };
-
-      mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
-        const reader = new FileReader();
-        reader.onload = () => {
-          const base64 = reader.result;
-          setAttachments((prev) => [
-            ...prev,
-            {
-              id: `voice_${Date.now()}`,
-              name: `Voice Query (${recordSeconds || 1}s).webm`,
-              mimeType: "audio/webm",
-              kind: "audio",
-              data: base64,
-              durationSec: recordSeconds,
-              sizeKb: Math.round(audioBlob.size / 1024),
-            },
-          ]);
-        };
-        reader.readAsDataURL(audioBlob);
-        stream.getTracks().forEach((track) => track.stop());
-      };
-
-      mediaRecorder.start();
-      setRecording(true);
-    } catch (err) {
-      console.error(err);
-      toast.error(lang === "ar" ? "تعذر الوصول للميكروفون" : "Could not access microphone");
-    }
-  };
-
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && recording) {
-      mediaRecorderRef.current.stop();
-      setRecording(false);
-    }
-  };
-
-  const cancelRecording = () => {
-    if (mediaRecorderRef.current && recording) {
-      mediaRecorderRef.current.stream?.getTracks().forEach((track) => track.stop());
-      mediaRecorderRef.current = null;
-      setRecording(false);
-    }
   };
 
   const starterChips =
@@ -852,8 +772,8 @@ export default function PlatformChatbotWidget() {
                 </div>
                 <div className="text-[10px] sm:text-[11px] text-sky-100/90 font-medium truncate">
                   {lang === "ar"
-                    ? "تحليل صور • مستندات PDF • رسائل صوتية • بيانات حية"
-                    : "Multimodal: Photos · PDFs · Voice · Live Grounding"}
+                    ? "تحليل صور • مستندات PDF • بيانات حية"
+                    : "Multimodal: Photos · PDFs · Live Grounding"}
                 </div>
               </div>
             </div>
@@ -920,13 +840,6 @@ export default function PlatformChatbotWidget() {
                               <FileText className="h-4 w-4 text-amber-200 shrink-0" />
                               <span className="truncate">{att.name}</span>
                               <span className="text-[10px] opacity-80 shrink-0">({att.sizeKb} KB)</span>
-                            </div>
-                          )}
-                          {att.kind === "audio" && (
-                            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/20 backdrop-blur-sm border border-white/25 text-xs font-semibold">
-                              <Volume2 className="h-4 w-4 text-emerald-300 shrink-0" />
-                              <span className="truncate">{att.name}</span>
-                              <audio src={att.data} controls className="h-6 w-36 max-w-full" />
                             </div>
                           )}
                         </div>
@@ -1112,7 +1025,6 @@ export default function PlatformChatbotWidget() {
                 >
                   {att.kind === "image" && <ImageIcon className="h-3.5 w-3.5 text-sky-500" />}
                   {att.kind === "pdf" && <FileText className="h-3.5 w-3.5 text-rose-500" />}
-                  {att.kind === "audio" && <Volume2 className="h-3.5 w-3.5 text-emerald-500" />}
                   <span className="font-semibold text-slate-800 dark:text-slate-200 max-w-[120px] truncate text-[11px]">
                     {att.name}
                   </span>
@@ -1125,34 +1037,6 @@ export default function PlatformChatbotWidget() {
                   </button>
                 </div>
               ))}
-            </div>
-          )}
-
-          {/* Live Audio Recording Overlay */}
-          {recording && (
-            <div className="px-4 py-2.5 bg-rose-500/10 border-t border-rose-400/30 flex items-center justify-between gap-3 text-xs text-rose-600 dark:text-rose-400">
-              <div className="flex items-center gap-2 font-bold animate-pulse">
-                <span className="h-2.5 w-2.5 rounded-full bg-rose-600 animate-ping" />
-                <span>
-                  {lang === "ar" ? "جاري تسجيل صوتك..." : "Recording voice query..."} ({recordSeconds}s)
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={cancelRecording}
-                  className="px-2.5 py-1 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-bold"
-                >
-                  {lang === "ar" ? "إلغاء" : "Cancel"}
-                </button>
-                <button
-                  type="button"
-                  onClick={stopRecording}
-                  className="px-3 py-1 rounded-lg bg-rose-600 text-white text-[11px] font-bold shadow-sm"
-                >
-                  {lang === "ar" ? "إرفاق الصوت ✓" : "Attach Voice ✓"}
-                </button>
-              </div>
             </div>
           )}
 
@@ -1169,7 +1053,7 @@ export default function PlatformChatbotWidget() {
               ref={fileInputRef}
               type="file"
               multiple
-              accept="image/*,application/pdf,audio/*"
+              accept="image/*,application/pdf"
               className="hidden"
               onChange={handleFileSelect}
             />
@@ -1178,26 +1062,11 @@ export default function PlatformChatbotWidget() {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              disabled={busy || recording}
-              title={lang === "ar" ? "إرفاق صورة أو PDF أو صوت" : "Attach Photo, PDF, or Audio"}
+              disabled={busy}
+              title={lang === "ar" ? "إرفاق صورة أو PDF" : "Attach Photo or PDF"}
               className="p-2.5 rounded-2xl border border-slate-200 dark:border-white/10 hover:border-indigo-500 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/30 text-slate-600 dark:text-slate-300 transition-colors shrink-0 disabled:opacity-50 cursor-pointer"
             >
               <Paperclip className="h-4 w-4" />
-            </button>
-
-            {/* Microphone button */}
-            <button
-              type="button"
-              onClick={recording ? stopRecording : startRecording}
-              disabled={busy}
-              title={recording ? "Stop Recording" : "Record Voice Query"}
-              className={`p-2.5 rounded-2xl border transition-colors shrink-0 disabled:opacity-50 cursor-pointer ${
-                recording
-                  ? "border-rose-500 bg-rose-500 text-white animate-pulse"
-                  : "border-slate-200 dark:border-white/10 hover:border-indigo-500 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/30 text-slate-600 dark:text-slate-300"
-              }`}
-            >
-              <Mic className="h-4 w-4" />
             </button>
 
             {/* Text Input */}
