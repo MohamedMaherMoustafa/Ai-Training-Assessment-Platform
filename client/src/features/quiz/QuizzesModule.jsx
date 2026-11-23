@@ -20,6 +20,7 @@ import {
   ShieldAlert,
   AlertTriangle,
   Loader2,
+  ClipboardCheck,
 } from "lucide-react";
 import {
   approveQuizRetake,
@@ -40,19 +41,43 @@ import { useAuth } from "../../context/AuthContext";
 import { useLang } from "../../context/LangContext";
 import { usePopup } from "../../context/PopupContext";
 
-const EMPTY_QUESTION = () => ({
+const EMPTY_QUESTION = (type = "mcq") => ({
   id: `q_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+  type: type === "theoretical" ? "theoretical" : "mcq",
   text: "",
   allowMultiple: false,
-  options: [
-    { id: "a", text: "" },
-    { id: "b", text: "" },
-    { id: "c", text: "" },
-    { id: "d", text: "" },
-  ],
+  options:
+    type === "theoretical"
+      ? []
+      : [
+          { id: "a", text: "" },
+          { id: "b", text: "" },
+          { id: "c", text: "" },
+          { id: "d", text: "" },
+        ],
   correctOptionId: "a",
   correctOptionIds: ["a"],
+  modelAnswer: "",
+  rubric: [],
+  points: 1,
 });
+
+/**
+ * Calculates recommended quiz duration based on question count, types, and difficulty
+ */
+function calcAutoQuizTime(qs = [], diff = "medium") {
+  const d = String(diff || "medium").toLowerCase();
+  const mcqMins = d === "easy" ? 1.0 : d === "hard" ? 2.5 : 1.5;
+  const theoMins = d === "easy" ? 2.5 : d === "hard" ? 5.0 : 3.5;
+
+  let total = 0;
+  for (const q of qs) {
+    if (q.type === "theoretical") total += theoMins;
+    else total += mcqMins;
+  }
+  const minTime = d === "easy" ? 5 : d === "hard" ? 15 : 10;
+  return Math.max(Math.ceil(total), minTime);
+}
 
 function getCorrectIds(q) {
   if (Array.isArray(q.correctOptionIds) && q.correctOptionIds.length > 0) {
@@ -83,6 +108,8 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
   const [lessonId, setLessonId] = useState("");
   const [quizTitle, setQuizTitle] = useState("");
   const [durationMinutes, setDurationMinutes] = useState(10);
+  const [difficulty, setDifficulty] = useState("medium");
+  const [includeTheoretical, setIncludeTheoretical] = useState(true);
   const [questions, setQuestions] = useState([EMPTY_QUESTION()]);
   const [draftingAI, setDraftingAI] = useState(null);
 
@@ -784,21 +811,35 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
     try {
       const res = await axios.post(
         "http://localhost:3001/api/quiz/generate",
-        { text, lang, courseId, count },
+        { text, lang, courseId, count, includeTheoretical, difficulty },
         { timeout: 120000 }
       );
       if (Array.isArray(res.data?.questions) && res.data.questions.length > 0) {
-        setQuestions(
-          res.data.questions.map((q) => ({
+        const normalized = res.data.questions.map((q) => {
+          const isTheo = q.type === "theoretical" || (!q.options && q.modelAnswer);
+          return {
             ...q,
+            type: isTheo ? "theoretical" : "mcq",
             allowMultiple: Boolean(q.allowMultiple) || getCorrectIds(q).length > 1,
             correctOptionIds: getCorrectIds(q),
-          }))
-        );
+            modelAnswer: q.modelAnswer || "",
+            rubric: Array.isArray(q.rubric) ? q.rubric : [],
+            points: Number(q.points) || 1,
+          };
+        });
+        setQuestions(normalized);
+
+        // Auto-calculate and apply estimated time from difficulty & question types
+        const autoTime = res.data.estimatedTimeMinutes || calcAutoQuizTime(normalized, difficulty);
+        setDurationMinutes(autoTime);
+
+        const theoCount = normalized.filter((q) => q.type === "theoretical").length;
+        const mcqCount = normalized.length - theoCount;
+
         toast.success(
           lang === "ar"
-            ? `قام ذكاء المنصة بتوليد ${res.data.questions.length} سؤال اختيار من متعدد!`
-            : `Platform AI drafted ${res.data.questions.length} MCQs!`
+            ? `قام ذكاء المنصة بتوليد ${normalized.length} أسئلة (${mcqCount} اختياري + ${theoCount} نظري/مقالي). الوقت المقدر تلقائياً: ${autoTime} دقيقة!`
+            : `Platform AI drafted ${normalized.length} questions (${mcqCount} MCQ + ${theoCount} Theoretical). Auto estimated time: ${autoTime} min!`
         );
       }
     } catch {
@@ -819,6 +860,8 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
     setLessonId("");
     setQuizTitle("");
     setDurationMinutes(10);
+    setDifficulty("medium");
+    setIncludeTheoretical(true);
     setQuestions([EMPTY_QUESTION()]);
   };
 
@@ -828,16 +871,49 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
     setLessonId(qz.lessonId || "");
     setQuizTitle(qz.title || "");
     setDurationMinutes(qz.durationMinutes || 10);
+    setDifficulty(qz.difficulty || "medium");
+    setIncludeTheoretical(
+      Array.isArray(qz.questions) && qz.questions.some((q) => q.type === "theoretical")
+    );
     setQuestions(
       Array.isArray(qz.questions) && qz.questions.length > 0
-        ? qz.questions.map((q) => ({
-            ...q,
-            allowMultiple: Boolean(q.allowMultiple) || getCorrectIds(q).length > 1,
-            correctOptionIds: getCorrectIds(q),
-          }))
+        ? qz.questions.map((q) => {
+            const isTheo = q.type === "theoretical" || (!q.options && q.modelAnswer);
+            return {
+              ...q,
+              type: isTheo ? "theoretical" : "mcq",
+              allowMultiple: Boolean(q.allowMultiple) || getCorrectIds(q).length > 1,
+              correctOptionIds: getCorrectIds(q),
+              modelAnswer: q.modelAnswer || "",
+              rubric: Array.isArray(q.rubric) ? q.rubric : [],
+              points: Number(q.points) || 1,
+            };
+          })
         : [EMPTY_QUESTION()]
     );
     setShowBuilder(true);
+  };
+
+  const toggleQuestionType = (qIdx) => {
+    const next = [...questions];
+    const q = next[qIdx];
+    const nextType = q.type === "theoretical" ? "mcq" : "theoretical";
+    next[qIdx] = {
+      ...q,
+      type: nextType,
+      options:
+        nextType === "theoretical"
+          ? []
+          : Array.isArray(q.options) && q.options.length === 4
+          ? q.options
+          : [
+              { id: "a", text: "" },
+              { id: "b", text: "" },
+              { id: "c", text: "" },
+              { id: "d", text: "" },
+            ],
+    };
+    setQuestions(next);
   };
 
   const toggleQuestionMode = (qIdx) => {
@@ -883,12 +959,26 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
     if (!courseId || !quizTitle.trim()) return;
 
     const cleanQuestions = questions.map((q) => {
+      const isTheo = q.type === "theoretical";
+      if (isTheo) {
+        return {
+          id: q.id,
+          type: "theoretical",
+          text: q.text,
+          modelAnswer: q.modelAnswer || "",
+          rubric: Array.isArray(q.rubric) ? q.rubric : [],
+          points: Number(q.points) || 1,
+          allowMultiple: false,
+        };
+      }
       const ids = getCorrectIds(q);
       return {
         ...q,
+        type: "mcq",
         allowMultiple: Boolean(q.allowMultiple) || ids.length > 1,
         correctOptionIds: ids,
         correctOptionId: ids[0] || "a",
+        points: Number(q.points) || 1,
       };
     });
 
@@ -898,6 +988,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
         lessonId,
         title: quizTitle.trim(),
         durationMinutes: Number(durationMinutes) || 10,
+        difficulty: difficulty || "medium",
         questions: cleanQuestions,
       });
       toast.success("Quiz updated!");
@@ -907,6 +998,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
         lessonId,
         title: quizTitle.trim(),
         durationMinutes: Number(durationMinutes) || 10,
+        difficulty: difficulty || "medium",
         instructorId: selectedCourse?.instructorId || user.uid,
         questions: cleanQuestions,
         status: "draft",
@@ -1003,9 +1095,80 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
     setSubmittingQuiz(true);
     try {
       const qs = activeQuiz.questions || [];
+
+      // 1. Evaluate theoretical questions with AI
+      const theoQuestions = qs.filter((q) => q.type === "theoretical");
+      let theoEvaluations = {};
+      if (theoQuestions.length > 0) {
+        try {
+          const evalRes = await axios.post(
+            "http://localhost:3001/api/quiz/evaluate-answers",
+            { lang, answers, questions: qs },
+            { timeout: 35000 }
+          );
+          if (evalRes.data?.evaluations) {
+            theoEvaluations = evalRes.data.evaluations;
+          }
+        } catch (evalErr) {
+          console.warn("AI theoretical evaluation fallback:", evalErr);
+          for (const tq of theoQuestions) {
+            const studentAns = String(answers[tq.id] || "").trim();
+            const modelAns = String(tq.modelAnswer || "").trim().toLowerCase();
+            const words = studentAns.toLowerCase().split(/\s+/).filter((w) => w.length > 3);
+            const matched = words.filter((w) => modelAns.includes(w)).length;
+            const isOk = studentAns.length >= 15 && matched >= 2;
+            const isPartial = !isOk && studentAns.length >= 10 && matched >= 1;
+            theoEvaluations[tq.id] = {
+              isCorrect: isOk || isPartial,
+              gradeStatus: isOk ? "correct" : isPartial ? "partially_correct" : "incorrect",
+              score: isOk ? 1 : isPartial ? 0.5 : 0,
+              feedback: isOk
+                ? (lang === "ar" ? "إجابة ممتازة ودقيقة تغطي المفاهيم المطلوبة." : "Excellent response covering key concepts.")
+                : isPartial
+                ? (lang === "ar" ? "إجابة صحيحة جزئياً ولكن تنقصها بعض التفاصيل الدقيقة." : "Partially correct response, some details missing.")
+                : (lang === "ar" ? "الإجابة غير دقيقة أو لم تغطِ المعايير المطلوبة." : "Answer is incorrect or missed required criteria."),
+            };
+          }
+        }
+      }
+
+      // 2. Score questions & build breakdown
       let correctCount = 0;
       const wrong = [];
       const breakdown = qs.map((q) => {
+        if (q.type === "theoretical") {
+          const studentAns = String(answers[q.id] || "").trim();
+          const evalInfo = theoEvaluations[q.id] || {
+            isCorrect: false,
+            gradeStatus: "incorrect",
+            score: 0,
+            feedback: lang === "ar" ? "لم يتم تقديم إجابة." : "No answer provided.",
+          };
+          const pts = Number(evalInfo.score) || (evalInfo.isCorrect ? 1 : 0);
+          correctCount += pts;
+
+          if (!evalInfo.isCorrect || evalInfo.gradeStatus === "incorrect") {
+            wrong.push({
+              question: q.text,
+              correctAnswer: q.modelAnswer || "Model Answer",
+              studentAnswer: studentAns || (lang === "ar" ? "لم تتم الإجابة" : "No answer"),
+            });
+          }
+
+          return {
+            id: q.id,
+            type: "theoretical",
+            question: q.text,
+            chosenText: studentAns || (lang === "ar" ? "لم تتم الإجابة" : "No answer"),
+            correctText: q.modelAnswer || (lang === "ar" ? "موضحة في معايير الإجابة" : "Refer to model answer"),
+            isCorrect: evalInfo.isCorrect,
+            gradeStatus: evalInfo.gradeStatus || (evalInfo.isCorrect ? "correct" : "incorrect"),
+            score: pts,
+            aiFeedback: evalInfo.feedback || "",
+          };
+        }
+
+        // MCQ grading
         const expected = [...getCorrectIds(q)].sort();
         const rawChosen = answers[q.id];
         const chosen = (
@@ -1032,27 +1195,32 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
         }
         return {
           id: q.id,
+          type: "mcq",
           question: q.text,
           chosenText,
           correctText,
           isCorrect,
+          gradeStatus: isCorrect ? "correct" : "incorrect",
+          score: isCorrect ? 1 : 0,
         };
       });
-      const scorePct = qs.length > 0 ? Math.round((correctCount / qs.length) * 100) : 0;
+
+      const totalPossible = qs.length;
+      const scorePct = totalPossible > 0 ? Math.round((correctCount / totalPossible) * 100) : 0;
 
       let aiFeedback =
         wrong.length === 0
           ? lang === "ar"
-            ? "أداء ممتاز! أجبت على جميع الأسئلة بشكل صحيح."
-            : "Excellent work! You answered all questions correctly."
+            ? "أداء ممتاز! أجبت على جميع الأسئلة النظرية والاختيارية بشكل متقن."
+            : "Excellent work! You answered all questions and theoretical prompts accurately."
           : lang === "ar"
-          ? `راجِع النقاط التي أخطأت فيها (${wrong.length} أسئلة) وراجع محتوى الدرس قبل المحاولة التالية.`
+          ? `راجع النقاط التي تحتاج تحسيناً (${wrong.length} أسئلة) وراجع محتوى الدرس قبل المحاولة التالية.`
           : `Review the ${wrong.length} missed concept(s) in the lesson notes before your next attempt.`;
 
       try {
         const fbRes = await axios.post(
           "http://localhost:3001/api/feedback",
-          { lang, score: correctCount, totalQuestions: qs.length, wrongAnswers: wrong },
+          { lang, score: correctCount, totalQuestions: totalPossible, wrongAnswers: wrong },
           { timeout: 15000 }
         );
         if (fbRes.data?.feedback) aiFeedback = fbRes.data.feedback;
@@ -1069,7 +1237,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
         instructorId: activeQuiz.instructorId,
         score: scorePct,
         points: correctCount,
-        total: qs.length,
+        total: totalPossible,
         answers,
         aiFeedback,
       });
@@ -1079,14 +1247,14 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
         title: activeQuiz.title,
         score: scorePct,
         correctCount,
-        total: qs.length,
+        total: totalPossible,
         aiFeedback,
         breakdown,
       });
       toast.success(
         lang === "ar"
-          ? `تم تسليم الاختبار! النقاط: ${correctCount} / ${qs.length}`
-          : `Quiz submitted! Points: ${correctCount} / ${qs.length} pts`
+          ? `تم تسليم وتصحيح الاختبار بالذكاء الاصطناعي! النقاط: ${correctCount} / ${totalPossible}`
+          : `Quiz submitted and AI-evaluated! Points: ${correctCount} / ${totalPossible} pts`
       );
       activeQuizRef.current = null;
       setActiveQuiz(null);
@@ -1514,6 +1682,46 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
 
               <div className="space-y-4">
                 {(activeQuiz.questions || []).map((q, idx) => {
+                  if (q.type === "theoretical") {
+                    const currentAns = typeof answers[q.id] === "string" ? answers[q.id] : "";
+                    const wordCount = currentAns.trim() ? currentAns.trim().split(/\s+/).length : 0;
+                    return (
+                      <div
+                        key={q.id}
+                        className="p-5 rounded-2xl glass-subtle space-y-3 border border-indigo-400/30 shadow-sm"
+                      >
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div className="font-bold text-sm text-slate-900 dark:text-white">
+                            {idx + 1}. {q.text}
+                          </div>
+                          <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-400/30 flex items-center gap-1 shrink-0">
+                            <Sparkles className="h-3 w-3 text-amber-500" />
+                            {lang === "ar" ? "سؤال نظري / مقالي (تصحيح ذكي)" : "Theoretical / Essay (AI Graded)"}
+                          </span>
+                        </div>
+                        <textarea
+                          rows={4}
+                          value={currentAns}
+                          onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                          placeholder={
+                            lang === "ar"
+                              ? "اكتب إجابتك النظرية والشرح هنا بالتفصيل (سيقوم الذكاء الاصطناعي بمراجعة إجابتك وتقييم صحتها)..."
+                              : "Write your theoretical answer and explanation here in detail (AI will analyze and grade it)..."
+                          }
+                          className="w-full px-3.5 py-2.5 glass-input text-xs sm:text-sm leading-relaxed resize-y font-normal"
+                        />
+                        <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                          <span>
+                            {lang === "ar" ? "عدد الكلمات:" : "Word count:"} {wordCount}
+                          </span>
+                          <span className="text-indigo-600 dark:text-cyan-400 font-bold">
+                            {lang === "ar" ? "درجة السؤال: 1 نقطة" : "Question Mark: 1 pt"}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  }
+
                   const isMulti = Boolean(q.allowMultiple) || getCorrectIds(q).length > 1;
                   const selectedArr = Array.isArray(answers[q.id])
                     ? answers[q.id]
@@ -1670,7 +1878,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 sm:gap-5">
             <div>
               <label className="glass-form-label">{t("quizzes.course")}</label>
               <select
@@ -1717,6 +1925,24 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
             </div>
             <div>
               <label className="glass-form-label">
+                {lang === "ar" ? "مستوى الصعوبة" : "Difficulty"}
+              </label>
+              <select
+                value={difficulty}
+                onChange={(e) => {
+                  const newDiff = e.target.value;
+                  setDifficulty(newDiff);
+                  setDurationMinutes(calcAutoQuizTime(questions, newDiff));
+                }}
+                className="w-full px-3.5 py-2.5 glass-input text-sm font-semibold"
+              >
+                <option value="easy">{lang === "ar" ? "سهل (Easy)" : "Easy"}</option>
+                <option value="medium">{lang === "ar" ? "متوسط (Medium)" : "Medium"}</option>
+                <option value="hard">{lang === "ar" ? "صعب ومتقدم (Hard)" : "Hard"}</option>
+              </select>
+            </div>
+            <div>
+              <label className="glass-form-label">
                 {lang === "ar" ? "الوقت (بالدقائق)" : "Timer (Minutes)"}
               </label>
               <input
@@ -1728,120 +1954,214 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                 onChange={(e) => setDurationMinutes(e.target.value)}
                 className="w-full px-3.5 py-2.5 glass-input text-sm font-bold"
               />
+              <div className="flex items-center gap-1.5 mt-1.5">
+                <button
+                  type="button"
+                  onClick={() => setDurationMinutes(calcAutoQuizTime(questions, difficulty))}
+                  className="text-[10px] sm:text-[11px] px-2 py-0.5 rounded-lg bg-indigo-500/15 text-indigo-700 dark:text-cyan-300 font-bold hover:bg-indigo-500/25 flex items-center gap-1 transition-all cursor-pointer"
+                  title={
+                    lang === "ar"
+                      ? "تطبيق الوقت المقدر تلقائياً بناءً على مستوى الصعوبة ونوعية الأسئلة"
+                      : "Apply auto-calculated time based on difficulty and questions"
+                  }
+                >
+                  <Clock className="h-3 w-3" />
+                  <span>
+                    {lang === "ar" ? "تطبيق الوقت التلقائي:" : "Auto-Estimate:"} {calcAutoQuizTime(questions, difficulty)} {lang === "ar" ? "د" : "min"}
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 pt-1">
-            {/* Draft 10 Questions */}
-            <button
-              type="button"
-              onClick={() => handleDraftWithAI(10)}
-              disabled={Boolean(draftingAI)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white text-xs font-bold shadow-lg shadow-purple-500/25 active:scale-95 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-              title={
-                lang === "ar"
-                  ? "توليد 10 أسئلة اختيار من متعدد بواسطة ذكاء المنصة"
-                  : "Draft 10 MCQs with Platform AI"
-              }
-            >
-              {draftingAI === 10 ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Sparkles className="h-4 w-4" />
-              )}
-              {draftingAI === 10 ? (
-                <span>{lang === "ar" ? "جارٍ التوليد (10)..." : "Drafting 10..."}</span>
-              ) : (
-                <span>{t("quizzes.draft10WithAI") || "Draft 10 Questions with AI"}</span>
-              )}
-            </button>
+          {/* AI Drafting Toolbar & Question Composition */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-slate-200/40 dark:border-white/5">
+            <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+              {/* Draft 10 Questions */}
+              <button
+                type="button"
+                onClick={() => handleDraftWithAI(10)}
+                disabled={Boolean(draftingAI)}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white text-xs font-bold shadow-lg shadow-purple-500/25 active:scale-95 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                title={
+                  lang === "ar"
+                    ? "توليد 10 أسئلة (اختيار من متعدد + نظري) بواسطة ذكاء المنصة"
+                    : "Draft 10 questions (MCQ + Theoretical) with Platform AI"
+                }
+              >
+                {draftingAI === 10 ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Sparkles className="h-4 w-4" />
+                )}
+                {draftingAI === 10 ? (
+                  <span>{lang === "ar" ? "جارٍ التوليد (10)..." : "Drafting 10..."}</span>
+                ) : (
+                  <span>{t("quizzes.draft10WithAI") || "Draft 10 Questions with AI"}</span>
+                )}
+              </button>
 
-            {/* Draft 15 Questions */}
-            <button
-              type="button"
-              onClick={() => handleDraftWithAI(15)}
-              disabled={Boolean(draftingAI)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white text-xs font-bold shadow-lg shadow-violet-500/25 active:scale-95 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-              title={
-                lang === "ar"
-                  ? "توليد 15 سؤالاً اختيار من متعدد بواسطة ذكاء المنصة"
-                  : "Draft 15 MCQs with Platform AI"
-              }
-            >
-              {draftingAI === 15 ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Sparkles className="h-4 w-4" />
-              )}
-              {draftingAI === 15 ? (
-                <span>{lang === "ar" ? "جارٍ التوليد (15)..." : "Drafting 15..."}</span>
-              ) : (
-                <span>{t("quizzes.draft15WithAI") || "Draft 15 Questions with AI"}</span>
-              )}
-            </button>
+              {/* Draft 15 Questions */}
+              <button
+                type="button"
+                onClick={() => handleDraftWithAI(15)}
+                disabled={Boolean(draftingAI)}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white text-xs font-bold shadow-lg shadow-violet-500/25 active:scale-95 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                title={
+                  lang === "ar"
+                    ? "توليد 15 سؤالاً بواسطة ذكاء المنصة"
+                    : "Draft 15 questions with Platform AI"
+                }
+              >
+                {draftingAI === 15 ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Sparkles className="h-4 w-4" />
+                )}
+                {draftingAI === 15 ? (
+                  <span>{lang === "ar" ? "جارٍ التوليد (15)..." : "Drafting 15..."}</span>
+                ) : (
+                  <span>{t("quizzes.draft15WithAI") || "Draft 15 Questions with AI"}</span>
+                )}
+              </button>
 
-            {/* Draft 20 Questions */}
-            <button
-              type="button"
-              onClick={() => handleDraftWithAI(20)}
-              disabled={Boolean(draftingAI)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 hover:from-purple-500 hover:to-rose-500 text-white text-xs font-bold shadow-lg shadow-pink-500/25 active:scale-95 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-              title={
-                lang === "ar"
-                  ? "توليد 20 سؤالاً اختيار من متعدد بواسطة ذكاء المنصة"
-                  : "Draft 20 MCQs with Platform AI"
-              }
-            >
-              {draftingAI === 20 ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Sparkles className="h-4 w-4" />
-              )}
-              {draftingAI === 20 ? (
-                <span>{lang === "ar" ? "جارٍ التوليد (20)..." : "Drafting 20..."}</span>
-              ) : (
-                <span>{t("quizzes.draft20WithAI") || "Draft 20 Questions with AI"}</span>
-              )}
-            </button>
+              {/* Draft 20 Questions */}
+              <button
+                type="button"
+                onClick={() => handleDraftWithAI(20)}
+                disabled={Boolean(draftingAI)}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 hover:from-purple-500 hover:to-rose-500 text-white text-xs font-bold shadow-lg shadow-pink-500/25 active:scale-95 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                title={
+                  lang === "ar"
+                    ? "توليد 20 سؤالاً بواسطة ذكاء المنصة"
+                    : "Draft 20 questions with Platform AI"
+                }
+              >
+                {draftingAI === 20 ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Sparkles className="h-4 w-4" />
+                )}
+                {draftingAI === 20 ? (
+                  <span>{lang === "ar" ? "جارٍ التوليد (20)..." : "Drafting 20..."}</span>
+                ) : (
+                  <span>{t("quizzes.draft20WithAI") || "Draft 20 Questions with AI"}</span>
+                )}
+              </button>
+            </div>
 
-            {/* Manual Add Question */}
-            <button
-              type="button"
-              onClick={() => setQuestions((prev) => [...prev, EMPTY_QUESTION()])}
-              className="glass-btn-secondary flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-xs font-bold cursor-pointer"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              {t("quizzes.addQuestion")}
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-400/20 text-xs font-bold text-indigo-700 dark:text-cyan-300 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={includeTheoretical}
+                  onChange={(e) => setIncludeTheoretical(e.target.checked)}
+                  className="rounded text-indigo-600"
+                />
+                <span>{lang === "ar" ? "تضمين أسئلة نظرية ومقالية" : "Include Theoretical Questions"}</span>
+              </label>
+
+              {/* Add MCQ Question */}
+              <button
+                type="button"
+                onClick={() => {
+                  const next = [...questions, EMPTY_QUESTION("mcq")];
+                  setQuestions(next);
+                  setDurationMinutes(calcAutoQuizTime(next, difficulty));
+                }}
+                className="glass-btn-secondary flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-xs font-bold cursor-pointer"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                <span>{lang === "ar" ? "+ سؤال اختياري" : "+ Add MCQ"}</span>
+              </button>
+
+              {/* Add Theoretical Question */}
+              <button
+                type="button"
+                onClick={() => {
+                  const next = [...questions, EMPTY_QUESTION("theoretical")];
+                  setQuestions(next);
+                  setDurationMinutes(calcAutoQuizTime(next, difficulty));
+                }}
+                className="px-3.5 py-2 rounded-2xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/35 text-amber-800 dark:text-amber-200 flex items-center gap-1.5 text-xs font-bold transition-all cursor-pointer"
+              >
+                <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+                <span>{lang === "ar" ? "+ سؤال مقالي ونظري" : "+ Add Theoretical"}</span>
+              </button>
+            </div>
           </div>
 
           <div className="space-y-4">
             {questions.map((q, idx) => {
+              const isTheo = q.type === "theoretical";
               const correctIds = getCorrectIds(q);
               const isMulti = Boolean(q.allowMultiple) || correctIds.length > 1;
+
               return (
                 <div
                   key={q.id}
-                  className="p-5 rounded-2xl glass-subtle space-y-3.5 border border-white/80 dark:border-white/10"
+                  className={`p-5 rounded-2xl glass-subtle space-y-3.5 border ${
+                    isTheo ? "border-amber-400/40 bg-amber-500/[0.03]" : "border-white/80 dark:border-white/10"
+                  }`}
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="text-xs font-black uppercase tracking-wider text-indigo-700 dark:text-indigo-300">
-                      {t("quizzes.questionText")} #{idx + 1}
-                    </span>
-                    <div className="flex items-center gap-3">
-                      <label className="inline-flex items-center gap-1.5 text-xs font-semibold cursor-pointer text-sky-700 dark:text-sky-300">
-                        <input
-                          type="checkbox"
-                          checked={isMulti}
-                          onChange={() => toggleQuestionMode(idx)}
-                          className="rounded text-indigo-600 focus:ring-indigo-500"
-                        />
-                        {lang === "ar" ? "أكثر من إجابة صحيحة" : "Multiple Correct Answers"}
-                      </label>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-black uppercase tracking-wider text-indigo-700 dark:text-indigo-300">
+                        {t("quizzes.questionText")} #{idx + 1}
+                      </span>
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                          isTheo
+                            ? "bg-amber-500/20 text-amber-800 dark:text-amber-200 border border-amber-400/40"
+                            : "bg-sky-500/20 text-sky-800 dark:text-sky-200 border border-sky-400/40"
+                        }`}
+                      >
+                        {isTheo
+                          ? lang === "ar"
+                            ? "سؤال نظري / مقالي (تصحيح AI)"
+                            : "Theoretical / Essay (AI Graded)"
+                          : lang === "ar"
+                          ? "اختيار من متعدد (MCQ)"
+                          : "Multiple Choice (MCQ)"}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2.5">
+                      {/* Convert question type button */}
+                      <button
+                        type="button"
+                        onClick={() => toggleQuestionType(idx)}
+                        className="text-[11px] text-indigo-600 dark:text-cyan-400 font-semibold hover:underline cursor-pointer"
+                      >
+                        {isTheo
+                          ? lang === "ar"
+                            ? "تحويل لاختيار من متعدد"
+                            : "Convert to MCQ"
+                          : lang === "ar"
+                          ? "تحويل لسؤال نظري/مقالي"
+                          : "Convert to Theoretical"}
+                      </button>
+
+                      {!isTheo && (
+                        <label className="inline-flex items-center gap-1.5 text-xs font-semibold cursor-pointer text-sky-700 dark:text-sky-300">
+                          <input
+                            type="checkbox"
+                            checked={isMulti}
+                            onChange={() => toggleQuestionMode(idx)}
+                            className="rounded text-indigo-600 focus:ring-indigo-500"
+                          />
+                          {lang === "ar" ? "أكثر من إجابة صحيحة" : "Multiple Correct Answers"}
+                        </label>
+                      )}
+
                       {questions.length > 1 && (
                         <button
                           type="button"
-                          onClick={() => setQuestions((prev) => prev.filter((_, i) => i !== idx))}
+                          onClick={() => {
+                            const next = questions.filter((_, i) => i !== idx);
+                            setQuestions(next);
+                            setDurationMinutes(calcAutoQuizTime(next, difficulty));
+                          }}
                           className="text-xs text-rose-600 dark:text-rose-400 font-semibold hover:underline cursor-pointer"
                         >
                           {t("app.delete")}
@@ -1849,6 +2169,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                       )}
                     </div>
                   </div>
+
                   <input
                     required
                     value={q.text}
@@ -1857,36 +2178,101 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                       next[idx].text = e.target.value;
                       setQuestions(next);
                     }}
-                    placeholder="Enter MCQ question..."
-                    className="w-full px-3.5 py-2.5 glass-input text-sm"
+                    placeholder={
+                      isTheo
+                        ? lang === "ar"
+                          ? "أدخل نص السؤال النظري أو المقالي (مثال: اشرح الفرق بين التعلم الموجه وغير الموجه)..."
+                          : "Enter theoretical question prompt (e.g. Explain the difference between supervised and unsupervised learning)..."
+                        : "Enter MCQ question..."
+                    }
+                    className="w-full px-3.5 py-2.5 glass-input text-sm font-semibold"
                   />
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    {q.options.map((opt, oIdx) => {
-                      const checked = correctIds.includes(opt.id);
-                      return (
-                        <div key={opt.id} className="flex items-center gap-2 p-1.5 rounded-xl bg-white/40 dark:bg-slate-800/40 border border-slate-200/50 dark:border-white/5">
-                          <input
-                            type={isMulti ? "checkbox" : "radio"}
-                            name={`correct_${q.id}`}
-                            checked={checked}
-                            onChange={() => toggleCorrectOption(idx, opt.id)}
-                            className="ms-2 cursor-pointer"
-                          />
-                          <input
-                            required
-                            value={opt.text}
-                            onChange={(e) => {
-                              const next = [...questions];
-                              next[idx].options[oIdx].text = e.target.value;
-                              setQuestions(next);
-                            }}
-                            placeholder={`${t("quizzes.option")} ${opt.id.toUpperCase()}`}
-                            className="flex-1 px-3 py-1.5 glass-input text-xs"
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
+
+                  {/* Theoretical fields: Model Answer & Rubric */}
+                  {isTheo ? (
+                    <div className="space-y-3 pt-1">
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                          {lang === "ar"
+                            ? "الإجابة النموذجية المعتمدة (مرجع التصحيح التلقائي بالذكاء الاصطناعي):"
+                            : "Model Answer (Reference for AI Grading):"}
+                        </label>
+                        <textarea
+                          rows={3}
+                          required
+                          value={q.modelAnswer || ""}
+                          onChange={(e) => {
+                            const next = [...questions];
+                            next[idx].modelAnswer = e.target.value;
+                            setQuestions(next);
+                          }}
+                          placeholder={
+                            lang === "ar"
+                              ? "اكتب هنا الإجابة النموذجية الوافية التي يجب على الطالب تغطية عناصرها..."
+                              : "Enter the comprehensive model answer covering the key concepts expected from students..."
+                          }
+                          className="w-full px-3.5 py-2 glass-input text-xs sm:text-[13px] leading-relaxed resize-y"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                          {lang === "ar"
+                            ? "الكلمات المفتاحية ومعايير التقييم الأساسية (افصل بينها بفواصل):"
+                            : "Key Concepts & Rubric Criteria (comma-separated):"}
+                        </label>
+                        <input
+                          value={Array.isArray(q.rubric) ? q.rubric.join(", ") : q.rubric || ""}
+                          onChange={(e) => {
+                            const next = [...questions];
+                            next[idx].rubric = e.target.value
+                              .split(/[,،]+/)
+                              .map((s) => s.trim())
+                              .filter(Boolean);
+                            setQuestions(next);
+                          }}
+                          placeholder={
+                            lang === "ar"
+                              ? "مثال: بيانات مصنفة، مخرجات معروفة، تصنيف، تنبؤ"
+                              : "e.g. labeled data, known targets, classification, regression"
+                          }
+                          className="w-full px-3.5 py-2 glass-input text-xs"
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    /* MCQ options grid */
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      {q.options.map((opt, oIdx) => {
+                        const checked = correctIds.includes(opt.id);
+                        return (
+                          <div
+                            key={opt.id}
+                            className="flex items-center gap-2 p-1.5 rounded-xl bg-white/40 dark:bg-slate-800/40 border border-slate-200/50 dark:border-white/5"
+                          >
+                            <input
+                              type={isMulti ? "checkbox" : "radio"}
+                              name={`correct_${q.id}`}
+                              checked={checked}
+                              onChange={() => toggleCorrectOption(idx, opt.id)}
+                              className="ms-2 cursor-pointer"
+                            />
+                            <input
+                              required
+                              value={opt.text}
+                              onChange={(e) => {
+                                const next = [...questions];
+                                next[idx].options[oIdx].text = e.target.value;
+                                setQuestions(next);
+                              }}
+                              placeholder={`${t("quizzes.option")} ${opt.id.toUpperCase()}`}
+                              className="flex-1 px-3 py-1.5 glass-input text-xs"
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -1946,25 +2332,69 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {lastReview.breakdown.map((item, idx) => (
                 <div
                   key={item.id}
-                  className="p-3 rounded-xl glass-subtle text-xs flex items-start gap-2.5"
+                  className="p-3.5 rounded-2xl glass-subtle text-xs flex flex-col gap-1.5 border border-slate-200/50 dark:border-white/5"
                 >
-                  {item.isCorrect ? (
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
-                  ) : (
-                    <XCircle className="h-4 w-4 text-rose-600 shrink-0 mt-0.5" />
-                  )}
-                  <div>
-                    <div className="font-semibold">
-                      {idx + 1}. {item.question}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-start gap-2 min-w-0">
+                      {item.isCorrect ? (
+                        <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+                      ) : item.gradeStatus === "partially_correct" ? (
+                        <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                      ) : (
+                        <XCircle className="h-4 w-4 text-rose-600 shrink-0 mt-0.5" />
+                      )}
+                      <div className="font-bold text-slate-900 dark:text-white">
+                        {idx + 1}. {item.question}
+                      </div>
                     </div>
-                    <div className="text-slate-500 mt-0.5">
-                      Your answer: <strong>{item.chosenText}</strong> · Correct:{" "}
-                      <strong>{item.correctText}</strong>
+                    {item.type === "theoretical" && (
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${
+                          item.gradeStatus === "correct"
+                            ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-400/30"
+                            : item.gradeStatus === "partially_correct"
+                            ? "bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-400/30"
+                            : "bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-400/30"
+                        }`}
+                      >
+                        {item.gradeStatus === "correct"
+                          ? lang === "ar"
+                            ? "إجابة صحيحة (1 نقطة)"
+                            : "Correct (1 pt)"
+                          : item.gradeStatus === "partially_correct"
+                          ? lang === "ar"
+                            ? "صحيحة جزئياً (0.5 نقطة)"
+                            : "Partially Correct (0.5 pt)"
+                          : lang === "ar"
+                          ? "إجابة غير صحيحة (0 نقطة)"
+                          : "Incorrect (0 pts)"}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="text-slate-600 dark:text-slate-300 ps-6 space-y-1">
+                    <div>
+                      {lang === "ar" ? "إجابتك:" : "Your answer:"}{" "}
+                      <strong className="text-slate-900 dark:text-white">{item.chosenText}</strong>
                     </div>
+                    {item.correctText && (
+                      <div className="text-slate-500 text-[11.5px]">
+                        {lang === "ar" ? "الإجابة النموذجية:" : "Model Answer:"}{" "}
+                        <strong className="text-emerald-700 dark:text-emerald-300">{item.correctText}</strong>
+                      </div>
+                    )}
+                    {item.aiFeedback && (
+                      <div className="mt-1 p-2 rounded-xl bg-indigo-500/10 border border-indigo-400/20 text-indigo-900 dark:text-cyan-200 text-[11px] leading-relaxed">
+                        <span className="font-bold">
+                          {lang === "ar" ? "💡 تصحيح وتقييم الذكاء الاصطناعي:" : "💡 AI Evaluation & Feedback:"}
+                        </span>{" "}
+                        {item.aiFeedback}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

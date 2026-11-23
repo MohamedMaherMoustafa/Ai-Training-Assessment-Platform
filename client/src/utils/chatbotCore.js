@@ -78,10 +78,10 @@ export async function callDirectAI({
         ? "يرجى الاستماع بدقة إلى التسجيل الصوتي المرفق، فهم سؤالي أو مسألتي بالكامل، وتقديم إجابة تعليمية وافية ومفصلة وشاملة."
         : "Please listen carefully to the attached voice recording, transcribe and understand my request or question, and provide a thorough, accurate educational answer."
       : attachments.length > 0
-      ? lang === "ar"
-        ? "يرجى تحليل المرفق وشرحه بالتفصيل والإجابة على أي محتوى ظاهر فيه."
-        : "Please analyze the attached file thoroughly, explain what it is, and answer any questions about it."
-      : "Hello");
+        ? lang === "ar"
+          ? "يرجى تحليل المرفق وشرحه بالتفصيل والإجابة على أي محتوى ظاهر فيه."
+          : "Please analyze the attached file thoroughly, explain what it is, and answer any questions about it."
+        : "Hello");
 
   parts.push({ text: promptText });
 
@@ -206,8 +206,8 @@ function buildFallbackQuestions(text, lang = "en", count = 5) {
         cand && cand !== keyWord
           ? cand
           : lang === "ar"
-          ? `مصطلح بديل ${j}`
-          : `Alternative concept ${j}`
+            ? `مصطلح بديل ${j}`
+            : `Alternative concept ${j}`
       );
     }
 
@@ -455,11 +455,11 @@ function searchLessonContentQA(message, dataset, lang) {
 
   return lang === "ar"
     ? `من درس "${bestHit.lessonTitle}" (${bestHit.courseTitle}):\n${bestHit.excerpts
-        .map((e) => `• ${e}`)
-        .join("\n")}`
+      .map((e) => `• ${e}`)
+      .join("\n")}`
     : `From lesson "${bestHit.lessonTitle}" (${bestHit.courseTitle}):\n${bestHit.excerpts
-        .map((e) => `• ${e}`)
-        .join("\n")}`;
+      .map((e) => `• ${e}`)
+      .join("\n")}`;
 }
 
 function searchPlatformKB(message, lang) {
@@ -507,9 +507,8 @@ export async function executeDirectQuizCreation({
   const sourceText = (
     lesson?.text && lesson.text.trim().length >= 20
       ? lesson.text
-      : `${lesson?.title || ""} ${
-          course?.description?.[lang] || course?.description?.en || course?.title?.en || ""
-        }`
+      : `${lesson?.title || ""} ${course?.description?.[lang] || course?.description?.en || course?.title?.en || ""
+      }`
   ).trim();
 
   let generatedQuestions = [];
@@ -525,11 +524,16 @@ export async function executeDirectQuizCreation({
           lang,
           courseId: course.id,
           count,
+          includeTheoretical: true,
+          difficulty: "medium",
         },
         { timeout: 45000 }
       );
       if (Array.isArray(res.data?.questions) && res.data.questions.length > 0) {
         generatedQuestions = res.data.questions;
+        if (res.data.estimatedTimeMinutes && !explicitAction?.durationMinutes) {
+          durationMinutes = res.data.estimatedTimeMinutes;
+        }
       }
     } catch {
       // fallback below
@@ -926,8 +930,8 @@ export async function processChatbotMessageWithDataset({
         b.top5.length > 0
           ? b.top5.map((x, idx) => `#${idx + 1} ${x.name} (${x.pts} pts)`).join(" | ")
           : lang === "ar"
-          ? "لا توجد نقاط بعد"
-          : "No scores yet";
+            ? "لا توجد نقاط بعد"
+            : "No scores yet";
       return `• ${b.courseTitle}: ${rankStr}`;
     });
     return {

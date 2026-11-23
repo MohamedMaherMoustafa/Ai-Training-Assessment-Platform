@@ -353,18 +353,26 @@ The assignments feature offers flexible solving modes for students (download to 
 #### 6.4.2 Active Quiz Player & Floating PiP
 - **Top Bar:** Progress bar, real-time countdown timer (turns amber at 2 min, pulsing red at 1 min), "Submit Quiz" action.
 - **Floating Top-Center PiP Window:** Persistent 160×110px mirrored live video feed anchored at `top: 14px; left: 50%; transform: translateX(-50%)` with glowing red `LIVE` badge. Kept completely clear of questions and answer options.
-- **Question Card:** Question prompt in EN/AR, code snippet / diagram box, answer choices (radio for single-select, checkbox for multi-select).
+- **Dual Question Typologies:**
+  - *Multiple Choice (MCQ):* Single-select radio or multi-select checkbox choices with option badges.
+  - *Theoretical / Conceptual Questions:* Dedicated rich textareas allowing students to write out long-form explanations with live word counts, graded automatically by AI against model criteria.
 - **Question Navigator Grid:** Numbered buttons (1..N) indicating answered (green), current (indigo), and unanswered (slate).
 
-#### 6.4.3 Anti-Cheating & Computer Vision Security Suite
+#### 6.4.3 Quiz Builder, Difficulty & Auto-Estimated Timer
+- **Difficulty Selection:** `Easy`, `Medium`, `Hard`.
+- **Auto-Calculated Estimated Time:** Real-time formula estimating completion time dynamically from difficulty and question mix (MCQ vs. Theoretical), applied with one click or auto-assigned during AI quiz generation.
+- **Theoretical Question Authoring:** Teachers can specify the question prompt, expected model answer (`الإجابة النموذجية`), and key rubric criteria keywords.
+
+#### 6.4.4 Anti-Cheating & Computer Vision Security Suite
 1. **On-Device Real-Time Mobile Phone Detection:** Powered by TensorFlow.js (`@tensorflow/tfjs`) and COCO-SSD (`@tensorflow-models/coco-ssd`). Detecting a `cell phone` triggers **immediate first-offense termination** without grace warnings.
 2. **Instant Camera Covering & Blackout Detection:** Canvas luminance and texture variance analysis (`avgBrightness < 35`, `stdDev < 15`). If the student covers the camera lens or the screen goes black for ~0.9–1.0 second, the quiz terminates immediately.
 3. **Camera Disconnect Protection:** Disconnecting the camera triggers 1 warning; a second disconnect causes immediate disqualification.
 4. **Anti-Screenshot & Privacy Shield (Strict 2-Strike System):** Blocks right-click/copy/cut, intercepts `PrintScreen`, snipping shortcuts (`Win+Shift+S`, `Cmd+Shift+3/4/5`), `Ctrl+P`, `F12`, tab switching, and window blur to hide questions behind a blackout privacy shield and wipe clipboard data.
 5. **Fullscreen Cheating Violation Overlay (`z-index: 100010`):** Unmissable alert dialog communicating the exact reason for termination and permanently locking re-entry until approved by the instructor.
 
-#### 6.4.4 Quiz Results & AI Explanations
+#### 6.4.5 Quiz Results & AI Theoretical Grading
 - Displays score percentage, earned integer points, and per-question correctness indicator.
+- **AI Theoretical Correction:** Grades student written responses (`Correct / 1 pt`, `Partially Correct / 0.5 pt`, `Incorrect / 0 pts`), displaying the student's answer, reference model answer, and detailed AI feedback explaining what was accurate and what was missing.
 - Interactive AI explanation card for each incorrect answer explaining why the chosen option was wrong and why the correct answer is right.
 - "Request Retake" button for disqualified or low-scoring students.
 
