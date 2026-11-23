@@ -350,10 +350,10 @@ export default function PlatformChatbotWidget() {
       const options = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
         ? { mimeType: "audio/webm;codecs=opus" }
         : MediaRecorder.isTypeSupported("audio/webm")
-        ? { mimeType: "audio/webm" }
-        : MediaRecorder.isTypeSupported("audio/mp4")
-        ? { mimeType: "audio/mp4" }
-        : {};
+          ? { mimeType: "audio/webm" }
+          : MediaRecorder.isTypeSupported("audio/mp4")
+            ? { mimeType: "audio/mp4" }
+            : {};
 
       const recorder = new MediaRecorder(stream, options);
       mediaRecorderRef.current = recorder;
@@ -534,55 +534,55 @@ export default function PlatformChatbotWidget() {
   const starterChips =
     user?.role === "instructor" || user?.role === "admin"
       ? [
-          {
-            label: lang === "ar" ? "إنشاء اختبار على درس" : "Make a quiz on a lesson",
-            prompt:
-              lang === "ar"
-                ? "اعمل اختبار للطلاب على درس"
-                : "Make a quiz for students on lesson",
-            action: { type: "request_create_quiz" },
-          },
-          {
-            label: lang === "ar" ? "تلخيص درس" : "Summarize a lesson",
-            prompt: lang === "ar" ? "لخص لي درس" : "Summarize a lesson",
-            action: { type: "request_summarize_lessons" },
-          },
-          {
-            label: lang === "ar" ? "بيانات المقررات والطلاب" : "Courses & students summary",
-            prompt:
-              lang === "ar"
-                ? "اعرض ملخص المقررات والطلاب والنقاط"
-                : "Show summary of all courses, lessons, and student points",
-          },
-          {
-            label: lang === "ar" ? "تحليل ملف درس أو مسألة" : "Analyze a lesson / diagram",
-            prompt:
-              lang === "ar"
-                ? "كيف يمكنك تحليل صورة مسألة أو ملف PDF تعليمي؟"
-                : "How do you analyze a diagram or educational PDF document?",
-          },
-        ]
+        {
+          label: lang === "ar" ? "إنشاء اختبار على درس" : "Make a quiz on a lesson",
+          prompt:
+            lang === "ar"
+              ? "اعمل اختبار للطلاب على درس"
+              : "Make a quiz for students on lesson",
+          action: { type: "request_create_quiz" },
+        },
+        {
+          label: lang === "ar" ? "تلخيص درس" : "Summarize a lesson",
+          prompt: lang === "ar" ? "لخص لي درس" : "Summarize a lesson",
+          action: { type: "request_summarize_lessons" },
+        },
+        {
+          label: lang === "ar" ? "بيانات المقررات والطلاب" : "Courses & students summary",
+          prompt:
+            lang === "ar"
+              ? "اعرض ملخص المقررات والطلاب والنقاط"
+              : "Show summary of all courses, lessons, and student points",
+        },
+        {
+          label: lang === "ar" ? "تحليل ملف درس أو مسألة" : "Analyze a lesson / diagram",
+          prompt:
+            lang === "ar"
+              ? "كيف يمكنك تحليل صورة مسألة أو ملف PDF تعليمي؟"
+              : "How do you analyze a diagram or educational PDF document?",
+        },
+      ]
       : [
-          {
-            label: lang === "ar" ? "تلخيص درس" : "Summarize a lesson",
-            prompt: lang === "ar" ? "لخص لي درس" : "Summarize a lesson",
-            action: { type: "request_summarize_lessons" },
-          },
-          {
-            label: lang === "ar" ? "نقاطي ودرجاتي" : "My points & marks",
-            prompt:
-              lang === "ar"
-                ? "كم مجموع نقاطي ودرجاتي في الاختبارات والواجبات؟"
-                : "Show my quiz points, grades, and assignment marks",
-          },
-          {
-            label: lang === "ar" ? "حل مسألة من صورة" : "Solve from photo",
-            prompt:
-              lang === "ar"
-                ? "أريد إرسال صورة مسألة لشرحها خطوة بخطوة"
-                : "I want to attach a photo of a problem for step-by-step explanation",
-          },
-        ];
+        {
+          label: lang === "ar" ? "تلخيص درس" : "Summarize a lesson",
+          prompt: lang === "ar" ? "لخص لي درس" : "Summarize a lesson",
+          action: { type: "request_summarize_lessons" },
+        },
+        {
+          label: lang === "ar" ? "نقاطي ودرجاتي" : "My points & marks",
+          prompt:
+            lang === "ar"
+              ? "كم مجموع نقاطي ودرجاتي في الاختبارات والواجبات؟"
+              : "Show my quiz points, grades, and assignment marks",
+        },
+        {
+          label: lang === "ar" ? "حل مسألة من صورة" : "Solve from photo",
+          prompt:
+            lang === "ar"
+              ? "أريد إرسال صورة مسألة لشرحها خطوة بخطوة"
+              : "I want to attach a photo of a problem for step-by-step explanation",
+        },
+      ];
 
   const handleSend = async (customText = null, explicitAction = null) => {
     const textToSend = String(customText !== null ? customText : input).trim();
@@ -750,9 +750,8 @@ export default function PlatformChatbotWidget() {
 
   return (
     <div
-      className={`fixed z-40 transition-all duration-200 ${
-        open ? "bottom-1 sm:bottom-2 end-2 sm:end-4" : "bottom-0 end-2 sm:end-4"
-      }`}
+      className={`fixed z-40 transition-all duration-200 ${open ? "bottom-1 sm:bottom-2 end-2 sm:end-4" : "bottom-0 end-2 sm:end-4"
+        }`}
     >
       {!open ? (
         <button
@@ -764,14 +763,14 @@ export default function PlatformChatbotWidget() {
         >
           {/* Robot Mascot Launcher */}
           <div className="flex flex-col items-center relative">
-            <div className="drop-shadow-[0_6px_16px_rgba(2,132,199,0.38)]">
+            <div className="drop-shadow-[0_8px_18px_rgba(2,132,199,0.4)]">
               <svg
-                width="76"
-                height="82"
+                width="88"
+                height="94"
                 viewBox="0 0 118 104"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
-                className="w-[66px] h-[72px] sm:w-[74px] sm:h-[80px] overflow-visible"
+                className="w-[78px] h-[84px] sm:w-[86px] sm:h-[92px] overflow-visible"
               >
                 <defs>
                   <linearGradient id="botBodyGrad" x1="18" y1="16" x2="62" y2="66" gradientUnits="userSpaceOnUse">
@@ -864,16 +863,15 @@ export default function PlatformChatbotWidget() {
                 <path d="M38 33.5C40 35.5 46 35.5 48 33.5" stroke="#34d399" strokeWidth="2" strokeLinecap="round" />
               </svg>
             </div>
-            <div className="w-13 sm:w-14 h-2.5 -mt-0.5 rounded-full bg-slate-900/30 dark:bg-sky-400/25 blur-[2.5px]" />
+            <div className="w-14 sm:w-16 h-3 -mt-0.5 rounded-full bg-slate-900/30 dark:bg-sky-400/25 blur-[3px]" />
           </div>
         </button>
       ) : (
         <div
-          className={`chatbot-pop-in bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-[28px] shadow-2xl border border-slate-200/80 dark:border-white/10 flex flex-col overflow-hidden transition-all duration-200 ${
-            expanded
-              ? "w-[94vw] sm:w-[620px] h-[86vh]"
-              : "w-[94vw] sm:w-[440px] h-[580px]"
-          }`}
+          className={`chatbot-pop-in bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-[28px] shadow-2xl border border-slate-200/80 dark:border-white/10 flex flex-col overflow-hidden transition-all duration-200 ${expanded
+            ? "w-[94vw] sm:w-[620px] h-[86vh]"
+            : "w-[94vw] sm:w-[440px] h-[580px]"
+            }`}
         >
           {/* Header */}
           <div className="px-4 py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white flex items-center justify-between gap-2 shadow-sm">
@@ -929,17 +927,15 @@ export default function PlatformChatbotWidget() {
             {messages.map((m) => (
               <div
                 key={m.id}
-                className={`flex flex-col ${
-                  m.sender === "user" ? "items-end" : "items-start"
-                }`}
+                className={`flex flex-col ${m.sender === "user" ? "items-end" : "items-start"
+                  }`}
               >
                 {/* Bubble Container */}
                 <div
-                  className={`max-w-[88%] sm:max-w-[85%] rounded-[22px] px-4 py-3 shadow-sm transition-all ${
-                    m.sender === "user"
-                      ? "rounded-tr-none rtl:rounded-tr-[22px] rtl:rounded-tl-none bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-indigo-500/20"
-                      : "rounded-tl-none rtl:rounded-tl-[22px] rtl:rounded-tr-none bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 border border-slate-200/80 dark:border-white/10"
-                  }`}
+                  className={`max-w-[88%] sm:max-w-[85%] rounded-[22px] px-4 py-3 shadow-sm transition-all ${m.sender === "user"
+                    ? "rounded-tr-none rtl:rounded-tr-[22px] rtl:rounded-tl-none bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-indigo-500/20"
+                    : "rounded-tl-none rtl:rounded-tl-[22px] rtl:rounded-tr-none bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 border border-slate-200/80 dark:border-white/10"
+                    }`}
                 >
                   {/* Attached media display in user bubble */}
                   {Array.isArray(m.attachments) && m.attachments.length > 0 && (
@@ -1028,19 +1024,18 @@ export default function PlatformChatbotWidget() {
                               m.showTranslation && m.translatedText ? m.translatedText : m.text
                             )
                           }
-                          className={`hover:text-slate-700 dark:hover:text-slate-200 flex items-center gap-1 cursor-pointer transition-colors ${
-                            speakingMsgId === m.id
-                              ? "text-indigo-600 dark:text-cyan-400 font-bold animate-pulse"
-                              : ""
-                          }`}
+                          className={`hover:text-slate-700 dark:hover:text-slate-200 flex items-center gap-1 cursor-pointer transition-colors ${speakingMsgId === m.id
+                            ? "text-indigo-600 dark:text-cyan-400 font-bold animate-pulse"
+                            : ""
+                            }`}
                           title={
                             speakingMsgId === m.id
                               ? lang === "ar"
                                 ? "إيقاف الصوت"
                                 : "Stop voice"
                               : lang === "ar"
-                              ? "قراءة صوتية"
-                              : "Read aloud"
+                                ? "قراءة صوتية"
+                                : "Read aloud"
                           }
                         >
                           {speakingMsgId === m.id ? (
@@ -1054,8 +1049,8 @@ export default function PlatformChatbotWidget() {
                                 ? "إيقاف"
                                 : "Stop"
                               : lang === "ar"
-                              ? "صوت"
-                              : "Voice"}
+                                ? "صوت"
+                                : "Voice"}
                           </span>
                         </button>
 
@@ -1064,19 +1059,18 @@ export default function PlatformChatbotWidget() {
                           type="button"
                           onClick={() => handleTranslateMessage(m.id)}
                           disabled={translatingMsgId === m.id}
-                          className={`flex items-center gap-1 px-1.5 py-0.5 rounded transition-all cursor-pointer ${
-                            m.showTranslation
-                              ? "bg-indigo-500/15 text-indigo-600 dark:text-cyan-400 font-bold"
-                              : "hover:text-slate-700 dark:hover:text-slate-200"
-                          }`}
+                          className={`flex items-center gap-1 px-1.5 py-0.5 rounded transition-all cursor-pointer ${m.showTranslation
+                            ? "bg-indigo-500/15 text-indigo-600 dark:text-cyan-400 font-bold"
+                            : "hover:text-slate-700 dark:hover:text-slate-200"
+                            }`}
                           title={
                             m.showTranslation
                               ? lang === "ar"
                                 ? "عرض النص الأصلي"
                                 : "Show original English"
                               : lang === "ar"
-                              ? "ترجمة الرد إلى العربية"
-                              : "Translate reply to Arabic"
+                                ? "ترجمة الرد إلى العربية"
+                                : "Translate reply to Arabic"
                           }
                         >
                           {translatingMsgId === m.id ? (
@@ -1090,8 +1084,8 @@ export default function PlatformChatbotWidget() {
                                 ? "الأصل"
                                 : "Original"
                               : lang === "ar"
-                              ? "ترجمة"
-                              : "Translate to Arabic"}
+                                ? "ترجمة"
+                                : "Translate to Arabic"}
                           </span>
                         </button>
 
@@ -1288,14 +1282,13 @@ export default function PlatformChatbotWidget() {
                     ? "إيقاف التسجيل"
                     : "Stop recording"
                   : lang === "ar"
-                  ? "تسجيل استفسار صوتي"
-                  : "Record voice query"
+                    ? "تسجيل استفسار صوتي"
+                    : "Record voice query"
               }
-              className={`p-2.5 rounded-2xl border transition-all shrink-0 cursor-pointer ${
-                recording
-                  ? "border-rose-500 bg-rose-500 text-white shadow-md shadow-rose-500/30 animate-pulse"
-                  : "border-slate-200 dark:border-white/10 hover:border-emerald-500 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/30 text-slate-600 dark:text-slate-300"
-              }`}
+              className={`p-2.5 rounded-2xl border transition-all shrink-0 cursor-pointer ${recording
+                ? "border-rose-500 bg-rose-500 text-white shadow-md shadow-rose-500/30 animate-pulse"
+                : "border-slate-200 dark:border-white/10 hover:border-emerald-500 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/30 text-slate-600 dark:text-slate-300"
+                }`}
             >
               <Mic className="h-4 w-4" />
             </button>
