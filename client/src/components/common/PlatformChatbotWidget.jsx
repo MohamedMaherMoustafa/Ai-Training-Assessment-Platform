@@ -762,16 +762,16 @@ export default function PlatformChatbotWidget() {
           title={lang === "ar" ? "اضغط للتحدث مع المساعد الذكي أثر AI" : "Click to open Athar AI Assistant"}
           aria-label="Open AI Robot Chatbot"
         >
-          {/* Compact Static Robot Mascot */}
+          {/* Robot Mascot Launcher */}
           <div className="flex flex-col items-center relative">
-            <div className="drop-shadow-[0_4px_12px_rgba(2,132,199,0.35)]">
+            <div className="drop-shadow-[0_6px_16px_rgba(2,132,199,0.38)]">
               <svg
-                width="62"
-                height="68"
+                width="76"
+                height="82"
                 viewBox="0 0 118 104"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
-                className="w-[50px] h-[56px] sm:w-[58px] sm:h-[64px] overflow-visible"
+                className="w-[66px] h-[72px] sm:w-[74px] sm:h-[80px] overflow-visible"
               >
                 <defs>
                   <linearGradient id="botBodyGrad" x1="18" y1="16" x2="62" y2="66" gradientUnits="userSpaceOnUse">
@@ -864,7 +864,7 @@ export default function PlatformChatbotWidget() {
                 <path d="M38 33.5C40 35.5 46 35.5 48 33.5" stroke="#34d399" strokeWidth="2" strokeLinecap="round" />
               </svg>
             </div>
-            <div className="w-10 sm:w-11 h-2 -mt-0.5 rounded-full bg-slate-900/30 dark:bg-sky-400/25 blur-[2px]" />
+            <div className="w-13 sm:w-14 h-2.5 -mt-0.5 rounded-full bg-slate-900/30 dark:bg-sky-400/25 blur-[2.5px]" />
           </div>
         </button>
       ) : (
