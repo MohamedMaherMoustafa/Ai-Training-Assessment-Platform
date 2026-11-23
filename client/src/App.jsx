@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -9,11 +9,22 @@ import { UploadProgressProvider } from "./context/UploadProgressContext";
 import { playClickSound } from "./utils/soundEffects";
 import RoleGuard from "./components/common/RoleGuard";
 import RobotIntroSplash from "./components/common/RobotIntroSplash";
-import LoginPage from "./features/auth/LoginPage";
-import RegisterPage from "./features/auth/RegisterPage";
-import AdminDashboard from "./features/admin/AdminDashboard";
-import InstructorDashboard from "./features/instructor/InstructorDashboard";
-import StudentDashboard from "./features/student/StudentDashboard";
+import PlatformCachePrompt from "./components/common/PlatformCachePrompt";
+
+// High-performance code-split lazy routes
+const LoginPage = lazy(() => import("./features/auth/LoginPage"));
+const RegisterPage = lazy(() => import("./features/auth/RegisterPage"));
+const AdminDashboard = lazy(() => import("./features/admin/AdminDashboard"));
+const InstructorDashboard = lazy(() => import("./features/instructor/InstructorDashboard"));
+const StudentDashboard = lazy(() => import("./features/student/StudentDashboard"));
+
+function PageLoader() {
+  return (
+    <div className="min-h-[60vh] flex items-center justify-center">
+      <div className="h-10 w-10 rounded-full border-3 border-indigo-500/20 border-t-indigo-500 animate-spin" />
+    </div>
+  );
+}
 
 function RootRedirect() {
   const { user, loading } = useAuth();
@@ -46,6 +57,7 @@ export default function App() {
           <PopupProvider>
             <UploadProgressProvider>
               {showIntro && <RobotIntroSplash onComplete={() => setShowIntro(false)} />}
+              <PlatformCachePrompt />
               <BrowserRouter>
                 <Toaster
                   position="top-center"
@@ -65,40 +77,42 @@ export default function App() {
                     },
                   }}
                 />
-                <Routes>
-                  <Route path="/" element={<RootRedirect />} />
-                  <Route path="/login" element={<LoginPage />} />
-                  <Route path="/register" element={<RegisterPage />} />
+                <Suspense fallback={<PageLoader />}>
+                  <Routes>
+                    <Route path="/" element={<RootRedirect />} />
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/register" element={<RegisterPage />} />
 
-                  <Route
-                    path="/admin/*"
-                    element={
-                      <RoleGuard allowedRoles={["admin"]}>
-                        <AdminDashboard />
-                      </RoleGuard>
-                    }
-                  />
+                    <Route
+                      path="/admin/*"
+                      element={
+                        <RoleGuard allowedRoles={["admin"]}>
+                          <AdminDashboard />
+                        </RoleGuard>
+                      }
+                    />
 
-                  <Route
-                    path="/instructor/*"
-                    element={
-                      <RoleGuard allowedRoles={["instructor"]}>
-                        <InstructorDashboard />
-                      </RoleGuard>
-                    }
-                  />
+                    <Route
+                      path="/instructor/*"
+                      element={
+                        <RoleGuard allowedRoles={["instructor"]}>
+                          <InstructorDashboard />
+                        </RoleGuard>
+                      }
+                    />
 
-                  <Route
-                    path="/student/*"
-                    element={
-                      <RoleGuard allowedRoles={["student"]}>
-                        <StudentDashboard />
-                      </RoleGuard>
-                    }
-                  />
+                    <Route
+                      path="/student/*"
+                      element={
+                        <RoleGuard allowedRoles={["student"]}>
+                          <StudentDashboard />
+                        </RoleGuard>
+                      }
+                    />
 
-                  <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                  </Routes>
+                </Suspense>
               </BrowserRouter>
             </UploadProgressProvider>
           </PopupProvider>

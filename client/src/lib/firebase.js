@@ -6,14 +6,14 @@ import { getStorage } from "firebase/storage";
 import { getAnalytics, isSupported } from "firebase/analytics";
 
 export const firebaseConfig = {
-  apiKey: "AIzaSyDcFiKm1P-vUPy11SDGtzhwUhcQew87efU",
-  authDomain: "training-assessment-platform.firebaseapp.com",
-  databaseURL: "https://training-assessment-platform-default-rtdb.firebaseio.com",
-  projectId: "training-assessment-platform",
-  storageBucket: "training-assessment-platform.firebasestorage.app",
-  messagingSenderId: "762793101420",
-  appId: "1:762793101420:web:3a4dbc9a1bdfdb9643b049",
-  measurementId: "G-FR5SK5090B",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "training-assessment-platform.firebaseapp.com",
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL || "https://training-assessment-platform-default-rtdb.firebaseio.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "training-assessment-platform",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "training-assessment-platform.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "762793101420",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:762793101420:web:3a4dbc9a1bdfdb9643b049",
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-FR5SK5090B",
 };
 
 export const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];

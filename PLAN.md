@@ -339,7 +339,7 @@ service cloud.firestore {
 ### Target Web App Firebase Config
 ```js
 const firebaseConfig = {
-  apiKey: "AIzaSyDcFiKm1P-vUPy11SDGtzhwUhcQew87efU",
+  apiKey: process.env.VITE_FIREBASE_API_KEY || "YOUR_FIREBASE_API_KEY",
   authDomain: "training-assessment-platform.firebaseapp.com",
   databaseURL: "https://training-assessment-platform-default-rtdb.firebaseio.com",
   projectId: "training-assessment-platform",
