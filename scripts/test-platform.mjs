@@ -402,6 +402,7 @@ await runCase("13. Structural Check: Critical Feature Files Exist & Client Dist 
     "client/src/utils/certificateGenerator.js",
     "client/src/utils/progressReportGenerator.js",
     "client/src/utils/pdfPageRenderer.js",
+    "client/src/utils/assignmentPdfDownloader.js",
     "client/src/utils/platformChatbotEngine.js",
     "client/src/features/assignments/LiveAnnotationModal.jsx",
     "client/src/features/lessons/LessonLibraryModule.jsx",

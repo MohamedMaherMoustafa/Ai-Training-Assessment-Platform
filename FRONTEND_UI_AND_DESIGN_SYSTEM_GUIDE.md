@@ -273,20 +273,24 @@ graph TD
 
 ### 6.3 Assignments & Dual-Solving Studio
 
-The assignments feature offers dual solving modes for students and comprehensive AI auto-grading.
+The assignments feature offers flexible solving modes for students (download to solve offline, live digital annotation, and solved file uploads) accompanied by automated AI grading.
 
 ```
-┌────────────────────────────────────────────────────────────────────────┐
-│ STUDENT ASSIGNMENT CARD                                                │
-│ Title: Machine Learning Worksheet 3 · Max: 20 pts · Due: Oct 24, 18:00  │
-├────────────────────────────────────────────────────────────────────────┤
-│ [ Option A: Solve in Live Annotation ]   [ Option B: Upload Solved PDF ]│
-└────────────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ STUDENT ASSIGNMENT CARD                                                                │
+│ Title: Machine Learning Worksheet 3 · Max: 20 pts · Due: Oct 24, 18:00                  │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│ [ 📥 Download to Solve (Watermarked) ] [ 🖊️ Live Annotation ] [ ⚡ Upload Solved File ] │
+└────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 #### 6.3.1 Assignments Management (`AssignmentsModule.jsx`)
 - **Tab Filter:** All Assignments · Active / Pending · Submitted · Graded.
 - **Assignment Card Elements:** Course badge, assignment title, due date & countdown badge (`min={today}` future date lock), max points badge (`Max Marks`), status badge ("Not Submitted", "Submitted - Pending Grade", "Graded X/Y", "Overdue").
+- **Watermarked PDF Downloader (`assignmentPdfDownloader.js`):**
+  - Instant one-click action generating an official watermarked PDF worksheet.
+  - Automatically imprints high-resolution diagonal platform watermark text: `"ATHAR EDUCATIONAL PLATFORM • منصة أثر التعليمية"`, secondary security subtitles, header banner, student name, and footer metadata.
+  - Students can solve offline on tablets (GoodNotes, Notability, Acrobat), on PCs, or print on physical paper.
 - **Assignment Creation Modal Fields:**
   - `Course ID` (dropdown).
   - `Assignment Title` (text).
@@ -310,6 +314,7 @@ The assignments feature offers dual solving modes for students and comprehensive
 - **Bottom Bar:** Student submission notes textarea, points display, "Submit Assignment" button.
 
 #### 6.3.3 Solved Assignment Upload Modal (`UploadSolvedAssignmentModal.jsx`)
+- **Download Helper Banner:** Step 1 banner allowing the student to download the watermarked assignment PDF directly if they have not yet obtained it.
 - **File Dropzone:** Accepts pre-solved PDF documents or clear photos/scans (JPG, PNG).
 - **Multi-Page Preview:** Instant canvas rendering and multi-page slider allowing students to verify their pages before submitting.
 - **Automated AI Grading Engine (`/api/assignment/grade`):**

@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import {
   AlertCircle,
   CheckCircle2,
+  Download,
   FileText,
   Image as ImageIcon,
   Loader2,
@@ -16,6 +17,7 @@ import { useUploadProgress } from "../../context/UploadProgressContext";
 import { renderPdfFileToPages } from "../../utils/pdfPageRenderer";
 import { gradePdfAssignmentWithAI } from "../../utils/aiGrader";
 import { submitAssignmentWork } from "../../services/platformService";
+import { downloadWatermarkedAssignmentPdf } from "../../utils/assignmentPdfDownloader";
 
 export default function UploadSolvedAssignmentModal({
   open,
@@ -32,7 +34,39 @@ export default function UploadSolvedAssignmentModal({
   const [answerNotes, setAnswerNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const fileInputRef = useRef(null);
+
+  const handleDownloadPdf = async () => {
+    if (downloading || !assignment) return;
+    setDownloading(true);
+    const toastId = toast.loading(
+      lang === "ar"
+        ? "جاري تجهيز وتحميل ورقة الواجب بالعلامة المائية للمنصة..."
+        : "Preparing watermarked assignment PDF with platform watermark..."
+    );
+    try {
+      const studentName = user?.displayName || user?.username || user?.email || "";
+      await downloadWatermarkedAssignmentPdf(assignment, {
+        studentName,
+        lang,
+      });
+      toast.success(
+        lang === "ar"
+          ? "تم تحميل ورقة الواجب بالعلامة المائية بنجاح!"
+          : "Watermarked assignment PDF downloaded successfully!",
+        { id: toastId }
+      );
+    } catch (err) {
+      console.error(err);
+      toast.error(
+        lang === "ar" ? "حدث خطأ أثناء تحميل الملف" : "Failed to download assignment PDF",
+        { id: toastId }
+      );
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   if (!open || !assignment) return null;
 
@@ -302,6 +336,41 @@ export default function UploadSolvedAssignmentModal({
                   : "Your solution is automatically evaluated against model rubrics for instant scoring & diagnostics."}
               </div>
             </div>
+          </div>
+
+          {/* Step 1: Download Original Worksheet with Platform Watermark Banner */}
+          <div className="p-3.5 rounded-2xl bg-gradient-to-r from-sky-500/10 via-indigo-500/10 to-violet-500/10 border border-sky-400/30 text-xs flex flex-wrap items-center justify-between gap-3 shadow-xs">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="h-8 w-8 rounded-xl bg-sky-500/20 text-sky-600 dark:text-cyan-300 flex items-center justify-center shrink-0">
+                <Download className="h-4 w-4" />
+              </div>
+              <div className="min-w-0">
+                <div className="font-extrabold text-[12px] text-sky-900 dark:text-cyan-200">
+                  {lang === "ar"
+                    ? "هل تحتاج لتحميل ورقة الواجب للحل أولاً؟"
+                    : "Need the worksheet PDF to solve first?"}
+                </div>
+                <div className="text-[11px] text-slate-600 dark:text-slate-300">
+                  {lang === "ar"
+                    ? "حمّل الملف الآن بالعلامة المائية المعتمدة للمنصة، وحلّه على جهازك أو اطبعه ثم ارفع الحل هنا."
+                    : "Download with the official platform watermark, solve offline or print, then upload below."}
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              disabled={downloading}
+              onClick={handleDownloadPdf}
+              className="px-3.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-sky-300/80 dark:border-sky-700/60 text-sky-700 dark:text-cyan-300 font-bold hover:bg-sky-50 dark:hover:bg-slate-700/70 transition-all text-xs flex items-center gap-1.5 shadow-xs cursor-pointer shrink-0 disabled:opacity-50"
+            >
+              {downloading ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin text-sky-500" />
+              ) : (
+                <Download className="h-3.5 w-3.5 text-sky-500" />
+              )}
+              <span>{lang === "ar" ? "تحميل ورقة الواجب PDF" : "Download Worksheet PDF"}</span>
+            </button>
           </div>
 
           {/* Dropzone File Upload Area */}

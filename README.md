@@ -44,6 +44,9 @@ The platform provides end-to-end support for coursework, lesson materials, digit
 
 ### 2. 📝 Assignments Studio & Dual Solving Mode (Live Annotation + Upload Solved PDF/Image)
 - **Multi-page PDF Engine**: Renders high-resolution PDF pages directly onto an HTML5 canvas.
+- **Watermarked Assignment PDF Download (`assignmentPdfDownloader.js`)**:
+  - Students can download the assignment worksheet to solve offline on tablets, computers, or by printing.
+  - Automatically imprints an official semi-transparent platform watermark (`"ATHAR EDUCATIONAL PLATFORM • منصة أثر التعليمية"`) across every page alongside security sub-banners and page numbers.
 - **Dual Solving Options**:
   - **Live Annotation Mode**: Smooth ink pen, translucent highlighter, inline text notes, and eraser on digital PDF worksheets with deadline lock (`Unavailable — Due date has passed`).
   - **Upload Solved File Mode (`UploadSolvedAssignmentModal.jsx`)**: Students can upload their pre-solved PDF or scan/photo of handwritten sheets with instant page preview and verification.

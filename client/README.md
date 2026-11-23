@@ -33,6 +33,7 @@ The frontend application for **Athar Educational Platform (منصة أثر ال�
 
 ### 5. Interactive Live PDF Annotation Canvas & Solved Uploads
 - Multi-page PDF rendering via Mozilla PDF.js.
+- Watermarked assignment PDF downloader (`assignmentPdfDownloader.js`) applying the platform name watermark across every worksheet page for offline solving or printing.
 - Dual-layer ink pen, highlighter, inline text notes, and eraser (`LiveAnnotationModal.jsx`).
 - Solved PDF / image upload modal (`UploadSolvedAssignmentModal.jsx`) with multi-page preview.
 - AI auto-grading with blank worksheet detection (0 pts), proportional scoring, diagnostic feedback, and teacher model answer keys.

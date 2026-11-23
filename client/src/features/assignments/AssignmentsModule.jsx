@@ -8,9 +8,11 @@ import {
   CheckCircle2,
   ClipboardList,
   Clock,
+  Download,
   Edit3,
   Eye,
   FileText,
+  Loader2,
   Lock,
   PenTool,
   Plus,
@@ -28,6 +30,7 @@ import {
   updateAssignment,
 } from "../../services/platformService";
 import { renderPdfFileToPages } from "../../utils/pdfPageRenderer";
+import { downloadWatermarkedAssignmentPdf } from "../../utils/assignmentPdfDownloader";
 import { useAuth } from "../../context/AuthContext";
 import { useLang } from "../../context/LangContext";
 import { usePopup } from "../../context/PopupContext";
@@ -93,6 +96,38 @@ export default function AssignmentsModule({
     modalMode: "student",
   });
   const [uploadModalAssignment, setUploadModalAssignment] = useState(null);
+  const [downloadingId, setDownloadingId] = useState(null);
+
+  const handleDownloadAssignment = async (assignment) => {
+    if (downloadingId) return;
+    setDownloadingId(assignment.id);
+    const toastId = toast.loading(
+      lang === "ar"
+        ? "جاري تجهيز وتحميل ورقة الواجب بالعلامة المائية للمنصة..."
+        : "Preparing watermarked assignment PDF with platform watermark..."
+    );
+    try {
+      const studentName = user?.displayName || user?.username || user?.email || "";
+      await downloadWatermarkedAssignmentPdf(assignment, {
+        studentName,
+        lang,
+      });
+      toast.success(
+        lang === "ar"
+          ? "تم تحميل ورقة الواجب بالعلامة المائية بنجاح!"
+          : "Watermarked assignment PDF downloaded successfully!",
+        { id: toastId }
+      );
+    } catch (err) {
+      console.error(err);
+      toast.error(
+        lang === "ar" ? "حدث خطأ أثناء تحميل الملف" : "Failed to download assignment PDF",
+        { id: toastId }
+      );
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   const refreshData = async () => {
     const [allAssn, allCourses] = await Promise.all([listAssignments(), listCourses()]);
@@ -721,23 +756,43 @@ export default function AssignmentsModule({
                     )}
 
                     {hasPdf && (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setModalState({
-                            open: true,
-                            assignment: a,
-                            submission: mySub || null,
-                            modalMode: "view",
-                          })
-                        }
-                        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-500/25 transition-colors font-semibold"
-                        title={lang === "ar" ? "معاينة الملف" : "Preview PDF"}
-                      >
-                        <FileText className="h-3 w-3" />
-                        {a.pdfName || "Worksheet.pdf"} · {a.pdfPages.length}p
-                        <Eye className="h-2.5 w-2.5 ms-0.5 opacity-70" />
-                      </button>
+                      <div className="inline-flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setModalState({
+                              open: true,
+                              assignment: a,
+                              submission: mySub || null,
+                              modalMode: "view",
+                            })
+                          }
+                          className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-500/25 transition-colors font-semibold"
+                          title={lang === "ar" ? "معاينة الملف" : "Preview PDF"}
+                        >
+                          <FileText className="h-3 w-3" />
+                          {a.pdfName || "Worksheet.pdf"} · {a.pdfPages.length}p
+                          <Eye className="h-2.5 w-2.5 ms-0.5 opacity-70" />
+                        </button>
+
+                        <button
+                          type="button"
+                          disabled={downloadingId === a.id}
+                          onClick={() => handleDownloadAssignment(a)}
+                          className="p-1 rounded-full bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-500/25 transition-colors disabled:opacity-50"
+                          title={
+                            lang === "ar"
+                              ? "تحميل ورقة الواجب كملف PDF بعلامة المنصة المائية"
+                              : "Download watermarked worksheet PDF"
+                          }
+                        >
+                          {downloadingId === a.id ? (
+                            <Loader2 className="h-3 w-3 animate-spin text-indigo-600" />
+                          ) : (
+                            <Download className="h-3 w-3" />
+                          )}
+                        </button>
+                      </div>
                     )}
                   </div>
 
@@ -966,6 +1021,25 @@ export default function AssignmentsModule({
                       <div className="flex flex-wrap items-center gap-2 ms-auto">
                         <button
                           type="button"
+                          disabled={downloadingId === a.id}
+                          onClick={() => handleDownloadAssignment(a)}
+                          className="glass-btn-secondary px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs active:scale-95 cursor-pointer text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-cyan-300 disabled:opacity-50"
+                          title={
+                            lang === "ar"
+                              ? "تحميل ورقة الواجب كملف PDF بعلامة المنصة المائية للحل أوفلاين أو طباعته"
+                              : "Download watermarked assignment PDF to solve offline or print"
+                          }
+                        >
+                          {downloadingId === a.id ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin text-indigo-500" />
+                          ) : (
+                            <Download className="h-3.5 w-3.5 text-indigo-500 dark:text-cyan-400" />
+                          )}
+                          <span>{lang === "ar" ? "تحميل للحل (Download)" : "Download to Solve"}</span>
+                        </button>
+
+                        <button
+                          type="button"
                           onClick={() =>
                             setModalState({
                               open: true,
@@ -974,7 +1048,7 @@ export default function AssignmentsModule({
                               modalMode: "student",
                             })
                           }
-                          className="glass-btn-secondary px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer border border-indigo-400/30 text-indigo-700 dark:text-cyan-300 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/40"
+                          className="glass-btn-secondary px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs active:scale-95 cursor-pointer border border-indigo-400/30 text-indigo-700 dark:text-cyan-300 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/40"
                           title={
                             lang === "ar"
                               ? "حل وتأشير تفاعلي بالقلم والأدوات على ورقة الواجب (Live Annotation)"
