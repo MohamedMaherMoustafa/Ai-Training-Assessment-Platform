@@ -23,6 +23,10 @@ import {
   Check,
   Languages,
   Loader2,
+  Mic,
+  Volume2,
+  VolumeX,
+  Square,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useLang } from "../../context/LangContext";
@@ -333,9 +337,16 @@ export default function PlatformChatbotWidget() {
   const [attachments, setAttachments] = useState([]);
   const [copiedMsgId, setCopiedMsgId] = useState(null);
   const [translatingMsgId, setTranslatingMsgId] = useState(null);
+  const [recording, setRecording] = useState(false);
+  const [recordSeconds, setRecordSeconds] = useState(0);
+  const [speakingMsgId, setSpeakingMsgId] = useState(null);
 
   const fileInputRef = useRef(null);
   const scrollRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const recordTimerRef = useRef(null);
+  const mediaStreamRef = useRef(null);
 
   const welcomeText = (() => {
     if (user?.role === "instructor" || user?.role === "admin") {
@@ -363,7 +374,190 @@ export default function PlatformChatbotWidget() {
     }
   }, [messages, open, busy]);
 
-  // File Upload Handlers (Photos & PDFs)
+  // Cleanup speech & recording on unmount or dialog close
+  useEffect(() => {
+    return () => {
+      if (typeof window !== "undefined" && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+      if (recordTimerRef.current) clearInterval(recordTimerRef.current);
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach((t) => t.stop());
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!open) {
+      if (typeof window !== "undefined" && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+      setSpeakingMsgId(null);
+    }
+  }, [open]);
+
+  // Voice Recording Handlers
+  const startRecording = async () => {
+    if (recording || busy) return;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      toast.error(
+        lang === "ar"
+          ? "المتصفح لا يدعم تسجيل الصوت أو يحتاج صلاحية الميكروفون."
+          : "Voice recording is not supported in this browser."
+      );
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaStreamRef.current = stream;
+      audioChunksRef.current = [];
+
+      const options = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+        ? { mimeType: "audio/webm;codecs=opus" }
+        : MediaRecorder.isTypeSupported("audio/webm")
+        ? { mimeType: "audio/webm" }
+        : MediaRecorder.isTypeSupported("audio/mp4")
+        ? { mimeType: "audio/mp4" }
+        : {};
+
+      const recorder = new MediaRecorder(stream, options);
+      mediaRecorderRef.current = recorder;
+
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) {
+          audioChunksRef.current.push(e.data);
+        }
+      };
+
+      recorder.onstop = () => {
+        const mimeType = recorder.mimeType || "audio/webm";
+        const blob = new Blob(audioChunksRef.current, { type: mimeType });
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64 = reader.result;
+          setAttachments((prev) => [
+            ...prev,
+            {
+              id: `voice_${Date.now()}`,
+              name: lang === "ar" ? "تسجيل_صوتي.webm" : "Voice_Query.webm",
+              mimeType: mimeType,
+              kind: "audio",
+              data: base64,
+              sizeKb: Math.max(1, Math.round(blob.size / 1024)),
+              durationSec: recordSeconds,
+            },
+          ]);
+        };
+        reader.readAsDataURL(blob);
+
+        if (mediaStreamRef.current) {
+          mediaStreamRef.current.getTracks().forEach((t) => t.stop());
+          mediaStreamRef.current = null;
+        }
+      };
+
+      recorder.start(250);
+      setRecording(true);
+      setRecordSeconds(0);
+      if (recordTimerRef.current) clearInterval(recordTimerRef.current);
+      recordTimerRef.current = setInterval(() => {
+        setRecordSeconds((s) => s + 1);
+      }, 1000);
+    } catch (err) {
+      console.error("Recording error:", err);
+      toast.error(
+        lang === "ar"
+          ? "تعذر الوصول إلى الميكروفون. يرجى السماح بصلاحية الصوت."
+          : "Could not access microphone. Please allow audio permission."
+      );
+    }
+  };
+
+  const stopRecording = () => {
+    if (!recording) return;
+    if (recordTimerRef.current) clearInterval(recordTimerRef.current);
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.stop();
+    }
+    setRecording(false);
+  };
+
+  const cancelRecording = () => {
+    if (recordTimerRef.current) clearInterval(recordTimerRef.current);
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.ondataavailable = null;
+      mediaRecorderRef.current.onstop = null;
+      mediaRecorderRef.current.stop();
+    }
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach((t) => t.stop());
+      mediaStreamRef.current = null;
+    }
+    audioChunksRef.current = [];
+    setRecording(false);
+    setRecordSeconds(0);
+  };
+
+  // Text-To-Speech (TTS) Voice Read Aloud
+  const toggleSpeech = (msgId, rawText) => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+      toast.error(
+        lang === "ar"
+          ? "المتصفح لا يدعم ميزة نطق الردود الصوتية."
+          : "Text-to-speech is not supported in this browser."
+      );
+      return;
+    }
+
+    if (speakingMsgId === msgId) {
+      window.speechSynthesis.cancel();
+      setSpeakingMsgId(null);
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    // Clean markdown syntax for smooth natural speech reading
+    const cleanText = String(rawText || "")
+      .replace(/```[\s\S]*?```/g, " كود برمجي ")
+      .replace(/`([^`]+)`/g, "$1")
+      .replace(/#{1,6}\s+/g, "")
+      .replace(/\*\*([^*]+)\*\*/g, "$1")
+      .replace(/\*([^*]+)\*/g, "$1")
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+      .replace(/https?:\/\/\S+/g, "")
+      .replace(/[•\-\*]\s+/g, "")
+      .replace(/\n+/g, " ")
+      .trim();
+
+    if (!cleanText) return;
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    const isArabic = /[\u0600-\u06FF]/.test(cleanText);
+    utterance.lang = isArabic ? "ar-SA" : "en-US";
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+
+    const voices = window.speechSynthesis.getVoices?.() || [];
+    if (isArabic) {
+      const arVoice = voices.find((v) => v.lang.startsWith("ar"));
+      if (arVoice) utterance.voice = arVoice;
+    } else {
+      const enVoice = voices.find(
+        (v) => v.lang.startsWith("en") && (v.name.includes("Google") || v.name.includes("Natural"))
+      ) || voices.find((v) => v.lang.startsWith("en"));
+      if (enVoice) utterance.voice = enVoice;
+    }
+
+    utterance.onend = () => setSpeakingMsgId(null);
+    utterance.onerror = () => setSpeakingMsgId(null);
+
+    setSpeakingMsgId(msgId);
+    window.speechSynthesis.speak(utterance);
+  };
+
+  // File Upload Handlers (Photos & PDFs & Audio)
   const handleFileSelect = (e) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
@@ -379,14 +573,15 @@ export default function PlatformChatbotWidget() {
         const base64 = event.target.result;
         const isImage = file.type.startsWith("image/");
         const isPdf = file.type === "application/pdf";
+        const isAudio = file.type.startsWith("audio/");
 
         setAttachments((prev) => [
           ...prev,
           {
             id: `att_${Date.now()}_${Math.random()}`,
             name: file.name,
-            mimeType: file.type || (isPdf ? "application/pdf" : "image/jpeg"),
-            kind: isImage ? "image" : isPdf ? "pdf" : "file",
+            mimeType: file.type || (isPdf ? "application/pdf" : isAudio ? "audio/webm" : "image/jpeg"),
+            kind: isImage ? "image" : isPdf ? "pdf" : isAudio ? "audio" : "file",
             data: base64,
             sizeKb: Math.round(file.size / 1024),
           },
@@ -849,6 +1044,20 @@ export default function PlatformChatbotWidget() {
                               <span className="text-[10px] opacity-80 shrink-0">({att.sizeKb} KB)</span>
                             </div>
                           )}
+                          {att.kind === "audio" && (
+                            <div className="flex flex-col gap-1.5 p-2 rounded-xl bg-white/20 backdrop-blur-sm border border-white/25">
+                              <div className="flex items-center gap-1.5 text-xs font-semibold">
+                                <Volume2 className="h-4 w-4 text-emerald-300 shrink-0" />
+                                <span className="truncate">{att.name}</span>
+                                {att.durationSec ? (
+                                  <span className="text-[10px] opacity-80 shrink-0">
+                                    ({Math.floor(att.durationSec / 60)}:{(att.durationSec % 60).toString().padStart(2, "0")})
+                                  </span>
+                                ) : null}
+                              </div>
+                              <audio controls src={att.data} className="w-full max-w-[240px] h-8 rounded-lg" />
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -892,6 +1101,46 @@ export default function PlatformChatbotWidget() {
                         {m.model || (lang === "ar" ? "أثر AI" : "Athar AI")}
                       </span>
                       <div className="flex items-center gap-2">
+                        {/* Voice Read Aloud Button */}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            toggleSpeech(
+                              m.id,
+                              m.showTranslation && m.translatedText ? m.translatedText : m.text
+                            )
+                          }
+                          className={`hover:text-slate-700 dark:hover:text-slate-200 flex items-center gap-1 cursor-pointer transition-colors ${
+                            speakingMsgId === m.id
+                              ? "text-indigo-600 dark:text-cyan-400 font-bold animate-pulse"
+                              : ""
+                          }`}
+                          title={
+                            speakingMsgId === m.id
+                              ? lang === "ar"
+                                ? "إيقاف الصوت"
+                                : "Stop voice"
+                              : lang === "ar"
+                              ? "قراءة صوتية"
+                              : "Read aloud"
+                          }
+                        >
+                          {speakingMsgId === m.id ? (
+                            <VolumeX className="h-3 w-3 text-rose-500" />
+                          ) : (
+                            <Volume2 className="h-3 w-3" />
+                          )}
+                          <span className="text-[9.5px]">
+                            {speakingMsgId === m.id
+                              ? lang === "ar"
+                                ? "إيقاف"
+                                : "Stop"
+                              : lang === "ar"
+                              ? "صوت"
+                              : "Voice"}
+                          </span>
+                        </button>
+
                         {/* Translate to Arabic Button (Beside Copy Button) */}
                         <button
                           type="button"
@@ -1032,6 +1281,7 @@ export default function PlatformChatbotWidget() {
                 >
                   {att.kind === "image" && <ImageIcon className="h-3.5 w-3.5 text-sky-500" />}
                   {att.kind === "pdf" && <FileText className="h-3.5 w-3.5 text-rose-500" />}
+                  {att.kind === "audio" && <Mic className="h-3.5 w-3.5 text-emerald-500 animate-pulse" />}
                   <span className="font-semibold text-slate-800 dark:text-slate-200 max-w-[120px] truncate text-[11px]">
                     {att.name}
                   </span>
@@ -1044,6 +1294,39 @@ export default function PlatformChatbotWidget() {
                   </button>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Active Voice Recording Live Bar */}
+          {recording && (
+            <div className="px-3.5 py-2.5 bg-rose-50 dark:bg-rose-950/40 border-t border-rose-200 dark:border-rose-900/40 flex items-center justify-between gap-3 animate-pulse">
+              <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 text-xs font-bold min-w-0">
+                <span className="h-2.5 w-2.5 rounded-full bg-rose-500 animate-ping shrink-0" />
+                <Mic className="h-4 w-4 shrink-0" />
+                <span className="truncate">
+                  {lang === "ar" ? "جاري تسجيل صوتك..." : "Recording voice query..."}
+                </span>
+                <span className="font-mono bg-rose-200/60 dark:bg-rose-900/60 px-2 py-0.5 rounded text-[11px] text-rose-800 dark:text-rose-200 shrink-0">
+                  {Math.floor(recordSeconds / 60)}:{(recordSeconds % 60).toString().padStart(2, "0")}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={cancelRecording}
+                  className="px-2.5 py-1 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-semibold transition-colors cursor-pointer"
+                >
+                  {lang === "ar" ? "إلغاء" : "Cancel"}
+                </button>
+                <button
+                  type="button"
+                  onClick={stopRecording}
+                  className="flex items-center gap-1 px-3 py-1 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold shadow-sm transition-colors cursor-pointer"
+                >
+                  <Square className="h-3 w-3 fill-current" />
+                  <span>{lang === "ar" ? "إيقاف واعتماد" : "Done"}</span>
+                </button>
+              </div>
             </div>
           )}
 
@@ -1060,20 +1343,43 @@ export default function PlatformChatbotWidget() {
               ref={fileInputRef}
               type="file"
               multiple
-              accept="image/*,application/pdf"
+              accept="image/*,application/pdf,audio/*"
               className="hidden"
               onChange={handleFileSelect}
             />
 
-            {/* Attach Photo / PDF button */}
+            {/* Attach Photo / PDF / Audio button */}
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={busy}
-              title={lang === "ar" ? "إرفاق صورة أو PDF" : "Attach Photo or PDF"}
+              title={lang === "ar" ? "إرفاق صورة أو PDF أو ملف صوتي" : "Attach Photo, PDF, or Audio"}
               className="p-2.5 rounded-2xl border border-slate-200 dark:border-white/10 hover:border-indigo-500 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/30 text-slate-600 dark:text-slate-300 transition-colors shrink-0 disabled:opacity-50 cursor-pointer"
             >
               <Paperclip className="h-4 w-4" />
+            </button>
+
+            {/* Record Voice Button */}
+            <button
+              type="button"
+              onClick={recording ? stopRecording : startRecording}
+              disabled={busy}
+              title={
+                recording
+                  ? lang === "ar"
+                    ? "إيقاف التسجيل"
+                    : "Stop recording"
+                  : lang === "ar"
+                  ? "تسجيل استفسار صوتي"
+                  : "Record voice query"
+              }
+              className={`p-2.5 rounded-2xl border transition-all shrink-0 cursor-pointer ${
+                recording
+                  ? "border-rose-500 bg-rose-500 text-white shadow-md shadow-rose-500/30 animate-pulse"
+                  : "border-slate-200 dark:border-white/10 hover:border-emerald-500 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/30 text-slate-600 dark:text-slate-300"
+              }`}
+            >
+              <Mic className="h-4 w-4" />
             </button>
 
             {/* Text Input */}

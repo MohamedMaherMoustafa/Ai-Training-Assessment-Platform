@@ -24,15 +24,17 @@ async function callGeminiChat({
 }) {
   const parts = [];
 
-  // Add attachments (photos, PDFs)
+  // Add attachments (photos, PDFs, voice recordings)
   if (Array.isArray(attachments) && attachments.length > 0) {
     for (const att of attachments) {
       if (att && att.data) {
         const cleanBase64 = String(att.data).replace(/^data:[^;]+;base64,/, "");
-        const mimeType =
-          att.mimeType ||
-          att.type ||
-          (att.kind === "pdf" ? "application/pdf" : "image/jpeg");
+        let mimeType = att.mimeType || att.type;
+        if (!mimeType) {
+          if (att.kind === "pdf") mimeType = "application/pdf";
+          else if (att.kind === "audio") mimeType = "audio/webm";
+          else mimeType = "image/jpeg";
+        }
         parts.push({
           inlineData: {
             mimeType,
@@ -43,9 +45,18 @@ async function callGeminiChat({
     }
   }
 
+  const hasAudio = attachments.some(
+    (a) => a && (a.kind === "audio" || (a.mimeType && a.mimeType.startsWith("audio/")))
+  );
+  const defaultPrompt = hasAudio
+    ? "Please listen carefully to the attached voice recording, transcribe and understand what the user is asking in Arabic or English, and provide a clear, accurate, helpful educational response."
+    : attachments.length > 0
+    ? "Please analyze the attached file(s) and provide a detailed, helpful educational explanation."
+    : "Hello";
+
   // Add user prompt text
   parts.push({
-    text: userPrompt || (attachments.length > 0 ? "Please analyze the attached file(s) and provide a detailed, helpful educational explanation." : "Hello"),
+    text: userPrompt || defaultPrompt,
   });
 
   const payload = {

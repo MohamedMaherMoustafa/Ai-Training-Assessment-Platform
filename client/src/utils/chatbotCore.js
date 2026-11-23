@@ -52,10 +52,12 @@ export async function callDirectAI({
     for (const att of attachments) {
       if (att && att.data) {
         const cleanBase64 = String(att.data).replace(/^data:[^;]+;base64,/, "");
-        const mimeType =
-          att.mimeType ||
-          att.type ||
-          (att.kind === "pdf" ? "application/pdf" : "image/jpeg");
+        let mimeType = att.mimeType || att.type;
+        if (!mimeType) {
+          if (att.kind === "pdf") mimeType = "application/pdf";
+          else if (att.kind === "audio") mimeType = "audio/webm";
+          else mimeType = "image/jpeg";
+        }
         parts.push({
           inlineData: {
             mimeType,
@@ -66,9 +68,16 @@ export async function callDirectAI({
     }
   }
 
+  const hasAudio = attachments.some(
+    (a) => a && (a.kind === "audio" || (a.mimeType && a.mimeType.startsWith("audio/")))
+  );
   const promptText =
     String(message || "").trim() ||
-    (attachments.length > 0
+    (hasAudio
+      ? lang === "ar"
+        ? "يرجى الاستماع بدقة إلى التسجيل الصوتي المرفق، فهم سؤالي أو مسألتي بالكامل، وتقديم إجابة تعليمية وافية ومفصلة وشاملة."
+        : "Please listen carefully to the attached voice recording, transcribe and understand my request or question, and provide a thorough, accurate educational answer."
+      : attachments.length > 0
       ? lang === "ar"
         ? "يرجى تحليل المرفق وشرحه بالتفصيل والإجابة على أي محتوى ظاهر فيه."
         : "Please analyze the attached file thoroughly, explain what it is, and answer any questions about it."
