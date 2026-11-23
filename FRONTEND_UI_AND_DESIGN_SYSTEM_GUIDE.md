@@ -459,9 +459,9 @@ The assignments feature offers flexible solving modes for students (download to 
   - *"My points & marks"* (`نقاطي ودرجاتي`): Retrieves instant student points breakdown.
   - *"Make a quiz on a lesson"* (Instructor/Admin): Prompts instant quiz generation.
 - **Lesson Summarization Browser:** Clicking "Summarize a lesson" lists **all available course lessons and PDF materials** with interactive chips. Clicking any chip produces an instant, structured educational summary of that lesson.
-- **High-Speed Multimodal Attachments & Voice Queries:**
+- **High-Speed Multimodal Attachments & Voice Notes:**
   - Students can attach photos of handwritten problems, PDF documents, or recorded voice notes.
-  - **Live Voice Query Recording:** Direct microphone recording dock with pulsating live timer (`00:05`), audio stream waveform indicator, and cancel/stop controls.
+  - **Live Voice Note Recording:** Direct microphone recording dock with pulsating live timer (`00:05`), audio stream waveform indicator, and cancel/stop controls.
   - **Voice Audio Understanding:** Powered by Gemini 2.5 multimodal audio processing for Arabic and English spoken questions.
   - **Spoken Voice Answers (TTS):** Every bot message includes a read-aloud voice action button (`<Volume2 />` / `<VolumeX />`) using browser speech synthesis with automatic Arabic/English language and voice selection.
 

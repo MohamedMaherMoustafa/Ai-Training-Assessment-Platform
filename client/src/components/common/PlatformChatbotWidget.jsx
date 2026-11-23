@@ -374,7 +374,7 @@ export default function PlatformChatbotWidget() {
             ...prev,
             {
               id: `voice_${Date.now()}`,
-              name: lang === "ar" ? "تسجيل صوتي" : "Voice Note",
+              name: lang === "ar" ? "ملاحظة صوتية" : "Voice note",
               mimeType: mimeType,
               kind: "audio",
               data: base64,
@@ -961,7 +961,7 @@ export default function PlatformChatbotWidget() {
                               <div className="flex items-center gap-1.5 text-xs font-semibold">
                                 <Volume2 className="h-4 w-4 text-emerald-300 shrink-0" />
                                 <span className="truncate">
-                                  {att.kind === "audio" ? (lang === "ar" ? "تسجيل صوتي" : "Voice Note") : att.name}
+                                  {att.kind === "audio" ? (lang === "ar" ? "ملاحظة صوتية" : "Voice note") : att.name}
                                 </span>
                                 {att.durationSec ? (
                                   <span className="text-[10px] opacity-80 shrink-0">
@@ -1195,7 +1195,7 @@ export default function PlatformChatbotWidget() {
                   {att.kind === "pdf" && <FileText className="h-3.5 w-3.5 text-rose-500" />}
                   {att.kind === "audio" && <Mic className="h-3.5 w-3.5 text-emerald-500 animate-pulse" />}
                   <span className="font-semibold text-slate-800 dark:text-slate-200 max-w-[120px] truncate text-[11px]">
-                    {att.kind === "audio" ? (lang === "ar" ? "تسجيل صوتي" : "Voice Note") : att.name}
+                    {att.kind === "audio" ? (lang === "ar" ? "ملاحظة صوتية" : "Voice note") : att.name}
                   </span>
                   <button
                     type="button"
@@ -1216,7 +1216,7 @@ export default function PlatformChatbotWidget() {
                 <span className="h-2.5 w-2.5 rounded-full bg-rose-500 animate-ping shrink-0" />
                 <Mic className="h-4 w-4 shrink-0" />
                 <span className="truncate">
-                  {lang === "ar" ? "جاري تسجيل صوتك..." : "Recording voice query..."}
+                  {lang === "ar" ? "ملاحظة صوتية..." : "Voice note..."}
                 </span>
                 <span className="font-mono bg-rose-200/60 dark:bg-rose-900/60 px-2 py-0.5 rounded text-[11px] text-rose-800 dark:text-rose-200 shrink-0">
                   {Math.floor(recordSeconds / 60)}:{(recordSeconds % 60).toString().padStart(2, "0")}
@@ -1282,8 +1282,17 @@ export default function PlatformChatbotWidget() {
                     ? "إيقاف التسجيل"
                     : "Stop recording"
                   : lang === "ar"
-                    ? "تسجيل استفسار صوتي"
-                    : "Record voice query"
+                    ? "تسجيل ملاحظة صوتية"
+                    : "Voice note"
+              }
+              aria-label={
+                recording
+                  ? lang === "ar"
+                    ? "إيقاف التسجيل"
+                    : "Stop recording"
+                  : lang === "ar"
+                    ? "تسجيل ملاحظة صوتية"
+                    : "Voice note"
               }
               className={`p-2.5 rounded-2xl border transition-all shrink-0 cursor-pointer ${recording
                 ? "border-rose-500 bg-rose-500 text-white shadow-md shadow-rose-500/30 animate-pulse"
