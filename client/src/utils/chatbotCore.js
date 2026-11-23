@@ -715,6 +715,38 @@ export async function processChatbotMessageWithDataset({
   const msgTrim = String(message || "").trim();
   const msgLower = msgTrim.toLowerCase();
 
+  // Handle conversational questions like "can i ask about a question?", "may i ask a question?", "عندي سؤال", etc.
+  const isAskingToAsk =
+    /(can\s+(i|we)\s+ask|may\s+i\s+ask|could\s+i\s+ask|i\s+(have|got)\s+a\s+question|want\s+to\s+ask|ask\s+about\s+a\s+question|ask\s+a\s+question|ask\s+you\s+something|ممكن\s+اسال|ممكن\s+أسأل|عندي\s+سؤال|بدي\s+اسال|هل\s+يمكنني\s+ان\s+اسال|هل\s+استطيع\s+ان\s+اسال|استفسار)/i.test(
+      msgLower
+    );
+
+  if (isAskingToAsk) {
+    if (lang === "ar") {
+      return {
+        reply: `بالتأكيد! يمكنك سؤالي عن أي شيء تريد. سواء كان استفساراً عن مقرراتك، شرح درس محدد، حل مسألة في واجب، كود برمجي، رياضيات، أو درجاتك واختباراتك—أنا هنا لمساعدتك والإجابة على كل استفساراتك. تفضل، ما هو سؤالك؟`,
+      };
+    }
+    return {
+      reply: `Of course! You can ask me anything. Whether it's about your courses, explaining a specific lesson, helping with a homework problem, coding, mathematics, or checking your quiz marks and platform features—I am right here to help you. What is your question?`,
+    };
+  }
+
+  const hasAudioAttachment =
+    Array.isArray(attachments) &&
+    attachments.some(
+      (a) => a && (a.kind === "audio" || (a.mimeType && a.mimeType.startsWith("audio/")))
+    );
+
+  if (hasAudioAttachment && (!msgTrim || /^(voice note|ملاحظة صوتية|تسجيل صوتي)$/i.test(msgTrim))) {
+    return {
+      reply:
+        lang === "ar"
+          ? `🎙️ تم استلام ملاحظتك الصوتية بنجاح! أنا أستمع إليك. تفضل بطرح سؤالك حول أي درس، مسألة، كود، درجاتك، أو أي موضوع تعليمي وسأجيبك فوراً.`
+          : `🎙️ Voice note received successfully! I am listening. Please ask your question about any lesson, homework, coding problem, marks, or topic and I will answer you right away.`,
+    };
+  }
+
   if (
     /^(hi|hello|hey|good morning|good evening|thanks|thank you|who are you|help|مرحبا|أهلا|اهلا|السلام عليكم|صباح الخير|مساء الخير|شكرا|شكراً|من انت|مساعدة)[!؟?.\s]*$/i.test(
       msgTrim

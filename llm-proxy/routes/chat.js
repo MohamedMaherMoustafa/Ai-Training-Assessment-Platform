@@ -224,6 +224,17 @@ function buildFallbackReply({
     return summarizeExtractive(lessonText, lang, lessonTitle, message);
   }
 
+  const msgLower = String(message || "").toLowerCase();
+  const isAskingToAsk =
+    /(can\s+(i|we)\s+ask|may\s+i\s+ask|could\s+i\s+ask|i\s+(have|got)\s+a\s+question|want\s+to\s+ask|ask\s+about\s+a\s+question|ask\s+a\s+question|ask\s+you\s+something|ممكن\s+اسال|ممكن\s+أسأل|عندي\s+سؤال|بدي\s+اسال|هل\s+يمكنني\s+ان\s+اسال|هل\s+استطيع\s+ان\s+اسال|استفسار)/i.test(
+      msgLower
+    );
+  if (isAskingToAsk) {
+    return lang === "ar"
+      ? "بالتأكيد! يمكنك سؤالي عن أي شيء تريد. سواء كان استفساراً عن مقرراتك، شرح درس محدد، حل مسألة في واجب، كود برمجي، رياضيات، أو درجاتك واختباراتك—أنا هنا لمساعدتك والإجابة على كل استفساراتك. تفضل، ما هو سؤالك؟"
+      : "Of course! You can ask me anything. Whether it's about your courses, explaining a specific lesson, helping with a homework problem, coding, mathematics, or checking your quiz marks and platform features—I am right here to help you. What is your question?";
+  }
+
   const matched = searchContextLines(message, contextSummary, lang);
   if (matched) {
     return matched;

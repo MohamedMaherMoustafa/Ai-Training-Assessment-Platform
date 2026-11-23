@@ -274,6 +274,7 @@ export default function PlatformChatbotWidget() {
   const [recording, setRecording] = useState(false);
   const [recordSeconds, setRecordSeconds] = useState(0);
   const [speakingMsgId, setSpeakingMsgId] = useState(null);
+  const [liveTranscript, setLiveTranscript] = useState("");
 
   const fileInputRef = useRef(null);
   const scrollRef = useRef(null);
@@ -281,6 +282,8 @@ export default function PlatformChatbotWidget() {
   const audioChunksRef = useRef([]);
   const recordTimerRef = useRef(null);
   const mediaStreamRef = useRef(null);
+  const speechRecognitionRef = useRef(null);
+  const speechTranscriptRef = useRef("");
 
   const welcomeText = (() => {
     if (user?.role === "instructor" || user?.role === "admin") {
@@ -314,6 +317,11 @@ export default function PlatformChatbotWidget() {
       if (typeof window !== "undefined" && window.speechSynthesis) {
         window.speechSynthesis.cancel();
       }
+      if (speechRecognitionRef.current) {
+        try {
+          speechRecognitionRef.current.abort();
+        } catch (_) {}
+      }
       if (recordTimerRef.current) clearInterval(recordTimerRef.current);
       if (mediaStreamRef.current) {
         mediaStreamRef.current.getTracks().forEach((t) => t.stop());
@@ -346,6 +354,45 @@ export default function PlatformChatbotWidget() {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaStreamRef.current = stream;
       audioChunksRef.current = [];
+      speechTranscriptRef.current = "";
+      setLiveTranscript("");
+
+      // Native Speech Recognition in parallel for instant voice detection
+      const SpeechRecognitionClass =
+        typeof window !== "undefined"
+          ? window.SpeechRecognition || window.webkitSpeechRecognition
+          : null;
+
+      if (SpeechRecognitionClass) {
+        try {
+          const recognizer = new SpeechRecognitionClass();
+          recognizer.continuous = true;
+          recognizer.interimResults = true;
+          recognizer.lang = lang === "ar" ? "ar-SA" : "en-US";
+
+          recognizer.onresult = (event) => {
+            let fullText = "";
+            for (let i = 0; i < event.results.length; i++) {
+              fullText += event.results[i][0].transcript + " ";
+            }
+            const clean = fullText.trim();
+            if (clean) {
+              speechTranscriptRef.current = clean;
+              setLiveTranscript(clean);
+              setInput(clean);
+            }
+          };
+
+          recognizer.onerror = (err) => {
+            console.warn("Speech recognition notice:", err.error || err);
+          };
+
+          recognizer.start();
+          speechRecognitionRef.current = recognizer;
+        } catch (sErr) {
+          console.warn("Speech recognition init failed:", sErr);
+        }
+      }
 
       const options = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
         ? { mimeType: "audio/webm;codecs=opus" }
@@ -368,6 +415,8 @@ export default function PlatformChatbotWidget() {
         const mimeType = recorder.mimeType || "audio/webm";
         const blob = new Blob(audioChunksRef.current, { type: mimeType });
         const reader = new FileReader();
+        const duration = recordSeconds;
+        const capturedTranscript = speechTranscriptRef.current.trim();
         reader.onloadend = () => {
           const base64 = reader.result;
           setAttachments((prev) => [
@@ -377,9 +426,10 @@ export default function PlatformChatbotWidget() {
               name: lang === "ar" ? "ملاحظة صوتية" : "Voice note",
               mimeType: mimeType,
               kind: "audio",
+              transcript: capturedTranscript,
               data: base64,
               sizeKb: Math.max(1, Math.round(blob.size / 1024)),
-              durationSec: recordSeconds,
+              durationSec: duration,
             },
           ]);
         };
@@ -411,14 +461,30 @@ export default function PlatformChatbotWidget() {
   const stopRecording = () => {
     if (!recording) return;
     if (recordTimerRef.current) clearInterval(recordTimerRef.current);
+    if (speechRecognitionRef.current) {
+      try {
+        speechRecognitionRef.current.stop();
+      } catch (_) {}
+      speechRecognitionRef.current = null;
+    }
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
       mediaRecorderRef.current.stop();
+    }
+    const finalTranscript = speechTranscriptRef.current.trim();
+    if (finalTranscript) {
+      setInput((prev) => (prev ? `${prev} ${finalTranscript}` : finalTranscript));
     }
     setRecording(false);
   };
 
   const cancelRecording = () => {
     if (recordTimerRef.current) clearInterval(recordTimerRef.current);
+    if (speechRecognitionRef.current) {
+      try {
+        speechRecognitionRef.current.abort();
+      } catch (_) {}
+      speechRecognitionRef.current = null;
+    }
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
       mediaRecorderRef.current.ondataavailable = null;
       mediaRecorderRef.current.onstop = null;
@@ -429,6 +495,8 @@ export default function PlatformChatbotWidget() {
       mediaStreamRef.current = null;
     }
     audioChunksRef.current = [];
+    speechTranscriptRef.current = "";
+    setLiveTranscript("");
     setRecording(false);
     setRecordSeconds(0);
   };
@@ -585,22 +653,32 @@ export default function PlatformChatbotWidget() {
       ];
 
   const handleSend = async (customText = null, explicitAction = null) => {
-    const textToSend = String(customText !== null ? customText : input).trim();
+    let textToSend = String(customText !== null ? customText : input).trim();
     const currentAttachments = [...attachments];
+
+    // If textToSend is empty but there is an audio voice note with recognized speech, use the transcript!
+    if (!textToSend && currentAttachments.some((a) => a.kind === "audio" && a.transcript)) {
+      const audioWithText = currentAttachments.find((a) => a.kind === "audio" && a.transcript);
+      textToSend = audioWithText.transcript;
+    }
 
     if ((!textToSend && currentAttachments.length === 0) || busy) return;
 
     const userMsg = {
       id: `u_${Date.now()}`,
       sender: "user",
-      text: textToSend,
+      text: textToSend || (lang === "ar" ? "🎙️ ملاحظة صوتية" : "🎙️ Voice note"),
       attachments: currentAttachments,
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
 
     const nextHistory = [...messages, userMsg];
     setMessages(nextHistory);
-    if (customText === null) setInput("");
+    if (customText === null) {
+      setInput("");
+      setLiveTranscript("");
+      speechTranscriptRef.current = "";
+    }
     setAttachments([]);
     setBusy(true);
 
@@ -1211,34 +1289,42 @@ export default function PlatformChatbotWidget() {
 
           {/* Active Voice Recording Live Bar */}
           {recording && (
-            <div className="px-3.5 py-2.5 bg-rose-50 dark:bg-rose-950/40 border-t border-rose-200 dark:border-rose-900/40 flex items-center justify-between gap-3 animate-pulse">
-              <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 text-xs font-bold min-w-0">
-                <span className="h-2.5 w-2.5 rounded-full bg-rose-500 animate-ping shrink-0" />
-                <Mic className="h-4 w-4 shrink-0" />
-                <span className="truncate">
-                  {lang === "ar" ? "ملاحظة صوتية..." : "Voice note..."}
-                </span>
-                <span className="font-mono bg-rose-200/60 dark:bg-rose-900/60 px-2 py-0.5 rounded text-[11px] text-rose-800 dark:text-rose-200 shrink-0">
-                  {Math.floor(recordSeconds / 60)}:{(recordSeconds % 60).toString().padStart(2, "0")}
-                </span>
+            <div className="px-3.5 py-2.5 bg-rose-50 dark:bg-rose-950/40 border-t border-rose-200 dark:border-rose-900/40 flex flex-col gap-2">
+              <div className="flex items-center justify-between gap-3 animate-pulse">
+                <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 text-xs font-bold min-w-0">
+                  <span className="h-2.5 w-2.5 rounded-full bg-rose-500 animate-ping shrink-0" />
+                  <Mic className="h-4 w-4 shrink-0" />
+                  <span className="truncate">
+                    {lang === "ar" ? "ملاحظة صوتية..." : "Voice note..."}
+                  </span>
+                  <span className="font-mono bg-rose-200/60 dark:bg-rose-900/60 px-2 py-0.5 rounded text-[11px] text-rose-800 dark:text-rose-200 shrink-0">
+                    {Math.floor(recordSeconds / 60)}:{(recordSeconds % 60).toString().padStart(2, "0")}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={cancelRecording}
+                    className="px-2.5 py-1 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-semibold transition-colors cursor-pointer"
+                  >
+                    {lang === "ar" ? "إلغاء" : "Cancel"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={stopRecording}
+                    className="flex items-center gap-1 px-3 py-1 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold shadow-sm transition-colors cursor-pointer"
+                  >
+                    <Square className="h-3 w-3 fill-current" />
+                    <span>{lang === "ar" ? "إيقاف واعتماد" : "Done"}</span>
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center gap-1.5 shrink-0">
-                <button
-                  type="button"
-                  onClick={cancelRecording}
-                  className="px-2.5 py-1 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-semibold transition-colors cursor-pointer"
-                >
-                  {lang === "ar" ? "إلغاء" : "Cancel"}
-                </button>
-                <button
-                  type="button"
-                  onClick={stopRecording}
-                  className="flex items-center gap-1 px-3 py-1 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold shadow-sm transition-colors cursor-pointer"
-                >
-                  <Square className="h-3 w-3 fill-current" />
-                  <span>{lang === "ar" ? "إيقاف واعتماد" : "Done"}</span>
-                </button>
-              </div>
+              {liveTranscript && (
+                <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-white/90 dark:bg-slate-900/90 border border-rose-200 dark:border-rose-900/50 text-[11.5px] text-slate-800 dark:text-slate-200 font-medium shadow-xs">
+                  <span className="text-emerald-500 font-bold shrink-0">🗣️</span>
+                  <span className="truncate font-sans">{liveTranscript}</span>
+                </div>
+              )}
             </div>
           )}
 
