@@ -374,7 +374,7 @@ export default function PlatformChatbotWidget() {
             ...prev,
             {
               id: `voice_${Date.now()}`,
-              name: lang === "ar" ? "تسجيل_صوتي.webm" : "Voice_Query.webm",
+              name: lang === "ar" ? "تسجيل صوتي" : "Voice Note",
               mimeType: mimeType,
               kind: "audio",
               data: base64,
@@ -964,7 +964,9 @@ export default function PlatformChatbotWidget() {
                             <div className="flex flex-col gap-1.5 p-2 rounded-xl bg-white/20 backdrop-blur-sm border border-white/25">
                               <div className="flex items-center gap-1.5 text-xs font-semibold">
                                 <Volume2 className="h-4 w-4 text-emerald-300 shrink-0" />
-                                <span className="truncate">{att.name}</span>
+                                <span className="truncate">
+                                  {att.kind === "audio" ? (lang === "ar" ? "تسجيل صوتي" : "Voice Note") : att.name}
+                                </span>
                                 {att.durationSec ? (
                                   <span className="text-[10px] opacity-80 shrink-0">
                                     ({Math.floor(att.durationSec / 60)}:{(att.durationSec % 60).toString().padStart(2, "0")})
@@ -1199,7 +1201,7 @@ export default function PlatformChatbotWidget() {
                   {att.kind === "pdf" && <FileText className="h-3.5 w-3.5 text-rose-500" />}
                   {att.kind === "audio" && <Mic className="h-3.5 w-3.5 text-emerald-500 animate-pulse" />}
                   <span className="font-semibold text-slate-800 dark:text-slate-200 max-w-[120px] truncate text-[11px]">
-                    {att.name}
+                    {att.kind === "audio" ? (lang === "ar" ? "تسجيل صوتي" : "Voice Note") : att.name}
                   </span>
                   <button
                     type="button"
