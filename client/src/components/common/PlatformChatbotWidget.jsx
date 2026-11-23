@@ -257,69 +257,6 @@ function parseInlineFormatting(str) {
   return parts.length > 0 ? parts : str;
 }
 
-const HELP_CALLOUTS = [
-  {
-    titleEn: "Need help?",
-    descEn: "Ask me anything!",
-    titleAr: "تحتاج مساعدة؟",
-    descAr: "اسألني أي شيء!",
-    icon: Sparkles,
-    color: "text-amber-500 dark:text-amber-300",
-    bgColor: "bg-amber-50 dark:bg-amber-950/60",
-    emoji: "👋",
-  },
-  {
-    titleEn: "Stuck on a question?",
-    descEn: "I'll explain step-by-step!",
-    titleAr: "محتار في سؤال؟",
-    descAr: "أشرحه لك خطوة بخطوة!",
-    icon: HelpCircle,
-    color: "text-sky-500 dark:text-sky-300",
-    bgColor: "bg-sky-50 dark:bg-sky-950/60",
-    emoji: "🙋‍♂️",
-  },
-  {
-    titleEn: "Want a practice quiz?",
-    descEn: "Generate one in seconds!",
-    titleAr: "تريد كويز تدريبي؟",
-    descAr: "أنشئه لك في ثوانٍ معدودة!",
-    icon: Flame,
-    color: "text-rose-500 dark:text-rose-300",
-    bgColor: "bg-rose-50 dark:bg-rose-950/60",
-    emoji: "⚡",
-  },
-  {
-    titleEn: "Review your lessons?",
-    descEn: "I can summarize any PDF!",
-    titleAr: "تراجع دروسك ومذكراتك؟",
-    descAr: "ألخص لك أي ملف PDF!",
-    icon: BookOpen,
-    color: "text-emerald-500 dark:text-emerald-300",
-    bgColor: "bg-emerald-50 dark:bg-emerald-950/60",
-    emoji: "📖",
-  },
-  {
-    titleEn: "Check your rank?",
-    descEn: "Ask about your scoreboard!",
-    titleAr: "تعرف على ترتيبك؟",
-    descAr: "اسألني عن نقاطك وترتيبك!",
-    icon: Trophy,
-    color: "text-purple-500 dark:text-purple-300",
-    bgColor: "bg-purple-50 dark:bg-purple-950/60",
-    emoji: "🏆",
-  },
-  {
-    titleEn: "I'm your AI Coach!",
-    descEn: "Tap me to get started 🚀",
-    titleAr: "أنا مدربك ومساعدك الذكي!",
-    descAr: "اضغط هنا لنبدأ فوراً 🚀",
-    icon: Bot,
-    color: "text-indigo-600 dark:text-cyan-400",
-    bgColor: "bg-indigo-50 dark:bg-indigo-950/60",
-    emoji: "✨",
-  },
-];
-
 export default function PlatformChatbotWidget() {
   const { user } = useAuth();
   const { lang } = useLang();
@@ -331,9 +268,6 @@ export default function PlatformChatbotWidget() {
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
 
-  // Static help callout - completely fixed without animation/cycling
-  const activeCallout = HELP_CALLOUTS[0];
-  const CalloutIcon = activeCallout.icon;
   const [attachments, setAttachments] = useState([]);
   const [copiedMsgId, setCopiedMsgId] = useState(null);
   const [translatingMsgId, setTranslatingMsgId] = useState(null);
@@ -815,47 +749,29 @@ export default function PlatformChatbotWidget() {
   };
 
   return (
-    <div className="fixed bottom-0.5 sm:bottom-1 end-3 sm:end-4 z-40">
+    <div
+      className={`fixed z-40 transition-all duration-200 ${
+        open ? "bottom-1 sm:bottom-2 end-2 sm:end-4" : "bottom-0 end-2 sm:end-4"
+      }`}
+    >
       {!open ? (
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="group relative flex items-end pb-0.5 gap-2.5 focus:outline-none cursor-pointer select-none"
-          title={lang === "ar" ? "اضغط للتحدث مع المساعد الذكي" : "Click to open AI Assistant"}
+          className="group relative flex flex-col items-center pb-0 focus:outline-none cursor-pointer select-none transition-transform hover:scale-105 active:scale-95"
+          title={lang === "ar" ? "اضغط للتحدث مع المساعد الذكي أثر AI" : "Click to open Athar AI Assistant"}
           aria-label="Open AI Robot Chatbot"
         >
-          {/* Static Speech Bubble */}
-          <div className="flex items-center gap-2.5 px-3 sm:px-3.5 py-2 rounded-2xl bg-white/95 dark:bg-slate-900/90 shadow-xl border border-slate-200/80 dark:border-white/10 text-start backdrop-blur-md ring-2 ring-sky-400/20 max-w-[210px] sm:max-w-xs mb-2">
-            <div
-              className={`h-7 w-7 rounded-xl ${activeCallout.bgColor} flex items-center justify-center ${activeCallout.color} shrink-0 shadow-inner`}
-            >
-              <CalloutIcon className="h-3.5 w-3.5" />
-            </div>
-            <div className="min-w-0">
-              <div className="font-extrabold text-[11px] text-slate-900 dark:text-white leading-tight flex items-center gap-1">
-                <span className="truncate">
-                  {lang === "ar" ? activeCallout.titleAr : activeCallout.titleEn}
-                </span>
-                <span className="text-xs inline-block shrink-0">
-                  {activeCallout.emoji}
-                </span>
-              </div>
-              <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium truncate">
-                {lang === "ar" ? activeCallout.descAr : activeCallout.descEn}
-              </div>
-            </div>
-          </div>
-
-          {/* Completely Static Robot Mascot */}
+          {/* Compact Static Robot Mascot */}
           <div className="flex flex-col items-center relative">
-            <div className="drop-shadow-[0_10px_20px_rgba(2,132,199,0.45)]">
+            <div className="drop-shadow-[0_4px_12px_rgba(2,132,199,0.35)]">
               <svg
-                width="104"
-                height="112"
+                width="62"
+                height="68"
                 viewBox="0 0 118 104"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
-                className="w-[96px] h-[104px] sm:w-[110px] sm:h-[118px] overflow-visible"
+                className="w-[50px] h-[56px] sm:w-[58px] sm:h-[64px] overflow-visible"
               >
                 <defs>
                   <linearGradient id="botBodyGrad" x1="18" y1="16" x2="62" y2="66" gradientUnits="userSpaceOnUse">
@@ -900,7 +816,7 @@ export default function PlatformChatbotWidget() {
                   <line x1="75" y1="32" x2="82" y2="4" stroke="#0284c7" strokeWidth="2.5" strokeLinecap="round" />
                   <circle cx="82" cy="4" r="2.5" fill="#fbbf24" stroke="#ffffff" strokeWidth="1" />
 
-                  {/* BIG Prominent Sign Board */}
+                  {/* Handheld Sign Board */}
                   <g filter="url(#signDropShadow)">
                     <rect x="62" y="2" width="52" height="23" rx="6.5" fill="url(#botSignGrad)" stroke="#ffffff" strokeWidth="1.6" />
                     {/* Active Indicator LED */}
@@ -948,7 +864,7 @@ export default function PlatformChatbotWidget() {
                 <path d="M38 33.5C40 35.5 46 35.5 48 33.5" stroke="#34d399" strokeWidth="2" strokeLinecap="round" />
               </svg>
             </div>
-            <div className="w-16 h-3 -mt-1 rounded-full bg-slate-900/30 dark:bg-sky-400/25 blur-[3px]" />
+            <div className="w-10 sm:w-11 h-2 -mt-0.5 rounded-full bg-slate-900/30 dark:bg-sky-400/25 blur-[2px]" />
           </div>
         </button>
       ) : (
