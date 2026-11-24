@@ -441,7 +441,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
     setCamState("requesting");
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } },
+        video: { facingMode: "user", width: { ideal: 1280, min: 640 }, height: { ideal: 720, min: 480 } },
         audio: false,
       });
       camStreamRef.current = stream;
@@ -609,7 +609,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
 
               // 3. Person Detection & Second Person Highlighting with 10s Countdown
               const personDetections = predictions.filter(
-                (p) => p.class === "person" && p.score >= 0.45
+                (p) => p.class === "person" && p.score >= 0.38
               );
 
               const vidW = video.videoWidth || 640;
@@ -1419,7 +1419,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
       {/* Camera Gate Modal */}
       {showCamGate && pendingQuiz && createPortal(
         <div style={{ position: "fixed", inset: 0, zIndex: 100000, background: "rgba(2,6,23,0.95)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-          <div style={{ background: "#0f172a", border: "2px solid #38bdf8", borderRadius: 20, padding: 32, maxWidth: 440, width: "100%", textAlign: "center", color: "#fff", boxShadow: "0 24px 80px rgba(0,0,0,0.8)" }}>
+          <div style={{ background: "#0f172a", border: "2px solid #38bdf8", borderRadius: 20, padding: 32, maxWidth: 480, width: "100%", textAlign: "center", color: "#fff", boxShadow: "0 24px 80px rgba(0,0,0,0.8)" }}>
             <div style={{ fontSize: 48, marginBottom: 12 }}>📷</div>
             <h2 style={{ fontSize: 22, fontWeight: 900, marginBottom: 8 }}>
               {lang === "ar" ? "الكاميرا مطلوبة لبدء الاختبار" : "Camera Required to Start Quiz"}
@@ -1429,7 +1429,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                 ? "لا يمكن بدء الاختبار إلا بعد تفعيل الكاميرا. سيتم مراقبتك طوال فترة الاختبار للتحقق من عدم استخدام أي أجهزة غش. إذا اكتشف النظام هاتفاً محمولاً أو تعمد حجب وتغطية الكاميرا (شاشة سوداء)، سيتم إنهاء الاختبار فوراً كحالة غش."
                 : "The quiz cannot start without your camera. You will be monitored throughout the exam. If a mobile phone is detected or the camera is covered/obscured (black screen), the quiz will be immediately terminated for cheating."}
             </p>
-            <div style={{ width: "100%", aspectRatio: "4/3", background: "#1e293b", borderRadius: 12, overflow: "hidden", marginBottom: 20, border: "1px solid #334155" }}>
+            <div style={{ width: "100%", aspectRatio: "16/10", background: "#1e293b", borderRadius: 14, overflow: "hidden", marginBottom: 20, border: "1px solid #334155" }}>
               <video ref={camGateVideoRef} autoPlay muted playsInline style={{ width: "100%", height: "100%", objectFit: "cover", transform: "scaleX(-1)" }} />
             </div>
             <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
@@ -1613,9 +1613,9 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
             left: "50%",
             transform: "translateX(-50%)",
             zIndex: 99997,
-            width: multiPersonCountdown !== null ? 220 : 160,
-            height: multiPersonCountdown !== null ? 150 : 110,
-            borderRadius: 14,
+            width: multiPersonCountdown !== null ? 280 : 220,
+            height: multiPersonCountdown !== null ? 195 : 155,
+            borderRadius: 16,
             overflow: "hidden",
             border: multiPersonCountdown !== null ? "2.5px solid #ef4444" : "2px solid #38bdf8",
             boxShadow: multiPersonCountdown !== null
@@ -1662,12 +1662,12 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                   position: "absolute",
                   bottom: "100%",
                   left: 0,
-                  fontSize: 7.5,
+                  fontSize: 9,
                   fontWeight: 900,
                   color: "#fff",
                   backgroundColor: p.isSecondPerson ? "#ef4444" : "#10b981",
-                  padding: "1px 4px",
-                  borderRadius: 4,
+                  padding: "2px 6px",
+                  borderRadius: 5,
                   whiteSpace: "nowrap",
                   letterSpacing: 0.3,
                   boxShadow: "0 2px 4px rgba(0,0,0,0.4)",
@@ -1720,7 +1720,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
         <div
           style={{
             position: "fixed",
-            top: 175,
+            top: 218,
             left: "50%",
             transform: "translateX(-50%)",
             zIndex: 99998,
