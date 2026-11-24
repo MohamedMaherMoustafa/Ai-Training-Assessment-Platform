@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -25,6 +25,7 @@ import { useTheme } from "../../context/ThemeContext";
 import { usePopup } from "../../context/PopupContext";
 import { playLoginSuccessSound } from "../../utils/soundEffects";
 import LanguageDropdown from "../../components/common/LanguageDropdown";
+import RobotMascotSvg from "../../components/common/RobotMascotSvg";
 
 export default function LoginPage() {
   const { t, i18n } = useTranslation();
@@ -38,6 +39,52 @@ export default function LoginPage() {
   const [showPass, setShowPass] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  const [isTypingPassword, setIsTypingPassword] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+  const typingTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    };
+  }, []);
+
+  const handlePasswordChange = (e) => {
+    const val = e.target.value;
+    setPassword(val);
+
+    if (val.length > 0) {
+      setIsTypingPassword(true);
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      // When user stops typing for 1000ms, release his eyes!
+      typingTimeoutRef.current = setTimeout(() => {
+        setIsTypingPassword(false);
+      }, 1000);
+    } else {
+      setIsTypingPassword(false);
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    }
+  };
+
+  const handlePasswordFocus = () => {
+    setIsPasswordFocused(true);
+    if (password.length > 0) {
+      setIsTypingPassword(true);
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = setTimeout(() => {
+        setIsTypingPassword(false);
+      }, 1000);
+    }
+  };
+
+  const handlePasswordBlur = () => {
+    setIsPasswordFocused(false);
+    setIsTypingPassword(false);
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+  };
+
+  const isCoveringEyes = isTypingPassword && !showPass;
 
   useEffect(() => {
     const saved = localStorage.getItem("platform_remember_user");
@@ -252,6 +299,63 @@ export default function LoginPage() {
           {/* Right Column: Clean Authentication Form */}
           <section className="col-span-1 lg:col-span-7 p-6 sm:p-9 lg:p-10 xl:p-14 bg-white dark:bg-slate-900 flex flex-col justify-center overflow-y-auto transition-colors">
             <div className="max-w-md xl:max-w-lg mx-auto w-full">
+              {/* Interactive Athar AI Mascot */}
+              <div className="flex flex-col items-center justify-center mb-3">
+                <div className="relative flex flex-col items-center select-none group">
+                  <div className="drop-shadow-[0_8px_20px_rgba(37,99,235,0.35)] transition-transform hover:scale-105 duration-200">
+                    <RobotMascotSvg
+                      isCoveringEyes={isCoveringEyes}
+                      isPeeking={showPass && (isTypingPassword || isPasswordFocused)}
+                      showSign={!isPasswordFocused && !isTypingPassword}
+                      signText={lang === "ar" ? "أهلاً!" : "ATHAR"}
+                      width={96}
+                      height={102}
+                      className="w-[84px] h-[90px] sm:w-[94px] sm:h-[100px] overflow-visible"
+                      idPrefix="login_bot"
+                    />
+                  </div>
+
+                  {/* Mascot Speech Bubble / Status Pill */}
+                  <div className="mt-1 flex items-center justify-center text-center">
+                    {isCoveringEyes ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-400/30 text-[11px] font-black animate-pulse shadow-sm">
+                        <span>🙈</span>
+                        <span>
+                          {lang === "ar"
+                            ? "مغمض عينيّ تماماً... لن أنظر إلى كلمة المرور!"
+                            : "Covering my eyes! No peeking at your password!"}
+                        </span>
+                      </span>
+                    ) : showPass && (isTypingPassword || isPasswordFocused) ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-400/30 text-[11px] font-black shadow-sm">
+                        <span>🫣</span>
+                        <span>
+                          {lang === "ar"
+                            ? "أتلصص بنظرة سريعة لأنك أظهرت كلمة المرور!"
+                            : "Peeking! Password visibility is turned on!"}
+                        </span>
+                      </span>
+                    ) : isPasswordFocused ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-400/30 text-[11px] font-black shadow-sm">
+                        <span>👀</span>
+                        <span>
+                          {lang === "ar"
+                            ? "عيناي مفتوحتان... سأغمضهما فور أن تبدأ الكتابة!"
+                            : "Eyes open... I'll cover them when you type!"}
+                        </span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-cyan-400 border border-blue-400/20 text-[10.5px] font-bold">
+                        <span>🤖</span>
+                        <span>
+                          {lang === "ar" ? "مساعد أثر AI يرحب بك" : "Athar AI Assistant"}
+                        </span>
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               {/* Header */}
               <div className="text-center mb-4 sm:mb-5">
                 <h2 className="text-2xl sm:text-3xl xl:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
@@ -298,7 +402,9 @@ export default function LoginPage() {
                       autoComplete="new-password"
                       required
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={handlePasswordChange}
+                      onFocus={handlePasswordFocus}
+                      onBlur={handlePasswordBlur}
                       placeholder={t("auth.passwordPlaceholder")}
                       className="w-full ps-10 pe-10 py-2.5 sm:py-3 glass-input text-xs sm:text-sm"
                     />

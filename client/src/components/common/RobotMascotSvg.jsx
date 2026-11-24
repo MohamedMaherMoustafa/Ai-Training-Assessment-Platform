@@ -12,6 +12,8 @@ export default function RobotMascotSvg({
   showSign = true,
   signText = "HELP!",
   isWaving = false,
+  isCoveringEyes = false,
+  isPeeking = false,
   idPrefix = "bot",
 }) {
   const skin = useMemo(() => {
@@ -110,109 +112,114 @@ export default function RobotMascotSvg({
         </g>
       )}
 
-      {/* Left Arm: Resting */}
-      <g className="robot-arm-l">
-        <rect
-          x="16"
-          y="45"
-          width="8"
-          height="19"
-          rx="4"
-          fill={`url(#${metalGradId})`}
-          stroke={colors.glowColor}
-          strokeWidth="1.5"
-        />
-        <circle cx="20" cy="64" r="3.5" fill={colors.bodyGradStart} />
-      </g>
-
-      {/* Right Arm & Sign Board */}
-      {showSign ? (
-        <g className={`robot-arm-sign ${isWaving ? "animate-bounce" : ""}`}>
-          {/* Upper Arm */}
-          <rect
-            x="58"
-            y="27"
-            width="9"
-            height="21"
-            rx="4.5"
-            fill={`url(#${metalGradId})`}
-            stroke={colors.glowColor}
-            strokeWidth="1.5"
-            transform="rotate(-36 60 44)"
-          />
-          {/* Hand holding pole */}
-          <circle
-            cx="75"
-            cy="27"
-            r="5"
-            fill={colors.bodyGradStart}
-            stroke="#ffffff"
-            strokeWidth="1.2"
-          />
-          <path
-            d="M72 26 L69 22 M75 25 L75 20 M78 26 L81 23"
-            stroke={colors.bodyGradStart}
-            strokeWidth="1.5"
-            strokeLinecap="round"
-          />
-
-          {/* Sign Pole */}
-          <line
-            x1="75"
-            y1="32"
-            x2="82"
-            y2="4"
-            stroke={colors.glowColor}
-            strokeWidth="2.5"
-            strokeLinecap="round"
-          />
-          <circle cx="82" cy="4" r="2.5" fill="#fbbf24" stroke="#ffffff" strokeWidth="1" />
-
-          {/* Sign Board */}
-          <g filter={`url(#${shadowFilterId})`}>
+      {/* Arms & Handheld Sign (Hidden while covering eyes) */}
+      {!isCoveringEyes && (
+        <>
+          {/* Left Arm: Resting */}
+          <g className="robot-arm-l">
             <rect
-              x="62"
-              y="2"
-              width="52"
-              height="23"
-              rx="6.5"
-              fill={`url(#${signGradId})`}
-              stroke="#ffffff"
-              strokeWidth="1.6"
+              x="16"
+              y="45"
+              width="8"
+              height="19"
+              rx="4"
+              fill={`url(#${metalGradId})`}
+              stroke={colors.glowColor}
+              strokeWidth="1.5"
             />
-            {/* LED Status Indicator */}
-            <circle cx="69" cy="8" r="2" fill={colors.ledColor} className="animate-pulse" />
-            {/* Sign Text */}
-            <text
-              x="91"
-              y="14.5"
-              fill="#ffffff"
-              fontSize="10.5"
-              fontWeight="900"
-              textAnchor="middle"
-              dominantBaseline="central"
-              fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
-              letterSpacing="0.6"
-            >
-              {signText}
-            </text>
+            <circle cx="20" cy="64" r="3.5" fill={colors.bodyGradStart} />
           </g>
-        </g>
-      ) : (
-        /* Alternative Right Arm (Resting symmetrically) */
-        <g className="robot-arm-r">
-          <rect
-            x="64"
-            y="45"
-            width="8"
-            height="19"
-            rx="4"
-            fill={`url(#${metalGradId})`}
-            stroke={colors.glowColor}
-            strokeWidth="1.5"
-          />
-          <circle cx="68" cy="64" r="3.5" fill={colors.bodyGradStart} />
-        </g>
+
+          {/* Right Arm & Sign Board */}
+          {showSign ? (
+            <g className={`robot-arm-sign ${isWaving ? "animate-bounce" : ""}`}>
+              {/* Upper Arm */}
+              <rect
+                x="58"
+                y="27"
+                width="9"
+                height="21"
+                rx="4.5"
+                fill={`url(#${metalGradId})`}
+                stroke={colors.glowColor}
+                strokeWidth="1.5"
+                transform="rotate(-36 60 44)"
+              />
+              {/* Hand holding pole */}
+              <circle
+                cx="75"
+                cy="27"
+                r="5"
+                fill={colors.bodyGradStart}
+                stroke="#ffffff"
+                strokeWidth="1.2"
+              />
+              <path
+                d="M72 26 L69 22 M75 25 L75 20 M78 26 L81 23"
+                stroke={colors.bodyGradStart}
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+
+              {/* Sign Pole */}
+              <line
+                x1="75"
+                y1="32"
+                x2="82"
+                y2="4"
+                stroke={colors.glowColor}
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              />
+              <circle cx="82" cy="4" r="2.5" fill="#fbbf24" stroke="#ffffff" strokeWidth="1" />
+
+              {/* Sign Board */}
+              <g filter={`url(#${shadowFilterId})`}>
+                <rect
+                  x="62"
+                  y="2"
+                  width="52"
+                  height="23"
+                  rx="6.5"
+                  fill={`url(#${signGradId})`}
+                  stroke="#ffffff"
+                  strokeWidth="1.6"
+                />
+                {/* LED Status Indicator */}
+                <circle cx="69" cy="8" r="2" fill={colors.ledColor} className="animate-pulse" />
+                {/* Sign Text */}
+                <text
+                  x="91"
+                  y="14.5"
+                  fill="#ffffff"
+                  fontSize="10.5"
+                  fontWeight="900"
+                  textAnchor="middle"
+                  dominantBaseline="central"
+                  fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+                  letterSpacing="0.6"
+                >
+                  {signText}
+                </text>
+              </g>
+            </g>
+          ) : (
+            /* Alternative Right Arm (Resting symmetrically) */
+            <g className="robot-arm-r">
+              <rect
+                x="64"
+                y="45"
+                width="8"
+                height="19"
+                rx="4"
+                fill={`url(#${metalGradId})`}
+                stroke={colors.glowColor}
+                strokeWidth="1.5"
+              />
+              <circle cx="68" cy="64" r="3.5" fill={colors.bodyGradStart} />
+            </g>
+          )}
+        </>
       )}
 
       {/* Legs */}
@@ -414,6 +421,95 @@ export default function RobotMascotSvg({
           <circle cx="50" cy="28" r="7.5" fill="none" stroke="#f59e0b" strokeWidth="0.8" strokeDasharray="1.5 1.5" />
           {/* Chain dangling */}
           <path d="M56 31 Q60 38 62 48" stroke="#d97706" strokeWidth="1" fill="none" strokeDasharray="1 1" />
+        </g>
+      )}
+
+      {/* Arms & Hands Covering Eyes with Fingers */}
+      {isCoveringEyes && (
+        <g className="robot-covering-eyes animate-fadeIn">
+          {/* Cute Shy Blush Marks on Cheeks */}
+          <ellipse cx="26" cy="35" rx="3.5" ry="2" fill="#fb7185" opacity="0.8" />
+          <ellipse cx="60" cy="35" rx="3.5" ry="2" fill="#fb7185" opacity="0.8" />
+
+          {/* Left Raised Arm link from shoulder */}
+          <path
+            d="M 19 54 Q 13 36 28 28"
+            stroke={colors.glowColor}
+            strokeWidth="6"
+            strokeLinecap="round"
+            fill="none"
+          />
+          <path
+            d="M 19 54 Q 13 36 28 28"
+            stroke={`url(#${metalGradId})`}
+            strokeWidth="3.8"
+            strokeLinecap="round"
+            fill="none"
+          />
+
+          {/* Right Raised Arm link from shoulder */}
+          <path
+            d="M 67 54 Q 73 36 58 28"
+            stroke={colors.glowColor}
+            strokeWidth="6"
+            strokeLinecap="round"
+            fill="none"
+          />
+          <path
+            d="M 67 54 Q 73 36 58 28"
+            stroke={`url(#${metalGradId})`}
+            strokeWidth="3.8"
+            strokeLinecap="round"
+            fill="none"
+          />
+
+          {/* Left Hand & Fingers covering Left Eye (cx=36, cy=28) */}
+          <g className="left-hand-cover" transform="rotate(-6 35 28)">
+            {/* Palm Base */}
+            <rect
+              x="28"
+              y="22"
+              width="14"
+              height="11"
+              rx="4"
+              fill={`url(#${metalGradId})`}
+              stroke={colors.glowColor}
+              strokeWidth="1.2"
+            />
+            {/* Robotic Fingers hiding eye */}
+            <rect x="29" y="19" width="2.8" height="7" rx="1.4" fill={colors.bodyGradStart} stroke="#ffffff" strokeWidth="0.8" />
+            <rect x="32.5" y="18" width="2.8" height="8" rx="1.4" fill={colors.bodyGradStart} stroke="#ffffff" strokeWidth="0.8" />
+            <rect x="36" y="18.5" width="2.8" height="7.5" rx="1.4" fill={colors.bodyGradStart} stroke="#ffffff" strokeWidth="0.8" />
+            <rect x="39.5" y="20" width="2.6" height="6" rx="1.3" fill={colors.bodyGradStart} stroke="#ffffff" strokeWidth="0.8" />
+          </g>
+
+          {/* Right Hand & Fingers covering Right Eye (cx=50, cy=28) */}
+          <g
+            className="right-hand-cover"
+            transform={isPeeking ? "rotate(14 53 28) translate(3, 0)" : "rotate(6 51 28)"}
+          >
+            {/* Palm Base */}
+            <rect
+              x="44"
+              y="22"
+              width="14"
+              height="11"
+              rx="4"
+              fill={`url(#${metalGradId})`}
+              stroke={colors.glowColor}
+              strokeWidth="1.2"
+            />
+            {/* Robotic Fingers hiding eye */}
+            <rect x="44" y="20" width="2.6" height="6" rx="1.3" fill={colors.bodyGradStart} stroke="#ffffff" strokeWidth="0.8" />
+            <rect x="47.5" y="18.5" width="2.8" height="7.5" rx="1.4" fill={colors.bodyGradStart} stroke="#ffffff" strokeWidth="0.8" />
+            <rect x="51" y="18" width="2.8" height="8" rx="1.4" fill={colors.bodyGradStart} stroke="#ffffff" strokeWidth="0.8" />
+            <rect x="54.5" y="19" width="2.8" height="7" rx="1.4" fill={colors.bodyGradStart} stroke="#ffffff" strokeWidth="0.8" />
+          </g>
+
+          {/* If peeking, right eye glows through the finger gap */}
+          {isPeeking && (
+            <circle cx="50" cy="28" r="2.8" fill={colors.bodyGradStart} className="animate-pulse" />
+          )}
         </g>
       )}
 
