@@ -457,16 +457,48 @@ Week 8  │ Testing + Firebase deploy
 
 ## ✅ Final Demo Sign-Off Checklist
 
-- [ ] Instructor uploads a lesson PDF
-- [ ] Local trained LLM auto-drafts 10 MCQs from the PDF content
-- [ ] Instructor reviews and approves the quiz in QuizBuilder
-- [ ] Student enrols in the course
-- [ ] Student takes the quiz with a timer
-- [ ] Score is saved to Firestore and displayed
-- [ ] AI study feedback is shown after submission
-- [ ] Instructor sees all student results in dashboard
-- [ ] Full AR ↔ EN toggle with RTL layout
-- [ ] Light / Dark theme toggle works across all pages
+- [x] Instructor uploads a lesson PDF
+- [x] Local trained LLM auto-drafts 10, 15, or 20 MCQs from the PDF content
+- [x] Instructor reviews and approves the quiz in QuizBuilder
+- [x] Student enrols in the course
+- [x] Student takes the quiz with a timer and webcam proctoring
+- [x] Score is saved to Firebase RTDB and displayed on live scoreboard
+- [x] AI study feedback and diagnostic report is shown after submission
+- [x] Instructor sees all student results in dashboard and progress tracker
+- [x] Full AR ↔ EN toggle with RTL layout
+- [x] Light / Dark theme toggle works across all pages
+- [x] Student Rewards Store & Gamified Coin Economy with Strict Academic Point Protection
+- [x] Interactive Login Mascot with real-time eye-covering password typing animation
+- [x] Chatbot inline Arabic translation engine in assistant response footers
+- [x] Strict username validation rules (`>= 8` chars and `@` or `_`)
+- [x] Conditional WhatsApp support button (displayed only when status is "Needs Support")
+- [x] Cognitive IQ Puzzles module with 10 ascending difficulty tiers and proportional rewards
+
+---
+
+## 🌟 Recently Completed Major Features & Modernizations
+
+### 1. Student Rewards Store & Coin Economy (`/student/store`)
+- **Point Conversion**: Academic points convert to spendable Coins ($1 \text{ pt} = 10 \text{ coins}$), plus bonus coins earned from Cognitive IQ Puzzles (+15 to +400 coins per puzzle).
+- **Strict Academic Point Protection**: Purchasing cosmetic items in the store **strictly spends Coins only**. Academic points, course marks, certificate eligibility, and podium standings are never deducted.
+- **Cosmetics Catalog**: 8 Glowing Name Tags, 8 Liquid-Glass Avatar Frames, and Chatbot Studio (6 Robot skins, 7 Hats, 6 Glasses, 5 Shoes).
+- **Live Equip State**: Synchronized across header, sidebar, profile settings modal, chatbot widget, and scoreboard podiums.
+
+### 2. Interactive Login Mascot (Eye-Covering Password Privacy Animation)
+- SVG robot mascot mounted on `LoginPage.jsx`.
+- Covers his eyes with hands and fingers when the user is typing their password.
+- 1-second debounce inactivity release and blur unmasking.
+- Peeking mode: Parts fingers and peeks when `showPass` is enabled.
+
+### 3. AI Quiz 10, 15, and 20 Question Generation Buttons
+- Instructors have 3 quick AI generation buttons to tailor quiz depth to lesson requirements.
+
+### 4. Chatbot Response Inline Arabic Translation Engine
+- Dedicated "Translate into Arabic" button (`Languages` icon) in every assistant message footer beside the copy button.
+
+### 5. Strict Username Security & Conditional Support
+- Enforced username validation rule (`username.length >= 8` and must contain `@` or `_`).
+- WhatsApp support button displayed on student dashboard only when student status is "Needs Support".
 
 ---
 

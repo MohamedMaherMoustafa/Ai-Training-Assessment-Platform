@@ -67,6 +67,38 @@ A bilingual (English / Arabic RTL) **Aurora Prism Liquid-Glass** web platform ba
 ### 10. Walking Robot Mascot Intro Splash Screen
 - **Intro Experience (`client/src/components/common/WalkingRobotIntro.jsx`):** On initial website entry, an animated mascot walks across the center from left to right while dynamically writing the glowing neon brand name **"ATHAR AI"** (منصة أثر التعليمية) across the background.
 
+### 11. Student Rewards Store & Gamified Economy (`StudentStoreModule.jsx`, `storeData.js`)
+- **Points to Coins Conversion Engine**: Automatically computes spendable Coins from academic points ($1 \text{ Academic Pt} = 10 \text{ Coins}$), combined with bonus Coins earned by completing Cognitive IQ Puzzles (+15 to +400 coins per puzzle).
+- **Strict Academic Point Protection Guarantee**: Purchasing cosmetic items in the store **strictly spends Coins only**. Academic points, course marks, certificate eligibility, and podium standings are never deducted.
+- **Cosmetics Catalog**:
+  - **8 Glowing Name Tags**: *Novice Scholar*, *Code Ninja*, *Bug Hunter*, *AI Pioneer*, *Byte Master*, *Logic Wizard*, *Cyber Sentinel*, *Grand Alchemist*.
+  - **8 Liquid-Glass Avatar Frames**: *Neon Azure*, *Emerald Pulse*, *Golden Radiance*, *Cyberpunk Violet*, *Crimson Flame*, *Quantum Glitch*, *Starry Nebula*, *Royal Obsidian*.
+  - **Robot Chatbot Customization Studio**:
+    - **6 Color Skins**: Classic Cobalt, Emerald Bot, Crimson Fury, Cyber Gold, Violet Shadow, Neon Pink.
+    - **7 Hats**: Top Hat, Graduation Cap, Beanie, Baseball Cap, Crown, Viking Helmet, Wizard Hat.
+    - **6 Glasses**: Nerdy Specs, Cool Shades, Steampunk Goggles, VR Headset, Monocle, Cyber Visor.
+    - **5 Shoes**: Sport Sneakers, Cyber Boots, Roller Skates, Golden Kicks, Classic Loafers.
+- **Dynamic Cross-Platform Synchronization**: Equipped frames and titles immediately apply to the student's avatar in the sidebar, header coins pill, profile settings modal, and scoreboard podium. Robot cosmetics apply directly to the live floating AI chatbot assistant.
+
+### 12. Interactive Login Mascot & Password Privacy Animation (`LoginPage.jsx`, `RobotMascotSvg.jsx`)
+- **Interactive SVG Robot Mascot**: Positioned directly above the authentication card on `LoginPage.jsx`.
+- **Eye-Covering Password Animation**: When the user types into the password input, the robot raises his hands and covers his eyes with his fingers.
+- **Inactivity Debounce & Blur**: Drops hands and uncovers eyes after 1 second of typing inactivity or when the password field is blurred.
+- **Peeking Animation**: If the password visibility toggle (`showPass`) is active, the robot peeks playfully between parted fingers!
+- State-aware expressions for idle and username typing states.
+
+### 13. AI Quiz Authoring Depth & Question Quantity Selectors (10, 15, 20 Questions)
+- **Granular AI Question Presets**: Instructor Quiz Creator provides three quick generation buttons: **10 Questions**, **15 Questions**, and **20 Questions**, allowing teachers to instantly draft brief quizzes, standard assessments, or full unit exams.
+
+### 14. Chatbot Inline Arabic Translation Engine
+- **Instant Response Translation**: Every assistant response features a dedicated "Translate into Arabic" button (`Languages` icon) in the message footer beside the copy button, instantly providing a localized, natural Arabic translation of the response.
+
+### 15. Account Security & Strict Username Validation Rules
+- **Username Policy Enforcement**: Both instructor account creation and student registration enforce strict username validation requiring `username.length >= 8` and the presence of either `@` or `_`.
+
+### 16. Conditional Student Support System (Needs Support Detection)
+- **Targeted Support Access**: The direct WhatsApp instructor contact button on the student dashboard is conditionally rendered only when the student's status is "Needs Support", hiding it during normal academic standing to keep the interface focused.
+
 ---
 
 ## Automated Verification Results

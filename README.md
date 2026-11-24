@@ -67,17 +67,18 @@ The platform provides end-to-end support for coursework, lesson materials, digit
 
 ---
 
-### 4. 🤖 Platform AI Chatbot Assistant & Splash Intro
+### 4. 🤖 Platform AI Chatbot Assistant, Splash Intro & Inline Arabic Translation
 - **Walking Mascot Splash Intro (`WalkingRobotIntro.jsx`)**: An animated robot walks across the center from left to right on website entry, dynamically writing **"ATHAR AI"** across the screen in futuristic glowing typography.
 - **Multimodal Intelligence**: Accepts text queries and instant file attachments (photos, diagrams, and PDF documents) with sub-3s response times powered by native global fetch to Gemini API.
+- **Inline Arabic Translation Engine**: Every assistant response features an instant **"Translate into Arabic"** button (`Languages` icon) in the message footer beside the copy button, allowing students to translate any explanation or answer into clear, natural Arabic instantly.
 - **Course & Lesson Summarization Browser**: Clicking the **"Summarize a lesson"** action lists all available lessons in the course with interactive chips, allowing the user to select any lesson for an immediate AI summary.
 - **Course & Student Aware**: Can answer conceptual questions, look up student marks and rankings, and explain platform mechanics.
 - **Safe Guardrails**: Scoped strictly to educational topics without dumping raw internal data.
 
 ---
 
-### 5. ⏱️ AI Quizzes & Advanced Anti-Cheating Proctoring
-- **Platform AI Quiz Generation**: Automatically generates context-aware multiple-choice questions (MCQs) directly from lesson contents in Arabic or English.
+### 5. ⏱️ AI Quizzes (10, 15, or 20 Questions) & Advanced Anti-Cheating Proctoring
+- **Flexible AI Question Generation Presets**: Instructors can generate quizzes instantly with three dedicated question count options: **10 Questions**, **15 Questions**, or **20 Questions**, tailoring the assessment depth to lesson scope and exam requirements.
 - **Interactive Timer**: Configurable duration in minutes with a real-time countdown clock and auto-submit on time expiry.
 - **Pre-Quiz Webcam Gate**: Students cannot initiate an assessment without enabling their camera. A pre-quiz verification modal previews the video feed and confirms active proctoring before releasing questions.
 - **Top-Center Floating Proctoring Window (PiP)**: A persistent 160×110px mirrored live video feed anchored at `top: 14px; left: 50%` with a glowing red `LIVE` indicator, keeping questions and answer choices completely unobstructed.
@@ -90,21 +91,53 @@ The platform provides end-to-end support for coursework, lesson materials, digit
 
 ---
 
-### 4. 🤖 Platform AI Chatbot Assistant
-- **Multimodal Intelligence**: Accepts text queries, audio/voice inputs (recorded directly in the browser), and attachments (photos and PDF documents).
-- **Course & Student Aware**: Can answer conceptual questions, summarize lectures in Arabic or English, look up student marks and rankings, and explain platform mechanics.
-- **Safe Guardrails**: Scoped strictly to educational topics without dumping raw internal data.
+### 6. 🪙 Student Rewards Store & Gamified Coin Economy (`/student/store`)
+- **Points to Coins Conversion ($1 \text{ Academic Point} = 10 \text{ Coins}$)**: Students earn coins automatically from academic performance (Quizzes and Assignments), plus bonus coins earned by solving Cognitive IQ Puzzles (+15 to +400 coins per puzzle).
+- **Strict Academic Point Protection Guarantee**: Purchasing cosmetic items in the store **strictly spends Coins only**. Academic points, course marks, certificate eligibility, and academic leaderboard rankings are **permanently protected and never deducted**.
+- **Complete Cosmetics Catalog**:
+  - **8 Glowing Name Tags / Titles**: *Novice Scholar*, *Code Ninja*, *Bug Hunter*, *AI Pioneer*, *Byte Master*, *Logic Wizard*, *Cyber Sentinel*, and *Grand Alchemist*.
+  - **8 Liquid-Glass Animated Avatar Frames**: *Neon Azure*, *Emerald Pulse*, *Golden Radiance*, *Cyberpunk Violet*, *Crimson Flame*, *Quantum Glitch*, *Starry Nebula*, and *Royal Obsidian*.
+  - **Chatbot Customization Studio**:
+    - **6 Robot Skins**: Classic Cobalt, Emerald Bot, Crimson Fury, Cyber Gold, Violet Shadow, and Neon Pink.
+    - **7 Hats / Headwear**: Top Hat, Graduation Cap, Beanie, Baseball Cap, Crown, Viking Helmet, and Wizard Hat.
+    - **6 Glasses / Eyewear**: Nerdy Specs, Cool Shades, Steampunk Goggles, VR Headset, Monocle, and Cyber Visor.
+    - **5 Shoes / Footwear**: Sport Sneakers, Cyber Boots, Roller Skates, Golden Kicks, and Classic Loafers.
+- **Live Dynamic Synchronization**: Equipped items update in real time across the platform:
+  - Active Avatar Frame & Name Tag appear on the Student Sidebar profile card, Header Coins Pill, Profile Settings Modal, and Top-3 Podium on the Course Scoreboard.
+  - Active Robot Skin and Accessories immediately customize the floating AI Assistant mascot across all student screens.
 
 ---
 
-### 5. 📊 Automated 7-Day Weekly Performance Reports
+### 7. 🙈 Interactive Login Mascot (Eye-Covering Password Privacy Animation)
+- **Interactive SVG Robot Mascot (`RobotMascotSvg.jsx`)**: Positioned above the authentication card on `LoginPage.jsx`.
+- **Active Password Eye Covering**: As soon as the student starts typing in the password field, the robot smoothly raises his hands and covers his eyes with his fingers.
+- **1-Second Typing Inactivity Debounce**: If typing pauses for 1 second or the password field loses focus, the robot lowers his hands and uncovers his eyes.
+- **Peeking Mode**: If the student clicks the show password toggle (`showPass`), the robot parts his fingers to sneak a peek at the input!
+- **State-Aware Expressions**: The robot mascot smiles and observes normally while typing username/email fields.
+
+---
+
+### 8. 📊 Automated 7-Day Weekly Performance Reports
 - **Weekly Schedule Engine**: Evaluates student activity and progress every 7 calendar days.
 - **Organized View**: Formats historical student performance chronologically (e.g., Week 1, Week 2, Current Week).
 - **Automated Notifications**: Automatically dispatches a notification every 7 days inviting the student to view their updated performance breakdown.
 
 ---
 
-### 6. 🎨 Glassmorphic UI & Accessibility
+### 9. 🧠 Cognitive IQ Puzzles Hub & Proportional Rewards (`IQPuzzlesModule.jsx`)
+- **10 Ascending Difficulty Levels**: Gamified puzzles covering numerical reasoning, spatial rotation, Boolean logic, balance equations, and multi-constraint deduction.
+- **Proportional Coins Earnings**: Solving challenging puzzles awards between 15 and 400 coins, providing an engaging way to build coins for the Store.
+- **Cognitive Ranks & Streaks**: 6 IQ tiers and daily brain teaser streak tracking.
+
+---
+
+### 10. 🛡️ System Security, Username Validation & Conditional Support
+- **Strict Username Validation**: Instructor account creation and student registration strictly require usernames to be at least 8 characters long and contain either `@` or `_` (e.g., `student_user`, `john@athar`).
+- **Conditional WhatsApp Support Button**: The student dashboard displays the direct WhatsApp instructor contact button **only when the student's status is "Needs Support"**, keeping the interface clean and distraction-free when academic performance is on track.
+
+---
+
+### 11. 🎨 Glassmorphic UI & Accessibility
 - **Modern Liquid Glass Design**: Frosted glass cards, translucent inputs (`.glass-input`), glowing accent indicators, and backdrop blur.
 - **Bilingual & RTL/LTR Support**: Fully translated in English (LTR) and Arabic (RTL) with instant language toggle.
 - **Theme Modes**: Seamless Dark mode (`#080c1a`) and crisp Light mode with high-contrast text and visible navigation.
@@ -137,18 +170,20 @@ The platform provides end-to-end support for coursework, lesson materials, digit
 │   │   └── pdf.worker.min.mjs       # Mozilla PDF.js web worker
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── common/              # Chatbot widget, profile modal, progress modal
+│   │   │   ├── common/              # Chatbot widget, profile modal, progress modal, RobotMascotSvg
 │   │   │   └── layout/              # AppLayout, Sidebar, TopHeader, Notifications
 │   │   ├── context/                 # AuthContext, LangContext, PopupContext, UploadContext
 │   │   ├── features/
 │   │   │   ├── admin/               # Overview & Instructors management
 │   │   │   ├── assignments/         # Assignment publishing & Live Annotation studio
-│   │   │   ├── auth/                # Login & Registration pages
+│   │   │   ├── auth/                # Login (with animated mascot) & Registration pages
 │   │   │   ├── courses/             # Courses & lesson material management
 │   │   │   ├── lessons/             # PDF Lesson library & student private notebooks
-│   │   │   ├── quiz/                # AI Quiz builder & interactive exam runner
+│   │   │   ├── puzzles/             # Gamified Cognitive IQ Puzzles module
+│   │   │   ├── quiz/                # AI Quiz builder (10/15/20 questions) & proctored exam runner
 │   │   │   ├── reports/             # Weekly 7-day performance reports module
-│   │   │   └── scoreboard/          # Dynamic top 5 leaderboard
+│   │   │   ├── scoreboard/          # Dynamic top 5 leaderboard & branded certificates
+│   │   │   └── store/               # Student Rewards Store & cosmetic customization studio
 │   │   ├── locales/                 # ar.json & en.json translation bundles
 │   │   ├── services/                # platformService.js (RTDB & Auth business logic)
 │   │   ├── utils/                   # pdfPageRenderer, pdfExtractor, soundEffects
@@ -159,7 +194,7 @@ The platform provides end-to-end support for coursework, lesson materials, digit
 │   ├── server.js                    # Express endpoints (/api/chat, /api/quiz/generate, etc.)
 │   └── package.json
 ├── scripts/
-│   └── test-platform.mjs            # Automated 13-point platform verification suite
+│   └── test-platform.mjs            # Automated 16-point platform verification suite
 └── package.json                     # Root orchestrator scripts
 ```
 

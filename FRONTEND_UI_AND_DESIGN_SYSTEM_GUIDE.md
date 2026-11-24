@@ -22,7 +22,10 @@
    - [6.8 Real-Time Direct Chat (`DirectChatModule.jsx`)](#68-real-time-direct-chat)
    - [6.9 Smart AI Chatbot Assistant & Walking Mascot (`PlatformChatbotWidget.jsx`, `RobotIntroSplash.jsx`)](#69-smart-ai-chatbot-assistant--walking-mascot)
    - [6.10 Admin Management Modules (`AdminOverview.jsx`, `InstructorsModule.jsx`, `StudentsModule.jsx`)](#610-admin-management-modules)
-   - [6.11 Global Modals (`ProfileSettingsModal.jsx`, `UploadProgressModal.jsx`)](#611-global-modals)
+   - [6.11 IQ Puzzles & Cognitive Brain Hub (`IQPuzzlesModule.jsx`)](#611-iq-puzzles--cognitive-brain-hub)
+   - [6.12 Global Modals (`ProfileSettingsModal.jsx`, `UploadProgressModal.jsx`)](#612-global-modals)
+   - [6.13 Student Rewards Store & Customization Studio (`StudentStoreModule.jsx`, `storeData.js`)](#613-student-rewards-store--customization-studio)
+   - [6.14 Interactive Robot Mascot & Password Privacy Component (`RobotMascotSvg.jsx`, `LoginPage.jsx`)](#614-interactive-robot-mascot--password-privacy-component)
 7. [UI/UX Improvement Recommendations & Modernization Checklist](#7-uiux-improvement-recommendations--modernization-checklist)
 
 ---
@@ -454,6 +457,7 @@ The assignments feature offers flexible solving modes for students (download to 
 
 #### 6.9.2 Chatbot Interface (`PlatformChatbotWidget.jsx`)
 - **Header:** Athar AI branding, status indicator, clear chat button, language translate toggle, minimize button.
+- **Message Action Bar:** Every assistant response includes a **Copy** action and an inline **"Translate into Arabic"** action (`<Languages className="w-3.5 h-3.5" />`) for immediate localization of explanations into natural Arabic.
 - **Starter Quick Action Chips:**
   - *"Summarize a lesson"* (`تلخيص درس`): Opens the lesson browser.
   - *"My points & marks"* (`نقاطي ودرجاتي`): Retrieves instant student points breakdown.
@@ -513,9 +517,52 @@ The assignments feature offers flexible solving modes for students (download to 
 - Password Change Fields: Current Password, New Password, Confirm New Password, password strength indicator.
 - Avatar squircle preview with initials generator.
 
-#### 6.11.2 File Upload Progress Modal (`UploadProgressModal.jsx`)
+#### 6.12.2 File Upload Progress Modal (`UploadProgressModal.jsx`)
 - Global modal overlay for large PDF and media uploads.
 - Real-time animated progress bar (`.upload-shimmer-anim`), upload speed indicator (KB/s, MB/s), and estimated time remaining countdown.
+
+---
+
+### 6.13 Student Rewards Store & Customization Studio (`StudentStoreModule.jsx`, `storeData.js`)
+
+#### 6.13.1 Coin Economy & Academic Point Protection
+- **Conversion Formula:** Total Coins = $(\text{Academic Points} \times 10) + \text{Bonus IQ Coins} - \text{Spent Coins}$.
+- **Strict Academic Point Protection Guarantee:** Purchasing cosmetic items in the store **strictly spends Coins only**. Academic points, course marks, certificate eligibility, and podium standings are never deducted.
+
+#### 6.13.2 Visual Cosmetics Catalog
+- **8 Glowing Name Tags / Badges:**
+  - *Novice Scholar*, *Code Ninja*, *Bug Hunter*, *AI Pioneer*, *Byte Master*, *Logic Wizard*, *Cyber Sentinel*, *Grand Alchemist*.
+  - Styled with custom linear gradients, glowing borders, and drop shadows matching student level.
+- **8 Liquid-Glass Animated Avatar Frames:**
+  - *Neon Azure* (`ring-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.5)]`), *Emerald Pulse* (pulsing emerald ring), *Golden Radiance* (warm amber-yellow ring), *Cyberpunk Violet* (fuchsia/violet neon), *Crimson Flame* (rose-red glow), *Quantum Glitch* (dual cyan-purple ring), *Starry Nebula* (deep indigo-violet stellar halo), *Royal Obsidian* (sleek metallic silver-slate outline).
+- **Robot Chatbot Customization Studio:**
+  - **6 Color Skins:** Classic Cobalt (`#2563eb`), Emerald Bot (`#059669`), Crimson Fury (`#dc2626`), Cyber Gold (`#d97706`), Violet Shadow (`#7c3aed`), Neon Pink (`#db2777`).
+  - **7 Hats / Headwear:** Top Hat, Graduation Cap, Beanie, Baseball Cap, Crown, Viking Helmet, Wizard Hat.
+  - **6 Glasses / Eyewear:** Nerdy Specs, Cool Shades, Steampunk Goggles, VR Headset, Monocle, Cyber Visor.
+  - **5 Shoes / Footwear:** Sport Sneakers, Cyber Boots, Roller Skates, Golden Kicks, Classic Loafers.
+
+#### 6.13.3 Dynamic Equip Synchronization
+- Equipping frames and titles updates live across:
+  - Header coin counter pill (`Header.jsx`)
+  - Student sidebar user profile squircle (`Sidebar.jsx`)
+  - Profile Settings Modal preview (`ProfileSettingsModal.jsx`)
+  - Top 5 Scoreboard podium cards and table (`ScoreboardModule.jsx`)
+  - Floating Assistant Chatbot mascot (`PlatformChatbotWidget.jsx`)
+
+---
+
+### 6.14 Interactive Robot Mascot & Password Privacy Component (`RobotMascotSvg.jsx`, `LoginPage.jsx`)
+
+#### 6.14.1 Interactive State Machine
+- **`idle`:** Neutral friendly posture, blinking eyes, relaxed floating hands.
+- **`typing-user`:** Attentive listening posture, smiling mouth, hands at sides.
+- **`typing-pass` (Active Typing):** The robot brings both mechanical hands up to his face, fingers splayed over the visor, completely covering both eyes while the user is typing sensitive password characters.
+- **`peeking` (Show Password Enabled):** When the user clicks the eye icon to view the password, the robot's fingers part horizontally, and his pupils peek between his fingers in a playful, secure gesture.
+- **Debounce Inactivity Release:** Automatically returns to neutral unmasked posture 1000ms after the last keystroke or when the password field blurs.
+
+#### 6.14.2 SVG Coordinate & Motion Mapping
+- Built as pure scalable SVG (`viewBox="0 0 160 160"`) with zero external asset dependencies.
+- CSS transitions on `<path>` and `<g>` elements deliver 60 FPS hardware-accelerated finger and hand positioning without UI layout shift.
 
 ---
 
