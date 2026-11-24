@@ -23,12 +23,14 @@ import {
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import { usePopup } from "../../context/PopupContext";
+import { useLang } from "../../context/LangContext";
 import { playLoginSuccessSound } from "../../utils/soundEffects";
 import LanguageDropdown from "../../components/common/LanguageDropdown";
 import RobotMascotSvg from "../../components/common/RobotMascotSvg";
 
 export default function LoginPage() {
   const { t, i18n } = useTranslation();
+  const { lang } = useLang();
   const { login } = useAuth();
   const { theme, toggleTheme, logoSrc } = useTheme();
   const { showPopup } = usePopup();
