@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { MemoryRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { ThemeProvider } from "./context/ThemeContext";
 import { LangProvider } from "./context/LangContext";
@@ -29,7 +29,7 @@ function PageLoader() {
 function RootRedirect() {
   const { user, loading } = useAuth();
   if (loading) return null;
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/student" replace />;
   if (user.role === "admin") return <Navigate to="/admin" replace />;
   if (user.role === "instructor") return <Navigate to="/instructor" replace />;
   return <Navigate to="/student" replace />;
@@ -127,7 +127,7 @@ export default function App() {
             <UploadProgressProvider>
               {showIntro && <RobotIntroSplash onComplete={handleCompleteIntro} />}
               <PlatformCachePrompt />
-              <BrowserRouter>
+              <MemoryRouter initialEntries={["/"]}>
                 <Toaster
                   position="top-center"
                   toastOptions={{
@@ -182,7 +182,7 @@ export default function App() {
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
                 </Suspense>
-              </BrowserRouter>
+              </MemoryRouter>
             </UploadProgressProvider>
           </PopupProvider>
         </AuthProvider>

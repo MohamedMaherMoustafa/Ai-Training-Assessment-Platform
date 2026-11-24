@@ -6,9 +6,32 @@ import { loginWithCredentials, logoutAll } from "../services/platformService";
 
 const AuthContext = createContext(null);
 
+export const DEFAULT_PLATFORM_USER = {
+  uid: "student_default",
+  username: "student",
+  displayName: "Student",
+  name: { en: "Student", ar: "طالب" },
+  email: "student@athar.ai",
+  role: "student",
+  active: true,
+  approvalStatus: "approved",
+  isGuest: true,
+  instructorIds: ["inst_1"],
+};
+
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(() => {
+    if (typeof window !== "undefined") {
+      const savedAdmin = localStorage.getItem("admin_session");
+      if (savedAdmin) {
+        try {
+          return JSON.parse(savedAdmin);
+        } catch {}
+      }
+    }
+    return DEFAULT_PLATFORM_USER;
+  });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const savedAdmin = localStorage.getItem("admin_session");
@@ -25,7 +48,7 @@ export function AuthProvider({ children }) {
     const unsub = onAuthStateChanged(auth, async (fbUser) => {
       if (!fbUser) {
         const adminCheck = localStorage.getItem("admin_session");
-        setUser(adminCheck ? JSON.parse(adminCheck) : null);
+        setUser(adminCheck ? JSON.parse(adminCheck) : DEFAULT_PLATFORM_USER);
         setLoading(false);
         return;
       }
@@ -35,16 +58,16 @@ export function AuthProvider({ children }) {
           const profile = snap.val();
           if (profile.active === false) {
             await logoutAll();
-            setUser(null);
+            setUser(DEFAULT_PLATFORM_USER);
           } else {
             setUser({ uid: fbUser.uid, ...profile });
           }
         } else {
-          setUser(null);
+          setUser(DEFAULT_PLATFORM_USER);
         }
       } catch (err) {
         console.error("Failed to load user profile:", err);
-        setUser(null);
+        setUser(DEFAULT_PLATFORM_USER);
       } finally {
         setLoading(false);
       }
@@ -87,7 +110,7 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     await logoutAll();
-    setUser(null);
+    setUser(DEFAULT_PLATFORM_USER);
   };
 
   return (

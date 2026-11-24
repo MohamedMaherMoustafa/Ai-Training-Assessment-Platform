@@ -383,6 +383,51 @@ export default function AppLayout({ navItems, children }) {
           </div>
 
           <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+            {/* Guest Quick Role Switcher */}
+            {user?.isGuest && (
+              <div className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-xs font-bold shadow-xs">
+                <span className="text-[10px] text-slate-400 font-semibold">
+                  {lang === "ar" ? "الوضع:" : "Role:"}
+                </span>
+                <NavLink
+                  to="/student"
+                  className={({ isActive }) =>
+                    `px-2 py-0.5 rounded-full text-[11px] font-extrabold transition-all ${
+                      user?.role === "student"
+                        ? "bg-indigo-600 text-white shadow-xs"
+                        : "text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400"
+                    }`
+                  }
+                >
+                  {lang === "ar" ? "طالب" : "Student"}
+                </NavLink>
+                <NavLink
+                  to="/instructor"
+                  className={({ isActive }) =>
+                    `px-2 py-0.5 rounded-full text-[11px] font-extrabold transition-all ${
+                      user?.role === "instructor"
+                        ? "bg-indigo-600 text-white shadow-xs"
+                        : "text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400"
+                    }`
+                  }
+                >
+                  {lang === "ar" ? "معلم" : "Instructor"}
+                </NavLink>
+                <NavLink
+                  to="/admin"
+                  className={({ isActive }) =>
+                    `px-2 py-0.5 rounded-full text-[11px] font-extrabold transition-all ${
+                      user?.role === "admin"
+                        ? "bg-indigo-600 text-white shadow-xs"
+                        : "text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400"
+                    }`
+                  }
+                >
+                  {lang === "ar" ? "مسؤول" : "Admin"}
+                </NavLink>
+              </div>
+            )}
+
             {/* Student Store & Coins Pill */}
             {user?.role === "student" && (
               <NavLink
