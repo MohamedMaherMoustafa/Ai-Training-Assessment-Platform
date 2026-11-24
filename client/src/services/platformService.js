@@ -6,7 +6,7 @@ import {
   updatePassword,
 } from "firebase/auth";
 import { ref, get, set, update, remove, push, onValue } from "firebase/database";
-import { auth, rtdb, getSecondaryAuth } from "../lib/firebase";
+import { auth, rtdb, storage, getSecondaryAuth } from "../lib/firebase";
 import { validateUsername } from "../utils/validators";
 
 const normalizeKey = (value) => value.trim().toLowerCase().replace(/[^a-z0-9_@-]/g, "_");
@@ -405,24 +405,56 @@ export async function updateUserProfileAndCredentials(currentUser, { displayName
   }
 
   // 2) Non-Admin (Instructor or Student)
+  let finalPhotoURL = photoURL;
+
   // Update Firebase Auth current user if signed in
   if (auth.currentUser) {
     const authProfileUpdates = {};
     if (trimmedName && auth.currentUser.displayName !== trimmedName) {
       authProfileUpdates.displayName = trimmedName;
     }
-    if (photoURL !== undefined) {
-      authProfileUpdates.photoURL = photoURL || "";
+
+    // Firebase Auth updateProfile strictly requires photoURL to be a web URL (< 2048 chars).
+    // It throws auth/invalid-profile-attribute if given a Base64 data URI!
+    // Try uploading to Firebase Storage if available to obtain a short https download URL:
+    if (photoURL && typeof photoURL === "string" && photoURL.startsWith("data:") && storage) {
+      try {
+        const { ref: sRef, uploadString, getDownloadURL } = await import("firebase/storage");
+        const storageRef = sRef(storage, `avatars/${currentUser.uid}_${Date.now()}.jpg`);
+        await uploadString(storageRef, photoURL, "data_url");
+        const downloadURL = await getDownloadURL(storageRef);
+        if (downloadURL) {
+          finalPhotoURL = downloadURL;
+          authProfileUpdates.photoURL = downloadURL;
+        }
+      } catch (storageErr) {
+        console.warn("Firebase Storage upload fallback to RTDB:", storageErr);
+        // Fallback: finalPhotoURL remains the base64 data URI (stored in RTDB with no URL limit)
+      }
+    } else if (
+      photoURL &&
+      typeof photoURL === "string" &&
+      (photoURL.startsWith("http://") || photoURL.startsWith("https://")) &&
+      photoURL.length < 2048
+    ) {
+      authProfileUpdates.photoURL = photoURL;
+    } else if (photoURL === "") {
+      authProfileUpdates.photoURL = "";
     }
+
     if (Object.keys(authProfileUpdates).length > 0) {
-      await updateProfile(auth.currentUser, authProfileUpdates);
+      try {
+        await updateProfile(auth.currentUser, authProfileUpdates);
+      } catch (authErr) {
+        console.warn("Firebase Auth updateProfile non-critical notice:", authErr);
+      }
     }
     if (newPassword && newPassword.trim()) {
       await updatePassword(auth.currentUser, newPassword.trim());
     }
   }
 
-  // Update RTDB users record
+  // Update RTDB users record (RTDB stores finalPhotoURL cleanly with zero URL length restrictions!)
   const userUpdates = {
     displayName: trimmedName,
     name: { en: trimmedName, ar: trimmedName },
@@ -437,7 +469,7 @@ export async function updateUserProfileAndCredentials(currentUser, { displayName
     userUpdates.phone = cleanPhone;
   }
   if (photoURL !== undefined) {
-    userUpdates.photoURL = photoURL;
+    userUpdates.photoURL = finalPhotoURL;
   }
   await update(ref(rtdb, `users/${currentUser.uid}`), userUpdates);
 
