@@ -25,12 +25,14 @@ import { isSoundEnabled, setSoundEnabled, playLogoutSound } from "../../utils/so
 import PlatformChatbotWidget from "../common/PlatformChatbotWidget";
 import LanguageDropdown from "../common/LanguageDropdown";
 import ProfileSettingsModal from "../common/ProfileSettingsModal";
+import { getStoreItemById } from "../../features/store/storeData";
 import {
   clearNotifications,
   markAllNotificationsRead,
   markNotificationRead,
   subscribeNotifications,
   subscribeUserDirectChats,
+  getStudentCustomizationAndCoins,
 } from "../../services/platformService";
 
 export default function AppLayout({ navItems, children }) {
@@ -48,6 +50,46 @@ export default function AppLayout({ navItems, children }) {
   const [soundOn, setSoundOn] = useState(isSoundEnabled());
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const notifBoxRef = useRef(null);
+
+  const [customization, setCustomization] = useState(() => {
+    try {
+      const local = user?.uid ? localStorage.getItem(`customization_${user.uid}`) : null;
+      return local ? JSON.parse(local) : { equipped: {}, availableCoins: 0 };
+    } catch {
+      return { equipped: {}, availableCoins: 0 };
+    }
+  });
+
+  useEffect(() => {
+    if (!user?.uid || user.role !== "student") return;
+    getStudentCustomizationAndCoins(user.uid)
+      .then((res) => {
+        setCustomization({
+          equipped: res.equipped || {},
+          availableCoins: res.availableCoins || 0,
+        });
+      })
+      .catch(() => {});
+
+    const handleUpdate = (e) => {
+      if (e.detail?.equipped) {
+        setCustomization((prev) => ({
+          ...prev,
+          equipped: e.detail.equipped,
+          availableCoins:
+            e.detail.availableCoins !== undefined
+              ? e.detail.availableCoins
+              : prev.availableCoins,
+        }));
+      }
+    };
+
+    window.addEventListener("athar_customization_updated", handleUpdate);
+    return () => window.removeEventListener("athar_customization_updated", handleUpdate);
+  }, [user?.uid, user?.role]);
+
+  const equippedFrame = getStoreItemById(customization?.equipped?.avatarFrame);
+  const equippedTag = getStoreItemById(customization?.equipped?.nameTag);
 
   const toggleSound = () => {
     const next = !soundOn;
@@ -266,7 +308,11 @@ export default function AppLayout({ navItems, children }) {
               className="flex items-center gap-2.5 min-w-0 cursor-pointer flex-1"
               title={t("profile.editTooltip") || "Edit Profile & Password"}
             >
-              <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-teal-500 to-emerald-500 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform">
+              <div
+                className={`h-9 w-9 rounded-xl bg-gradient-to-tr from-teal-500 to-emerald-500 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-all ${
+                  equippedFrame?.frameClass || ""
+                }`}
+              >
                 {String(displayName || "U").slice(0, 2).toUpperCase()}
               </div>
               <div className="min-w-0">
@@ -276,6 +322,14 @@ export default function AppLayout({ navItems, children }) {
                 <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 capitalize truncate">
                   {t(`roles.${user?.role || "student"}`)}
                 </div>
+                {equippedTag && (
+                  <div
+                    className={`inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[9px] font-black border mt-1 max-w-full truncate shadow-xs ${equippedTag.badgeClass}`}
+                  >
+                    <span>{equippedTag.icon}</span>
+                    <span className="truncate">{equippedTag.name[lang]}</span>
+                  </div>
+                )}
               </div>
             </div>
             <button
@@ -329,6 +383,23 @@ export default function AppLayout({ navItems, children }) {
           </div>
 
           <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+            {/* Student Store & Coins Pill */}
+            {user?.role === "student" && (
+              <NavLink
+                to="/student/store"
+                className="h-8 sm:h-9 px-2.5 sm:px-3 rounded-full border border-amber-300 dark:border-amber-500/40 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/40 text-amber-700 dark:text-amber-300 flex items-center gap-1.5 text-xs font-black shadow-xs hover:scale-105 transition-all cursor-pointer shrink-0"
+                title={lang === "ar" ? "رصيد العملات — اضغط لفتح المتجر" : "Coins balance — Click to open Store"}
+              >
+                <span>🪙</span>
+                <span className="font-mono text-[12px]">
+                  {(customization?.availableCoins || 0).toLocaleString()}
+                </span>
+                <span className="hidden md:inline text-[10px] text-amber-600/80 dark:text-amber-400/80">
+                  {lang === "ar" ? "عملة" : "Coins"}
+                </span>
+              </NavLink>
+            )}
+
             {/* Notification Bell */}
             <div className="relative" ref={notifBoxRef}>
               <button

@@ -32,6 +32,8 @@ import { useAuth } from "../../context/AuthContext";
 import { useLang } from "../../context/LangContext";
 import { useTheme } from "../../context/ThemeContext";
 import { processChatbotMessage } from "../../utils/platformChatbotEngine";
+import RobotMascotSvg from "./RobotMascotSvg";
+import { getStudentCustomizationAndCoins } from "../../services/platformService";
 
 // Lightweight beautiful markdown formatter for AI responses
 function FormattedBotText({ text, lang = "en" }) {
@@ -284,6 +286,42 @@ export default function PlatformChatbotWidget() {
   const mediaStreamRef = useRef(null);
   const speechRecognitionRef = useRef(null);
   const speechTranscriptRef = useRef("");
+
+  const [botCustomization, setBotCustomization] = useState(() => {
+    try {
+      const local = user?.uid ? localStorage.getItem(`customization_${user.uid}`) : null;
+      if (local) {
+        const parsed = JSON.parse(local);
+        return parsed.equipped || {};
+      }
+    } catch {}
+    return {
+      botColor: "skin_classic_blue",
+      botHat: "hat_none",
+      botGlasses: "glasses_none",
+      botShoes: "shoes_none",
+    };
+  });
+
+  useEffect(() => {
+    if (!user?.uid) return;
+    getStudentCustomizationAndCoins(user.uid)
+      .then((res) => {
+        if (res.equipped) setBotCustomization(res.equipped);
+      })
+      .catch(() => {});
+
+    const handleCustomizationUpdate = (e) => {
+      if (e.detail?.equipped) {
+        setBotCustomization(e.detail.equipped);
+      }
+    };
+
+    window.addEventListener("athar_customization_updated", handleCustomizationUpdate);
+    return () => {
+      window.removeEventListener("athar_customization_updated", handleCustomizationUpdate);
+    };
+  }, [user?.uid]);
 
   const welcomeText = (() => {
     if (user?.role === "instructor" || user?.role === "admin") {
@@ -842,104 +880,17 @@ export default function PlatformChatbotWidget() {
           {/* Robot Mascot Launcher */}
           <div className="flex flex-col items-center relative">
             <div className="drop-shadow-[0_8px_18px_rgba(2,132,199,0.4)]">
-              <svg
-                width="88"
-                height="94"
-                viewBox="0 0 118 104"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
+              <RobotMascotSvg
+                skinId={botCustomization.botColor || "skin_classic_blue"}
+                hatId={botCustomization.botHat || "hat_none"}
+                glassesId={botCustomization.botGlasses || "glasses_none"}
+                shoesId={botCustomization.botShoes || "shoes_none"}
+                width={88}
+                height={94}
                 className="w-[78px] h-[84px] sm:w-[86px] sm:h-[92px] overflow-visible"
-              >
-                <defs>
-                  <linearGradient id="botBodyGrad" x1="18" y1="16" x2="62" y2="66" gradientUnits="userSpaceOnUse">
-                    <stop stopColor="#38bdf8" />
-                    <stop offset="0.55" stopColor="#2563eb" />
-                    <stop offset="1" stopColor="#4f46e5" />
-                  </linearGradient>
-                  <linearGradient id="botMetalGrad" x1="20" y1="10" x2="60" y2="38" gradientUnits="userSpaceOnUse">
-                    <stop stopColor="#f8fafc" />
-                    <stop offset="1" stopColor="#cbd5e1" />
-                  </linearGradient>
-                  <linearGradient id="botSignGrad" x1="62" y1="2" x2="114" y2="25" gradientUnits="userSpaceOnUse">
-                    <stop stopColor="#38bdf8" />
-                    <stop offset="0.5" stopColor="#2563eb" />
-                    <stop offset="1" stopColor="#4f46e5" />
-                  </linearGradient>
-                  <filter id="signDropShadow" x="-10%" y="-10%" width="130%" height="130%">
-                    <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="#0284c7" floodOpacity="0.35" />
-                  </filter>
-                </defs>
-
-                {/* Antenna */}
-                <line x1="44" y1="17" x2="44" y2="8" stroke="#38bdf8" strokeWidth="3" strokeLinecap="round" />
-                <circle cx="44" cy="7" r="4.5" fill="#fbbf24" stroke="#ffffff" strokeWidth="1.5" />
-                <circle cx="44" cy="7" r="7.5" stroke="#fbbf24" strokeWidth="1" strokeDasharray="2 2" className="opacity-80" />
-
-                {/* Left Arm: Static Resting */}
-                <g className="robot-arm-l">
-                  <rect x="16" y="45" width="8" height="19" rx="4" fill="url(#botMetalGrad)" stroke="#0284c7" strokeWidth="1.5" />
-                  <circle cx="20" cy="64" r="3.5" fill="#38bdf8" />
-                </g>
-
-                {/* Right Arm & Big Sign: Raised Static Handheld Sign */}
-                <g className="robot-arm-wave">
-                  {/* Upper Arm */}
-                  <rect x="58" y="27" width="9" height="21" rx="4.5" fill="url(#botMetalGrad)" stroke="#0284c7" strokeWidth="1.5" transform="rotate(-36 60 44)" />
-                  {/* Robot Hand holding sign pole */}
-                  <circle cx="75" cy="27" r="5" fill="#38bdf8" stroke="#ffffff" strokeWidth="1.2" />
-                  <path d="M72 26 L69 22 M75 25 L75 20 M78 26 L81 23" stroke="#38bdf8" strokeWidth="1.5" strokeLinecap="round" />
-
-                  {/* Sign Pole */}
-                  <line x1="75" y1="32" x2="82" y2="4" stroke="#0284c7" strokeWidth="2.5" strokeLinecap="round" />
-                  <circle cx="82" cy="4" r="2.5" fill="#fbbf24" stroke="#ffffff" strokeWidth="1" />
-
-                  {/* Handheld Sign Board */}
-                  <g filter="url(#signDropShadow)">
-                    <rect x="62" y="2" width="52" height="23" rx="6.5" fill="url(#botSignGrad)" stroke="#ffffff" strokeWidth="1.6" />
-                    {/* Active Indicator LED */}
-                    <circle cx="69" cy="8" r="2" fill="#34d399" />
-                    {/* Sign Text: centered inside sign box */}
-                    <text
-                      x="91"
-                      y="14.5"
-                      fill="#ffffff"
-                      fontSize="10.5"
-                      fontWeight="900"
-                      textAnchor="middle"
-                      dominantBaseline="central"
-                      className="robot-sign-text"
-                      fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
-                      letterSpacing="0.6"
-                    >
-                      {lang === "ar" ? "مساعدة!" : "HELP!"}
-                    </text>
-                  </g>
-                </g>
-
-                {/* Legs: Static */}
-                <g className="robot-leg-l">
-                  <rect x="30" y="67" width="9" height="15" rx="4" fill="#334155" />
-                  <rect x="28" y="78" width="13" height="6" rx="3" fill="#0284c7" />
-                </g>
-                <g className="robot-leg-r">
-                  <rect x="47" y="67" width="9" height="15" rx="4" fill="#334155" />
-                  <rect x="45" y="78" width="13" height="6" rx="3" fill="#0284c7" />
-                </g>
-
-                {/* Robot Torso */}
-                <rect x="25" y="43" width="36" height="27" rx="10" fill="url(#botBodyGrad)" stroke="#bae6fd" strokeWidth="2" />
-                <rect x="33" y="50" width="20" height="12" rx="4" fill="#0f172a" fillOpacity="0.65" />
-                <circle cx="38" cy="56" r="2.2" fill="#34d399" />
-                <circle cx="43" cy="56" r="2.2" fill="#38bdf8" />
-                <circle cx="48" cy="56" r="2.2" fill="#fbbf24" />
-
-                {/* Robot Head: Static */}
-                <rect x="22" y="16" width="42" height="28" rx="11" fill="url(#botMetalGrad)" stroke="#38bdf8" strokeWidth="2.2" />
-                <rect x="27" y="21" width="32" height="17" rx="6" fill="#0f172a" />
-                <circle cx="36" cy="28" r="3.2" fill="#38bdf8" />
-                <circle cx="50" cy="28" r="3.2" fill="#38bdf8" />
-                <path d="M38 33.5C40 35.5 46 35.5 48 33.5" stroke="#34d399" strokeWidth="2" strokeLinecap="round" />
-              </svg>
+                signText={lang === "ar" ? "مساعدة!" : "HELP!"}
+                idPrefix="widget"
+              />
             </div>
             <div className="w-14 sm:w-16 h-3 -mt-0.5 rounded-full bg-slate-900/30 dark:bg-sky-400/25 blur-[3px]" />
           </div>

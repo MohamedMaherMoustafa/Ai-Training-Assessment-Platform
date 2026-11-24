@@ -12,12 +12,15 @@ import {
   Users,
   CheckCircle2,
   ArrowRight,
+  ArrowLeft,
   RefreshCw,
   FileText,
   CalendarCheck,
   Video,
   MessageSquare,
   Brain,
+  ShoppingBag,
+  Sparkles,
 } from "lucide-react";
 import AppLayout from "../../components/layout/AppLayout";
 import CoursesModule from "../courses/CoursesModule";
@@ -30,6 +33,7 @@ import GradesModule from "../grades/GradesModule";
 import ScoreboardModule from "../scoreboard/ScoreboardModule";
 import WeeklyReportsModule from "./WeeklyReportsModule";
 import IQPuzzlesModule from "../puzzles/IQPuzzlesModule";
+import StudentStoreModule from "../store/StudentStoreModule";
 import { useAuth } from "../../context/AuthContext";
 import { useLang } from "../../context/LangContext";
 import { useTheme } from "../../context/ThemeContext";
@@ -128,6 +132,41 @@ function StudentInstructorSelector({
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-indigo-600 to-purple-600 hover:from-amber-600 hover:to-indigo-700 text-white text-xs font-black shadow-lg shadow-indigo-600/30 transition-all hover:scale-105 cursor-pointer"
         >
           <span>{lang === "ar" ? "خوض ألغاز الذكاء 🚀" : "Play IQ Puzzles 🚀"}</span>
+          {lang === "ar" ? <ArrowLeft className="h-3.5 w-3.5" /> : <ArrowRight className="h-3.5 w-3.5" />}
+        </button>
+      </div>
+
+      {/* Featured Student Store & Customization Hub Card */}
+      <div className="relative overflow-hidden rounded-3xl p-5 bg-gradient-to-r from-amber-600 via-orange-600 to-indigo-800 border border-amber-400/30 text-white shadow-xl flex flex-wrap items-center justify-between gap-4">
+        <div className="pointer-events-none absolute -top-8 -end-8 h-32 w-32 rounded-full bg-white/10 blur-xl" />
+        <div className="flex items-center gap-4 relative z-10">
+          <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-amber-300 to-orange-500 flex items-center justify-center text-slate-900 shadow-lg shadow-orange-500/30 shrink-0 text-2xl font-black">
+            🪙
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10.5px] uppercase font-black px-2.5 py-0.5 rounded-full bg-white/20 text-white border border-white/30 flex items-center gap-1">
+                <Sparkles className="h-3 w-3 text-amber-200" />
+                <span>{lang === "ar" ? "متجر المكافآت 🛍️" : "Rewards Store 🛍️"}</span>
+              </span>
+            </div>
+            <h3 className="text-base sm:text-lg font-black mt-1">
+              {lang === "ar" ? "استبدل عملاتك بألقاب وإطارات ومظاهر للمساعد الذكي" : "Redeem Coins for Name Tags, Frames & Chatbot Skins"}
+            </h3>
+            <p className="text-xs text-white/90 max-w-xl mt-0.5">
+              {lang === "ar"
+                ? "نقاطك الأكاديمية تولد عملات ذهبية! اشترِ بها ألقاباً تحت اسمك، وإطارات مشعة، وقبعات ونظارات وأحذية وألوان حصرية للمساعد الذكي."
+                : "Your academic points earn gold coins! Buy exclusive titles below your name, glowing profile frames, and chatbot skins, hats, glasses & shoes."}
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => navigate("/student/store")}
+          className="relative z-10 flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-slate-900 hover:bg-amber-50 text-xs font-black shadow-lg shadow-amber-500/20 transition-all hover:scale-105 cursor-pointer"
+        >
+          <ShoppingBag className="h-4 w-4 text-orange-600" />
+          <span>{lang === "ar" ? "فتح متجر المكافآت 🛒" : "Open Rewards Store 🛒"}</span>
           {lang === "ar" ? <ArrowLeft className="h-3.5 w-3.5" /> : <ArrowRight className="h-3.5 w-3.5" />}
         </button>
       </div>
@@ -385,6 +424,11 @@ export default function StudentDashboard() {
       icon: Brain,
     },
     {
+      to: "/student/store",
+      label: t("nav.store") || (lang === "ar" ? "متجر المكافآت والعملات" : "Rewards Store"),
+      icon: ShoppingBag,
+    },
+    {
       to: "/student/weekly-reports",
       label: t("nav.weeklyReports") || (lang === "ar" ? "التقارير الأسبوعية" : "Weekly Reports"),
       icon: CalendarCheck,
@@ -465,6 +509,10 @@ export default function StudentDashboard() {
         <Route
           path="puzzles"
           element={<IQPuzzlesModule />}
+        />
+        <Route
+          path="store"
+          element={<StudentStoreModule />}
         />
         <Route
           path="weekly-reports"

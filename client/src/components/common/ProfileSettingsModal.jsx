@@ -17,6 +17,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useLang } from "../../context/LangContext";
 import { updateUserProfileAndCredentials } from "../../services/platformService";
 import { playSuccessSound } from "../../utils/soundEffects";
+import { getStoreItemById } from "../../features/store/storeData";
 
 export default function ProfileSettingsModal({ isOpen, onClose }) {
   const { t } = useTranslation();
@@ -128,6 +129,22 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
   const roleName = t(`roles.${user?.role || "student"}`);
   const userIdentifier = user?.email || user?.username || "user";
 
+  let equippedFrameId = user?.customization?.equipped?.avatarFrame || null;
+  let equippedTagId = user?.customization?.equipped?.nameTag || null;
+  try {
+    if (user?.uid && (!equippedFrameId || !equippedTagId)) {
+      const local = localStorage.getItem(`customization_${user.uid}`);
+      if (local) {
+        const parsed = JSON.parse(local);
+        if (!equippedFrameId) equippedFrameId = parsed.equipped?.avatarFrame || null;
+        if (!equippedTagId) equippedTagId = parsed.equipped?.nameTag || null;
+      }
+    }
+  } catch {}
+
+  const equippedFrame = getStoreItemById(equippedFrameId);
+  const equippedTag = getStoreItemById(equippedTagId);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-fadeIn">
       <div
@@ -149,7 +166,11 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
           </button>
 
           <div className="flex items-center gap-3">
-            <div className="h-11 w-11 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-sm flex items-center justify-center shadow-md shadow-indigo-500/20 shrink-0">
+            <div
+              className={`h-11 w-11 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-sm flex items-center justify-center shadow-md shadow-indigo-500/20 shrink-0 transition-all ${
+                equippedFrame?.frameClass || ""
+              }`}
+            >
               {String(trimmedInitial(currentDisplayName)).slice(0, 2).toUpperCase() || <ShieldCheck className="h-5 w-5" />}
             </div>
             <div className="min-w-0 pr-6 rtl:pr-0 rtl:pl-6">
@@ -163,10 +184,16 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
           </div>
 
           {/* User metadata badge */}
-          <div className="mt-3 flex items-center gap-2 text-xs">
+          <div className="mt-3 flex items-center flex-wrap gap-2 text-xs">
             <span className="px-2.5 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-semibold border border-indigo-200/60 dark:border-indigo-800/60 capitalize">
               {roleName}
             </span>
+            {equippedTag && (
+              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-black border shadow-xs ${equippedTag.badgeClass}`}>
+                <span>{equippedTag.icon}</span>
+                <span>{equippedTag.name[lang]}</span>
+              </span>
+            )}
             <span className="text-slate-400 dark:text-slate-500">•</span>
             <span className="text-slate-500 dark:text-slate-400 truncate max-w-[200px]" title={userIdentifier}>
               {userIdentifier}

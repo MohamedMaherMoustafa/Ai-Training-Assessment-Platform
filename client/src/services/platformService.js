@@ -1768,5 +1768,236 @@ export async function saveStudentIQProgress(studentUid, stats) {
   }
 }
 
+// -------------------------------------------------------------
+// Student Store, Coins & Customizations
+// -------------------------------------------------------------
+
+export async function getStudentCustomizationAndCoins(studentUid) {
+  if (!studentUid) {
+    return {
+      totalAcademicPoints: 0,
+      totalEarnedCoins: 0,
+      availableCoins: 0,
+      spentCoins: 0,
+      inventory: ["skin_classic_blue", "hat_none", "glasses_none", "shoes_none"],
+      equipped: {
+        nameTag: null,
+        avatarFrame: null,
+        botColor: "skin_classic_blue",
+        botHat: "hat_none",
+        botGlasses: "glasses_none",
+        botShoes: "shoes_none",
+      },
+    };
+  }
+
+  // 1. Calculate Academic Points (Quiz Points + Assignment Points)
+  let academicPoints = 0;
+  try {
+    const resultsSnap = await get(ref(rtdb, "results"));
+    if (resultsSnap.exists()) {
+      const allResults = Object.values(resultsSnap.val() || {});
+      allResults.forEach((r) => {
+        if (r && r.studentId === studentUid) {
+          if (r.points !== undefined && r.points !== null) {
+            academicPoints += Number(r.points) || 0;
+          } else {
+            const totalQ = Number(r.total) || 1;
+            const pct = Number(r.score) || 0;
+            academicPoints += Math.round((pct / 100) * totalQ);
+          }
+        }
+      });
+    }
+
+    const assignmentsSnap = await get(ref(rtdb, "assignmentSubmissions"));
+    if (assignmentsSnap.exists()) {
+      const allSubs = assignmentsSnap.val() || {};
+      Object.values(allSubs).forEach((studentMap) => {
+        if (studentMap && typeof studentMap === "object") {
+          const sub = studentMap[studentUid];
+          if (sub && sub.score !== undefined && sub.score !== null && sub.score !== "") {
+            academicPoints += Number(sub.score) || 0;
+          }
+        }
+      });
+    }
+  } catch (err) {
+    console.warn("Could not calculate academic points for coins:", err.message);
+  }
+
+  // 2. Fetch IQ Puzzle Coins
+  let iqCoins = 0;
+  try {
+    const iqSnap = await get(ref(rtdb, `users/${studentUid}/iqStats`));
+    if (iqSnap.exists()) {
+      iqCoins = Number(iqSnap.val()?.coins) || 0;
+    }
+  } catch (err) {
+    console.warn("Could not fetch IQ coins:", err.message);
+  }
+
+  // 3. Fetch Customization & Spent Coins
+  let customization = {};
+  const localKey = `customization_${studentUid}`;
+  let localData = null;
+  try {
+    const raw = localStorage.getItem(localKey);
+    if (raw) localData = JSON.parse(raw);
+  } catch {}
+
+  try {
+    const custSnap = await get(ref(rtdb, `users/${studentUid}/customization`));
+    if (custSnap.exists()) {
+      customization = custSnap.val() || {};
+    }
+  } catch (err) {
+    console.warn("Could not fetch user customization:", err.message);
+  }
+
+  const mergedCust = {
+    ...localData,
+    ...customization,
+  };
+
+  const spentCoins = Number(mergedCust.spentCoins) || 0;
+  const bonusCoins = Number(mergedCust.bonusCoins) || 0;
+  // Conversion: 1 Academic Point = 10 Coins
+  const totalEarnedCoins = (academicPoints * 10) + iqCoins + bonusCoins;
+  const availableCoins = Math.max(0, totalEarnedCoins - spentCoins);
+
+  const defaultInventory = ["skin_classic_blue", "hat_none", "glasses_none", "shoes_none"];
+  const inventory = Array.isArray(mergedCust.inventory)
+    ? Array.from(new Set([...defaultInventory, ...mergedCust.inventory]))
+    : defaultInventory;
+
+  const equipped = {
+    nameTag: mergedCust.equipped?.nameTag || null,
+    avatarFrame: mergedCust.equipped?.avatarFrame || null,
+    botColor: mergedCust.equipped?.botColor || "skin_classic_blue",
+    botHat: mergedCust.equipped?.botHat || "hat_none",
+    botGlasses: mergedCust.equipped?.botGlasses || "glasses_none",
+    botShoes: mergedCust.equipped?.botShoes || "shoes_none",
+  };
+
+  const result = {
+    totalAcademicPoints: academicPoints,
+    totalEarnedCoins,
+    availableCoins,
+    spentCoins,
+    inventory,
+    equipped,
+  };
+
+  try {
+    localStorage.setItem(localKey, JSON.stringify({ spentCoins, inventory, equipped }));
+  } catch {}
+
+  return result;
+}
+
+export async function buyStoreItem(studentUid, item) {
+  if (!studentUid || !item) throw new Error("Invalid purchase parameters");
+
+  const current = await getStudentCustomizationAndCoins(studentUid);
+  if (current.inventory.includes(item.id)) {
+    // Already owned, just equip it!
+    await equipStoreItem(studentUid, item.type, item.id);
+    return { success: true, alreadyOwned: true, availableCoins: current.availableCoins };
+  }
+
+  if (current.availableCoins < item.price) {
+    throw new Error("Insufficient coins to purchase this item");
+  }
+
+  const newSpentCoins = current.spentCoins + item.price;
+  const newInventory = Array.from(new Set([...current.inventory, item.id]));
+  const newEquipped = {
+    ...current.equipped,
+    [item.type]: item.id,
+  };
+
+  const payload = {
+    spentCoins: newSpentCoins,
+    inventory: newInventory,
+    equipped: newEquipped,
+    updatedAt: Date.now(),
+  };
+
+  const localKey = `customization_${studentUid}`;
+  try {
+    localStorage.setItem(localKey, JSON.stringify(payload));
+  } catch {}
+
+  await update(ref(rtdb, `users/${studentUid}/customization`), payload);
+
+  // Dispatch custom window event so AppLayout, Chatbot, and Dashboard update in real-time
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(
+      new CustomEvent("athar_customization_updated", {
+        detail: { equipped: newEquipped, availableCoins: current.availableCoins - item.price },
+      })
+    );
+  }
+
+  return {
+    success: true,
+    availableCoins: current.availableCoins - item.price,
+    equipped: newEquipped,
+    inventory: newInventory,
+  };
+}
+
+export async function equipStoreItem(studentUid, itemType, itemId) {
+  if (!studentUid || !itemType) return;
+  const current = await getStudentCustomizationAndCoins(studentUid);
+
+  const newEquipped = {
+    ...current.equipped,
+    [itemType]: itemId,
+  };
+
+  const payload = {
+    equipped: newEquipped,
+    updatedAt: Date.now(),
+  };
+
+  const localKey = `customization_${studentUid}`;
+  try {
+    localStorage.setItem(
+      localKey,
+      JSON.stringify({ spentCoins: current.spentCoins, inventory: current.inventory, equipped: newEquipped })
+    );
+  } catch {}
+
+  await update(ref(rtdb, `users/${studentUid}/customization`), payload);
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(
+      new CustomEvent("athar_customization_updated", {
+        detail: { equipped: newEquipped },
+      })
+    );
+  }
+
+  return { success: true, equipped: newEquipped };
+}
+
+export async function unequipStoreItem(studentUid, itemType) {
+  if (!studentUid || !itemType) return;
+  const fallback =
+    itemType === "botColor"
+      ? "skin_classic_blue"
+      : itemType === "botHat"
+      ? "hat_none"
+      : itemType === "botGlasses"
+      ? "glasses_none"
+      : itemType === "botShoes"
+      ? "shoes_none"
+      : null;
+
+  return equipStoreItem(studentUid, itemType, fallback);
+}
+
 
 

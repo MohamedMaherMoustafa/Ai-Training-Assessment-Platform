@@ -102,9 +102,25 @@
     "myResults": "Grades & Feedback",
     "scoreboard": "Top 3 Scoreboard",
     "iqPuzzles": "IQ Puzzles & Brain Hub",
+    "store": "Rewards Store",
     "weeklyReports": "Weekly Reports",
     "sessions": "Course Sessions",
     "chat": "Direct Chat"
+  },
+  "store": {
+    "title": "Student Rewards Store",
+    "coins": "Coins",
+    "academicPoints": "Academic Points",
+    "pointRatio": "1 Point = 10 Coins",
+    "pointSafetyNote": "Academic points are 100% safe. Store purchases only deduct from Coins.",
+    "equip": "Equip",
+    "unequip": "Unequip",
+    "equipped": "Equipped",
+    "owned": "Owned",
+    "buy": "Buy",
+    "tryOn": "Try On",
+    "revert": "Revert",
+    "insufficientCoins": "Insufficient Coins"
   },
   "admin": {
     "title": "System Admin Control Center",

@@ -11,6 +11,7 @@ import {
   listUsers,
 } from "../../services/platformService";
 import { generateTop3CertificatePdf } from "../../utils/certificateGenerator";
+import { getStoreItemById } from "../store/storeData";
 
 const MEDAL_CONFIG = {
   1: {
@@ -329,6 +330,22 @@ export default function ScoreboardModule({ mode = "admin", activeInstructorId = 
                         const cfg = MEDAL_CONFIG[rank];
                         const isMe = entry && user?.uid && entry.studentId === user.uid;
 
+                        const studentObj = entry ? students.find((s) => s.uid === entry.studentId) : null;
+                        let frameId = studentObj?.customization?.equipped?.avatarFrame || null;
+                        let tagId = studentObj?.customization?.equipped?.nameTag || null;
+                        if (isMe) {
+                          try {
+                            const local = localStorage.getItem(`customization_${user.uid}`);
+                            if (local) {
+                              const parsed = JSON.parse(local);
+                              if (parsed.equipped?.avatarFrame) frameId = parsed.equipped.avatarFrame;
+                              if (parsed.equipped?.nameTag) tagId = parsed.equipped.nameTag;
+                            }
+                          } catch {}
+                        }
+                        const podiumFrame = getStoreItemById(frameId);
+                        const podiumTag = getStoreItemById(tagId);
+
                         return (
                           <div
                             key={rank}
@@ -344,7 +361,9 @@ export default function ScoreboardModule({ mode = "admin", activeInstructorId = 
                                 <Star className="h-3.5 w-3.5 fill-current" />
                               </div>
                               <div
-                                className={`h-14 w-14 rounded-full bg-gradient-to-br ${cfg.avatarGradient} text-white font-extrabold text-lg flex items-center justify-center shadow-lg ring-4 ring-white/75 dark:ring-slate-900/75`}
+                                className={`h-14 w-14 rounded-full bg-gradient-to-br ${cfg.avatarGradient} text-white font-extrabold text-lg flex items-center justify-center shadow-lg ring-4 ring-white/75 dark:ring-slate-900/75 transition-all ${
+                                  podiumFrame?.frameClass || ""
+                                }`}
                               >
                                 {entry ? getInitials(entry.studentName) : "—"}
                               </div>
@@ -367,6 +386,16 @@ export default function ScoreboardModule({ mode = "admin", activeInstructorId = 
                                       </span>
                                     )}
                                   </div>
+                                  {podiumTag && (
+                                    <div className="pt-0.5">
+                                      <span
+                                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black border shadow-xs ${podiumTag.badgeClass}`}
+                                      >
+                                        <span>{podiumTag.icon}</span>
+                                        <span>{podiumTag.name[lang]}</span>
+                                      </span>
+                                    </div>
+                                  )}
                                   <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/60 dark:bg-slate-900/50 border border-white/60 dark:border-white/15 text-xs font-extrabold text-slate-900 dark:text-white shadow-sm">
                                     <Award className="h-3.5 w-3.5 text-sky-600 dark:text-sky-300" />
                                     {entry.totalPoints} {lang === "ar" ? "نقطة" : "pts"}
@@ -468,6 +497,22 @@ export default function ScoreboardModule({ mode = "admin", activeInstructorId = 
                                 {restOfStudents.map((entry, idx) => {
                                   const rank = idx + 4;
                                   const isMe = user?.uid && entry.studentId === user.uid;
+                                  const rowStudentObj = students.find((s) => s.uid === entry.studentId);
+                                  let rowFrameId = rowStudentObj?.customization?.equipped?.avatarFrame || null;
+                                  let rowTagId = rowStudentObj?.customization?.equipped?.nameTag || null;
+                                  if (isMe) {
+                                    try {
+                                      const local = localStorage.getItem(`customization_${user.uid}`);
+                                      if (local) {
+                                        const parsed = JSON.parse(local);
+                                        if (parsed.equipped?.avatarFrame) rowFrameId = parsed.equipped.avatarFrame;
+                                        if (parsed.equipped?.nameTag) rowTagId = parsed.equipped.nameTag;
+                                      }
+                                    } catch {}
+                                  }
+                                  const rowFrame = getStoreItemById(rowFrameId);
+                                  const rowTag = getStoreItemById(rowTagId);
+
                                   return (
                                     <tr
                                       key={entry.studentId}
@@ -485,7 +530,11 @@ export default function ScoreboardModule({ mode = "admin", activeInstructorId = 
                                       {/* Student Identity */}
                                       <td className="px-4 py-3">
                                         <div className="flex items-center gap-2.5 min-w-0">
-                                          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-sky-500 text-white font-bold text-[11px] flex items-center justify-center shrink-0 shadow-sm">
+                                          <div
+                                            className={`h-8 w-8 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-sky-500 text-white font-bold text-[11px] flex items-center justify-center shrink-0 shadow-sm transition-all ${
+                                              rowFrame?.frameClass || ""
+                                            }`}
+                                          >
                                             {getInitials(entry.studentName)}
                                           </div>
                                           <div className="min-w-0">
@@ -497,6 +546,14 @@ export default function ScoreboardModule({ mode = "admin", activeInstructorId = 
                                                 </span>
                                               )}
                                             </div>
+                                            {rowTag && (
+                                              <div
+                                                className={`inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[9px] font-black border mt-0.5 max-w-full truncate shadow-xs ${rowTag.badgeClass}`}
+                                              >
+                                                <span>{rowTag.icon}</span>
+                                                <span className="truncate">{rowTag.name[lang]}</span>
+                                              </div>
+                                            )}
                                           </div>
                                         </div>
                                       </td>
