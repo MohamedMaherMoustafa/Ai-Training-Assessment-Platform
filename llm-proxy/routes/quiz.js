@@ -10,8 +10,8 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 15 
 
 const OLLAMA_BASE = process.env.OLLAMA_BASE_URL || "http://localhost:11434";
 const PREFERRED_MODEL = process.env.OLLAMA_MODEL || "academy-tutor";
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash";
+const getGeminiApiKey = () => process.env.GEMINI_API_KEY || "";
+const getGeminiModel = () => process.env.GEMINI_MODEL || "gemini-flash-lite-latest";
 
 /**
  * Auto-calculate estimated quiz time in minutes based on difficulty and question types
@@ -35,7 +35,8 @@ function calculateEstimatedQuizTime(questions = [], difficulty = "medium") {
 }
 
 async function generateQuizWithGemini(text, lang = "en", count = 10, includeTheoretical = true, difficulty = "medium") {
-  if (!GEMINI_API_KEY) return null;
+  const apiKey = getGeminiApiKey();
+  if (!apiKey) return null;
 
   const diffLabel = difficulty === "hard" ? "Advanced / Challenging" : difficulty === "easy" ? "Fundamental / Easy" : "Standard / Medium";
 
@@ -72,17 +73,36 @@ async function generateQuizWithGemini(text, lang = "en", count = 10, includeTheo
     },
   };
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
-  const res = await axios.post(url, payload, {
-    headers: { "Content-Type": "application/json" },
-    timeout: 60000,
-  });
+  const candidateModels = [
+    getGeminiModel(),
+    "gemini-flash-lite-latest",
+    "gemini-3.5-flash-lite",
+    "gemini-3.1-flash-lite",
+    "gemini-3.8-flash",
+    "gemini-flash-latest",
+  ].filter((m, idx, arr) => m && arr.indexOf(m) === idx);
 
-  const rawJson = res.data?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!rawJson) return null;
-  const parsed = JSON.parse(rawJson);
-  const questionsList = parsed.questions || parsed.quiz || (Array.isArray(parsed) ? parsed : []);
-  return normalizeQuestions(questionsList);
+  for (const model of candidateModels) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    try {
+      const res = await axios.post(url, payload, {
+        headers: { "Content-Type": "application/json" },
+        timeout: 45000,
+      });
+
+      const rawJson = res.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (rawJson) {
+        const parsed = JSON.parse(rawJson);
+        const questionsList = parsed.questions || parsed.quiz || (Array.isArray(parsed) ? parsed : []);
+        if (questionsList.length > 0) {
+          return normalizeQuestions(questionsList);
+        }
+      }
+    } catch (err) {
+      console.warn(`Gemini (${model}) quiz generation failed:`, err.message);
+    }
+  }
+  return null;
 }
 
 function loadPromptTemplate(lang = "en") {
@@ -255,7 +275,8 @@ async function evaluateTheoreticalAnswer({ question, modelAnswer, rubric = [], s
   }
 
   // 2. Try Gemini first if key exists
-  if (GEMINI_API_KEY) {
+  const apiKey = getGeminiApiKey();
+  if (apiKey) {
     try {
       const prompt = [
         `You are an expert academic evaluator. Assess this student's written response to an open-ended theoretical question.`,
@@ -277,18 +298,33 @@ async function evaluateTheoreticalAnswer({ question, modelAnswer, rubric = [], s
         generationConfig: { responseMimeType: "application/json", temperature: 0.2 },
       };
 
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
-      const res = await axios.post(url, payload, { headers: { "Content-Type": "application/json" }, timeout: 30000 });
-      const rawJson = res.data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (rawJson) {
-        const parsed = JSON.parse(rawJson);
-        return {
-          isCorrect: Boolean(parsed.isCorrect),
-          gradeStatus: parsed.gradeStatus || (parsed.isCorrect ? "correct" : "incorrect"),
-          score: typeof parsed.score === "number" ? parsed.score : parsed.isCorrect ? 1 : 0,
-          maxScore: 1,
-          feedback: parsed.feedback || (parsed.isCorrect ? "إجابة صحيحة ومفاهيم واضحة." : "إجابة غير دقيقة."),
-        };
+      const candidateModels = [
+        getGeminiModel(),
+        "gemini-flash-lite-latest",
+        "gemini-3.5-flash-lite",
+        "gemini-3.1-flash-lite",
+        "gemini-3.8-flash",
+        "gemini-flash-latest",
+      ].filter((m, idx, arr) => m && arr.indexOf(m) === idx);
+
+      for (const model of candidateModels) {
+        try {
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+          const res = await axios.post(url, payload, { headers: { "Content-Type": "application/json" }, timeout: 30000 });
+          const rawJson = res.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (rawJson) {
+            const parsed = JSON.parse(rawJson);
+            return {
+              isCorrect: Boolean(parsed.isCorrect),
+              gradeStatus: parsed.gradeStatus || (parsed.isCorrect ? "correct" : "incorrect"),
+              score: typeof parsed.score === "number" ? parsed.score : parsed.isCorrect ? 1 : 0,
+              maxScore: 1,
+              feedback: parsed.feedback || (parsed.isCorrect ? "إجابة صحيحة ومفاهيم واضحة." : "إجابة غير دقيقة."),
+            };
+          }
+        } catch (mErr) {
+          console.warn(`Theoretical evaluation with ${model} failed:`, mErr.message);
+        }
       }
     } catch (gErr) {
       console.warn("Gemini theoretical evaluation fallback:", gErr.message);

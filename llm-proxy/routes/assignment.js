@@ -141,9 +141,14 @@ async function gradeWithGemini(questions, lang = "en") {
     `Questions & Student Answers to grade:\n${JSON.stringify(questionsPayload, null, 2)}`,
   ].join("\n\n");
 
-  const candidateModels = [getGeminiModel(), "gemini-3.5-flash-lite", "gemini-flash-latest"].filter(
-    (m, idx, arr) => m && arr.indexOf(m) === idx
-  );
+  const candidateModels = [
+    getGeminiModel(),
+    "gemini-flash-lite-latest",
+    "gemini-3.5-flash-lite",
+    "gemini-3.1-flash-lite",
+    "gemini-3.8-flash",
+    "gemini-flash-latest",
+  ].filter((m, idx, arr) => m && arr.indexOf(m) === idx);
 
   const payload = {
     contents: [{ role: "user", parts: [{ text: systemPrompt }] }],
@@ -337,9 +342,14 @@ async function gradePdfWithGemini({
 
   parts.push({ text: systemPrompt });
 
-  const candidateModels = [getGeminiModel(), "gemini-3.5-flash-lite", "gemini-flash-latest"].filter(
-    (m, idx, arr) => m && arr.indexOf(m) === idx
-  );
+  const candidateModels = [
+    getGeminiModel(),
+    "gemini-flash-lite-latest",
+    "gemini-3.5-flash-lite",
+    "gemini-3.1-flash-lite",
+    "gemini-3.8-flash",
+    "gemini-flash-latest",
+  ].filter((m, idx, arr) => m && arr.indexOf(m) === idx);
 
   const payload = {
     contents: [{ role: "user", parts }],

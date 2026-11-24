@@ -75,9 +75,14 @@ async function callGeminiChat({
     },
   };
 
-  const candidateModels = [model, "gemini-3.5-flash-lite", "gemini-flash-latest"].filter(
-    (m, idx, arr) => m && arr.indexOf(m) === idx
-  );
+  const candidateModels = [
+    model,
+    "gemini-flash-lite-latest",
+    "gemini-3.5-flash-lite",
+    "gemini-3.1-flash-lite",
+    "gemini-3.8-flash",
+    "gemini-flash-latest",
+  ].filter((m, idx, arr) => m && arr.indexOf(m) === idx);
 
   for (const m of candidateModels) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${apiKey}`;
@@ -287,9 +292,19 @@ router.post("/", async (req, res) => {
     .filter(Boolean)
     .join("\n\n");
 
+  const summarizePrompt =
+    lang === "ar"
+      ? `يرجى تقديم ملخص تعليمي شامل واحترافي لدرس "${lessonTitle || 'الدرس'}"، موضحاً الأفكار الأساسية، والمفاهيم الرئيسية، وأهم نقاط التعلم المستفادة بالتفصيل المنظم:\n\n${lessonText || ''}`
+      : `Please provide a comprehensive, well-structured educational summary of the lesson "${lessonTitle || 'Lesson'}", detailing the core concepts, main ideas, and key learning takeaways:\n\n${lessonText || ''}`;
+
+  const promptText =
+    mode === "summarize"
+      ? (message && message.length > 20 ? `${message}\n\n${lessonText ? `Lesson Content:\n${lessonText}` : ''}` : summarizePrompt)
+      : (message || "");
+
   const userPrompt = [
     historyBlock ? `RECENT CHAT CONTEXT:\n${historyBlock}` : "",
-    message ? `USER QUESTION: ${message}` : "",
+    promptText ? `USER REQUEST: ${promptText}` : "",
     attachments.length > 0
       ? `(User attached ${attachments.length} file(s): ${attachments.map((a) => `${a.kind || 'file'}: ${a.name || a.fileName || a.mimeType}`).join(", ")})`
       : "",

@@ -35,7 +35,7 @@ const DIRECT_AI_KEY =
   "";
 const DIRECT_AI_PRIMARY = "gemini-flash-lite-latest";
 const DIRECT_AI_FALLBACK = "gemini-3.5-flash-lite";
-const DIRECT_AI_TERTIARY = "gemini-flash-latest";
+const DIRECT_AI_TERTIARY = "gemini-3.1-flash-lite";
 
 export async function callDirectAI({
   message = "",
@@ -574,14 +574,21 @@ export async function executeDirectQuizCreation({
 }
 
 async function summarizeLessonViaAI(lesson, lang, useNetwork = true) {
-  if (!lesson.text || lesson.text.trim().length < 15) {
+  const lessonBody = String(lesson.text || lesson.description || lesson.title || "").trim();
+  if (lessonBody.length < 5) {
     return {
       reply:
         lang === "ar"
-          ? `الدرس "${lesson.titleAr || lesson.title}" لا يحتوي على نص كافٍ للتلخيص.`
-          : `Lesson "${lesson.title}" does not have enough readable text to summarize yet.`,
+          ? `الدرس "${lesson.titleAr || lesson.title}" لا يحتوي على محتوى كافٍ للتلخيص حالياً.`
+          : `Lesson "${lesson.title}" does not have enough content to summarize yet.`,
     };
   }
+
+  const prompt =
+    lang === "ar"
+      ? `يرجى تقديم ملخص تعليمي شامل واحترافي لدرس "${lesson.titleAr || lesson.title}"${lesson.courseTitle ? ` التابع لمقرر "${lesson.courseTitle}"` : ""}، موضحاً الأفكار الأساسية، والمفاهيم الرئيسية، وأهم نقاط التعلم المستفادة بالتفصيل المنظم:\n\n${lessonBody}`
+      : `Please provide a comprehensive, well-structured educational summary of the lesson "${lesson.title}"${lesson.courseTitle ? ` for course "${lesson.courseTitle}"` : ""}, detailing the core concepts, main ideas, and key learning takeaways:\n\n${lessonBody}`;
+
   if (useNetwork) {
     try {
       const res = await axios.post(
@@ -589,20 +596,34 @@ async function summarizeLessonViaAI(lesson, lang, useNetwork = true) {
         {
           mode: "summarize",
           lang,
+          message: prompt,
           lessonTitle: lesson.title,
-          lessonText: lesson.text,
+          lessonText: lessonBody,
         },
-        { timeout: 30000 }
+        { timeout: 35000 }
       );
       if (res.data?.reply) {
         return { reply: res.data.reply };
       }
     } catch {
-      // fallback below
+      // fallback to direct AI
+    }
+
+    try {
+      const directRes = await callDirectAI({
+        message: prompt,
+        lang,
+        contextSummary: `Target Lesson Content:\nTitle: ${lesson.title}\n${lessonBody.slice(0, 6000)}`,
+      });
+      if (directRes?.reply) {
+        return { reply: directRes.reply };
+      }
+    } catch {
+      // fallback to local extractive below
     }
   }
   return {
-    reply: localSummarizeText(lesson.text, lang, lesson.title),
+    reply: localSummarizeText(lessonBody, lang, lesson.title),
   };
 }
 
