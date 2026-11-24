@@ -35,8 +35,77 @@ function RootRedirect() {
   return <Navigate to="/student" replace />;
 }
 
+function shouldShowSplash() {
+  if (typeof window === "undefined" || !window.sessionStorage) return false;
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("splash") === "1" || params.get("intro") === "1") {
+      return true;
+    }
+
+    const alreadyShown = sessionStorage.getItem("platform_splash_shown");
+    if (alreadyShown) {
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export default function App() {
-  const [showIntro, setShowIntro] = useState(true);
+  const [showIntro, setShowIntro] = useState(() => shouldShowSplash());
+
+  useEffect(() => {
+    // Intercept hard refresh shortcuts (Ctrl+F5, Ctrl+Shift+R, Cmd+Shift+R, Shift+F5)
+    // so hard reloads will clear the session flag and show the splash screen again
+    const handleHardRefreshKeys = (e) => {
+      const isCtrlOrCmd = e.ctrlKey || e.metaKey;
+      const isF5 = e.key === "F5";
+      const isR = e.key === "r" || e.key === "R";
+      const isShift = e.shiftKey;
+
+      if ((isCtrlOrCmd && isF5) || (isCtrlOrCmd && isShift && isR) || (isShift && isF5)) {
+        try {
+          sessionStorage.removeItem("platform_splash_shown");
+        } catch {}
+      }
+      if (e.key === "Shift") {
+        window.__shiftHeldForReload = true;
+      }
+    };
+
+    const handleKeyUp = (e) => {
+      if (e.key === "Shift") {
+        window.__shiftHeldForReload = false;
+      }
+    };
+
+    const handleBeforeUnload = () => {
+      if (window.__shiftHeldForReload) {
+        try {
+          sessionStorage.removeItem("platform_splash_shown");
+        } catch {}
+      }
+    };
+
+    window.addEventListener("keydown", handleHardRefreshKeys, { passive: true });
+    window.addEventListener("keyup", handleKeyUp, { passive: true });
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("keydown", handleHardRefreshKeys);
+      window.removeEventListener("keyup", handleKeyUp);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+
+  const handleCompleteIntro = () => {
+    setShowIntro(false);
+    try {
+      sessionStorage.setItem("platform_splash_shown", "true");
+    } catch {}
+  };
 
   useEffect(() => {
     const handleGlobalClick = (e) => {
@@ -56,7 +125,7 @@ export default function App() {
         <AuthProvider>
           <PopupProvider>
             <UploadProgressProvider>
-              {showIntro && <RobotIntroSplash onComplete={() => setShowIntro(false)} />}
+              {showIntro && <RobotIntroSplash onComplete={handleCompleteIntro} />}
               <PlatformCachePrompt />
               <BrowserRouter>
                 <Toaster
