@@ -1,7 +1,7 @@
 # 🎓 Athar Educational Platform (منصة أثر التعليمية)
 ### *Learn · Develop · Achieve Your Goals*
 
-[![React 18](https://img.shields.io/badge/React-18-blue.svg)](https://react.dev/)
+[![React 19](https://img.shields.io/badge/React-19-blue.svg)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-6.x-purple.svg)](https://vitejs.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38bdf8.svg)](https://tailwindcss.com/)
 [![Firebase](https://img.shields.io/badge/Firebase-RTDB%20%26%20Auth-ffca28.svg)](https://firebase.google.com/)
@@ -14,31 +14,35 @@
 
 The **Athar Educational Platform (منصة أثر التعليمية)** is an enterprise-grade, intelligent educational web application tailored for technical education, continuous skill assessment, and modern interactive learning. Built with a **modern glassmorphism (liquid glass)** design language, it bridges students, instructors, and system administrators into a seamless, high-performance learning ecosystem.
 
-The platform provides end-to-end support for coursework, lesson materials, digital PDF annotation, AI-generated quizzes with anti-cheating enforcement, automated weekly progress tracking, voice/photo AI assistance, and real-time live performance analytics.
+The platform provides end-to-end support for coursework, lesson materials, digital PDF annotation, AI-generated quizzes with anti-cheating enforcement, automated weekly progress tracking, voice/photo AI assistance, a gamified 50-level cognitive puzzle engine, student rewards economy, official luxury Top-3 certificates, and real-time live performance analytics.
 
 ---
 
 ## ✨ Key Features & Capabilities
 
-### 1. 👥 Multi-Role Access Control (RBAC)
+### 1. 👥 Multi-Role Access Control (RBAC) & In-Memory Routing
+- **In-Memory Navigation (`MemoryRouter`)**:
+  - The application utilizes in-memory client-side routing, keeping the browser address bar clean and static at the root host (`/`).
+  - Internal URLs and route transitions are never stored in browser history, preventing unauthorized URL inspection or manual URL tampering.
+  - Users enter the platform instantly without mandatory login barriers; a default guest profile with dynamic role adaptation allows instant exploration as **Student**, **Instructor**, or **Admin** via the interactive topbar role-switcher pill.
 - **Student**:
   - Browse and enroll in courses provided by chosen instructors.
   - Interactive multi-page PDF reader with private freehand ink drawing, highlighting, and study notebook.
   - Interactive timed quizzes with instant per-question AI explanations.
   - Weekly progress reports arranged week-by-week.
-  - Top 5 leaderboard and personal credential updating (name & password).
+  - Top 5 leaderboard, gamified Rewards Store, and 50 Cognitive IQ Puzzles.
 - **Instructor (Teacher)**:
   - Create and manage courses with English and Arabic curriculum details.
   - Upload lecture PDFs with automatic text extraction for AI features.
   - Publish PDF worksheets/assignments with customizable deadlines and point presets.
   - Correct and annotate submitted student PDF homework in real-time with dual-layer ink pens, stamps, and feedback.
-  - Draft interactive quizzes in seconds using Platform AI or custom question authoring.
-  - Manage quiz retake requests and monitor student performance.
+  - Draft interactive quizzes in seconds using Platform AI (10, 15, or 20 questions) or custom question authoring.
+  - Manage quiz retake requests, student progress analytics, and print luxury official Top-3 PDF certificates.
 - **System Administrator**:
   - Comprehensive platform overview with real-time counters and recent event logs.
   - Add, edit, activate/deactivate, and delete instructor accounts.
   - Manage all platform courses and assignments centrally.
-  - Full leaderboard access and platform-wide notification broadcasting.
+  - Full leaderboard access, luxury certificate issuance, and platform-wide notification broadcasting.
 
 ---
 
@@ -92,9 +96,14 @@ The platform provides end-to-end support for coursework, lesson materials, digit
 ---
 
 ### 6. 🪙 Student Rewards Store & Gamified Coin Economy (`/student/store`)
-- **Points to Coins Conversion ($1 \text{ Academic Point} = 10 \text{ Coins}$)**: Students earn coins automatically from academic performance (Quizzes and Assignments), plus bonus coins earned by solving Cognitive IQ Puzzles (+15 to +400 coins per puzzle).
-- **Strict Academic Point Protection Guarantee**: Purchasing cosmetic items in the store **strictly spends Coins only**. Academic points, course marks, certificate eligibility, and academic leaderboard rankings are **permanently protected and never deducted**.
-- **Complete Cosmetics Catalog**:
+- **Tri-Source Coin Generation**:
+  1. **Quizzes**: Automatically awards $10\text{ coins}$ per earned academic point ($1 \text{ pt} = 10 \text{ coins}$).
+  2. **Graded PDF Assignments**: Automatically awards $10\text{ coins}$ per earned assignment point ($1 \text{ pt} = 10 \text{ coins}$).
+  3. **Cognitive IQ Puzzles**: Awards lucrative level bounty coins (+50 to +800 coins per level) across 50 progressive mental challenges.
+- **Strict Academic Score Protection Guarantee**:
+  - Purchasing cosmetic items in the Rewards Store **strictly spends Coins only** (`availableCoins = totalCoinsEarned - spentCoins`).
+  - **Academic points, course grades, official scoreboard rankings, and certificate eligibility are permanently protected and never reduced.**
+- **Complete Cosmetics Catalog (`storeData.js`)**:
   - **8 Glowing Name Tags / Titles**: *Novice Scholar*, *Code Ninja*, *Bug Hunter*, *AI Pioneer*, *Byte Master*, *Logic Wizard*, *Cyber Sentinel*, and *Grand Alchemist*.
   - **8 Liquid-Glass Animated Avatar Frames**: *Neon Azure*, *Emerald Pulse*, *Golden Radiance*, *Cyberpunk Violet*, *Crimson Flame*, *Quantum Glitch*, *Starry Nebula*, and *Royal Obsidian*.
   - **Chatbot Customization Studio**:
@@ -108,36 +117,70 @@ The platform provides end-to-end support for coursework, lesson materials, digit
 
 ---
 
-### 7. 🙈 Interactive Login Mascot (Eye-Covering Password Privacy Animation)
-- **Interactive SVG Robot Mascot (`RobotMascotSvg.jsx`)**: Positioned above the authentication card on `LoginPage.jsx`.
-- **Active Password Eye Covering**: As soon as the student starts typing in the password field, the robot smoothly raises his hands and covers his eyes with his fingers.
-- **1-Second Typing Inactivity Debounce**: If typing pauses for 1 second or the password field loses focus, the robot lowers his hands and uncovers his eyes.
-- **Peeking Mode**: If the student clicks the show password toggle (`showPass`), the robot parts his fingers to sneak a peek at the input!
-- **State-Aware Expressions**: The robot mascot smiles and observes normally while typing username/email fields.
+### 7. 🧠 50 IQ Cognitive Puzzle Levels with Strict Single-Attempt Lock (`IQPuzzlesModule.jsx`)
+- **50 Ascending Difficulty Levels**:
+  - Spans 6 progressive mental tiers:
+    1. **Tier 1 (Levels 1–8)**: *Novice Analyst* (+50 to +90 coins).
+    2. **Tier 2 (Levels 9–16)**: *Logic Operator* (+100 to +170 coins).
+    3. **Tier 3 (Levels 17–25)**: *Pattern Architect* (+180 to +260 coins).
+    4. **Tier 4 (Levels 26–34)**: *Quantum Thinker* (+280 to +400 coins).
+    5. **Tier 5 (Levels 35–42)**: *Cognitive Strategist* (+420 to +560 coins).
+    6. **Tier 6 (Levels 43–50)**: *IQ Grandmaster* (+580 to +800 coins).
+  - Total achievable coin bounty across all 50 levels: **12,740 Coins**.
+- **Strict Single-Attempt Choice Lock**:
+  - Once a student selects an answer, the choices are immediately locked (`selectedAnswer !== null` locks all buttons).
+  - If the choice is incorrect, the student cannot advance to the next level.
+  - An interactive **Retry Level** button allows resetting the current puzzle to try again.
+- **Sequential Level Unlocking**:
+  - Level $N$ is strictly locked until Level $N-1$ is solved and verified.
+  - Level state cards clearly distinguish **Solved** (green checkmark), **Current Available** (active play button), and **Locked** (padlock icon).
+- **Absolute Scoreboard Decoupling**:
+  - Puzzles award spendable bounty coins for the Rewards Store, but **puzzle points are 100% decoupled from the academic scoreboard**. The course leaderboard remains strictly dedicated to academic curriculum mastery (Quizzes + Graded Assignments).
 
 ---
 
-### 8. 📊 Automated 7-Day Weekly Performance Reports
+### 8. 🏆 Decoupled Scoreboard & Luxury Top-3 Official Certificates
+- **Pure Curriculum Scoreboard (`ScoreboardModule.jsx`)**:
+  - Ranks students strictly by academic mastery: $\text{Total Score} = \text{Quiz Points} + \text{Assignment Points}$.
+  - Features an **Official Certification Guarantee Badge** affirming that coin spendings and puzzle games never modify podium rankings.
+  - Stepped Liquid-Glass podium celebrating the Top 3 students with crowns, medals, and equipped cosmetics.
+- **Luxury Official Top-3 PDF Certificates (`certificateGenerator.js`)**:
+  - Instructors and Admins can generate and print high-resolution official certificates for the top 3 ranking students:
+    - **1st Place**: **Gold Rank** (`cert_template_1.jpg`) with warm golden guilloche borders, embossed gold seal, and ornate cursive calligraphy.
+    - **2nd Place**: **Silver Rank** (`cert_template_2.jpg`) with cool silver-indigo filigree borders, metallic blue-silver seal, and silver rank banner.
+    - **3rd Place**: **Bronze Rank** (`cert_template_3.jpg`) with warm copper-bronze rosettes, metallic bronze seal, and bronze rank banner.
+  - **2x Retina Canvas Rendering ($2000 \times 1414 \text{ px}$)**:
+    - Inpainted background templates using vertical gradient text-pixel interpolation to eliminate background streaks and border rosette clipping.
+    - Zero duplicate citation text: utilizes the template's embedded citation text while cleanly positioning the student's name in prominent cursive script (*Alex Brush* / *Great Vibes*), followed by the official course name and verified academic score at $Y = 965$.
+    - Authenticated with instructor's digital cursive signature, official date, and tamper-resistant certificate verification ID.
+
+---
+
+### 9. 🙈 Interactive Login Mascot (Eye-Covering Privacy Animation)
+- **Interactive SVG Robot Mascot (`RobotMascotSvg.jsx`)**: Positioned above the authentication card on `LoginPage.jsx`.
+- **Complete Eye-Covering (`🙈`) on Password Reveal & Typing**:
+  - When typing in the password field, the robot smoothly covers his eyes.
+  - When the student clicks the **eye icon** (`showPass`) to reveal the password in plain text, the robot firmly keeps his eyes covered to protect the user's privacy from shoulder-surfers.
+- **Inactivity Debounce & Smooth Lowering**: Drops hands back down when typing stops or when switching back to the username field.
+- **Cursor Tracking**: Mascot eyes naturally follow the user's mouse cursor across the screen when idle.
+
+---
+
+### 10. 📊 Automated 7-Day Weekly Performance Reports
 - **Weekly Schedule Engine**: Evaluates student activity and progress every 7 calendar days.
 - **Organized View**: Formats historical student performance chronologically (e.g., Week 1, Week 2, Current Week).
 - **Automated Notifications**: Automatically dispatches a notification every 7 days inviting the student to view their updated performance breakdown.
 
 ---
 
-### 9. 🧠 Cognitive IQ Puzzles Hub & Proportional Rewards (`IQPuzzlesModule.jsx`)
-- **10 Ascending Difficulty Levels**: Gamified puzzles covering numerical reasoning, spatial rotation, Boolean logic, balance equations, and multi-constraint deduction.
-- **Proportional Coins Earnings**: Solving challenging puzzles awards between 15 and 400 coins, providing an engaging way to build coins for the Store.
-- **Cognitive Ranks & Streaks**: 6 IQ tiers and daily brain teaser streak tracking.
-
----
-
-### 10. 🛡️ System Security, Username Validation & Conditional Support
+### 11. 🛡️ System Security & Conditional Support
 - **Strict Username Validation**: Instructor account creation and student registration strictly require usernames to be at least 8 characters long and contain either `@` or `_` (e.g., `student_user`, `john@athar`).
+- **Profile Privacy**: Profile photo upload options are safely removed from the profile modal to maintain privacy and standardized avatar rendering.
 - **Conditional WhatsApp Support Button**: The student dashboard displays the direct WhatsApp instructor contact button **only when the student's status is "Needs Support"**, keeping the interface clean and distraction-free when academic performance is on track.
 
 ---
 
-### 11. 🎨 Glassmorphic UI & Accessibility
+### 12. 🎨 Glassmorphic UI & Accessibility
 - **Modern Liquid Glass Design**: Frosted glass cards, translucent inputs (`.glass-input`), glowing accent indicators, and backdrop blur.
 - **Bilingual & RTL/LTR Support**: Fully translated in English (LTR) and Arabic (RTL) with instant language toggle.
 - **Theme Modes**: Seamless Dark mode (`#080c1a`) and crisp Light mode with high-contrast text and visible navigation.
@@ -149,7 +192,7 @@ The platform provides end-to-end support for coursework, lesson materials, digit
 
 | Layer | Technologies |
 |---|---|
-| **Frontend Framework** | React 19, Vite 8, React Router DOM v7 |
+| **Frontend Framework** | React 19, Vite 8, React Router DOM v7 (MemoryRouter for in-memory security) |
 | **Styling & UI** | Tailwind CSS 3.4, Custom Glassmorphism System, Lucide React Icons |
 | **Computer Vision & Proctoring** | TensorFlow.js (`@tensorflow/tfjs`), COCO-SSD (`@tensorflow-models/coco-ssd`), WebRTC MediaDevices API |
 | **Document Processing** | PDF.js (Mozilla), HTML5 Canvas 2D Rendering Engine, HTML2Canvas, jsPDF |
@@ -167,31 +210,34 @@ The platform provides end-to-end support for coursework, lesson materials, digit
 ├── client/                          # React + Vite Frontend Application
 │   ├── public/
 │   │   ├── Logo.png                 # Platform transparent brand logo
+│   │   ├── cert_template_1.jpg      # Gold 1st Place certificate template
+│   │   ├── cert_template_2.jpg      # Silver 2nd Place certificate template
+│   │   ├── cert_template_3.jpg      # Bronze 3rd Place certificate template
 │   │   └── pdf.worker.min.mjs       # Mozilla PDF.js web worker
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── common/              # Chatbot widget, profile modal, progress modal, RobotMascotSvg
 │   │   │   └── layout/              # AppLayout, Sidebar, TopHeader, Notifications
-│   │   ├── context/                 # AuthContext, LangContext, PopupContext, UploadContext
+│   │   ├── context/                 # AuthContext (MemoryRouter guest access), LangContext, PopupContext
 │   │   ├── features/
 │   │   │   ├── admin/               # Overview & Instructors management
 │   │   │   ├── assignments/         # Assignment publishing & Live Annotation studio
-│   │   │   ├── auth/                # Login (with animated mascot) & Registration pages
+│   │   │   ├── auth/                # Login (with eye-covering mascot) & Registration pages
 │   │   │   ├── courses/             # Courses & lesson material management
 │   │   │   ├── lessons/             # PDF Lesson library & student private notebooks
-│   │   │   ├── puzzles/             # Gamified Cognitive IQ Puzzles module
+│   │   │   ├── puzzles/             # 50 Cognitive IQ Puzzles module (single-attempt lock)
 │   │   │   ├── quiz/                # AI Quiz builder (10/15/20 questions) & proctored exam runner
 │   │   │   ├── reports/             # Weekly 7-day performance reports module
-│   │   │   ├── scoreboard/          # Dynamic top 5 leaderboard & branded certificates
+│   │   │   ├── scoreboard/          # Pure academic leaderboard & luxury Top-3 certificates
 │   │   │   └── store/               # Student Rewards Store & cosmetic customization studio
 │   │   ├── locales/                 # ar.json & en.json translation bundles
 │   │   ├── services/                # platformService.js (RTDB & Auth business logic)
-│   │   ├── utils/                   # pdfPageRenderer, pdfExtractor, soundEffects
-│   │   ├── App.jsx                  # Main application routing
+│   │   ├── utils/                   # certificateGenerator.js, pdfPageRenderer, pdfExtractor
+│   │   ├── App.jsx                  # MemoryRouter application root
 │   │   └── index.css                # Glassmorphic component styles & utility classes
 │   └── package.json
 ├── llm-proxy/                       # Node.js backend proxy for Gemini AI API
-│   ├── server.js                    # Express endpoints (/api/chat, /api/quiz/generate, etc.)
+│   ├── server.js                    # Express endpoints (/api/chat, /api/quiz/generate, /api/assignment/grade)
 │   └── package.json
 ├── scripts/
 │   └── test-platform.mjs            # Automated 16-point platform verification suite
@@ -244,13 +290,13 @@ The platform provides end-to-end support for coursework, lesson materials, digit
    ```
 
 5. **Open in Browser**:
-   Navigate to `http://localhost:5173`.
+   Navigate to `http://localhost:5173`. Instant guest access is immediately active, allowing seamless exploration across Student, Instructor, and Admin workspaces without login friction.
 
 ---
 
 ## 🧪 Automated Verification Suite
 
-The repository includes a comprehensive 13-stage test suite covering AI chatbot responses, quiz generation, scoreboard queries, lesson conceptual summarization, and build integrity:
+The repository includes a comprehensive 16-stage test suite covering AI chatbot responses, quiz generation, scoreboard queries, lesson conceptual summarization, automated PDF grading diagnostics, and build integrity:
 
 ```bash
 node scripts/test-platform.mjs
@@ -260,4 +306,3 @@ node scripts/test-platform.mjs
 
 ## 📄 License
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
-

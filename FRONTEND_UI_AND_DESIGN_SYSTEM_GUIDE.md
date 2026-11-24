@@ -153,11 +153,12 @@ All authenticated routes are rendered within **`client/src/components/layout/App
 - **Components from Start to End:**
   1. *Mobile Hamburger Button (`lg:hidden`):* Contains `<Menu />` icon plus a floating red notification dot if unread direct chat messages exist.
   2. *Brand Identity Pill:* Transparent platform logo (`Logo.png`) + dynamic localized role tag (`roles.student`, `roles.instructor`, `roles.admin`).
-  3. *Breadcrumb Trail (`hidden md:flex`):* `/ Current Section Name`.
-  4. *Sound FX Toggle Button:* `<Volume2 />` or `<VolumeX />` icon toggle, controls platform-wide Web Audio feedback.
-  5. *Dark / Light Mode Toggle:* `<Sun />` or `<Moon />` icon toggle with smooth color transitions.
-  6. *Bilingual Language Switcher (`LanguageDropdown.jsx`):* Dropdown selecting English (LTR) or Arabic (RTL).
-  7. *Notification Bell & Popover Box:* Luminous badge with unread count. Clicking opens a glass drop-panel showing notifications list, "Mark All as Read", "Clear All", and clickable notification links.
+  3. *In-Memory Role Switcher Pill:* Interactive glass pill selector (`Student`, `Instructor`, `Admin`) allowing seamless role switching in real time without page reload or browser URL mutations.
+  4. *Breadcrumb Trail (`hidden md:flex`):* `/ Current Section Name`.
+  5. *Sound FX Toggle Button:* `<Volume2 />` or `<VolumeX />` icon toggle, controls platform-wide Web Audio feedback.
+  6. *Dark / Light Mode Toggle:* `<Sun />` or `<Moon />` icon toggle with smooth color transitions.
+  7. *Bilingual Language Switcher (`LanguageDropdown.jsx`):* Dropdown selecting English (LTR) or Arabic (RTL).
+  8. *Notification Bell & Popover Box:* Luminous badge with unread count. Clicking opens a glass drop-panel showing notifications list, "Mark All as Read", "Clear All", and clickable notification links.
 
 ---
 
@@ -165,6 +166,7 @@ All authenticated routes are rendered within **`client/src/components/layout/App
 
 ### 4.1 Login Page (`client/src/features/auth/LoginPage.jsx`)
 - **Layout:** Split-screen layout (`h-screen overflow-hidden`) with a top floating pill header and a dual-card body.
+- **Interactive SVG Robot Mascot:** Positioned directly above the form card, providing interactive eye-covering privacy animation when typing or clicking the reveal-password eye icon (`showPass`), with real-time cursor tracking.
 - **Left/Start Branding Card (Desktop):** Gradient showcase card featuring platform title, description, illustration (`hero.png`), and glowing feature bullet tags (AI Quiz Engine, Multi-page PDF Annotation, Anti-Cheat Camera Proctoring).
 - **Right/End Form Card:** Frosted glass card (`.glass-form-card`) containing:
   - *Identifier Input:* Username or Email address with `<Mail />` / `<User />` icon prefix.
@@ -381,23 +383,40 @@ The assignments feature offers flexible solving modes for students (download to 
 
 ---
 
-### 6.5 Course Scoreboard & Printable Certificates (`ScoreboardModule.jsx`)
+### 6.5 Course Scoreboard & Luxury Official Top-3 Certificates (`ScoreboardModule.jsx`, `certificateGenerator.js`)
 
-#### 6.5.1 Liquid-Glass 3D Podium
-- Course selection dropdown.
+#### 6.5.1 Pure Curriculum Scoreboard & Liquid-Glass 3D Podium
+- **Pure Curriculum Score Formula:**
+  $$\text{Total Score} = \text{Quiz Points} + \text{Assignment Points}$$
+- **Scoreboard Decoupling & Curriculum Purity:**
+  - Puzzle game points and Rewards Store coin spendings are strictly decoupled from the course scoreboard.
+  - **Official Certification Guarantee Badge:** Displayed prominently above the leaderboard, assuring students and instructors that podium standings and certificate eligibility reflect 100% verified academic coursework.
 - **Podium Visual Layout:**
-  - **1st Place (Center, Tallest Step):** Glowing Gold aura, crown icon, student avatar, full name, total points badge.
-  - **2nd Place (Left Step):** Silver-Indigo styling.
-  - **3rd Place (Right Step):** Bronze-Teal styling.
-- **4th & 5th Place Runner-Up Cards:** Horizontal cards below the podium showing rank, avatar, name, and total points.
-- **Points Formula:** `Total Points = Quiz Points + Assignment Points`.
+  - **1st Place (Center, Tallest Step):** Radiant gold metallic gradient, golden crown icon, equipped animated avatar frame & glowing title tag, student full name, and verified academic points badge.
+  - **2nd Place (Left Step):** Cool silver-indigo metallic styling with silver medal icon.
+  - **3rd Place (Right Step):** Warm bronze metallic styling with bronze medal icon.
+- **4th & 5th Place Runner-Up Cards:** Glassmorphic horizontal cards below the podium showing rank, avatar, name, equipped title, and total academic score.
 
-#### 6.5.2 Printable Branded PDF Certificates (`certificateGenerator.js`)
-- Instructors and Admins can generate downloadable, high-resolution printable certificates:
-  - **Gold Certificate:** 1st place champion.
-  - **Silver-Indigo Certificate:** 2nd place runner-up.
-  - **Bronze-Teal Certificate:** 3rd place runner-up.
-- **Certificate Elements:** Official platform logo, decorative guilloche borders, student name, course title, total points breakdown, date of issue, and cursive instructor signature.
+#### 6.5.2 Luxury Official Top-3 PDF Certificate System (`certificateGenerator.js`)
+- Instructors and Admins can generate and print high-resolution official certificates for the top 3 ranking students:
+  - **1st Place — Gold Rank** (`cert_template_1.jpg`): Warm golden guilloche framing, embossed gold medallion seal, and golden rank banner.
+  - **2nd Place — Silver Rank** (`cert_template_2.jpg`): Cool metallic silver-indigo filigree framing, silver medallion seal, and silver rank banner.
+  - **3rd Place — Bronze Rank** (`cert_template_3.jpg`): Warm copper-bronze rosettes, metallic bronze medallion seal, and bronze rank banner.
+- **2x Retina Canvas Rendering Architecture ($2000 \times 1414 \text{ px}$):**
+  - **Text-Pixel Inpainting Engine:**
+    - Background templates are dynamically inpainted using vertical gradient text-pixel interpolation within $X \in [200, 785]$ and $Y \in [700, 1020]$.
+    - Replaces only text-colored pixels with the natural vertical background gradient, completely eliminating vertical streak bands and preserving the integrity of border guilloche rosettes.
+  - **Clean Typography Hierarchy (Zero Text Collisions):**
+    - **Citation Subtitle:** Preserves the template's embedded high-resolution citation text without double-printing or artificial overlay artifacts.
+    - **Student Name ($Y = 820$):** Rendered in prominent cursive calligraphy (*Alex Brush* / *Great Vibes*, font size 72px) with rank-specific palette:
+      - *Gold:* Deep warm sepia (`#6B4423`)
+      - *Silver:* Polished slate navy (`#263238`)
+      - *Bronze:* Rich copper bronze (`#3E2723`)
+    - **Course Name & Academic Score ($Y = 965$):** Positioned cleanly below citation text with zero overlapping:
+      - Font: *Cinzel* / *Playfair Display* (bold, size 22px).
+      - Text: `Course: "[Course Name]"  ·  Score: [X] Pts (Quizzes: [Q] pts | Assignments: [A] pts)`.
+    - **Digital Instructor Signature ($X = 350, Y = 1150$):** Cursive handwritten signature script (*Alex Brush* / *Great Vibes*), accompanied by the instructor's printed name below the signature line.
+    - **Issue Date & Verification ID ($X = 1600, Y = 1160$):** Official issue timestamp and tamper-resistant unique certificate identifier (e.g., `ID: ATAP-1-603962`).
 
 ---
 
@@ -489,33 +508,37 @@ The assignments feature offers flexible solving modes for students (download to 
 
 ---
 
-### 6.11 IQ Puzzles & Cognitive Brain Hub (`IQPuzzlesModule.jsx`)
-- **Gamified Level Progression:** 10 uniquely themed levels with ascending cognitive difficulty (Easy, Medium, Hard, Expert, Grandmaster, Mastermind).
-- **Diverse Puzzle Types:**
-  1. *Level 1 (Numerical Reasoning):* The Doubling Ladder number sequence induction.
-  2. *Level 2 (Abstract Spatial IQ):* Raven's Progressive Rotation Matrix (rotational angles and dot counts).
-  3. *Level 3 (Cryptographic Logic):* The Cryptographic Sum substitution cipher.
-  4. *Level 4 (Deductive Logic):* The Three Mystery Vaults truth-teller and liar elimination.
-  5. *Level 5 (Algebraic Balance):* Geometry Balance Scale simultaneous weight equations.
-  6. *Level 6 (Boolean Logic):* Boolean Network Router multi-stage signal propagation.
-  7. *Level 7 (Mechanical Kinematics):* Chronos Gear Train transmission ratio & rotational directions.
-  8. *Level 8 (Strategic Optimization):* Midnight Server Bridge river crossing bottleneck minimization.
-  9. *Level 9 (3D Mental Folding):* Isometric 3D Cube Net surface folding & opposite face identification.
-  10. *Level 10 (Multi-Constraint Deduction):* AI Architect's Lab Einstein constraint-satisfaction matrix.
-- **Hint System:** Every level offers two progressive guiding clues that explain strategic thinking without prematurely giving away the answer.
-- **Proportional Coins System:** Solving puzzles awards coins proportional to difficulty (15 to 400 coins per puzzle).
-- **Gamified Ranks & Streak:** 6 Cognitive IQ Ranks (Novice Thinker, Logic Explorer, Strategic Analyst, Brainiac Genius, Cognitive Master, IQ Grandmaster) + Daily Brain Teaser with daily streak counter.
-- **Interactive Visual Game Board:** Tailored visual schemas for each puzzle type (matrices, circuit flow, gear trains, balance scales, 2D nets).
-- **Celebratory Reward Modal:** Fanfare coin animation, sound effects, comprehensive logical explanations, and one-click Next Level unlocking.
+### 6.11 50 IQ Cognitive Puzzle Levels with Strict Single-Attempt Lock (`IQPuzzlesModule.jsx`, `puzzleLevelsData.js`)
+- **50 Progressively Calibrated Levels:**
+  - Spans 6 ascending mental tiers:
+    1. *Tier 1 (Levels 1–8) — Novice Analyst:* Number sequences, visual patterns, and basic matrix reasoning (+50 to +90 coins).
+    2. *Tier 2 (Levels 9–16) — Logic Operator:* Spatial rotation, arithmetic substitution, and analogical deduction (+100 to +170 coins).
+    3. *Tier 3 (Levels 17–25) — Pattern Architect:* Gear trains, balance scales, 2D-to-3D net folding, and Boolean logic gates (+180 to +260 coins).
+    4. *Tier 4 (Levels 26–34) — Quantum Thinker:* Cryptographic sums, river crossing state-space puzzles, and circuit networks (+280 to +400 coins).
+    5. *Tier 5 (Levels 35–42) — Cognitive Strategist:* Multi-variable constraint matrices and temporal deductions (+420 to +560 coins).
+    6. *Tier 6 (Levels 43–50) — IQ Grandmaster:* Complex multi-stage inductive logic, paradox resolution, and topological reasoning (+580 to +800 coins).
+  - Total achievable coin bounty across all 50 levels: **12,740 Coins**.
+- **Strict Single-Attempt Choice Lock:**
+  - When the student clicks an answer choice, all choice buttons lock immediately (`selectedAnswer !== null`).
+  - If chosen incorrectly, advancement to the next level is blocked.
+  - An interactive **Retry Level** button is provided to reset the selection and allow the student to rethink and solve the puzzle.
+- **Sequential Level Unlocking:**
+  - Level $N$ cannot be opened without passing Level $N-1$.
+  - Level state cards clearly distinguish **Solved** (green checkmark badge), **Current Available** (active play button), and **Locked** (padlock icon).
+- **Absolute Scoreboard Decoupling:**
+  - Puzzles award bounty coins for the Rewards Store, but are completely decoupled from academic course marks and official podium standings.
+- **Visual Schemas & Board:** Interactive vector representations for sequences, Raven rotation matrices, truth tables, balance scales, and 3D folding nets.
+- **Celebratory Reward Modal:** Fanfare coin animation, sound effects, step-by-step logical explanations, and one-click Next Level unlocking.
 
 ---
 
 ### 6.12 Global Modals
 
 #### 6.12.1 Profile & Password Settings Modal (`ProfileSettingsModal.jsx`)
-- Editable Fields: Full Name (English & Arabic), Display Name, Username, Email address.
-- Password Change Fields: Current Password, New Password, Confirm New Password, password strength indicator.
-- Avatar squircle preview with initials generator.
+- **Editable Fields:** Full Name (English & Arabic), Display Name, Username, Email address.
+- **Password Change Fields:** Current Password, New Password, Confirm New Password, password strength indicator.
+- **Standardized Avatar Squircle:** Profile photo upload options are removed to ensure user privacy and maintain clean, standardized avatar rendering across the platform.
+- **Equipped Cosmetic Badges:** Live preview of currently equipped title tag and liquid-glass animated avatar frame.
 
 #### 6.12.2 File Upload Progress Modal (`UploadProgressModal.jsx`)
 - Global modal overlay for large PDF and media uploads.
@@ -526,8 +549,15 @@ The assignments feature offers flexible solving modes for students (download to 
 ### 6.13 Student Rewards Store & Customization Studio (`StudentStoreModule.jsx`, `storeData.js`)
 
 #### 6.13.1 Coin Economy & Academic Point Protection
-- **Conversion Formula:** Total Coins = $(\text{Academic Points} \times 10) + \text{Bonus IQ Coins} - \text{Spent Coins}$.
-- **Strict Academic Point Protection Guarantee:** Purchasing cosmetic items in the store **strictly spends Coins only**. Academic points, course marks, certificate eligibility, and podium standings are never deducted.
+- **Tri-Source Coin Generation:**
+  - Quizzes: $10 \text{ coins}$ per earned point.
+  - Graded PDF Assignments: $10 \text{ coins}$ per earned point.
+  - 50 IQ Puzzles: $+50$ to $+800 \text{ bounty coins}$ per level.
+- **Conversion Formula:**
+  $$\text{Available Coins} = (\text{Quiz Pts} \times 10) + (\text{Assignment Pts} \times 10) + \text{Puzzle Bounty Coins} - \text{Spent Coins}$$
+- **Strict Academic Point Protection Guarantee:**
+  - Purchasing cosmetic items in the store **strictly spends Coins only** (`availableCoins`).
+  - Academic points, course marks, certificate eligibility, and podium standings are permanently protected and never deducted.
 
 #### 6.13.2 Visual Cosmetics Catalog
 - **8 Glowing Name Tags / Badges:**
@@ -553,12 +583,16 @@ The assignments feature offers flexible solving modes for students (download to 
 
 ### 6.14 Interactive Robot Mascot & Password Privacy Component (`RobotMascotSvg.jsx`, `LoginPage.jsx`)
 
-#### 6.14.1 Interactive State Machine
-- **`idle`:** Neutral friendly posture, blinking eyes, relaxed floating hands.
+#### 6.14.1 Interactive State Machine & Privacy Animation
+- **`idle`:** Neutral friendly posture, blinking eyes, relaxed floating hands. Eyes track user cursor movement across the viewport.
 - **`typing-user`:** Attentive listening posture, smiling mouth, hands at sides.
 - **`typing-pass` (Active Typing):** The robot brings both mechanical hands up to his face, fingers splayed over the visor, completely covering both eyes while the user is typing sensitive password characters.
-- **`peeking` (Show Password Enabled):** When the user clicks the eye icon to view the password, the robot's fingers part horizontally, and his pupils peek between his fingers in a playful, secure gesture.
-- **Debounce Inactivity Release:** Automatically returns to neutral unmasked posture 1000ms after the last keystroke or when the password field blurs.
+- **`covering-eyes` (Password Reveal Privacy):** When the user clicks the eye icon (`showPass`) to view the password in plain text, the robot firmly keeps his eyes covered (`🙈`) to prevent looking at the user's password and protect privacy.
+- **Debounce Inactivity Release:** Automatically lowers hands and returns to neutral posture 1000ms after the last keystroke or when switching focus back to the username field.
+
+#### 6.14.2 SVG Coordinate & Motion Mapping
+- Built as pure scalable SVG (`viewBox="0 0 160 160"`) with zero external asset dependencies.
+- CSS transitions on `<path>` and `<g>` elements deliver 60 FPS hardware-accelerated finger and hand positioning without UI layout shift.
 
 #### 6.14.2 SVG Coordinate & Motion Mapping
 - Built as pure scalable SVG (`viewBox="0 0 160 160"`) with zero external asset dependencies.

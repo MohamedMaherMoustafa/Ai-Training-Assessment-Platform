@@ -1,12 +1,20 @@
 # Athar Educational Platform — Frontend Client
 
-The frontend application for **Athar Educational Platform (منصة أثر التعليمية)** built with React 19, Vite 8, and Tailwind CSS.
+The frontend application for **Athar Educational Platform (منصة أثر التعليمية)** built with React 19, Vite 8, Tailwind CSS, and in-memory routing architecture.
 
 ---
 
 ## 🚀 Key Modules & Features
 
-### 1. Advanced Quiz Proctoring & Anti-Cheat Engine (`src/features/quiz/QuizzesModule.jsx`)
+### 1. In-Memory Routing Architecture & Instant Platform Access (`src/App.jsx`, `src/context/AuthContext.jsx`)
+- **Address Bar Independence (`MemoryRouter`)**:
+  - The entire routing system is powered by `react-router-dom`'s `MemoryRouter`. The browser URL remains fixed at the root host (`/`), completely preventing route tampering, unauthorized URL scraping, or path history tracking in the browser.
+- **Instant Guest Entry & Role Switcher**:
+  - Eliminates forced authentication gates. Any visitor enters the platform immediately under an interactive default profile (`DEFAULT_PLATFORM_USER` with `isGuest: true`).
+  - An interactive Role Switcher Pill in the top header (`AppLayout.jsx`) allows instantaneous switching between **Student**, **Instructor**, and **Admin** workspaces with automatic route adaptation (`RoleGuard.jsx`).
+  - Traditional authentication remains fully functional via `/login` and `/register` for permanent cloud account persistence.
+
+### 2. Advanced Quiz Proctoring & Anti-Cheat Engine (`src/features/quiz/QuizzesModule.jsx`)
 - **Flexible AI Question Presets**: Generates 10, 15, or 20 multiple-choice questions per assessment with dedicated creation buttons tailored for quick checks or comprehensive exams.
 - **Webcam Pre-Quiz Gate**: Assessments cannot be accessed until the student grants camera permissions and validates the feed via a verification modal.
 - **Top-Center Floating PiP Window**: A 160×110 px mirrored live camera feed fixed at `top: 14px; left: 50%` with a glowing red `LIVE` badge, providing continuous face monitoring without obscuring quiz content.
@@ -16,36 +24,27 @@ The frontend application for **Athar Educational Platform (منصة أثر ال�
 - **Screen Capture Shield**: Intercepts `PrintScreen`, `Win+Shift+S`, `Cmd+Shift+3/4/5`, developer tools, printing, window blur, and tab loss. Immediately hides quiz content behind a privacy mask and clears the clipboard.
 - **Fullscreen Cheating Violation Modal (`z-index: 100010`)**: Unmissable alert dialog communicating the exact reason for termination to the student and locking re-entry until approved by the instructor.
 
-### 2. Multi-Role Workspaces
-- **Student**: Course enrollment, private PDF annotation notebook, interactive timed quizzes, weekly progress tracker, course scoreboard, gamified Cognitive IQ Puzzles, and Rewards Store.
-  - **Conditional WhatsApp Support**: Direct WhatsApp button for instructor communication is dynamically displayed only when student status is "Needs Support".
-- **Instructor**: Course authoring, lecture PDF uploads with text extraction, assignment creation with due dates, PDF homework correction studio, AI quiz generator (10/15/20 questions), and student progress reports.
-- **Admin**: Central platform oversight, instructor account management, platform metrics, and system broadcasts.
-- **Security & Validation**: Strict username validation rule enforced on instructor creation and student registration (`username.length >= 8` and must contain `@` or `_`).
+### 3. 50 Cognitive IQ Puzzles with Single-Attempt Lock (`src/features/puzzles/IQPuzzlesModule.jsx`)
+- **50 Progressively Calibrated Levels (`puzzleLevelsData.js`)**:
+  - Spans 6 mental rank tiers: *Novice Analyst*, *Logic Operator*, *Pattern Architect*, *Quantum Thinker*, *Cognitive Strategist*, and *IQ Grandmaster*.
+  - Total achievable coin bounty across all 50 levels: **12,740 Coins**.
+- **Strict Single-Attempt Choice Lock**:
+  - Answer buttons lock immediately upon the first click (`selectedAnswer !== null`).
+  - Wrong answers strictly block advancement to the next level.
+  - A dedicated **Retry Level** button allows the student to reset their selection and try the puzzle again.
+- **Sequential Level Unlocking**:
+  - Level $N$ is locked until Level $N-1$ is solved and verified.
+- **Scoreboard Decoupling**:
+  - Solved puzzles award spendable bounty coins for the Rewards Store, but never impact or modify academic course scores.
 
-### 3. Smart Multimodal AI Chatbot (`src/components/common/PlatformChatbotWidget.jsx`)
-- Interactive walking robot mascot (RTL/LTR patrol-aware) and website intro splash screen (`WalkingRobotIntro.jsx`).
-- Multimodal intelligence: high-speed text analysis and instant photo/PDF document parsing.
-- **Inline Arabic Translation Toggle**: Dedicated "Translate into Arabic" button (`Languages` icon) in the footer of every assistant response beside the copy button for immediate, natural Arabic translations.
-- Lesson Summarization browser: lists all available course lessons with quick-action chips for instant AI summary generation.
-- Course lesson summarization, student grade lookup, and educational Q&A.
-
-### 4. Direct Chat Real-Time Attention Badges (`src/components/layout/AppLayout.jsx`)
-- Real-time unread message counter badge on the sidebar Direct Chat navigation link.
-- Mobile hamburger menu notification indicator for unread direct messages.
-- Instant real-time unread clear when reading or actively chatting in a conversation.
-
-### 5. Interactive Live PDF Annotation Canvas & Solved Uploads
-- Multi-page PDF rendering via Mozilla PDF.js.
-- Watermarked assignment PDF downloader (`assignmentPdfDownloader.js`) applying the platform name watermark across every worksheet page for offline solving or printing.
-- Dual-layer ink pen, highlighter, inline text notes, and eraser (`LiveAnnotationModal.jsx`).
-- Solved PDF / image upload modal (`UploadSolvedAssignmentModal.jsx`) with multi-page preview.
-- AI auto-grading with blank worksheet detection (0 pts), proportional scoring, diagnostic feedback, and teacher model answer keys.
-- Student private study notes and instructor homework grading with score presets.
-
-### 6. Student Rewards Store & Coin Economy (`src/features/store/StudentStoreModule.jsx`)
-- **Coin Conversion System**: Academic points earned from Quizzes and Assignments automatically convert to spendable Coins ($1 \text{ Academic Point} = 10 \text{ Coins}$), augmented by Cognitive IQ Puzzle rewards (+15 to +400 coins per solved puzzle).
-- **Strict Academic Point Protection**: Buying items in the store **only deducts from Coins**. Academic points, course marks, certificate eligibility, and podium standings are never affected.
+### 4. Student Rewards Store & Decoupled Coin Economy (`src/features/store/StudentStoreModule.jsx`)
+- **Tri-Source Coin Generation**:
+  - Quizzes: $10 \text{ coins}$ per earned point.
+  - Graded PDF Assignments: $10 \text{ coins}$ per earned point.
+  - 50 IQ Puzzles: $+50$ to $+800 \text{ bounty coins}$ per level.
+- **Academic Point Protection Guarantee**:
+  - Purchasing cosmetic items in the store **strictly spends Coins only** (`availableCoins`).
+  - Academic points, course marks, certificate eligibility, and podium standings are never deducted.
 - **Cosmetics Catalog (`src/features/store/storeData.js`)**:
   - **8 Glowing Name Tags**: Novice Scholar, Code Ninja, Bug Hunter, AI Pioneer, Byte Master, Logic Wizard, Cyber Sentinel, Grand Alchemist.
   - **8 Liquid-Glass Avatar Frames**: Neon Azure, Emerald Pulse, Golden Radiance, Cyberpunk Violet, Crimson Flame, Quantum Glitch, Starry Nebula, Royal Obsidian.
@@ -56,12 +55,42 @@ The frontend application for **Athar Educational Platform (منصة أثر ال�
     - **5 Shoes**: Sport Sneakers, Cyber Boots, Roller Skates, Golden Kicks, Classic Loafers.
 - **Dynamic Cross-Platform Synchronization**: Equipped frames and titles immediately apply to the student's avatar in the sidebar, header coins pill, profile settings modal, and scoreboard podium. Robot cosmetics apply directly to the live floating AI chatbot assistant.
 
-### 7. Interactive Login Mascot (`src/components/common/RobotMascotSvg.jsx` & `LoginPage.jsx`)
+### 5. Luxury Official Top-3 PDF Certificates (`src/utils/certificateGenerator.js`)
+- **Tailored Rank Templates**:
+  - **1st Place — Gold Rank** (`cert_template_1.jpg`): Warm golden guilloche framing, embossed gold medallion, and golden rank banner.
+  - **2nd Place — Silver Rank** (`cert_template_2.jpg`): Cool metallic silver-indigo filigree framing, silver medallion, and silver rank banner.
+  - **3rd Place — Bronze Rank** (`cert_template_3.jpg`): Warm copper-bronze rosettes, metallic bronze medallion, and bronze rank banner.
+- **2x Retina Canvas Compositing ($2000 \times 1414 \text{ px}$)**:
+  - Inpainted background templates using vertical gradient text-pixel interpolation to eliminate background streaks and border rosette clipping.
+  - Uses the template's embedded citation text while cleanly positioning the student's name in prominent cursive script (*Alex Brush* / *Great Vibes*), followed by the official course name and verified academic score at $Y = 965$.
+  - Authenticated with digital cursive signature, official date, and verification ID.
+
+### 6. Interactive Login Mascot & Password Privacy (`src/components/common/RobotMascotSvg.jsx`)
 - Interactive SVG Robot Mascot sitting atop the login portal card.
-- **Eye-Covering Password Animation**: When the user types into the password input, the robot raises his hands and covers his eyes with his fingers.
-- **Inactivity Debounce & Blur**: Drops hands and uncovers eyes after 1 second of typing inactivity or when the password field is blurred.
-- **Peeking Animation**: If the password visibility toggle (`showPass`) is active, the robot peeks playfully between parted fingers!
-- State-aware expressions for idle and username typing states.
+- **Complete Eye-Covering (`🙈`) on Password Reveal & Typing**:
+  - The robot smoothly covers his eyes when typing in the password field.
+  - Clicking the **eye icon** (`showPass`) keeps the robot's eyes firmly covered to protect the password from observers.
+- **Cursor Tracking & Inactivity Debounce**:
+  - Drops hands down when typing pauses or when the field is blurred.
+  - Mascot eyes smoothly track cursor position across the screen when idle.
+
+### 7. Interactive Live PDF Annotation Canvas & Solved Uploads
+- Multi-page PDF rendering via Mozilla PDF.js.
+- Watermarked assignment PDF downloader (`assignmentPdfDownloader.js`) applying the platform watermark across every page.
+- Dual-layer ink pen, highlighter, inline text notes, and eraser (`LiveAnnotationModal.jsx`).
+- Solved PDF / image upload modal (`UploadSolvedAssignmentModal.jsx`) with multi-page preview.
+- AI auto-grading with blank worksheet detection (0 pts), proportional scoring, diagnostic feedback, and teacher model answer keys.
+
+### 8. Smart Multimodal AI Chatbot (`src/components/common/PlatformChatbotWidget.jsx`)
+- Interactive walking robot mascot (RTL/LTR patrol-aware) and website intro splash screen (`WalkingRobotIntro.jsx`).
+- Multimodal intelligence: high-speed text analysis and instant photo/PDF document parsing.
+- **Inline Arabic Translation Toggle**: Dedicated "Translate into Arabic" button in the footer of every assistant response for immediate, natural Arabic translations.
+- Lesson Summarization browser: lists all available course lessons with quick-action chips for instant AI summary generation.
+
+### 9. Account Security & Privacy Policies
+- **Strict Username Validation**: Enforces username length $\ge 8$ characters and the presence of `@` or `_`.
+- **Profile Photo Privacy**: The photo upload option has been removed from `ProfileSettingsModal.jsx` to standardize avatar rendering and ensure user privacy.
+- **Conditional WhatsApp Support**: Direct instructor WhatsApp button displays only when student academic status indicates "Needs Support".
 
 ---
 
@@ -70,6 +99,7 @@ The frontend application for **Athar Educational Platform (منصة أثر ال�
 | Technology | Purpose |
 |---|---|
 | **React 19 & Vite 8** | Modern UI framework and high-speed build tool |
+| **React Router DOM v7** | In-memory routing (`MemoryRouter`) for address bar decoupling |
 | **Tailwind CSS 3.4 & Tailwind-RTL** | Liquid glass design language and bidirectional styling |
 | **TensorFlow.js (`@tensorflow/tfjs`)** | On-device machine learning runtime |
 | **COCO-SSD (`@tensorflow-models/coco-ssd`)** | Real-time object detection (mobile phone recognition) |
@@ -78,7 +108,7 @@ The frontend application for **Athar Educational Platform (منصة أثر ال�
 | **i18next & react-i18next** | Bilingual localization (Arabic RTL & English LTR) |
 | **Lucide React** | Consistent SVG iconography |
 | **Recharts** | Interactive student progress analytics charts |
-| **jsPDF & html2canvas** | Multi-page branded PDF report & certificate generation |
+| **jsPDF & HTML5 Canvas** | Luxury 2x Retina Top-3 official certificate generation |
 
 ---
 
