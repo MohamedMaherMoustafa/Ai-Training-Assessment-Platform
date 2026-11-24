@@ -86,7 +86,7 @@ export default function LoginPage() {
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
   };
 
-  const isCoveringEyes = isTypingPassword && !showPass;
+  const isCoveringEyes = showPass || isTypingPassword;
 
   useEffect(() => {
     const saved = localStorage.getItem("platform_remember_user");
@@ -307,8 +307,8 @@ export default function LoginPage() {
                   <div className="drop-shadow-[0_8px_20px_rgba(37,99,235,0.35)] transition-transform hover:scale-105 duration-200">
                     <RobotMascotSvg
                       isCoveringEyes={isCoveringEyes}
-                      isPeeking={showPass && (isTypingPassword || isPasswordFocused)}
-                      showSign={!isPasswordFocused && !isTypingPassword}
+                      isPeeking={false}
+                      showSign={!isCoveringEyes && !isPasswordFocused}
                       signText={lang === "ar" ? "أهلاً!" : "ATHAR"}
                       width={96}
                       height={102}
@@ -319,7 +319,16 @@ export default function LoginPage() {
 
                   {/* Mascot Speech Bubble / Status Pill */}
                   <div className="mt-1 flex items-center justify-center text-center">
-                    {isCoveringEyes ? (
+                    {showPass ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-400/30 text-[11px] font-black animate-pulse shadow-sm">
+                        <span>🙈</span>
+                        <span>
+                          {lang === "ar"
+                            ? "أغمض عينيّ تماماً... أظهرت كلمة المرور ولن أنظر إليها!"
+                            : "Hiding my eyes completely! You revealed your password and I won't look!"}
+                        </span>
+                      </span>
+                    ) : isCoveringEyes ? (
                       <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-400/30 text-[11px] font-black animate-pulse shadow-sm">
                         <span>🙈</span>
                         <span>
@@ -328,22 +337,13 @@ export default function LoginPage() {
                             : "Covering my eyes! No peeking at your password!"}
                         </span>
                       </span>
-                    ) : showPass && (isTypingPassword || isPasswordFocused) ? (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-400/30 text-[11px] font-black shadow-sm">
-                        <span>🫣</span>
-                        <span>
-                          {lang === "ar"
-                            ? "أتلصص بنظرة سريعة لأنك أظهرت كلمة المرور!"
-                            : "Peeking! Password visibility is turned on!"}
-                        </span>
-                      </span>
                     ) : isPasswordFocused ? (
                       <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-400/30 text-[11px] font-black shadow-sm">
                         <span>👀</span>
                         <span>
                           {lang === "ar"
-                            ? "عيناي مفتوحتان... سأغمضهما فور أن تبدأ الكتابة!"
-                            : "Eyes open... I'll cover them when you type!"}
+                            ? "عيناي مفتوحتان... سأغمضهما فور أن تبدأ الكتابة أو تظهر كلمة المرور!"
+                            : "Eyes open... I'll hide them when you type or reveal password!"}
                         </span>
                       </span>
                     ) : (
