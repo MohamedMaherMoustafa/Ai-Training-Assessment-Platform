@@ -31,7 +31,7 @@ import RobotMascotSvg from "../../components/common/RobotMascotSvg";
 export default function LoginPage() {
   const { t, i18n } = useTranslation();
   const { lang } = useLang();
-  const { login } = useAuth();
+  const { user, login } = useAuth();
   const { theme, toggleTheme, logoSrc } = useTheme();
   const { showPopup } = usePopup();
   const navigate = useNavigate();
@@ -45,6 +45,14 @@ export default function LoginPage() {
   const [isTypingPassword, setIsTypingPassword] = useState(false);
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const typingTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    if (user) {
+      if (user.role === "admin") navigate("/admin", { replace: true });
+      else if (user.role === "instructor") navigate("/instructor", { replace: true });
+      else navigate("/student", { replace: true });
+    }
+  }, [user, navigate]);
 
   useEffect(() => {
     return () => {

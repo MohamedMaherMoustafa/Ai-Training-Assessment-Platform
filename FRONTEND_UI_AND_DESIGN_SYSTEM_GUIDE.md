@@ -153,12 +153,11 @@ All authenticated routes are rendered within **`client/src/components/layout/App
 - **Components from Start to End:**
   1. *Mobile Hamburger Button (`lg:hidden`):* Contains `<Menu />` icon plus a floating red notification dot if unread direct chat messages exist.
   2. *Brand Identity Pill:* Transparent platform logo (`Logo.png`) + dynamic localized role tag (`roles.student`, `roles.instructor`, `roles.admin`).
-  3. *In-Memory Role Switcher Pill:* Interactive glass pill selector (`Student`, `Instructor`, `Admin`) allowing seamless role switching in real time without page reload or browser URL mutations.
-  4. *Breadcrumb Trail (`hidden md:flex`):* `/ Current Section Name`.
-  5. *Sound FX Toggle Button:* `<Volume2 />` or `<VolumeX />` icon toggle, controls platform-wide Web Audio feedback.
-  6. *Dark / Light Mode Toggle:* `<Sun />` or `<Moon />` icon toggle with smooth color transitions.
-  7. *Bilingual Language Switcher (`LanguageDropdown.jsx`):* Dropdown selecting English (LTR) or Arabic (RTL).
-  8. *Notification Bell & Popover Box:* Luminous badge with unread count. Clicking opens a glass drop-panel showing notifications list, "Mark All as Read", "Clear All", and clickable notification links.
+  3. *Breadcrumb Trail (`hidden md:flex`):* `/ Current Section Name`.
+  4. *Sound FX Toggle Button:* `<Volume2 />` or `<VolumeX />` icon toggle, controls platform-wide Web Audio feedback.
+  5. *Dark / Light Mode Toggle:* `<Sun />` or `<Moon />` icon toggle with smooth color transitions.
+  6. *Bilingual Language Switcher (`LanguageDropdown.jsx`):* Dropdown selecting English (LTR) or Arabic (RTL).
+  7. *Notification Bell & Popover Box:* Luminous badge with unread count. Clicking opens a glass drop-panel showing notifications list, "Mark All as Read", "Clear All", and clickable notification links.
 
 ---
 

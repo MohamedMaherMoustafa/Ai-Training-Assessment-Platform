@@ -3,7 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useTranslation } from "react-i18next";
 
 export default function RoleGuard({ allowedRoles, children }) {
-  const { user, setUser, loading } = useAuth();
+  const { user, loading } = useAuth();
   const { t } = useTranslation();
 
   if (loading) {
@@ -17,28 +17,11 @@ export default function RoleGuard({ allowedRoles, children }) {
     );
   }
 
-  // If user is guest/exploring without login, adapt role to requested view
-  if (user?.isGuest && allowedRoles && allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
-    const targetRole = allowedRoles[0];
-    setUser((prev) => ({
-      ...prev,
-      role: targetRole,
-      displayName:
-        targetRole === "admin"
-          ? "Admin"
-          : targetRole === "instructor"
-          ? "Instructor"
-          : "Student",
-      name:
-        targetRole === "admin"
-          ? { en: "Admin", ar: "مدير النظام" }
-          : targetRole === "instructor"
-          ? { en: "Instructor", ar: "معلم" }
-          : { en: "Student", ar: "طالب" },
-    }));
-  } else if (!user) {
-    return children;
-  } else if (!user.isGuest && allowedRoles && !allowedRoles.includes(user.role)) {
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
     const target =
       user.role === "admin"
         ? "/admin"

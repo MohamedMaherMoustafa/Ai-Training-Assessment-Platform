@@ -7,14 +7,14 @@ A bilingual (English / Arabic RTL) **Aurora Prism Liquid-Glass** web platform ba
 
 ## Core Implemented Modules & Features
 
-### 1. In-Memory Routing, Instant Guest Access & Multi-Role Workspaces
+### 1. In-Memory Routing, Direct Login Entry & Multi-Role Workspaces
 - **In-Memory Navigation (`MemoryRouter`):**
   - All routing is handled in-memory using `react-router-dom`'s `MemoryRouter`.
   - The browser address bar remains permanently static at the root host (`/`), completely preventing route tampering, unauthorized URL scraping, or internal path history storage in the browser.
-- **Instant Guest Entry & Multi-Role Adaptation:**
-  - Visitors enter the platform immediately without mandatory login barriers under a default guest profile (`isGuest: true`).
-  - An interactive Role Switcher Pill in the top header (`AppLayout.jsx`) allows instantaneous switching between **Student**, **Instructor**, and **Admin** workspaces with dynamic route adaptation (`RoleGuard.jsx`).
-  - Traditional authentication remains fully functional via `/login` and `/register` for permanent cloud account persistence.
+- **Direct Login Entry & Protected Dashboards:**
+  - When opening the platform, users immediately land on the **Login Page (`/login`)**.
+  - All role dashboards (`/student`, `/instructor`, `/admin`) are strictly guarded by `RoleGuard.jsx`, redirecting unauthenticated users to `/login`.
+  - Upon successful authentication, users are navigated to their corresponding role dashboard.
 
 ### 2. Aurora Prism Liquid-Glass UI & Interactive Audio
 - **Visual System (`client/src/index.css`, `AppLayout.jsx`):** Multi-hue aurora gradient backdrop, floating rounded dock sidebar (`300px` single-line nav labels), mobile-responsive pill topbars, split-hero login card, and Light/Dark + EN/AR toggles.

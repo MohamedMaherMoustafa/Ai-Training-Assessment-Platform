@@ -6,13 +6,13 @@ The frontend application for **Athar Educational Platform (منصة أثر ال�
 
 ## 🚀 Key Modules & Features
 
-### 1. In-Memory Routing Architecture & Instant Platform Access (`src/App.jsx`, `src/context/AuthContext.jsx`)
+### 1. In-Memory Routing Architecture & Direct Login Entry (`src/App.jsx`, `src/context/AuthContext.jsx`)
 - **Address Bar Independence (`MemoryRouter`)**:
   - The entire routing system is powered by `react-router-dom`'s `MemoryRouter`. The browser URL remains fixed at the root host (`/`), completely preventing route tampering, unauthorized URL scraping, or path history tracking in the browser.
-- **Instant Guest Entry & Role Switcher**:
-  - Eliminates forced authentication gates. Any visitor enters the platform immediately under an interactive default profile (`DEFAULT_PLATFORM_USER` with `isGuest: true`).
-  - An interactive Role Switcher Pill in the top header (`AppLayout.jsx`) allows instantaneous switching between **Student**, **Instructor**, and **Admin** workspaces with automatic route adaptation (`RoleGuard.jsx`).
-  - Traditional authentication remains fully functional via `/login` and `/register` for permanent cloud account persistence.
+- **Direct Login Entry & Protected Workspaces**:
+  - When opening the platform, the first screen presented is the **Login Page (`/login`)**.
+  - All workspace modules are protected by `RoleGuard.jsx`. Once credentials are authenticated, the user is navigated to their designated dashboard (`/student`, `/instructor`, or `/admin`).
+  - Account registration is accessible via `/register`.
 
 ### 2. Advanced Quiz Proctoring & Anti-Cheat Engine (`src/features/quiz/QuizzesModule.jsx`)
 - **Flexible AI Question Presets**: Generates 10, 15, or 20 multiple-choice questions per assessment with dedicated creation buttons tailored for quick checks or comprehensive exams.

@@ -4,7 +4,7 @@
 > **Repo Architecture Tool:** [Archify](https://github.com/tt-a1i/archify)
 > **Target Repository (HTTPS):** `https://github.com/MohamedMaherMoustafa/Ai-Training-Assessment-Platform.git`
 > **i18n:** Arabic + English (RTL/LTR) | **Theme:** Light + Dark
-> **Routing Architecture:** In-Memory Client-Side Routing (`MemoryRouter`) — Static Address Bar & Zero History Tracking
+> **Routing Architecture:** In-Memory Client-Side Routing (`MemoryRouter`) — Direct Login Entry & Static Address Bar
 
 ---
 
@@ -74,7 +74,7 @@ ai-training-platform/
         │   ├── common/                    # RobotMascotSvg, PlatformChatbotWidget, Modals
         │   └── layout/                    # AppLayout, Sidebar, Header, RoleSwitcher
         ├── context/
-        │   ├── AuthContext.jsx            # In-memory session, guest mode, role adaptation
+        │   ├── AuthContext.jsx            # In-memory session & role authentication
         │   ├── ThemeContext.jsx           # light / dark
         │   └── LangContext.jsx            # ar / en + RTL flag
         ├── features/
@@ -145,7 +145,7 @@ ai-training-platform/
 - Complete eye-covering (`🙈`) animation when typing password and when clicking the eye icon to reveal the password.
 - Strict username validation rule requiring at least 8 characters and containing `@` or `_`.
 - Removed profile photo upload option for user privacy.
-- Switched to `MemoryRouter` with instant guest access and dynamic multi-role adaptation.
+- Switched to `MemoryRouter` with direct login entry and zero address bar URL exposure.
 
 ---
 
@@ -169,7 +169,7 @@ ai-training-platform/
 - [x] 50 Cognitive IQ Puzzles with single-attempt lock and sequential level unlocking
 - [x] Decoupled academic scoreboard from puzzle games and coin redemptions
 - [x] Luxury official Top-3 PDF certificates (Gold 1st, Silver 2nd, Bronze 3rd) with 2x Retina canvas rendering
-- [x] In-memory client-side routing (`MemoryRouter`) with instant guest exploration and static address bar
+- [x] In-memory client-side routing (`MemoryRouter`) with direct login page entry and static address bar
 
 ---
 
@@ -190,9 +190,9 @@ ai-training-platform/
 - Inpainted templates using vertical gradient text-pixel interpolation to eliminate background streaks and border rosette clipping.
 - Repositioned student calligraphy name and course/score line at $Y = 965$, completely eliminating text collision.
 
-### 3. In-Memory Routing & Instant Platform Entry
+### 3. In-Memory Routing & Direct Login Entry
 - Switched to `MemoryRouter` in `App.jsx`, ensuring browser address bar remains permanently static at the root host (`/`).
-- Users access the platform immediately without forced login screens, utilizing a default guest profile with dynamic role switching (`Student | Instructor | Admin`).
+- Users access the platform directly at the **Login Page (`/login`)**, routing to their respective dashboard after authentication.
 
 ### 4. Interactive Login Mascot Privacy Upgrades
 - Robot covers eyes smoothly during password typing and firmly keeps eyes covered when the student clicks the **eye icon** (`showPass`) to reveal the password in plain text.

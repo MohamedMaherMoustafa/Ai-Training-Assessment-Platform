@@ -21,10 +21,10 @@ The platform provides end-to-end support for coursework, lesson materials, digit
 ## ✨ Key Features & Capabilities
 
 ### 1. 👥 Multi-Role Access Control (RBAC) & In-Memory Routing
-- **In-Memory Navigation (`MemoryRouter`)**:
+- **In-Memory Navigation (`MemoryRouter`) & Direct Login Entry**:
   - The application utilizes in-memory client-side routing, keeping the browser address bar clean and static at the root host (`/`).
   - Internal URLs and route transitions are never stored in browser history, preventing unauthorized URL inspection or manual URL tampering.
-  - Users enter the platform instantly without mandatory login barriers; a default guest profile with dynamic role adaptation allows instant exploration as **Student**, **Instructor**, or **Admin** via the interactive topbar role-switcher pill.
+  - When opening the platform, users are immediately greeted with the **Login Page (`/login`)** as the primary entry point. Upon authenticating, users are securely routed to their designated role workspace (**Student**, **Instructor**, or **Admin**).
 - **Student**:
   - Browse and enroll in courses provided by chosen instructors.
   - Interactive multi-page PDF reader with private freehand ink drawing, highlighting, and study notebook.
@@ -218,7 +218,7 @@ The platform provides end-to-end support for coursework, lesson materials, digit
 │   │   ├── components/
 │   │   │   ├── common/              # Chatbot widget, profile modal, progress modal, RobotMascotSvg
 │   │   │   └── layout/              # AppLayout, Sidebar, TopHeader, Notifications
-│   │   ├── context/                 # AuthContext (MemoryRouter guest access), LangContext, PopupContext
+│   │   ├── context/                 # AuthContext (MemoryRouter session management), LangContext, PopupContext
 │   │   ├── features/
 │   │   │   ├── admin/               # Overview & Instructors management
 │   │   │   ├── assignments/         # Assignment publishing & Live Annotation studio
@@ -290,7 +290,7 @@ The platform provides end-to-end support for coursework, lesson materials, digit
    ```
 
 5. **Open in Browser**:
-   Navigate to `http://localhost:5173`. Instant guest access is immediately active, allowing seamless exploration across Student, Instructor, and Admin workspaces without login friction.
+   Navigate to `http://localhost:5173`. The platform launches directly to the Login Page with clean in-memory routing keeping the browser address bar static at the root host.
 
 ---
 

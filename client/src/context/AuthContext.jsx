@@ -6,19 +6,6 @@ import { loginWithCredentials, logoutAll } from "../services/platformService";
 
 const AuthContext = createContext(null);
 
-export const DEFAULT_PLATFORM_USER = {
-  uid: "student_default",
-  username: "student",
-  displayName: "Student",
-  name: { en: "Student", ar: "طالب" },
-  email: "student@athar.ai",
-  role: "student",
-  active: true,
-  approvalStatus: "approved",
-  isGuest: true,
-  instructorIds: ["inst_1"],
-};
-
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     if (typeof window !== "undefined") {
@@ -29,9 +16,9 @@ export function AuthProvider({ children }) {
         } catch {}
       }
     }
-    return DEFAULT_PLATFORM_USER;
+    return null;
   });
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const savedAdmin = localStorage.getItem("admin_session");
@@ -48,7 +35,7 @@ export function AuthProvider({ children }) {
     const unsub = onAuthStateChanged(auth, async (fbUser) => {
       if (!fbUser) {
         const adminCheck = localStorage.getItem("admin_session");
-        setUser(adminCheck ? JSON.parse(adminCheck) : DEFAULT_PLATFORM_USER);
+        setUser(adminCheck ? JSON.parse(adminCheck) : null);
         setLoading(false);
         return;
       }
@@ -58,16 +45,16 @@ export function AuthProvider({ children }) {
           const profile = snap.val();
           if (profile.active === false) {
             await logoutAll();
-            setUser(DEFAULT_PLATFORM_USER);
+            setUser(null);
           } else {
             setUser({ uid: fbUser.uid, ...profile });
           }
         } else {
-          setUser(DEFAULT_PLATFORM_USER);
+          setUser(null);
         }
       } catch (err) {
         console.error("Failed to load user profile:", err);
-        setUser(DEFAULT_PLATFORM_USER);
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -110,7 +97,7 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     await logoutAll();
-    setUser(DEFAULT_PLATFORM_USER);
+    setUser(null);
   };
 
   return (
