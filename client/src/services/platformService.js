@@ -1678,4 +1678,78 @@ export async function markDirectChatRead(channelId, userRole) {
   await update(metaRef, { [unreadField]: 0 });
 }
 
+// -------------------------------------------------------------
+// IQ Puzzles & Gamification Stats
+// -------------------------------------------------------------
+
+export async function getStudentIQStats(studentUid) {
+  if (!studentUid) {
+    return {
+      coins: 0,
+      solvedLevels: [],
+      unlockedLevel: 1,
+      hintsUsed: 0,
+      dailyStreak: 0,
+      lastPlayedDate: null,
+    };
+  }
+
+  const localKey = `iq_stats_${studentUid}`;
+  let localData = null;
+  try {
+    const raw = localStorage.getItem(localKey);
+    if (raw) localData = JSON.parse(raw);
+  } catch {}
+
+  try {
+    const snap = await get(ref(rtdb, `users/${studentUid}/iqStats`));
+    if (snap.exists()) {
+      const remoteData = snap.val();
+      const merged = {
+        coins: Number(remoteData.coins) || 0,
+        solvedLevels: Array.isArray(remoteData.solvedLevels) ? remoteData.solvedLevels : [],
+        unlockedLevel: Number(remoteData.unlockedLevel) || 1,
+        hintsUsed: Number(remoteData.hintsUsed) || 0,
+        dailyStreak: Number(remoteData.dailyStreak) || 0,
+        lastPlayedDate: remoteData.lastPlayedDate || null,
+        ...localData,
+        ...remoteData,
+      };
+      try {
+        localStorage.setItem(localKey, JSON.stringify(merged));
+      } catch {}
+      return merged;
+    }
+  } catch (err) {
+    console.warn("RTDB IQ stats fetch warning:", err.message);
+  }
+
+  return localData || {
+    coins: 0,
+    solvedLevels: [],
+    unlockedLevel: 1,
+    hintsUsed: 0,
+    dailyStreak: 0,
+    lastPlayedDate: null,
+  };
+}
+
+export async function saveStudentIQProgress(studentUid, stats) {
+  if (!studentUid || !stats) return;
+  const localKey = `iq_stats_${studentUid}`;
+  try {
+    localStorage.setItem(localKey, JSON.stringify(stats));
+  } catch {}
+
+  try {
+    await update(ref(rtdb, `users/${studentUid}/iqStats`), {
+      ...stats,
+      updatedAt: Date.now(),
+    });
+  } catch (err) {
+    console.warn("RTDB IQ stats save warning:", err.message);
+  }
+}
+
+
 

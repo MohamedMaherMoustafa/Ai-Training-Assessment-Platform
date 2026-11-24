@@ -17,6 +17,7 @@ import {
   CalendarCheck,
   Video,
   MessageSquare,
+  Brain,
 } from "lucide-react";
 import AppLayout from "../../components/layout/AppLayout";
 import CoursesModule from "../courses/CoursesModule";
@@ -28,6 +29,7 @@ import QuizzesModule from "../quiz/QuizzesModule";
 import GradesModule from "../grades/GradesModule";
 import ScoreboardModule from "../scoreboard/ScoreboardModule";
 import WeeklyReportsModule from "./WeeklyReportsModule";
+import IQPuzzlesModule from "../puzzles/IQPuzzlesModule";
 import { useAuth } from "../../context/AuthContext";
 import { useLang } from "../../context/LangContext";
 import { useTheme } from "../../context/ThemeContext";
@@ -96,6 +98,38 @@ function StudentInstructorSelector({
             <img src={logoSrc} alt="Athar Educational Platform" className="w-full h-full object-contain filter drop-shadow-md scale-105" />
           </div>
         </div>
+      </div>
+
+      {/* Featured IQ Brain Hub Card */}
+      <div className="relative overflow-hidden rounded-3xl p-5 bg-gradient-to-r from-indigo-900 via-slate-900 to-purple-950 border border-indigo-500/30 text-white shadow-xl flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-amber-400 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30 shrink-0">
+            <Brain className="h-7 w-7 animate-pulse text-amber-200" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10.5px] uppercase font-black px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30">
+                {lang === "ar" ? "جديد في المنصة ⚡" : "New Feature ⚡"}
+              </span>
+            </div>
+            <h3 className="text-base sm:text-lg font-black mt-1">
+              {lang === "ar" ? "ألغاز الذكاء وتنمية التفكير (IQ Hub)" : "Cognitive IQ Puzzles & Brain Hub"}
+            </h3>
+            <p className="text-xs text-slate-300 max-w-xl mt-0.5">
+              {lang === "ar"
+                ? "10 مستويات متدرجة بأنماط ألغاز ذكاء مختلفة، تلميحات توجيهية، وعملات ذهبية تكسبها مع كل لغز تحله!"
+                : "10 progressive levels with unique puzzle types, hints, and coins awarded based on difficulty!"}
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => navigate("/student/puzzles")}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-indigo-600 to-purple-600 hover:from-amber-600 hover:to-indigo-700 text-white text-xs font-black shadow-lg shadow-indigo-600/30 transition-all hover:scale-105 cursor-pointer"
+        >
+          <span>{lang === "ar" ? "خوض ألغاز الذكاء 🚀" : "Play IQ Puzzles 🚀"}</span>
+          {lang === "ar" ? <ArrowLeft className="h-3.5 w-3.5" /> : <ArrowRight className="h-3.5 w-3.5" />}
+        </button>
       </div>
 
       {/* Approved Instructors to Open */}
@@ -346,6 +380,11 @@ export default function StudentDashboard() {
     { to: "/student/scoreboard", label: t("nav.scoreboard"), icon: Trophy },
     { to: "/student/grades", label: t("nav.myResults"), icon: Award },
     {
+      to: "/student/puzzles",
+      label: t("nav.iqPuzzles") || (lang === "ar" ? "ألغاز الذكاء (IQ)" : "IQ Puzzles"),
+      icon: Brain,
+    },
+    {
       to: "/student/weekly-reports",
       label: t("nav.weeklyReports") || (lang === "ar" ? "التقارير الأسبوعية" : "Weekly Reports"),
       icon: CalendarCheck,
@@ -422,6 +461,10 @@ export default function StudentDashboard() {
           element={wrapFiltered(
             <GradesModule mode="student" activeInstructorId={activeInstructorId} />
           )}
+        />
+        <Route
+          path="puzzles"
+          element={<IQPuzzlesModule />}
         />
         <Route
           path="weekly-reports"

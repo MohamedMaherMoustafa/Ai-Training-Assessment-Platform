@@ -142,5 +142,36 @@ export function playSuccessSound() {
   }
 }
 
+/**
+ * Exhilarating twin-chime sound played when student earns coins or solves an IQ puzzle.
+ */
+export function playCoinSound() {
+  if (!isSoundEnabled()) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    const now = ctx.currentTime;
+    const notes = [987.77, 1318.51, 1567.98]; // B5 - E6 - G6 arcade coin fanfare
+    notes.forEach((freq, idx) => {
+      const start = now + idx * 0.07;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq, start);
+
+      gain.gain.setValueAtTime(0.001, start);
+      gain.gain.linearRampToValueAtTime(0.12, start + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.22);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(start);
+      osc.stop(start + 0.24);
+    });
+  } catch {
+    // ignore audio block errors
+  }
+}
+
 
 

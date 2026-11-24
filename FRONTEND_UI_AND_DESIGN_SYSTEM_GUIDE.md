@@ -485,9 +485,30 @@ The assignments feature offers flexible solving modes for students (download to 
 
 ---
 
-### 6.11 Global Modals
+### 6.11 IQ Puzzles & Cognitive Brain Hub (`IQPuzzlesModule.jsx`)
+- **Gamified Level Progression:** 10 uniquely themed levels with ascending cognitive difficulty (Easy, Medium, Hard, Expert, Grandmaster, Mastermind).
+- **Diverse Puzzle Types:**
+  1. *Level 1 (Numerical Reasoning):* The Doubling Ladder number sequence induction.
+  2. *Level 2 (Abstract Spatial IQ):* Raven's Progressive Rotation Matrix (rotational angles and dot counts).
+  3. *Level 3 (Cryptographic Logic):* The Cryptographic Sum substitution cipher.
+  4. *Level 4 (Deductive Logic):* The Three Mystery Vaults truth-teller and liar elimination.
+  5. *Level 5 (Algebraic Balance):* Geometry Balance Scale simultaneous weight equations.
+  6. *Level 6 (Boolean Logic):* Boolean Network Router multi-stage signal propagation.
+  7. *Level 7 (Mechanical Kinematics):* Chronos Gear Train transmission ratio & rotational directions.
+  8. *Level 8 (Strategic Optimization):* Midnight Server Bridge river crossing bottleneck minimization.
+  9. *Level 9 (3D Mental Folding):* Isometric 3D Cube Net surface folding & opposite face identification.
+  10. *Level 10 (Multi-Constraint Deduction):* AI Architect's Lab Einstein constraint-satisfaction matrix.
+- **Hint System:** Every level offers two progressive guiding clues that explain strategic thinking without prematurely giving away the answer.
+- **Proportional Coins System:** Solving puzzles awards coins proportional to difficulty (15 to 400 coins per puzzle).
+- **Gamified Ranks & Streak:** 6 Cognitive IQ Ranks (Novice Thinker, Logic Explorer, Strategic Analyst, Brainiac Genius, Cognitive Master, IQ Grandmaster) + Daily Brain Teaser with daily streak counter.
+- **Interactive Visual Game Board:** Tailored visual schemas for each puzzle type (matrices, circuit flow, gear trains, balance scales, 2D nets).
+- **Celebratory Reward Modal:** Fanfare coin animation, sound effects, comprehensive logical explanations, and one-click Next Level unlocking.
 
-#### 6.11.1 Profile & Password Settings Modal (`ProfileSettingsModal.jsx`)
+---
+
+### 6.12 Global Modals
+
+#### 6.12.1 Profile & Password Settings Modal (`ProfileSettingsModal.jsx`)
 - Editable Fields: Full Name (English & Arabic), Display Name, Username, Email address.
 - Password Change Fields: Current Password, New Password, Confirm New Password, password strength indicator.
 - Avatar squircle preview with initials generator.
