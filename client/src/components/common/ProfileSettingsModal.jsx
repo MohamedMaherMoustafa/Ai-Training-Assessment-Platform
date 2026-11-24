@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import {
@@ -12,6 +12,9 @@ import {
   KeyRound,
   AlertCircle,
   Loader2,
+  Camera,
+  Upload,
+  Trash2,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useLang } from "../../context/LangContext";
@@ -31,6 +34,8 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
 
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
+  const [photoURL, setPhotoURL] = useState("");
+  const [photoPreview, setPhotoPreview] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -38,10 +43,14 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
+  const fileInputRef = useRef(null);
+
   useEffect(() => {
     if (isOpen) {
       setFullName(currentDisplayName);
       setPhone(user?.phoneNumber || user?.phone || "");
+      setPhotoURL(user?.photoURL || "");
+      setPhotoPreview(user?.photoURL || "");
       setNewPassword("");
       setConfirmPassword("");
       setShowNewPassword(false);
@@ -49,7 +58,7 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
       setErrorMsg("");
       setSaving(false);
     }
-  }, [isOpen, currentDisplayName, user?.phoneNumber, user?.phone]);
+  }, [isOpen, currentDisplayName, user?.phoneNumber, user?.phone, user?.photoURL]);
 
   // Handle ESC key to close
   useEffect(() => {
@@ -63,6 +72,92 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
   }, [isOpen, saving, onClose]);
 
   if (!isOpen) return null;
+
+  const handlePhotoSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+
+    // 1. Verify image type
+    if (!file.type.startsWith("image/")) {
+      const err =
+        lang === "ar"
+          ? "يرجى اختيار ملف صورة صالح (JPEG, PNG, WebP)"
+          : "Please select a valid image file (JPEG, PNG, WebP)";
+      setErrorMsg(err);
+      toast.error(err);
+      return;
+    }
+
+    // 2. Strict size check: NOT EXCEED 2 MB (2 * 1024 * 1024 bytes)
+    const MAX_SIZE_BYTES = 2 * 1024 * 1024;
+    if (file.size > MAX_SIZE_BYTES) {
+      const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
+      const err =
+        lang === "ar"
+          ? `حجم الصورة (${sizeMb} ميجابايت) يتجاوز الحد المسموح به (2 ميجابايت). يرجى اختيار صورة أصغر.`
+          : `Image size (${sizeMb} MB) exceeds the 2 MB maximum limit. Please choose a smaller picture.`;
+      setErrorMsg(err);
+      toast.error(err);
+      return;
+    }
+
+    setErrorMsg("");
+
+    const reader = new FileReader();
+    reader.onload = (loadEvt) => {
+      const img = new Image();
+      img.onload = () => {
+        const maxDim = 600;
+        let w = img.width;
+        let h = img.height;
+        if (w > maxDim || h > maxDim) {
+          if (w > h) {
+            h = Math.round((h * maxDim) / w);
+            w = maxDim;
+          } else {
+            w = Math.round((w * maxDim) / h);
+            h = maxDim;
+          }
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.88);
+        setPhotoURL(dataUrl);
+        setPhotoPreview(dataUrl);
+        toast.success(
+          lang === "ar"
+            ? "تم تحميل الصورة بنجاح. اضغط حفظ لتطبيق التغييرات."
+            : "Picture selected successfully. Click Save to apply."
+        );
+      };
+      img.onerror = () => {
+        const err = lang === "ar" ? "تعذر معالجة ملف الصورة" : "Failed to process image file";
+        setErrorMsg(err);
+        toast.error(err);
+      };
+      img.src = loadEvt.target.result;
+    };
+    reader.onerror = () => {
+      const err = lang === "ar" ? "خطأ في قراءة الملف" : "Failed to read file";
+      setErrorMsg(err);
+      toast.error(err);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemovePhoto = () => {
+    setPhotoURL("");
+    setPhotoPreview("");
+    toast.success(
+      lang === "ar"
+        ? "تمت إزالة الصورة. اضغط حفظ للاعتماد."
+        : "Picture removed. Click Save to apply."
+    );
+  };
 
   const handleSave = async (e) => {
     e?.preventDefault?.();
@@ -100,6 +195,7 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
         displayName: trimmedName,
         phoneNumber: trimmedPhone,
         newPassword: trimmedPassword || undefined,
+        photoURL: photoURL,
       });
 
       if (updatedUser) {
@@ -149,8 +245,12 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
           </button>
 
           <div className="flex items-center gap-3">
-            <div className="h-11 w-11 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-sm flex items-center justify-center shadow-md shadow-indigo-500/20 shrink-0">
-              {String(trimmedInitial(currentDisplayName)).slice(0, 2).toUpperCase() || <ShieldCheck className="h-5 w-5" />}
+            <div className="h-11 w-11 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-sm flex items-center justify-center shadow-md shadow-indigo-500/20 shrink-0 overflow-hidden ring-1 ring-white/30">
+              {photoPreview ? (
+                <img src={photoPreview} alt={currentDisplayName} className="h-full w-full object-cover" />
+              ) : (
+                String(trimmedInitial(currentDisplayName)).slice(0, 2).toUpperCase() || <ShieldCheck className="h-5 w-5" />
+              )}
             </div>
             <div className="min-w-0 pr-6 rtl:pr-0 rtl:pl-6">
               <h3 id="profile-modal-title" className="text-base font-bold text-slate-900 dark:text-white truncate">
@@ -182,6 +282,70 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
               <span>{errorMsg}</span>
             </div>
           )}
+
+          {/* Profile Picture Upload & Preview (Max 2 MB) */}
+          <div className="p-3.5 rounded-2xl bg-slate-50/90 dark:bg-slate-800/60 border border-slate-200/80 dark:border-white/10 flex items-center gap-3.5 shadow-xs">
+            <div className="relative group shrink-0">
+              <div className="h-16 w-16 sm:h-18 sm:w-18 rounded-2xl overflow-hidden bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 text-white font-black text-lg flex items-center justify-center shadow-md ring-2 ring-indigo-400/40">
+                {photoPreview ? (
+                  <img src={photoPreview} alt={currentDisplayName} className="h-full w-full object-cover" />
+                ) : (
+                  <span>{String(trimmedInitial(currentDisplayName)).slice(0, 2).toUpperCase()}</span>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                title={t("profile.changePhoto") || "Change Photo"}
+                className="absolute inset-0 bg-slate-950/60 backdrop-blur-[2px] rounded-2xl flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+              >
+                <Camera className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200">
+                <Camera className="h-3.5 w-3.5 text-indigo-500" />
+                <span>{t("profile.profilePicture") || "Profile Picture"}</span>
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-tight">
+                {t("profile.photoLimitHint") || "Max 2 MB (JPEG, PNG, WebP)"}
+              </p>
+
+              <div className="flex flex-wrap items-center gap-2 mt-2">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold shadow-xs transition-colors cursor-pointer"
+                >
+                  <Upload className="h-3 w-3" />
+                  <span>
+                    {photoPreview
+                      ? (t("profile.changePhoto") || "Change")
+                      : (t("profile.uploadPhoto") || "Upload Photo")}
+                  </span>
+                </button>
+                {photoPreview && (
+                  <button
+                    type="button"
+                    onClick={handleRemovePhoto}
+                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-200 hover:bg-rose-100 dark:bg-slate-700 dark:hover:bg-rose-950/50 text-slate-600 hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400 text-[11px] font-semibold transition-colors cursor-pointer"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                    <span>{t("profile.removePhoto") || "Remove"}</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={handlePhotoSelect}
+              className="hidden"
+            />
+          </div>
 
           {/* Full Name */}
           <div>

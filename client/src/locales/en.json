@@ -196,7 +196,13 @@
     "saveError": "Failed to update profile",
     "close": "Close",
     "editTooltip": "Edit Profile & Password",
-    "usernameOrEmail": "Username / Email"
+    "usernameOrEmail": "Username / Email",
+    "profilePicture": "Profile Picture",
+    "uploadPhoto": "Upload Photo",
+    "changePhoto": "Change Photo",
+    "removePhoto": "Remove Photo",
+    "photoLimitHint": "Max 2 MB (JPEG, PNG, WebP)",
+    "photoExceedsLimit": "Image size exceeds 2 MB maximum limit"
   },
   "upload": {
     "title": "Uploading File",

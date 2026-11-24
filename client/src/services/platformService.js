@@ -366,7 +366,7 @@ export async function deleteUserRecord(uid, username, email) {
  * Update Profile Name and/or Password for any role (admin, instructor, student).
  * Reflects immediately across RTDB, Auth, and linked records.
  */
-export async function updateUserProfileAndCredentials(currentUser, { displayName, newPassword, phoneNumber }) {
+export async function updateUserProfileAndCredentials(currentUser, { displayName, newPassword, phoneNumber, photoURL }) {
   if (!currentUser) throw new Error("NO_CURRENT_USER");
   const trimmedName = (displayName || "").trim();
   if (!trimmedName) throw new Error("DISPLAY_NAME_REQUIRED");
@@ -386,6 +386,9 @@ export async function updateUserProfileAndCredentials(currentUser, { displayName
       adminUpdates.phoneNumber = cleanPhone;
       adminUpdates.phone = cleanPhone;
     }
+    if (photoURL !== undefined) {
+      adminUpdates.photoURL = photoURL;
+    }
     await update(ref(rtdb, "admins/admin_123"), adminUpdates);
 
     // Sync admin_session in localStorage
@@ -404,8 +407,15 @@ export async function updateUserProfileAndCredentials(currentUser, { displayName
   // 2) Non-Admin (Instructor or Student)
   // Update Firebase Auth current user if signed in
   if (auth.currentUser) {
+    const authProfileUpdates = {};
     if (trimmedName && auth.currentUser.displayName !== trimmedName) {
-      await updateProfile(auth.currentUser, { displayName: trimmedName });
+      authProfileUpdates.displayName = trimmedName;
+    }
+    if (photoURL !== undefined) {
+      authProfileUpdates.photoURL = photoURL || "";
+    }
+    if (Object.keys(authProfileUpdates).length > 0) {
+      await updateProfile(auth.currentUser, authProfileUpdates);
     }
     if (newPassword && newPassword.trim()) {
       await updatePassword(auth.currentUser, newPassword.trim());
@@ -425,6 +435,9 @@ export async function updateUserProfileAndCredentials(currentUser, { displayName
     const cleanPhone = String(phoneNumber || "").replace(/\D/g, "").slice(0, 11);
     userUpdates.phoneNumber = cleanPhone;
     userUpdates.phone = cleanPhone;
+  }
+  if (photoURL !== undefined) {
+    userUpdates.photoURL = photoURL;
   }
   await update(ref(rtdb, `users/${currentUser.uid}`), userUpdates);
 
