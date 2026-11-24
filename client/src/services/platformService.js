@@ -1810,9 +1810,32 @@ export async function getStudentCustomizationAndCoins(studentUid) {
       });
     }
 
-    const assignmentsSnap = await get(ref(rtdb, "assignmentSubmissions"));
+    const assignmentsSnap = await get(ref(rtdb, "assignments"));
     if (assignmentsSnap.exists()) {
-      const allSubs = assignmentsSnap.val() || {};
+      const allAssignments = Object.values(assignmentsSnap.val() || {});
+      allAssignments.forEach((a) => {
+        if (a && a.submissions) {
+          const subs = Array.isArray(a.submissions)
+            ? a.submissions
+            : Object.values(a.submissions || {});
+          subs.forEach((sub) => {
+            if (
+              sub &&
+              (sub.studentId === studentUid || sub.id === studentUid) &&
+              sub.score !== undefined &&
+              sub.score !== null &&
+              sub.score !== ""
+            ) {
+              academicPoints += Number(sub.score) || 0;
+            }
+          });
+        }
+      });
+    }
+
+    const assignmentSubsSnap = await get(ref(rtdb, "assignmentSubmissions"));
+    if (assignmentSubsSnap.exists()) {
+      const allSubs = assignmentSubsSnap.val() || {};
       Object.values(allSubs).forEach((studentMap) => {
         if (studentMap && typeof studentMap === "object") {
           const sub = studentMap[studentUid];
@@ -1832,6 +1855,15 @@ export async function getStudentCustomizationAndCoins(studentUid) {
     const iqSnap = await get(ref(rtdb, `users/${studentUid}/iqStats`));
     if (iqSnap.exists()) {
       iqCoins = Number(iqSnap.val()?.coins) || 0;
+    }
+    if (!iqCoins && typeof window !== "undefined") {
+      try {
+        const localIQ = localStorage.getItem(`iq_stats_${studentUid}`);
+        if (localIQ) {
+          const parsed = JSON.parse(localIQ);
+          iqCoins = Number(parsed?.coins) || 0;
+        }
+      } catch {}
     }
   } catch (err) {
     console.warn("Could not fetch IQ coins:", err.message);

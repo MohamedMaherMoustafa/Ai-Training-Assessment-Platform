@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Award, BarChart3, BookOpen, Printer, Star, Trophy, UserCheck } from "lucide-react";
+import { Award, BarChart3, BookOpen, Printer, ShieldCheck, Star, Trophy, UserCheck } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "../../context/AuthContext";
 import { useLang } from "../../context/LangContext";
@@ -248,6 +248,16 @@ export default function ScoreboardModule({ mode = "admin", activeInstructorId = 
                 ? "ترتيب الطلاب وفقاً لمجموع النقاط المكتسبة في الاختبارات والواجبات"
                 : "Learners ranked by earned points across quizzes and assignments"}
             </p>
+            <div className="flex flex-wrap items-center gap-2 mt-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 text-[11px] font-bold">
+                <ShieldCheck className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                <span>
+                  {lang === "ar"
+                    ? "الترتيب الأكاديمي الرسمي: محسوب حصرياً من درجات الاختبارات والواجبات (لا يتأثر أبداً بألغاز الذكاء IQ ولا بإنفاق العملات في المتجر)"
+                    : "Official Academic Standings: Strictly calculated from Quizzes & Assignments (Never affected by IQ Puzzles or redeeming store coins)"}
+                </span>
+              </span>
+            </div>
           </div>
         </div>
         {canPrintCertificates && (
