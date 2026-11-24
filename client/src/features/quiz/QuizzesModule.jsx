@@ -353,8 +353,8 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
             : "Quiz Terminated: Second Person Detected";
         popupMessage =
           lang === "ar"
-            ? "تم إنهاء الاختبار فوراً وإلغاء محاولتك بالكامل دون احتساب أي درجة بسبب استمرار تواجد شخص إضافي أمام الكاميرا بعد انقضاء مهلة الـ 10 ثوانٍ المحددة لمغادرته. تم تسجيل المحاولة كمخالفة مراقبة صريحة، ولا يمكنك إعادة الاختبار إلا بعد موافقة رسمية من المحاضر."
-            : "Your quiz has been terminated immediately and cancelled without grading because a second person was detected in front of the camera and remained in frame after the 10-second warning countdown expired. Recorded as a strict proctoring violation; retake requires instructor approval.";
+            ? "تم إنهاء الاختبار فوراً وإلغاء محاولتك بالكامل دون احتساب أي درجة بسبب استمرار تواجد شخص إضافي أمام الكاميرا بعد انقضاء مهلة الـ 5 ثوانٍ المحددة لمغادرته. تم تسجيل المحاولة كمخالفة مراقبة صريحة، ولا يمكنك إعادة الاختبار إلا بعد موافقة رسمية من المحاضر."
+            : "Your quiz has been terminated immediately and cancelled without grading because a second person was detected in front of the camera and remained in frame after the 5-second warning countdown expired. Recorded as a strict proctoring violation; retake requires instructor approval.";
       }
 
       setTerminationModal({
@@ -381,8 +381,8 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
               : "Quiz terminated immediately due to cheating: Camera covered/obscured!")
           : reason === "multiple_persons_detected"
           ? (lang === "ar"
-              ? "تم إنهاء الاختبار فوراً لرصد شخص إضافي أمام الكاميرا لأكثر من 10 ثوانٍ!"
-              : "Quiz terminated immediately: Second person remained in camera over 10s!")
+              ? "تم إنهاء الاختبار فوراً لرصد شخص إضافي أمام الكاميرا لأكثر من 5 ثوانٍ!"
+              : "Quiz terminated immediately: Second person remained in camera over 5s!")
           : (lang === "ar"
               ? "تم إغلاق الاختبار وإلغاؤه لمحاولة الغش (2/2)!"
               : "Quiz terminated without submitting due to repeated violation (2/2)!")
@@ -607,7 +607,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                 return;
               }
 
-              // 3. Person Detection & Second Person Highlighting with 10s Countdown
+              // 3. Person Detection & Second Person Highlighting with 5s Countdown
               const personDetections = predictions.filter(
                 (p) => p.class === "person" && p.score >= 0.38
               );
@@ -643,14 +643,14 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                 if (!secondPersonActiveRef.current) {
                   secondPersonActiveRef.current = true;
                   secondPersonStartTimeRef.current = Date.now();
-                  setMultiPersonCountdown(10);
+                  setMultiPersonCountdown(5);
                 } else {
                   const elapsed = Math.floor((Date.now() - secondPersonStartTimeRef.current) / 1000);
-                  const remaining = Math.max(0, 10 - elapsed);
+                  const remaining = Math.max(0, 5 - elapsed);
                   setMultiPersonCountdown(remaining);
 
                   if (remaining <= 0) {
-                    console.warn("🚨 Second person remained in camera frame over 10s! Terminating quiz.");
+                    console.warn("🚨 Second person remained in camera frame over 5s! Terminating quiz.");
                     active = false;
                     if (camDetectionLoopRef.current) {
                       clearTimeout(camDetectionLoopRef.current);
@@ -1715,7 +1715,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
         document.body
       )}
 
-      {/* Prominent Warning Banner for 10-Second Countdown */}
+      {/* Prominent Warning Banner for 5-Second Countdown */}
       {activeQuiz && multiPersonCountdown !== null && createPortal(
         <div
           style={{

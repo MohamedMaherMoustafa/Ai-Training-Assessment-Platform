@@ -875,8 +875,8 @@ export async function markQuizCheatingTerminated(quizId, studentId, meta = {}) {
     if (meta.violationReason === "multiple_persons_detected") {
       titleEn = "Quiz Terminated: Multiple Persons Detected";
       titleAr = "إلغاء اختبار طالب لرصد شخص إضافي بالكاميرا";
-      bodyEn = `${meta.studentName || studentId} was disqualified from "${meta.quizTitle || "Quiz"}" because a second person entered the camera frame and remained over 10 seconds.`;
-      bodyAr = `تم إقصاء الطالب ${meta.studentName || studentId} من اختبار "${meta.quizTitle || "الاختبار"}" لرصد شخص ثانٍ أمام الكاميرا لم يغادر خلال مهلة الـ 10 ثوانٍ.`;
+      bodyEn = `${meta.studentName || studentId} was disqualified from "${meta.quizTitle || "Quiz"}" because a second person entered the camera frame and remained over 5 seconds.`;
+      bodyAr = `تم إقصاء الطالب ${meta.studentName || studentId} من اختبار "${meta.quizTitle || "الاختبار"}" لرصد شخص ثانٍ أمام الكاميرا لم يغادر خلال مهلة الـ 5 ثوانٍ.`;
     } else if (meta.violationReason === "mobile_phone_detected") {
       titleEn = "Quiz Terminated: Mobile Phone Cheating";
       titleAr = "إلغاء اختبار طالب لاستخدام هاتف محمول (غش)";
