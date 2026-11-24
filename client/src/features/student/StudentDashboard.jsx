@@ -117,8 +117,8 @@ function StudentInstructorSelector({
             </h3>
             <p className="text-xs text-slate-300 max-w-xl mt-0.5">
               {lang === "ar"
-                ? "10 مستويات متدرجة بأنماط ألغاز ذكاء مختلفة، تلميحات توجيهية، وعملات ذهبية تكسبها مع كل لغز تحله!"
-                : "10 progressive levels with unique puzzle types, hints, and coins awarded based on difficulty!"}
+                ? "50 مستوى متدرج بأنماط ألغاز ذكاء مختلفة، تلميحات توجيهية، وعملات ذهبية تكسبها مع كل لغز تحله!"
+                : "50 progressive levels with unique puzzle types, hints, and coins awarded based on difficulty!"}
             </p>
           </div>
         </div>

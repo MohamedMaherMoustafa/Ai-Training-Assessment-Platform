@@ -88,7 +88,16 @@ export default function IQPuzzlesModule() {
     return Math.min(100, Math.max(5, Math.round((progressInRank / span) * 100)));
   }, [currentRank, nextRank, stats.coins]);
 
+  const isLevelUnlocked = (puzzleItem) => {
+    if (!puzzleItem) return false;
+    if (puzzleItem.levelNumber === 1) return true;
+    const prevPuzzle = PUZZLE_LEVELS[puzzleItem.levelNumber - 2];
+    if (!prevPuzzle) return false;
+    return stats.solvedLevels.includes(prevPuzzle.id);
+  };
+
   const handleLevelSelect = (puzzle) => {
+    if (!isLevelUnlocked(puzzle)) return;
     playClickSound();
     setActivePuzzle(puzzle);
   };
@@ -101,10 +110,16 @@ export default function IQPuzzlesModule() {
         : [...prev.solvedLevels, solvedPuzzle.id];
 
       const newCoins = alreadySolved ? prev.coins : prev.coins + coinsAwarded;
-      const nextUnlocked = Math.max(
-        prev.unlockedLevel,
-        solvedPuzzle.levelNumber + 1
-      );
+
+      let sequentialUnlocked = 1;
+      for (let i = 0; i < PUZZLE_LEVELS.length; i++) {
+        if (newSolved.includes(PUZZLE_LEVELS[i].id)) {
+          sequentialUnlocked = i + 2;
+        } else {
+          break;
+        }
+      }
+      sequentialUnlocked = Math.min(sequentialUnlocked, PUZZLE_LEVELS.length);
 
       const todayStr = new Date().toISOString().slice(0, 10);
       let newStreak = prev.dailyStreak || 1;
@@ -116,7 +131,7 @@ export default function IQPuzzlesModule() {
         ...prev,
         coins: newCoins,
         solvedLevels: newSolved,
-        unlockedLevel: nextUnlocked,
+        unlockedLevel: sequentialUnlocked,
         hintsUsed: (prev.hintsUsed || 0) + hintsUsedInLevel,
         dailyStreak: newStreak,
         lastPlayedDate: todayStr,
@@ -131,9 +146,13 @@ export default function IQPuzzlesModule() {
 
   const handleNextLevel = () => {
     if (!activePuzzle) return;
+    if (!stats.solvedLevels.includes(activePuzzle.id)) return;
     const nextIdx = PUZZLE_LEVELS.findIndex((p) => p.id === activePuzzle.id) + 1;
     if (nextIdx < PUZZLE_LEVELS.length) {
-      setActivePuzzle(PUZZLE_LEVELS[nextIdx]);
+      const nextPuzzle = PUZZLE_LEVELS[nextIdx];
+      if (isLevelUnlocked(nextPuzzle)) {
+        setActivePuzzle(nextPuzzle);
+      }
     } else {
       setActivePuzzle(null);
     }
@@ -183,8 +202,8 @@ export default function IQPuzzlesModule() {
             </h1>
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
               {lang === "ar"
-                ? "تدرّج عبر 10 مستويات فريدة من ألغاز الذكاء الرياضي والمكاني والمنطقي، واجمع العملات الذهبية وطور رتبتك المعرفية من مفكر مبتدئ إلى أستاذ الذكاء الأكبر!"
-                : "Progress through 10 unique cognitive puzzle levels, earn coins based on difficulty, and elevate your mental rank from Novice Thinker to IQ Grandmaster!"}
+                ? "تدرّج عبر 50 مستوى فريد من ألغاز الذكاء الرياضي والمكاني والمنطقي، واجمع العملات الذهبية وطور رتبتك المعرفية من مفكر مبتدئ إلى أستاذ الذكاء الأكبر!"
+                : "Progress through 50 unique cognitive puzzle levels, earn coins based on difficulty, and elevate your mental rank from Novice Thinker to IQ Grandmaster!"}
             </p>
           </div>
 
@@ -276,7 +295,7 @@ export default function IQPuzzlesModule() {
           }`}
         >
           <Compass className="h-4 w-4" />
-          <span>{lang === "ar" ? "خريطة المراحل (10 مستويات)" : "Levels Roadmap (10 Puzzles)"}</span>
+          <span>{lang === "ar" ? "خريطة المراحل (50 مستوى)" : "Levels Roadmap (50 Puzzles)"}</span>
         </button>
 
         <button
@@ -319,7 +338,7 @@ export default function IQPuzzlesModule() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
             {PUZZLE_LEVELS.map((p) => {
-              const isUnlocked = p.levelNumber <= stats.unlockedLevel;
+              const isUnlocked = isLevelUnlocked(p);
               const isSolved = stats.solvedLevels.includes(p.id);
 
               return (

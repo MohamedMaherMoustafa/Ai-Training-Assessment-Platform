@@ -66,11 +66,13 @@ export default function PuzzleGameBoard({
   const [showRewardModal, setShowRewardModal] = useState(false);
   const [hintsUsedCount, setHintsUsedCount] = useState(0);
   const [answerState, setAnswerState] = useState(null); // 'idle' | 'wrong' | 'correct'
+  const [hasSubmitted, setHasSubmitted] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     setSelectedOptionId(null);
     setAnswerState(null);
+    setHasSubmitted(false);
     setErrorMessage("");
     setShowRewardModal(false);
     setShowHintModal(false);
@@ -82,10 +84,18 @@ export default function PuzzleGameBoard({
     DIFFICULTY_CONFIG[puzzle.difficulty] || DIFFICULTY_CONFIG.medium;
 
   const handleSelectOption = (optId) => {
-    if (answerState === "correct") return;
+    if (hasSubmitted || answerState === "correct") return;
     playClickSound();
     setSelectedOptionId(optId);
     setAnswerState(null);
+    setErrorMessage("");
+  };
+
+  const handleRetry = () => {
+    playClickSound();
+    setSelectedOptionId(null);
+    setAnswerState(null);
+    setHasSubmitted(false);
     setErrorMessage("");
   };
 
@@ -96,6 +106,8 @@ export default function PuzzleGameBoard({
   };
 
   const handleSubmit = () => {
+    if (hasSubmitted) return;
+
     if (!selectedOptionId) {
       setErrorMessage(
         lang === "ar"
@@ -106,6 +118,8 @@ export default function PuzzleGameBoard({
       return;
     }
 
+    setHasSubmitted(true);
+
     if (selectedOptionId === puzzle.correctOptionId) {
       setAnswerState("correct");
       playCoinSound();
@@ -115,8 +129,8 @@ export default function PuzzleGameBoard({
       setAnswerState("wrong");
       setErrorMessage(
         lang === "ar"
-          ? "إجابة غير صحيحة. راجع المعطيات أو اطلب تلميحاً للمساعدة!"
-          : "Not quite right. Re-check the logic or ask for a hint!"
+          ? "إجابة غير صحيحة! الاختيار من محاولة واحدة فقط في كل مستوى. لا يمكنك الانتقال للمستوى التالي دون تجاوزه. اضغط إعادة المحاولة للمحاولة مجدداً."
+          : "Incorrect answer! You only have one attempt per level and cannot pass to the next level without solving this one. Click Retry to try again."
       );
     }
   };
@@ -204,11 +218,10 @@ export default function PuzzleGameBoard({
               {puzzle.sequenceDisplay.map((item, idx) => (
                 <div
                   key={idx}
-                  className={`h-14 sm:h-16 px-4 min-w-[56px] sm:min-w-[64px] rounded-2xl flex items-center justify-center font-mono font-black text-lg sm:text-xl shadow-sm transition-transform hover:scale-105 ${
-                    item === "?"
+                  className={`h-14 sm:h-16 px-4 min-w-[56px] sm:min-w-[64px] rounded-2xl flex items-center justify-center font-mono font-black text-lg sm:text-xl shadow-sm transition-transform hover:scale-105 ${item === "?"
                       ? "bg-gradient-to-tr from-amber-500 to-indigo-600 text-white animate-pulse"
                       : "bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-white/10"
-                  }`}
+                    }`}
                 >
                   {item}
                 </div>
@@ -223,11 +236,10 @@ export default function PuzzleGameBoard({
                 row.map((cell, cIdx) => (
                   <div
                     key={`${rIdx}_${cIdx}`}
-                    className={`h-20 w-20 sm:h-24 sm:w-24 rounded-2xl flex flex-col items-center justify-center font-bold text-xs p-1 transition-all ${
-                      cell.shape === "unknown"
+                    className={`h-20 w-20 sm:h-24 sm:w-24 rounded-2xl flex flex-col items-center justify-center font-bold text-xs p-1 transition-all ${cell.shape === "unknown"
                         ? "bg-indigo-500/10 border-2 border-dashed border-indigo-500 text-indigo-500 text-2xl animate-pulse"
                         : "bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200"
-                    }`}
+                      }`}
                   >
                     {cell.shape !== "unknown" ? (
                       <>
@@ -381,11 +393,10 @@ export default function PuzzleGameBoard({
                 row.map((cell, cIdx) => (
                   <div
                     key={`${rIdx}_${cIdx}`}
-                    className={`h-11 w-11 rounded-xl flex items-center justify-center ${
-                      cell
+                    className={`h-11 w-11 rounded-xl flex items-center justify-center ${cell
                         ? "bg-white dark:bg-slate-800 border border-slate-300 dark:border-white/20 text-slate-900 dark:text-white shadow-xs"
                         : "opacity-0 pointer-events-none"
-                    }`}
+                      }`}
                   >
                     {cell}
                   </div>
@@ -412,35 +423,55 @@ export default function PuzzleGameBoard({
 
         {/* Answer Options Grid */}
         <div className="space-y-3">
-          <div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-            {lang === "ar" ? "اختر الإجابة الصحيحة:" : "Select your answer:"}
+          <div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center justify-between">
+            <span>{lang === "ar" ? "اختر الإجابة الصحيحة:" : "Select your answer:"}</span>
+            <span className="text-[11px] text-amber-600 dark:text-amber-400 font-bold bg-amber-500/10 px-2 py-0.5 rounded-full">
+              {lang === "ar" ? "⚠️ محاولة واحدة فقط لكل مستوى" : "⚠️ Single attempt per level"}
+            </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {puzzle.options.map((opt) => {
               const isSelected = selectedOptionId === opt.id;
+              const isWrong = hasSubmitted && answerState === "wrong" && isSelected;
+              const isCorrect = hasSubmitted && answerState === "correct" && isSelected;
+
               return (
                 <button
                   key={opt.id}
                   type="button"
+                  disabled={hasSubmitted}
                   onClick={() => handleSelectOption(opt.id)}
-                  className={`p-4 rounded-2xl border text-start transition-all cursor-pointer flex items-center justify-between gap-3 ${
-                    isSelected
-                      ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-900 dark:text-cyan-200 shadow-md shadow-indigo-500/10 font-bold scale-[1.01]"
-                      : "border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/60 hover:border-slate-300 dark:hover:border-white/20 text-slate-800 dark:text-slate-200"
-                  }`}
+                  className={`p-4 rounded-2xl border text-start transition-all flex items-center justify-between gap-3 ${hasSubmitted ? "cursor-not-allowed" : "cursor-pointer"
+                    } ${isWrong
+                      ? "border-rose-500 bg-rose-50 dark:bg-rose-950/40 text-rose-900 dark:text-rose-200 shadow-md shadow-rose-500/10 font-bold"
+                      : isCorrect
+                        ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200 shadow-md shadow-emerald-500/10 font-bold"
+                        : isSelected
+                          ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-900 dark:text-cyan-200 shadow-md shadow-indigo-500/10 font-bold scale-[1.01]"
+                          : "border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/60 hover:border-slate-300 dark:hover:border-white/20 text-slate-800 dark:text-slate-200"
+                    }`}
                 >
                   <span className="text-xs sm:text-[13px] font-semibold leading-relaxed">
                     {lang === "ar" ? opt.label.ar : opt.label.en}
                   </span>
                   <div
-                    className={`h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                      isSelected
-                        ? "border-indigo-600 bg-indigo-600 text-white"
-                        : "border-slate-300 dark:border-slate-600"
-                    }`}
+                    className={`h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0 ${isWrong
+                        ? "border-rose-600 bg-rose-600 text-white"
+                        : isCorrect
+                          ? "border-emerald-600 bg-emerald-600 text-white"
+                          : isSelected
+                            ? "border-indigo-600 bg-indigo-600 text-white"
+                            : "border-slate-300 dark:border-slate-600"
+                      }`}
                   >
-                    {isSelected && <span className="h-2 w-2 rounded-full bg-white" />}
+                    {isWrong ? (
+                      <span className="text-xs font-bold leading-none">✕</span>
+                    ) : isCorrect ? (
+                      <span className="text-xs font-bold leading-none">✓</span>
+                    ) : isSelected ? (
+                      <span className="h-2 w-2 rounded-full bg-white" />
+                    ) : null}
                   </div>
                 </button>
               );
@@ -450,9 +481,21 @@ export default function PuzzleGameBoard({
 
         {/* Error Feedback Banner */}
         {answerState === "wrong" && errorMessage && (
-          <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-900/50 flex items-center gap-2.5 text-xs font-bold text-rose-700 dark:text-rose-300 animate-shake">
-            <XCircle className="h-4 w-4 shrink-0 text-rose-500" />
-            <span>{errorMessage}</span>
+          <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-bold text-rose-700 dark:text-rose-300 animate-shake">
+            <div className="flex items-center gap-2.5">
+              <XCircle className="h-5 w-5 shrink-0 text-rose-500" />
+              <span className="leading-relaxed">{errorMessage}</span>
+            </div>
+            {hasSubmitted && (
+              <button
+                type="button"
+                onClick={handleRetry}
+                className="self-end sm:self-auto shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-sm transition-all cursor-pointer"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+                <span>{lang === "ar" ? "إعادة محاولة اللغز 🔄" : "Retry Level 🔄"}</span>
+              </button>
+            )}
           </div>
         )}
 
@@ -460,25 +503,45 @@ export default function PuzzleGameBoard({
         <div className="pt-4 border-t border-slate-200/80 dark:border-white/10 flex items-center justify-between gap-3">
           <button
             type="button"
+            disabled={hasSubmitted}
             onClick={() => {
+              if (hasSubmitted) return;
               setSelectedOptionId(null);
               setAnswerState(null);
               setErrorMessage("");
             }}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-colors ${hasSubmitted
+                ? "text-slate-400 dark:text-slate-600 cursor-not-allowed"
+                : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+              }`}
           >
             <RotateCcw className="h-3.5 w-3.5" />
             <span>{lang === "ar" ? "مسح الاختيار" : "Reset"}</span>
           </button>
 
-          <button
-            type="button"
-            onClick={handleSubmit}
-            className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-emerald-600 hover:from-indigo-500 hover:to-emerald-500 text-white text-xs sm:text-sm font-extrabold shadow-lg shadow-indigo-500/25 hover:shadow-xl transition-all hover:scale-105 active:scale-95 cursor-pointer"
-          >
-            <Sparkles className="h-4 w-4" />
-            <span>{lang === "ar" ? "تأكيد الإجابة 🚀" : "Submit Answer 🚀"}</span>
-          </button>
+          {hasSubmitted && answerState === "wrong" ? (
+            <button
+              type="button"
+              onClick={handleRetry}
+              className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-rose-600 via-rose-500 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white text-xs sm:text-sm font-extrabold shadow-lg shadow-rose-500/25 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+            >
+              <RotateCcw className="h-4 w-4" />
+              <span>{lang === "ar" ? "إعادة محاولة المستوى 🔄" : "Retry Level 🔄"}</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              disabled={hasSubmitted || !selectedOptionId}
+              onClick={handleSubmit}
+              className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-white text-xs sm:text-sm font-extrabold transition-all shadow-lg ${hasSubmitted || !selectedOptionId
+                  ? "bg-slate-300 dark:bg-slate-700 cursor-not-allowed text-slate-500 dark:text-slate-400 shadow-none"
+                  : "bg-gradient-to-r from-indigo-600 via-indigo-500 to-emerald-600 hover:from-indigo-500 hover:to-emerald-500 shadow-indigo-500/25 hover:shadow-xl hover:scale-105 active:scale-95 cursor-pointer"
+                }`}
+            >
+              <Sparkles className="h-4 w-4" />
+              <span>{lang === "ar" ? "تأكيد الإجابة (محاولة واحدة) 🚀" : "Submit Answer (1 Chance) 🚀"}</span>
+            </button>
+          )}
         </div>
       </div>
 
