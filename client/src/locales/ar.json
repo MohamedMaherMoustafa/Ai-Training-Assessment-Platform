@@ -196,13 +196,7 @@
     "saveError": "فشل تحديث البيانات",
     "close": "إغلاق",
     "editTooltip": "تعديل الملف الشخصي وكلمة المرور",
-    "usernameOrEmail": "اسم المستخدم / البريد الإلكتروني",
-    "profilePicture": "صورة الملف الشخصي",
-    "uploadPhoto": "رفع صورة",
-    "changePhoto": "تغيير الصورة",
-    "removePhoto": "حذف الصورة",
-    "photoLimitHint": "الحد الأقصى 2 ميجابايت (JPEG, PNG, WebP)",
-    "photoExceedsLimit": "حجم الصورة يتجاوز الحد الأقصى (2 ميجابايت)"
+    "usernameOrEmail": "اسم المستخدم / البريد الإلكتروني"
   },
   "upload": {
     "title": "جاري رفع الملف",

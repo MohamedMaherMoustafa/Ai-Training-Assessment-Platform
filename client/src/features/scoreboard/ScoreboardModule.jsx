@@ -344,15 +344,9 @@ export default function ScoreboardModule({ mode = "admin", activeInstructorId = 
                                 <Star className="h-3.5 w-3.5 fill-current" />
                               </div>
                               <div
-                                className={`h-14 w-14 rounded-full bg-gradient-to-br ${cfg.avatarGradient} text-white font-extrabold text-lg flex items-center justify-center shadow-lg ring-4 ring-white/75 dark:ring-slate-900/75 overflow-hidden`}
+                                className={`h-14 w-14 rounded-full bg-gradient-to-br ${cfg.avatarGradient} text-white font-extrabold text-lg flex items-center justify-center shadow-lg ring-4 ring-white/75 dark:ring-slate-900/75`}
                               >
-                                {entry?.photoURL ? (
-                                  <img src={entry.photoURL} alt={entry.studentName} className="h-full w-full object-cover" />
-                                ) : entry ? (
-                                  getInitials(entry.studentName)
-                                ) : (
-                                  "—"
-                                )}
+                                {entry ? getInitials(entry.studentName) : "—"}
                               </div>
                             </div>
 

@@ -266,12 +266,8 @@ export default function AppLayout({ navItems, children }) {
               className="flex items-center gap-2.5 min-w-0 cursor-pointer flex-1"
               title={t("profile.editTooltip") || "Edit Profile & Password"}
             >
-              <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-teal-500 to-emerald-500 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform overflow-hidden border border-slate-200/60 dark:border-white/10">
-                {user?.photoURL ? (
-                  <img src={user.photoURL} alt={displayName} className="h-full w-full object-cover" />
-                ) : (
-                  String(displayName || "U").slice(0, 2).toUpperCase()
-                )}
+              <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-teal-500 to-emerald-500 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform">
+                {String(displayName || "U").slice(0, 2).toUpperCase()}
               </div>
               <div className="min-w-0">
                 <div className="text-xs font-black text-slate-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
@@ -460,22 +456,6 @@ export default function AppLayout({ navItems, children }) {
                   <Moon className="h-4 w-4 text-indigo-600 shrink-0" />
                   <span className="hidden sm:inline">{t("app.dark")}</span>
                 </>
-              )}
-            </button>
-
-            {/* Quick Profile Avatar Button */}
-            <button
-              onClick={() => setProfileModalOpen(true)}
-              aria-label="Edit Profile"
-              title={t("profile.editTooltip") || "Edit Profile & Password"}
-              className="h-8 w-8 sm:h-9 sm:w-9 rounded-full border border-slate-200/90 dark:border-slate-700 bg-slate-50/90 dark:bg-slate-800 flex items-center justify-center overflow-hidden hover:ring-2 hover:ring-indigo-500/50 transition-all cursor-pointer shadow-xs shrink-0"
-            >
-              {user?.photoURL ? (
-                <img src={user.photoURL} alt={displayName} className="h-full w-full object-cover" />
-              ) : (
-                <span className="font-black text-xs text-indigo-600 dark:text-cyan-400">
-                  {String(displayName || "U").slice(0, 2).toUpperCase()}
-                </span>
               )}
             </button>
           </div>

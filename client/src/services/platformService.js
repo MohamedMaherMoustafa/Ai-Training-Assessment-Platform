@@ -6,7 +6,7 @@ import {
   updatePassword,
 } from "firebase/auth";
 import { ref, get, set, update, remove, push, onValue } from "firebase/database";
-import { auth, rtdb, storage, getSecondaryAuth } from "../lib/firebase";
+import { auth, rtdb, getSecondaryAuth } from "../lib/firebase";
 import { validateUsername } from "../utils/validators";
 
 const normalizeKey = (value) => value.trim().toLowerCase().replace(/[^a-z0-9_@-]/g, "_");
@@ -366,7 +366,7 @@ export async function deleteUserRecord(uid, username, email) {
  * Update Profile Name and/or Password for any role (admin, instructor, student).
  * Reflects immediately across RTDB, Auth, and linked records.
  */
-export async function updateUserProfileAndCredentials(currentUser, { displayName, newPassword, phoneNumber, photoURL }) {
+export async function updateUserProfileAndCredentials(currentUser, { displayName, newPassword, phoneNumber }) {
   if (!currentUser) throw new Error("NO_CURRENT_USER");
   const trimmedName = (displayName || "").trim();
   if (!trimmedName) throw new Error("DISPLAY_NAME_REQUIRED");
@@ -386,9 +386,6 @@ export async function updateUserProfileAndCredentials(currentUser, { displayName
       adminUpdates.phoneNumber = cleanPhone;
       adminUpdates.phone = cleanPhone;
     }
-    if (photoURL !== undefined) {
-      adminUpdates.photoURL = photoURL;
-    }
     await update(ref(rtdb, "admins/admin_123"), adminUpdates);
 
     // Sync admin_session in localStorage
@@ -405,56 +402,17 @@ export async function updateUserProfileAndCredentials(currentUser, { displayName
   }
 
   // 2) Non-Admin (Instructor or Student)
-  let finalPhotoURL = photoURL;
-
   // Update Firebase Auth current user if signed in
   if (auth.currentUser) {
-    const authProfileUpdates = {};
     if (trimmedName && auth.currentUser.displayName !== trimmedName) {
-      authProfileUpdates.displayName = trimmedName;
-    }
-
-    // Firebase Auth updateProfile strictly requires photoURL to be a web URL (< 2048 chars).
-    // It throws auth/invalid-profile-attribute if given a Base64 data URI!
-    // Try uploading to Firebase Storage if available to obtain a short https download URL:
-    if (photoURL && typeof photoURL === "string" && photoURL.startsWith("data:") && storage) {
-      try {
-        const { ref: sRef, uploadString, getDownloadURL } = await import("firebase/storage");
-        const storageRef = sRef(storage, `avatars/${currentUser.uid}_${Date.now()}.jpg`);
-        await uploadString(storageRef, photoURL, "data_url");
-        const downloadURL = await getDownloadURL(storageRef);
-        if (downloadURL) {
-          finalPhotoURL = downloadURL;
-          authProfileUpdates.photoURL = downloadURL;
-        }
-      } catch (storageErr) {
-        console.warn("Firebase Storage upload fallback to RTDB:", storageErr);
-        // Fallback: finalPhotoURL remains the base64 data URI (stored in RTDB with no URL limit)
-      }
-    } else if (
-      photoURL &&
-      typeof photoURL === "string" &&
-      (photoURL.startsWith("http://") || photoURL.startsWith("https://")) &&
-      photoURL.length < 2048
-    ) {
-      authProfileUpdates.photoURL = photoURL;
-    } else if (photoURL === "") {
-      authProfileUpdates.photoURL = "";
-    }
-
-    if (Object.keys(authProfileUpdates).length > 0) {
-      try {
-        await updateProfile(auth.currentUser, authProfileUpdates);
-      } catch (authErr) {
-        console.warn("Firebase Auth updateProfile non-critical notice:", authErr);
-      }
+      await updateProfile(auth.currentUser, { displayName: trimmedName });
     }
     if (newPassword && newPassword.trim()) {
       await updatePassword(auth.currentUser, newPassword.trim());
     }
   }
 
-  // Update RTDB users record (RTDB stores finalPhotoURL cleanly with zero URL length restrictions!)
+  // Update RTDB users record
   const userUpdates = {
     displayName: trimmedName,
     name: { en: trimmedName, ar: trimmedName },
@@ -467,9 +425,6 @@ export async function updateUserProfileAndCredentials(currentUser, { displayName
     const cleanPhone = String(phoneNumber || "").replace(/\D/g, "").slice(0, 11);
     userUpdates.phoneNumber = cleanPhone;
     userUpdates.phone = cleanPhone;
-  }
-  if (photoURL !== undefined) {
-    userUpdates.photoURL = finalPhotoURL;
   }
   await update(ref(rtdb, `users/${currentUser.uid}`), userUpdates);
 
