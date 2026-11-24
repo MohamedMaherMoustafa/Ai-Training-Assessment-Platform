@@ -854,11 +854,28 @@ export async function markQuizCheatingTerminated(quizId, studentId, meta = {}) {
     terminatedAt: Date.now(),
   });
   if (meta.instructorId) {
+    let titleEn = "Quiz Terminated (Screenshot Violation)";
+    let titleAr = "إلغاء اختبار طالب لمحاولة تصوير الشاشة (غش)";
+    let bodyEn = `${meta.studentName || studentId} was disqualified from "${meta.quizTitle || "Quiz"}" after repeating screenshot attempts (2/2 strikes).`;
+    let bodyAr = `تم إقصاء الطالب ${meta.studentName || studentId} من اختبار "${meta.quizTitle || "الاختبار"}" بعد تكرار محاولة تصوير الشاشة مرتين (مخالفة غش).`;
+
+    if (meta.violationReason === "multiple_persons_detected") {
+      titleEn = "Quiz Terminated: Multiple Persons Detected";
+      titleAr = "إلغاء اختبار طالب لرصد شخص إضافي بالكاميرا";
+      bodyEn = `${meta.studentName || studentId} was disqualified from "${meta.quizTitle || "Quiz"}" because a second person entered the camera frame and remained over 10 seconds.`;
+      bodyAr = `تم إقصاء الطالب ${meta.studentName || studentId} من اختبار "${meta.quizTitle || "الاختبار"}" لرصد شخص ثانٍ أمام الكاميرا لم يغادر خلال مهلة الـ 10 ثوانٍ.`;
+    } else if (meta.violationReason === "mobile_phone_detected") {
+      titleEn = "Quiz Terminated: Mobile Phone Cheating";
+      titleAr = "إلغاء اختبار طالب لاستخدام هاتف محمول (غش)";
+      bodyEn = `${meta.studentName || studentId} was disqualified from "${meta.quizTitle || "Quiz"}" due to mobile phone detection in the camera feed.`;
+      bodyAr = `تم إقصاء الطالب ${meta.studentName || studentId} من اختبار "${meta.quizTitle || "الاختبار"}" لرصد هاتف محمول أمام الكاميرا أثناء الحل.`;
+    }
+
     await pushNotification(meta.instructorId, {
-      titleEn: "Quiz Terminated (Screenshot Violation)",
-      titleAr: "إلغاء اختبار طالب لمحاولة تصوير الشاشة (غش)",
-      bodyEn: `${meta.studentName || studentId} was disqualified from "${meta.quizTitle || "Quiz"}" after repeating screenshot attempts (2/2 strikes).`,
-      bodyAr: `تم إقصاء الطالب ${meta.studentName || studentId} من اختبار "${meta.quizTitle || "الاختبار"}" بعد تكرار محاولة تصوير الشاشة مرتين (مخالفة غش).`,
+      titleEn,
+      titleAr,
+      bodyEn,
+      bodyAr,
       type: "warning",
       link: "/instructor/quizzes",
     });

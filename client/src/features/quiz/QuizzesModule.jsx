@@ -139,6 +139,12 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
   const [camWarningVisible, setCamWarningVisible] = useState(false);
   const camGateVideoRef = useRef(null);
 
+  // Multi-person proctoring state
+  const [multiPersonCountdown, setMultiPersonCountdown] = useState(null);
+  const [detectedPersons, setDetectedPersons] = useState([]);
+  const secondPersonActiveRef = useRef(false);
+  const secondPersonStartTimeRef = useRef(null);
+
   useEffect(() => {
     activeQuizRef.current = activeQuiz;
   }, [activeQuiz]);
@@ -240,7 +246,8 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
       reason === "mobile_phone_detected" ||
       reason === "camera_covered_detected" ||
       reason === "camera_lost_second" ||
-      reason === "camera_unavailable";
+      reason === "camera_unavailable" ||
+      reason === "multiple_persons_detected";
 
     // 1. If warning overlay is ALREADY displayed, ignore duplicate events (unless instant mobile/camera termination)!
     if (privacyRestrictedRef.current && !isInstantTermination) return;
@@ -294,7 +301,9 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
           instructorId: quizToTerminate.instructorId,
           violationReason: reason,
           cheatingType:
-            reason === "mobile_phone_detected"
+            reason === "multiple_persons_detected"
+              ? "second_person_multiple"
+              : reason === "mobile_phone_detected"
               ? "mobile_phone"
               : reason === "camera_covered_detected"
               ? "camera_blackout_covered"
@@ -337,6 +346,15 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
           lang === "ar"
             ? "تم إنهاء الاختبار فوراً بسبب تكرار إغلاق أو فقدان اتصال الكاميرا أثناء الاختبار. لا يمكنك إعادة الاختبار إلا بعد موافقة المحاضر."
             : "Your quiz has been closed immediately because the camera was disconnected or turned off multiple times. You cannot re-enter without instructor approval.";
+      } else if (reason === "multiple_persons_detected") {
+        popupTitle =
+          lang === "ar"
+            ? "تم إنهاء الاختبار لرصد شخص إضافي (مخالفة مراقبة الكاميرا)"
+            : "Quiz Terminated: Second Person Detected";
+        popupMessage =
+          lang === "ar"
+            ? "تم إنهاء الاختبار فوراً وإلغاء محاولتك بالكامل دون احتساب أي درجة بسبب استمرار تواجد شخص إضافي أمام الكاميرا بعد انقضاء مهلة الـ 10 ثوانٍ المحددة لمغادرته. تم تسجيل المحاولة كمخالفة مراقبة صريحة، ولا يمكنك إعادة الاختبار إلا بعد موافقة رسمية من المحاضر."
+            : "Your quiz has been terminated immediately and cancelled without grading because a second person was detected in front of the camera and remained in frame after the 10-second warning countdown expired. Recorded as a strict proctoring violation; retake requires instructor approval.";
       }
 
       setTerminationModal({
@@ -361,6 +379,10 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
           ? (lang === "ar"
               ? "تم إنهاء الاختبار وإلغاؤه فوراً بسبب حجب الكاميرا (شاشة سوداء)!"
               : "Quiz terminated immediately due to cheating: Camera covered/obscured!")
+          : reason === "multiple_persons_detected"
+          ? (lang === "ar"
+              ? "تم إنهاء الاختبار فوراً لرصد شخص إضافي أمام الكاميرا لأكثر من 10 ثوانٍ!"
+              : "Quiz terminated immediately: Second person remained in camera over 10s!")
           : (lang === "ar"
               ? "تم إغلاق الاختبار وإلغاؤه لمحاولة الغش (2/2)!"
               : "Quiz terminated without submitting due to repeated violation (2/2)!")
@@ -408,6 +430,10 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
     setCamState("idle");
     setShowCamPreview(false);
     camWarningShownRef.current = false;
+    setMultiPersonCountdown(null);
+    setDetectedPersons([]);
+    secondPersonActiveRef.current = false;
+    secondPersonStartTimeRef.current = null;
   };
 
   const startCamera = async (videoEl) => {
@@ -579,6 +605,105 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                   handlePrivacyViolation("mobile_phone_detected");
                 }
                 return;
+              }
+
+              // 3. Person Detection & Second Person Highlighting with 10s Countdown
+              const personDetections = predictions.filter(
+                (p) => p.class === "person" && p.score >= 0.45
+              );
+
+              const vidW = video.videoWidth || 640;
+              const vidH = video.videoHeight || 480;
+
+              // Sort persons by bounding box area: largest is primary student
+              const sortedPersons = [...personDetections].sort((a, b) => {
+                const areaA = (a.bbox[2] || 0) * (a.bbox[3] || 0);
+                const areaB = (b.bbox[2] || 0) * (b.bbox[3] || 0);
+                return areaB - areaA;
+              });
+
+              if (sortedPersons.length >= 2) {
+                // Another person is in the camera feed!
+                const boxes = sortedPersons.map((p, idx) => {
+                  const [x, y, w, h] = p.bbox;
+                  // Mirror X coordinate because webcam preview is scaleX(-1)
+                  const mirroredX = vidW - (x + w);
+                  return {
+                    id: idx,
+                    isPrimary: idx === 0,
+                    isSecondPerson: idx >= 1,
+                    leftPct: Math.max(0, Math.min(100, (mirroredX / vidW) * 100)),
+                    topPct: Math.max(0, Math.min(100, (y / vidH) * 100)),
+                    widthPct: Math.max(0, Math.min(100, (w / vidW) * 100)),
+                    heightPct: Math.max(0, Math.min(100, (h / vidH) * 100)),
+                  };
+                });
+                setDetectedPersons(boxes);
+
+                if (!secondPersonActiveRef.current) {
+                  secondPersonActiveRef.current = true;
+                  secondPersonStartTimeRef.current = Date.now();
+                  setMultiPersonCountdown(10);
+                } else {
+                  const elapsed = Math.floor((Date.now() - secondPersonStartTimeRef.current) / 1000);
+                  const remaining = Math.max(0, 10 - elapsed);
+                  setMultiPersonCountdown(remaining);
+
+                  if (remaining <= 0) {
+                    console.warn("🚨 Second person remained in camera frame over 10s! Terminating quiz.");
+                    active = false;
+                    if (camDetectionLoopRef.current) {
+                      clearTimeout(camDetectionLoopRef.current);
+                      camDetectionLoopRef.current = null;
+                    }
+                    setMultiPersonCountdown(null);
+                    secondPersonActiveRef.current = false;
+                    secondPersonStartTimeRef.current = null;
+                    if (handlePrivacyViolationRef.current) {
+                      handlePrivacyViolationRef.current("multiple_persons_detected");
+                    } else {
+                      handlePrivacyViolation("multiple_persons_detected");
+                    }
+                    return;
+                  }
+                }
+              } else if (sortedPersons.length === 1) {
+                // Exactly 1 person detected (the primary student)
+                const p = sortedPersons[0];
+                const [x, y, w, h] = p.bbox;
+                const mirroredX = vidW - (x + w);
+                setDetectedPersons([
+                  {
+                    id: 0,
+                    isPrimary: true,
+                    isSecondPerson: false,
+                    leftPct: Math.max(0, Math.min(100, (mirroredX / vidW) * 100)),
+                    topPct: Math.max(0, Math.min(100, (y / vidH) * 100)),
+                    widthPct: Math.max(0, Math.min(100, (w / vidW) * 100)),
+                    heightPct: Math.max(0, Math.min(100, (h / vidH) * 100)),
+                  },
+                ]);
+
+                // If second person was previously in frame and now left!
+                if (secondPersonActiveRef.current) {
+                  secondPersonActiveRef.current = false;
+                  secondPersonStartTimeRef.current = null;
+                  setMultiPersonCountdown(null);
+                  toast.success(
+                    lang === "ar"
+                      ? "✅ غادر الشخص الإضافي الكاميرا. تم استئناف الاختبار بأمان."
+                      : "✅ Second person left the camera. Quiz resuming safely.",
+                    { duration: 3500 }
+                  );
+                }
+              } else {
+                // 0 persons in frame
+                setDetectedPersons([]);
+                if (secondPersonActiveRef.current) {
+                  secondPersonActiveRef.current = false;
+                  secondPersonStartTimeRef.current = null;
+                  setMultiPersonCountdown(null);
+                }
               }
             } catch {
               // Frame read exception, ignore and continue
@@ -1488,13 +1613,16 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
             left: "50%",
             transform: "translateX(-50%)",
             zIndex: 99997,
-            width: 160,
-            height: 110,
+            width: multiPersonCountdown !== null ? 220 : 160,
+            height: multiPersonCountdown !== null ? 150 : 110,
             borderRadius: 14,
             overflow: "hidden",
-            border: "2px solid #38bdf8",
-            boxShadow: "0 8px 30px rgba(0,0,0,0.7), 0 0 16px rgba(56,189,248,0.25)",
+            border: multiPersonCountdown !== null ? "2.5px solid #ef4444" : "2px solid #38bdf8",
+            boxShadow: multiPersonCountdown !== null
+              ? "0 8px 30px rgba(239,68,68,0.5), 0 0 20px rgba(239,68,68,0.4)"
+              : "0 8px 30px rgba(0,0,0,0.7), 0 0 16px rgba(56,189,248,0.25)",
             background: "#0f172a",
+            transition: "all 0.3s ease",
           }}
         >
           <video
@@ -1510,15 +1638,58 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
             playsInline
             style={{ width: "100%", height: "100%", objectFit: "cover", transform: "scaleX(-1)", display: "block" }}
           />
+
+          {/* Person Detection Overlays: Person 1 (Green) vs Person 2 (Red Highlight) */}
+          {detectedPersons.map((p) => (
+            <div
+              key={p.id}
+              style={{
+                position: "absolute",
+                left: `${p.leftPct}%`,
+                top: `${p.topPct}%`,
+                width: `${p.widthPct}%`,
+                height: `${p.heightPct}%`,
+                border: p.isSecondPerson ? "2.5px solid #ef4444" : "1.5px solid #10b981",
+                borderRadius: 6,
+                backgroundColor: p.isSecondPerson ? "rgba(239, 68, 68, 0.25)" : "rgba(16, 185, 129, 0.12)",
+                boxShadow: p.isSecondPerson ? "0 0 14px #ef4444" : "none",
+                pointerEvents: "none",
+                transition: "all 0.15s ease-out",
+              }}
+            >
+              <span
+                style={{
+                  position: "absolute",
+                  bottom: "100%",
+                  left: 0,
+                  fontSize: 7.5,
+                  fontWeight: 900,
+                  color: "#fff",
+                  backgroundColor: p.isSecondPerson ? "#ef4444" : "#10b981",
+                  padding: "1px 4px",
+                  borderRadius: 4,
+                  whiteSpace: "nowrap",
+                  letterSpacing: 0.3,
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.4)",
+                  marginBottom: 2,
+                }}
+              >
+                {p.isSecondPerson
+                  ? (lang === "ar" ? "🚨 شخص 2 غير مصرح" : "🚨 Person 2 Unauthorized")
+                  : (lang === "ar" ? "👤 طالب معتمد" : "👤 Student Verified")}
+              </span>
+            </div>
+          ))}
+
           <div
             style={{
               position: "absolute",
               top: 5,
               left: 6,
               fontSize: 9,
-              color: "#34d399",
+              color: multiPersonCountdown !== null ? "#ef4444" : "#34d399",
               fontWeight: 800,
-              background: "rgba(15, 23, 42, 0.75)",
+              background: "rgba(15, 23, 42, 0.8)",
               backdropFilter: "blur(4px)",
               padding: "2px 6px",
               borderRadius: 6,
@@ -1533,12 +1704,75 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                 width: 6,
                 height: 6,
                 borderRadius: "50%",
-                background: "#ef4444",
+                background: multiPersonCountdown !== null ? "#ef4444" : "#34d399",
                 display: "inline-block",
-                boxShadow: "0 0 6px #ef4444",
+                boxShadow: multiPersonCountdown !== null ? "0 0 8px #ef4444" : "0 0 6px #34d399",
               }}
             />
-            LIVE
+            {multiPersonCountdown !== null ? "ALERT" : "LIVE"}
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Prominent Warning Banner for 10-Second Countdown */}
+      {activeQuiz && multiPersonCountdown !== null && createPortal(
+        <div
+          style={{
+            position: "fixed",
+            top: 175,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 99998,
+            width: "92%",
+            maxWidth: 520,
+            borderRadius: 20,
+            background: "linear-gradient(135deg, rgba(225, 29, 72, 0.96), rgba(159, 18, 57, 0.96))",
+            color: "#fff",
+            padding: "14px 20px",
+            boxShadow: "0 14px 45px rgba(225, 29, 72, 0.5), 0 0 0 2px rgba(255, 255, 255, 0.2)",
+            backdropFilter: "blur(12px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 16,
+            animation: "pulse 1.5s infinite",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <span style={{ fontSize: 28 }}>⚠️</span>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 900, textTransform: "uppercase", letterSpacing: 0.5, color: "#fecdd3" }}>
+                {lang === "ar"
+                  ? "تحذير: تم رصد شخص إضافي أمام الكاميرا!"
+                  : "Security Alert: Second Person Detected!"}
+              </div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: "#fff", marginTop: 2 }}>
+                {lang === "ar"
+                  ? `يجب مغادرة الشخص الإضافي فوراً خلال ${multiPersonCountdown} ثوانٍ وإلا سيتم إنهاء الاختبار!`
+                  : `Second person must leave camera frame within ${multiPersonCountdown}s or quiz will be terminated!`}
+              </div>
+            </div>
+          </div>
+          <div
+            style={{
+              height: 48,
+              width: 48,
+              borderRadius: "50%",
+              background: "rgba(255, 255, 255, 0.25)",
+              border: "2px solid rgba(255, 255, 255, 0.6)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontFamily: "monospace",
+              fontSize: 22,
+              fontWeight: 900,
+              color: "#fff",
+              flexShrink: 0,
+              boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
+            }}
+          >
+            {multiPersonCountdown}
           </div>
         </div>,
         document.body
