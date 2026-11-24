@@ -5,12 +5,7 @@ const RANK_CONFIGS = {
     templateUrl: "/certificates/cert_template_1.jpg",
     nameColor: "#644a1d",
     nameShadow: "rgba(217, 119, 6, 0.25)",
-    citationColor: "#334155",
-    accentColor: "#b45309",
-    citationLines: [
-      "In recognition of his/her outstanding excellence, continuous dedication, and",
-      "exceptional performance that leaves an inspiring impact.",
-    ],
+    accentColor: "#92400e",
     sealTitle: "1st Place - Golden Rank",
     strokeHex: "#0f172a",
     fallbackBorder: [180, 115, 14],
@@ -20,12 +15,7 @@ const RANK_CONFIGS = {
     templateUrl: "/certificates/cert_template_2.jpg",
     nameColor: "#222c54",
     nameShadow: "rgba(99, 102, 241, 0.25)",
-    citationColor: "#334155",
-    accentColor: "#4338ca",
-    citationLines: [
-      "In recognition of his/her remarkable dedication, consistent effort,",
-      "and distinguished academic achievement.",
-    ],
+    accentColor: "#3730a3",
     sealTitle: "2nd Place - Silver Rank",
     strokeHex: "#0f172a",
     fallbackBorder: [67, 56, 202],
@@ -35,12 +25,7 @@ const RANK_CONFIGS = {
     templateUrl: "/certificates/cert_template_3.jpg",
     nameColor: "#4d2816",
     nameShadow: "rgba(180, 83, 9, 0.25)",
-    citationColor: "#334155",
-    accentColor: "#9a3412",
-    citationLines: [
-      "In recognition of his/her commendable perseverance, strong commitment,",
-      "and notable academic progress.",
-    ],
+    accentColor: "#7c2d12",
     sealTitle: "3rd Place - Bronze Rank",
     strokeHex: "#0f172a",
     fallbackBorder: [15, 118, 110],
@@ -87,7 +72,7 @@ function createSignaturePng(instructorName = "Instructor", strokeHex = "#0f172a"
   ctx.textBaseline = "middle";
   ctx.fillText(sigText, 0, 0);
 
-  // Elegant calligraphy flourish underline
+  // Calligraphic pen flourish underline
   const textWidth = Math.min(ctx.measureText(sigText).width + 30, canvas.width - 40);
   const halfW = textWidth / 2;
   ctx.strokeStyle = strokeHex;
@@ -103,7 +88,6 @@ function createSignaturePng(instructorName = "Instructor", strokeHex = "#0f172a"
 }
 
 function drawVectorFallback(ctx, rank, cfg) {
-  // 2048 x 1528 fallback canvas
   ctx.fillStyle = `rgb(${cfg.fallbackBg.join(",")})`;
   ctx.fillRect(0, 0, 2048, 1528);
 
@@ -147,7 +131,8 @@ export async function generateTop3CertificatePdf({
   canvas.height = 1528;
   const ctx = canvas.getContext("2d");
 
-  // 1. Draw High-Fidelity Certificate Background Template (Gold, Silver, or Bronze)
+  // 1. Draw High-Fidelity Background Template (Gold, Silver, or Bronze)
+  // Note: The template already contains the official citation text in crystal-clear typography.
   try {
     const templateImg = await loadImage(cfg.templateUrl);
     ctx.drawImage(templateImg, 0, 0, 2048, 1528);
@@ -156,64 +141,54 @@ export async function generateTop3CertificatePdf({
     drawVectorFallback(ctx, rank, cfg);
   }
 
-  // 2. Render Student Name in Flowing Classical Script
+  // 2. Render Student Name in Classical Flowing Script (Centered at Y = 870)
   ctx.save();
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
 
-  let nameFontSize = 100;
+  let nameFontSize = 96;
   const scriptFontFamily =
     "'Alex Brush', 'Great Vibes', 'Brush Script MT', 'Lucida Handwriting', 'Segoe Script', cursive, serif";
   ctx.font = `italic 600 ${nameFontSize}px ${scriptFontFamily}`;
 
-  while (ctx.measureText(displayStudent).width > 1300 && nameFontSize > 44) {
+  while (ctx.measureText(displayStudent).width > 1200 && nameFontSize > 44) {
     nameFontSize -= 4;
     ctx.font = `italic 600 ${nameFontSize}px ${scriptFontFamily}`;
   }
 
   ctx.fillStyle = cfg.nameColor;
   ctx.shadowColor = cfg.nameShadow;
-  ctx.shadowBlur = 10;
+  ctx.shadowBlur = 8;
   ctx.shadowOffsetX = 1;
   ctx.shadowOffsetY = 2;
-  ctx.fillText(displayStudent, 1024, 860);
+  ctx.fillText(displayStudent, 1024, 870);
   ctx.restore();
 
-  // 3. Render Rank Citation Lines
+  // 3. Render Course & Score Badge (Positioned at Y = 965, cleanly between Name and Citation with ZERO collision)
   ctx.save();
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.font = "italic 500 27px 'Cinzel', 'Georgia', 'Times New Roman', serif";
-  ctx.fillStyle = cfg.citationColor;
-  ctx.fillText(cfg.citationLines[0], 1024, 1035);
-  ctx.fillText(cfg.citationLines[1], 1024, 1078);
-  ctx.restore();
-
-  // 4. Render Course Title & Official Points Breakdown Badge
-  ctx.save();
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.font = "bold 23px 'Cinzel', 'Trajan Pro', 'Segoe UI', sans-serif";
+  ctx.font = "bold 21px 'Cinzel', 'Trajan Pro', 'Segoe UI', sans-serif";
   ctx.fillStyle = cfg.accentColor;
   const detailsStr = `Course: "${displayCourse}"   ·   Score: ${totalPoints} Pts (Quizzes: ${quizPoints} pts | Assignments: ${assignmentPoints} pts)`;
-  ctx.fillText(detailsStr, 1024, 1135);
+  ctx.fillText(detailsStr, 1024, 965);
   ctx.restore();
 
-  // 5. Subject Teacher Signature & Title (Bottom Left)
+  // 4. Subject Teacher Signature & Title (Bottom Left: X = 350, Y = 1260)
   try {
     const sigPng = createSignaturePng(resolvedInstructor, cfg.strokeHex);
     const sigImg = await loadImage(sigPng);
-    ctx.drawImage(sigImg, 220, 1145, 270, 85);
+    ctx.drawImage(sigImg, 215, 1145, 270, 85);
   } catch {}
 
   ctx.save();
   ctx.textAlign = "center";
   ctx.font = "600 23px 'Cinzel', 'Segoe UI', 'Helvetica', sans-serif";
   ctx.fillStyle = "#1e293b";
-  ctx.fillText(`Subject Teacher / ${resolvedInstructor}`, 355, 1262);
+  ctx.fillText(`Subject Teacher / ${resolvedInstructor}`, 350, 1262);
   ctx.restore();
 
-  // 6. Issue Date & Verification Identifier (Bottom Right)
+  // 5. Issue Date & Certificate Verification ID (Bottom Right: X = 1680)
   const issueDate = new Date().toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -231,9 +206,9 @@ export async function generateTop3CertificatePdf({
   ctx.fillText(`ID: ${certCode}`, 1680, 1270);
   ctx.restore();
 
-  // 7. Generate Landscape A4 PDF Document
+  // 6. Generate Landscape A4 PDF Document
   const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
-  const dataUrl = canvas.toDataURL("image/jpeg", 0.94);
+  const dataUrl = canvas.toDataURL("image/jpeg", 0.95);
   doc.addImage(dataUrl, "JPEG", 0, 0, 297, 210);
 
   const safeFile = displayStudent.replace(/[^a-z0-9]/gi, "_");
