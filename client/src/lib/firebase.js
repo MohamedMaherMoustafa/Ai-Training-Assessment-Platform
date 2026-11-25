@@ -6,7 +6,7 @@ import { getStorage } from "firebase/storage";
 import { getAnalytics, isSupported } from "firebase/analytics";
 
 export const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDcFiKm1P-vUPy11SDGtzhwUhcQew87efU",
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "training-assessment-platform.firebaseapp.com",
   databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL || "https://training-assessment-platform-default-rtdb.firebaseio.com",
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "training-assessment-platform",
