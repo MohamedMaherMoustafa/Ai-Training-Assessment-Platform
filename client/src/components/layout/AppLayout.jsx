@@ -252,9 +252,9 @@ export default function AppLayout({ navItems, children }) {
         <aside
           className={`fixed lg:static inset-y-0 start-0 z-40 h-screen lg:h-full shrink-0 w-[86vw] max-w-[280px] ${
             sidebarCollapsed ? "lg:w-[76px]" : "lg:w-[230px] xl:w-[245px]"
-          } bg-white/40 dark:bg-transparent lg:bg-transparent lg:dark:bg-transparent backdrop-blur-2xl lg:backdrop-blur-none text-slate-800 dark:text-white border-e border-teal-500/25 dark:border-teal-400/35 flex flex-col justify-between overflow-hidden transition-all duration-300 ${
+          } bg-black/25 dark:bg-transparent lg:bg-black/15 lg:dark:bg-transparent backdrop-blur-2xl lg:backdrop-blur-md text-slate-100 dark:text-white border-e border-teal-500/25 dark:border-teal-400/35 flex flex-col justify-between overflow-hidden transition-all duration-300 ${
             sidebarOpen
-              ? "translate-x-0 bg-white/95 dark:bg-[#07131b]/95"
+              ? "translate-x-0 bg-[#07131b]/95"
               : "-translate-x-full rtl:translate-x-full lg:translate-x-0 lg:rtl:translate-x-0"
           }`}
         >
@@ -289,9 +289,9 @@ export default function AppLayout({ navItems, children }) {
                 />
               </div>
 
-              {/* Platform Slogan: smaller & fully visible without clipping */}
+              {/* Platform Slogan: smaller & fully visible with high contrast */}
               {!sidebarCollapsed && (
-                <div className="text-[8.5px] xs:text-[9px] font-bold text-slate-900 dark:text-teal-200/95 tracking-tight mt-1.5 select-none leading-none whitespace-nowrap overflow-visible">
+                <div className="text-[8.5px] xs:text-[9px] font-bold text-teal-300 dark:text-teal-200/95 tracking-tight mt-1.5 select-none leading-none whitespace-nowrap overflow-visible drop-shadow-sm">
                   {lang === "ar"
                     ? "• تعلّم • تطوّر • حقّق أهدافك"
                     : "• Learn • Develop • Achieve Your Goals"}
@@ -328,7 +328,7 @@ export default function AppLayout({ navItems, children }) {
                       `group relative flex items-center ${sidebarCollapsed ? "justify-center px-2 py-2" : "gap-3 ps-3.5 pe-4 py-2.5"} text-xs transition-all duration-200 z-30 ${
                         isActive
                           ? "rounded-s-2xl rounded-e-none text-white font-black"
-                          : `rounded-xl ${sidebarCollapsed ? "mx-1" : "me-3"} text-slate-900 dark:text-slate-100 hover:text-black dark:hover:text-white hover:bg-black/[0.05] dark:hover:bg-white/[0.08] font-bold`
+                          : `rounded-xl ${sidebarCollapsed ? "mx-1" : "me-3"} text-slate-100 hover:text-white hover:bg-white/[0.12] font-extrabold`
                       }`
                     }
                   >
@@ -338,12 +338,12 @@ export default function AppLayout({ navItems, children }) {
                           className={`h-7 w-7 rounded-lg flex items-center justify-center shrink-0 transition-all duration-300 transform ${
                             isActive
                               ? "bg-white/20 text-white border border-white/30 shadow-sm scale-105 dark:bg-teal-400/25 dark:text-teal-300 dark:border-teal-400/60 dark:shadow-[0_0_14px_rgba(45,212,191,0.5)]"
-                              : "text-slate-900 dark:text-slate-200 group-hover:text-black dark:group-hover:text-white group-hover:scale-105"
+                              : "bg-white/[0.08] border border-white/15 text-slate-200 group-hover:bg-white/[0.18] group-hover:text-white group-hover:border-white/30 group-hover:scale-105"
                           }`}
                         >
                           <Icon className="h-4 w-4 shrink-0 stroke-[2.2]" />
                         </span>
-                        {!sidebarCollapsed && <span className="truncate tracking-wide font-bold">{item.label}</span>}
+                        {!sidebarCollapsed && <span className="truncate tracking-wide font-extrabold text-slate-100 group-hover:text-white drop-shadow-sm">{item.label}</span>}
 
                         {/* Direct Chat Live Unread Counter Badge */}
                         {isChat && unreadChatCount > 0 && !sidebarCollapsed && (
@@ -425,8 +425,8 @@ export default function AppLayout({ navItems, children }) {
                 <Menu className="h-4 w-4" />
               </button>
               <div className="flex items-center gap-1.5 text-xs font-semibold">
-                <span className="text-slate-500 dark:text-white/60">Student /</span>
-                <span className="text-slate-900 dark:text-white/90 font-bold">{currentBreadcrumb}</span>
+                <span className="text-slate-300 dark:text-white/60">Student /</span>
+                <span className="text-white dark:text-white/90 font-extrabold drop-shadow-sm">{currentBreadcrumb}</span>
               </div>
             </div>
 
@@ -451,11 +451,11 @@ export default function AppLayout({ navItems, children }) {
                 <button
                   onClick={() => setNotifOpen((o) => !o)}
                   aria-label="Notifications"
-                  className="text-slate-800 dark:text-white/90 hover:text-slate-950 dark:hover:text-white transition-colors relative p-1 cursor-pointer"
+                  className="h-8 w-8 rounded-xl border border-white/25 dark:border-white/15 bg-white/10 dark:bg-white/5 hover:bg-white/20 dark:hover:bg-white/10 text-slate-200 hover:text-white transition-all relative flex items-center justify-center cursor-pointer shadow-xs active:scale-95"
                 >
                   <Bell className="h-4 w-4" />
                   {unreadCount > 0 && (
-                    <span className="absolute top-0 end-0 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-black" />
+                    <span className="absolute top-1 end-1 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-black" />
                   )}
                 </button>
 
@@ -541,26 +541,26 @@ export default function AppLayout({ navItems, children }) {
               <button
                 onClick={toggleSound}
                 aria-label="Toggle sound"
-                className="text-slate-800 dark:text-white/90 hover:text-slate-950 dark:hover:text-white transition-colors p-1 cursor-pointer"
+                className="h-8 w-8 rounded-xl border border-white/25 dark:border-white/15 bg-white/10 dark:bg-white/5 hover:bg-white/20 dark:hover:bg-white/10 text-slate-200 hover:text-white transition-all flex items-center justify-center cursor-pointer shadow-xs active:scale-95"
               >
-                {soundOn ? <Volume2 className="h-4 w-4 text-slate-900 dark:text-white/90" /> : <VolumeX className="h-4 w-4 text-slate-400" />}
+                {soundOn ? <Volume2 className="h-4 w-4 text-teal-300" /> : <VolumeX className="h-4 w-4 text-slate-400" />}
               </button>
 
               {/* Language Switcher */}
               <LanguageDropdown />
 
-              {/* Theme Toggle Icon */}
+              {/* Theme Toggle Icon with high-contrast glowing Moon & Sun */}
               <button
                 type="button"
                 onClick={toggleTheme}
                 aria-label="Toggle theme"
                 title={theme === "dark" ? t("app.light") : t("app.dark")}
-                className="text-slate-800 dark:text-white/90 hover:text-slate-950 dark:hover:text-white transition-colors p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center justify-center shrink-0"
+                className="h-8 w-8 rounded-xl border border-white/35 dark:border-white/15 bg-white/15 dark:bg-white/10 hover:bg-white/25 dark:hover:bg-white/20 text-slate-100 hover:text-white backdrop-blur-xl flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95"
               >
                 {theme === "dark" ? (
-                  <Sun className="h-4 w-4 text-amber-400 hover:text-amber-300 transition-transform hover:rotate-45" />
+                  <Sun className="h-4 w-4 text-amber-400 hover:text-amber-300 transition-transform hover:rotate-45 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]" />
                 ) : (
-                  <Moon className="h-4 w-4 text-slate-700 hover:text-indigo-600 transition-transform hover:-rotate-12" />
+                  <Moon className="h-4 w-4 text-teal-300 hover:text-teal-200 transition-transform hover:-rotate-12 drop-shadow-[0_0_8px_rgba(45,212,191,0.7)]" />
                 )}
               </button>
 
