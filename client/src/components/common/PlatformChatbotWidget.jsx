@@ -892,12 +892,8 @@ export default function PlatformChatbotWidget() {
                 idPrefix="widget"
               />
             </div>
-            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/90 dark:bg-[#0c1a26]/90 backdrop-blur-xl border border-slate-200/80 dark:border-teal-500/35 shadow-[0_8px_22px_rgba(0,0,0,0.35)] text-[11px] font-bold text-slate-900 dark:text-white">
+            <div className="inline-flex items-center justify-center px-3.5 py-1 rounded-full bg-white/90 dark:bg-[#0c1a26]/90 backdrop-blur-xl border border-slate-200/80 dark:border-teal-500/35 shadow-[0_8px_22px_rgba(0,0,0,0.35)] text-[11px] font-bold text-slate-900 dark:text-white">
               <span>{lang === "ar" ? "أثر AI" : "Athar AI"}</span>
-              <span className="text-teal-400 font-black">•</span>
-              <span className="text-teal-600 dark:text-teal-300 font-bold">
-                {lang === "ar" ? "متصل" : "Online"}
-              </span>
             </div>
           </div>
         </button>
