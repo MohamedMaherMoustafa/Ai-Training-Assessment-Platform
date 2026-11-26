@@ -142,7 +142,7 @@ export default function PlatformCachePrompt() {
         type="button"
         onClick={() => setVisible(true)}
         title={lang === "ar" ? "تسريع أداء المنصة" : "Accelerate Platform Performance"}
-        className="fixed bottom-3 start-3 z-30 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-indigo-600/90 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/25 text-[11px] font-bold backdrop-blur-md transition-all hover:scale-105 cursor-pointer animate-bounce"
+        className="fixed bottom-3 start-3 z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-sky-500 via-teal-500 to-emerald-500 hover:opacity-95 text-white shadow-lg shadow-teal-500/25 text-[11px] font-bold backdrop-blur-md transition-all hover:scale-105 cursor-pointer"
       >
         <Zap className="h-3.5 w-3.5 fill-current text-amber-300" />
         <span>{lang === "ar" ? "تسريع المنصة" : "Turbo Boost"}</span>
@@ -151,14 +151,14 @@ export default function PlatformCachePrompt() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fadeIn">
-      <div className="relative w-full max-w-md bg-white dark:bg-slate-900 border border-indigo-200 dark:border-indigo-900/60 rounded-3xl p-6 shadow-2xl shadow-indigo-500/10 text-slate-900 dark:text-white transition-all">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/65 backdrop-blur-sm animate-fadeIn">
+      <div className="glass-panel relative w-full max-w-md border-teal-400/25 rounded-3xl p-6 shadow-2xl text-slate-900 dark:text-white transition-all">
         {/* Close / Later Button */}
         {!caching && (
           <button
             type="button"
             onClick={handleDismiss}
-            className="absolute top-4 end-4 p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            className="absolute top-4 end-4 p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
@@ -167,7 +167,7 @@ export default function PlatformCachePrompt() {
 
         {/* Header Icon */}
         <div className="flex items-center gap-3 mb-4">
-          <div className="h-12 w-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30 shrink-0">
+          <div className="h-12 w-12 rounded-2xl bg-gradient-to-tr from-sky-500 via-teal-500 to-emerald-500 flex items-center justify-center text-white shadow-lg shadow-teal-500/30 shrink-0">
             <Zap className="h-6 w-6 fill-current animate-pulse text-amber-200" />
           </div>
           <div>
@@ -176,7 +176,7 @@ export default function PlatformCachePrompt() {
                 ? "تسريع أداء المنصة وحفظ الموارد"
                 : "Accelerate Platform Performance"}
             </h3>
-            <p className="text-xs text-indigo-600 dark:text-cyan-400 font-semibold mt-0.5 flex items-center gap-1">
+            <p className="text-xs text-teal-600 dark:text-teal-300 font-semibold mt-0.5 flex items-center gap-1">
               <Sparkles className="h-3 w-3" />
               {lang === "ar" ? "وضع السرعة الفائقة والذاكرة المؤقتة" : "High-Speed Turbo & Cache Storage"}
             </p>
@@ -192,13 +192,13 @@ export default function PlatformCachePrompt() {
 
         {/* Benefits list */}
         <div className="grid grid-cols-1 gap-2 mb-5">
-          <div className="flex items-center gap-2 p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-white/5 text-xs">
+          <div className="flex items-center gap-2 p-2.5 rounded-xl glass-subtle text-xs">
             <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
             <span className="font-medium">
               {lang === "ar" ? "تحميل فوري للصفحات والمقررات" : "Instant millisecond page transitions"}
             </span>
           </div>
-          <div className="flex items-center gap-2 p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-white/5 text-xs">
+          <div className="flex items-center gap-2 p-2.5 rounded-xl glass-subtle text-xs">
             <ShieldCheck className="h-4 w-4 text-sky-500 shrink-0" />
             <span className="font-medium">
               {lang === "ar" ? "حماية وتشفير وتوفير استهلاك البيانات" : "Bandwidth saving & offline asset readiness"}
@@ -209,13 +209,13 @@ export default function PlatformCachePrompt() {
         {/* Progress Bar during caching */}
         {caching && (
           <div className="mb-4">
-            <div className="flex items-center justify-between text-xs font-bold mb-1.5 text-indigo-600 dark:text-cyan-400">
+            <div className="flex items-center justify-between text-xs font-bold mb-1.5 text-teal-600 dark:text-teal-300">
               <span className="truncate">{statusText}</span>
               <span>{progress}%</span>
             </div>
-            <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+            <div className="w-full h-2 rounded-full bg-slate-200/70 dark:bg-white/10 overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-amber-500 via-indigo-500 to-emerald-500 transition-all duration-300 ease-out"
+                className="h-full bg-gradient-to-r from-sky-500 via-teal-500 to-emerald-500 transition-all duration-300 ease-out"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -228,7 +228,7 @@ export default function PlatformCachePrompt() {
             <button
               type="button"
               onClick={handleDismiss}
-              className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              className="glass-btn-secondary px-4 py-2 rounded-xl text-xs font-bold cursor-pointer"
             >
               {lang === "ar" ? "تذكيري لاحقاً" : "Remind me later"}
             </button>
@@ -238,7 +238,7 @@ export default function PlatformCachePrompt() {
             type="button"
             disabled={caching}
             onClick={handleStartCaching}
-            className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-emerald-600 hover:from-indigo-500 hover:to-emerald-500 text-white text-xs font-extrabold shadow-md shadow-indigo-500/25 hover:shadow-lg transition-all cursor-pointer disabled:opacity-50"
+            className="glass-btn-primary flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs cursor-pointer disabled:opacity-50"
           >
             {caching ? (
               <>

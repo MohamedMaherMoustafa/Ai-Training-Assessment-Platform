@@ -1859,7 +1859,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                   <button
                     type="button"
                     onClick={handleResumeFromWarning}
-                    className="mt-3 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-sky-500 via-indigo-600 to-violet-600 hover:from-sky-400 hover:via-indigo-500 hover:to-violet-500 text-white text-xs sm:text-sm font-black shadow-xl shadow-indigo-600/40 hover:scale-105 active:scale-95 transition-all cursor-pointer border border-white/20"
+                    className="mt-3 px-8 py-3.5 rounded-2xl glass-btn-primary text-xs sm:text-sm font-black shadow-xl hover:scale-105 active:scale-95 transition-all cursor-pointer border border-white/20"
                   >
                     {lang === "ar" ? "أدركت ذلك — العودة ومتابعة الاختبار" : "I Understand — Resume Quiz"}
                   </button>
@@ -1922,7 +1922,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                     return (
                       <div
                         key={q.id}
-                        className="p-5 rounded-2xl glass-subtle space-y-3 border border-indigo-400/30 shadow-sm"
+                        className="p-5 rounded-2xl glass-subtle space-y-3 border border-teal-400/30 shadow-sm"
                       >
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <div className="font-bold text-sm text-slate-900 dark:text-white">
@@ -1948,7 +1948,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                           <span>
                             {lang === "ar" ? "عدد الكلمات:" : "Word count:"} {wordCount}
                           </span>
-                          <span className="text-indigo-600 dark:text-cyan-400 font-bold">
+                          <span className="text-teal-600 dark:text-teal-300 font-bold">
                             {lang === "ar" ? "درجة السؤال: 1 نقطة" : "Question Mark: 1 pt"}
                           </span>
                         </div>
@@ -1969,7 +1969,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                           {idx + 1}. {q.text}
                         </div>
                         {isMulti && (
-                          <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-400/30">
+                          <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-teal-500/15 text-teal-700 dark:text-teal-300 border border-teal-400/30">
                             {lang === "ar" ? "اختر كل ما ينطبق" : "Select all that apply"}
                           </span>
                         )}
@@ -2091,7 +2091,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
       {showBuilder && canManage && (
         <form onSubmit={handleSaveQuiz} autoComplete="off" className="glass-form-card p-6 sm:p-7 space-y-6">
           <div className="flex items-center gap-3 pb-3 border-b border-slate-200/60 dark:border-white/10">
-            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-violet-600 to-fuchsia-600 text-white flex items-center justify-center shadow-md shadow-violet-500/20">
+            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-sky-500 to-emerald-500 text-white flex items-center justify-center shadow-md shadow-teal-500/25">
               <Sparkles className="h-5 w-5" />
             </div>
             <div>
@@ -2192,7 +2192,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                 <button
                   type="button"
                   onClick={() => setDurationMinutes(calcAutoQuizTime(questions, difficulty))}
-                  className="text-[10px] sm:text-[11px] px-2 py-0.5 rounded-lg bg-indigo-500/15 text-indigo-700 dark:text-cyan-300 font-bold hover:bg-indigo-500/25 flex items-center gap-1 transition-all cursor-pointer"
+                  className="text-[10px] sm:text-[11px] px-2 py-0.5 rounded-lg bg-teal-500/15 text-teal-700 dark:text-teal-300 font-bold hover:bg-teal-500/25 flex items-center gap-1 transition-all cursor-pointer"
                   title={
                     lang === "ar"
                       ? "تطبيق الوقت المقدر تلقائياً بناءً على مستوى الصعوبة ونوعية الأسئلة"
@@ -2216,7 +2216,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                 type="button"
                 onClick={() => handleDraftWithAI(10)}
                 disabled={Boolean(draftingAI)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white text-xs font-bold shadow-lg shadow-purple-500/25 active:scale-95 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-2xl glass-btn-primary text-xs active:scale-95 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                 title={
                   lang === "ar"
                     ? "توليد 10 أسئلة (اختيار من متعدد + نظري) بواسطة ذكاء المنصة"
@@ -2240,7 +2240,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                 type="button"
                 onClick={() => handleDraftWithAI(15)}
                 disabled={Boolean(draftingAI)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white text-xs font-bold shadow-lg shadow-violet-500/25 active:scale-95 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white text-xs font-bold shadow-lg shadow-teal-500/25 active:scale-95 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                 title={
                   lang === "ar"
                     ? "توليد 15 سؤالاً بواسطة ذكاء المنصة"
@@ -2264,7 +2264,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                 type="button"
                 onClick={() => handleDraftWithAI(20)}
                 disabled={Boolean(draftingAI)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 hover:from-purple-500 hover:to-rose-500 text-white text-xs font-bold shadow-lg shadow-pink-500/25 active:scale-95 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-cyan-500 to-sky-600 hover:from-cyan-400 hover:to-sky-500 text-white text-xs font-bold shadow-lg shadow-sky-500/25 active:scale-95 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                 title={
                   lang === "ar"
                     ? "توليد 20 سؤالاً بواسطة ذكاء المنصة"
@@ -2285,12 +2285,12 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-400/20 text-xs font-bold text-indigo-700 dark:text-cyan-300 cursor-pointer">
+              <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-teal-500/10 border border-teal-400/25 text-xs font-bold text-teal-700 dark:text-teal-300 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={includeTheoretical}
                   onChange={(e) => setIncludeTheoretical(e.target.checked)}
-                  className="rounded text-indigo-600"
+                  className="rounded text-teal-600"
                 />
                 <span>{lang === "ar" ? "تضمين أسئلة نظرية ومقالية" : "Include Theoretical Questions"}</span>
               </label>
@@ -2340,7 +2340,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-black uppercase tracking-wider text-indigo-700 dark:text-indigo-300">
+                      <span className="text-xs font-black uppercase tracking-wider text-teal-700 dark:text-teal-300">
                         {t("quizzes.questionText")} #{idx + 1}
                       </span>
                       <span
@@ -2365,7 +2365,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                       <button
                         type="button"
                         onClick={() => toggleQuestionType(idx)}
-                        className="text-[11px] text-indigo-600 dark:text-cyan-400 font-semibold hover:underline cursor-pointer"
+                        className="text-[11px] text-teal-600 dark:text-teal-300 font-semibold hover:underline cursor-pointer"
                       >
                         {isTheo
                           ? lang === "ar"
@@ -2382,7 +2382,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                             type="checkbox"
                             checked={isMulti}
                             onChange={() => toggleQuestionMode(idx)}
-                            className="rounded text-indigo-600 focus:ring-indigo-500"
+                            className="rounded text-teal-600 focus:ring-teal-500"
                           />
                           {lang === "ar" ? "أكثر من إجابة صحيحة" : "Multiple Correct Answers"}
                         </label>
@@ -2622,7 +2622,7 @@ export default function QuizzesModule({ mode = "admin", activeInstructorId = nul
                       </div>
                     )}
                     {item.aiFeedback && (
-                      <div className="mt-1 p-2 rounded-xl bg-indigo-500/10 border border-indigo-400/20 text-indigo-900 dark:text-cyan-200 text-[11px] leading-relaxed">
+                      <div className="mt-1 p-2 rounded-xl bg-teal-500/10 border border-teal-400/25 text-teal-900 dark:text-teal-200 text-[11px] leading-relaxed">
                         <span className="font-bold">
                           {lang === "ar" ? "💡 تصحيح وتقييم الذكاء الاصطناعي:" : "💡 AI Evaluation & Feedback:"}
                         </span>{" "}

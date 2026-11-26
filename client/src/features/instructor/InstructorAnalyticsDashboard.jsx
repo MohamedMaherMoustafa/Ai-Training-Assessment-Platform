@@ -405,7 +405,7 @@ export default function InstructorAnalyticsDashboard({
       value: `${avgQuizScore}%`,
       sub: `${results.length} attempts · ${passRate}% pass`,
       icon: Award,
-      color: "text-rose-600 bg-rose-500/15 dark:text-rose-300",
+      color: "text-cyan-600 bg-cyan-500/15 border border-cyan-400/25 dark:text-cyan-300",
       to: showManageLinks ? "/instructor/grades" : null,
     },
   ];
@@ -413,11 +413,14 @@ export default function InstructorAnalyticsDashboard({
   return (
     <div className="space-y-6">
       {showManageLinks && (
-        <div className="relative overflow-hidden rounded-[28px] p-6 bg-gradient-to-r from-cyan-500 via-blue-600 to-violet-600 text-white shadow-xl shadow-cyan-500/20">
-          <div className="pointer-events-none absolute -top-12 -end-12 h-44 w-44 rounded-full bg-white/15 blur-2xl" />
+        <div className="relative overflow-hidden rounded-[26px] p-6 glass-panel border-teal-400/25 shadow-xl">
+          <div className="pointer-events-none absolute -top-12 -end-12 h-44 w-44 rounded-full bg-teal-400/15 blur-2xl" />
           <div className="relative">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight">{instName}</h1>
-            <p className="text-xs sm:text-sm text-white/85 mt-1">
+            <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-teal-500/15 border border-teal-400/30 text-[11px] font-bold text-teal-700 dark:text-teal-300 mb-2">
+              Instructor Workspace
+            </span>
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">{instName}</h1>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1">
               {instSpec} —{" "}
               {lang === "ar"
                 ? "لوحة تحليل وإدارة تقدم المقررات والطلاب"
@@ -429,39 +432,31 @@ export default function InstructorAnalyticsDashboard({
 
       {/* 5 KPI Analysis Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        {kpis.map((k, idx) => {
+        {kpis.map((k) => {
           const Icon = k.icon;
-          const topStripes = [
-            "from-indigo-500 to-violet-500",
-            "from-cyan-400 to-sky-500",
-            "from-emerald-400 to-teal-500",
-            "from-amber-400 to-orange-500",
-            "from-rose-400 to-pink-500",
-          ];
           const cardBody = (
             <>
-              <div className={`absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r ${topStripes[idx % topStripes.length]}`} />
-              <div className="flex items-center justify-between pt-1">
-                <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-300">
                   {k.label}
                 </span>
-                <div className={`h-9 w-9 rounded-2xl flex items-center justify-center shadow-sm ${k.color}`}>
+                <div className={`h-9 w-9 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ${k.color}`}>
                   <Icon className="h-4 w-4" />
                 </div>
               </div>
-              <div className="text-2xl font-black mt-2.5">{k.value}</div>
-              <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 flex items-center justify-between">
+              <div className="text-2xl font-black mt-3 text-slate-900 dark:text-white">{k.value}</div>
+              <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 flex items-center justify-between">
                 <span>{k.sub}</span>
-                {k.to && <ArrowUpRight className="h-3.5 w-3.5 text-cyan-500" />}
+                {k.to && <ArrowUpRight className="h-3.5 w-3.5 text-teal-400" />}
               </div>
             </>
           );
           return k.to ? (
-            <Link key={k.label} to={k.to} className="glass-card p-4 block">
+            <Link key={k.label} to={k.to} className="glass-card p-4 flex flex-col justify-between">
               {cardBody}
             </Link>
           ) : (
-            <div key={k.label} className="glass-card p-4">
+            <div key={k.label} className="glass-card p-4 flex flex-col justify-between">
               {cardBody}
             </div>
           );
@@ -473,25 +468,25 @@ export default function InstructorAnalyticsDashboard({
         {/* Course Activity Chart */}
         <div className="glass-card p-5">
           <div className="flex items-center gap-2 mb-3">
-            <BarChart3 className="h-4 w-4 text-sky-600" />
-            <h2 className="text-sm font-bold">Course Activity &amp; Content</h2>
+            <BarChart3 className="h-4 w-4 text-teal-500" />
+            <h2 className="text-sm font-bold text-slate-900 dark:text-white">Course Activity &amp; Content</h2>
           </div>
           {courseMetrics.length === 0 ? (
-            <div className="h-52 flex items-center justify-center text-xs text-slate-500">
+            <div className="h-52 flex items-center justify-center text-xs text-slate-500 dark:text-slate-400">
               No courses yet.
             </div>
           ) : (
             <div className="h-56 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={courseMetrics}>
-                  <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
-                  <XAxis dataKey="shortTitle" tick={{ fontSize: 10 }} />
-                  <YAxis allowDecimals={false} tick={{ fontSize: 10 }} />
+                  <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.15} />
+                  <XAxis dataKey="shortTitle" tick={{ fontSize: 10, fill: "#94a3b8" }} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: "#94a3b8" }} />
                   <Tooltip />
                   <Legend wrapperStyle={{ fontSize: 10 }} />
-                  <Bar dataKey="enrolledCount" name="Enrolled" fill="#6366f1" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="lessonsCount" name="Lessons" fill="#0284c7" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="attemptsCount" name="Quiz Attempts" fill="#10b981" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="enrolledCount" name="Enrolled" fill="#0ea5e9" radius={[5, 5, 0, 0]} />
+                  <Bar dataKey="lessonsCount" name="Lessons" fill="#14b8a6" radius={[5, 5, 0, 0]} />
+                  <Bar dataKey="attemptsCount" name="Quiz Attempts" fill="#10b981" radius={[5, 5, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -501,24 +496,24 @@ export default function InstructorAnalyticsDashboard({
         {/* Quiz Avg vs Assignment Avg per Course */}
         <div className="glass-card p-5">
           <div className="flex items-center gap-2 mb-3">
-            <TrendingUp className="h-4 w-4 text-indigo-600" />
-            <h2 className="text-sm font-bold">Course Marks: Quizzes vs Assignments</h2>
+            <TrendingUp className="h-4 w-4 text-sky-500" />
+            <h2 className="text-sm font-bold text-slate-900 dark:text-white">Course Marks: Quizzes vs Assignments</h2>
           </div>
           {courseMetrics.length === 0 ? (
-            <div className="h-52 flex items-center justify-center text-xs text-slate-500">
+            <div className="h-52 flex items-center justify-center text-xs text-slate-500 dark:text-slate-400">
               No course marks yet.
             </div>
           ) : (
             <div className="h-56 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={courseMetrics}>
-                  <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
-                  <XAxis dataKey="shortTitle" tick={{ fontSize: 10 }} />
-                  <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
+                  <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.15} />
+                  <XAxis dataKey="shortTitle" tick={{ fontSize: 10, fill: "#94a3b8" }} />
+                  <YAxis domain={[0, 100]} tick={{ fontSize: 10, fill: "#94a3b8" }} />
                   <Tooltip />
                   <Legend wrapperStyle={{ fontSize: 10 }} />
-                  <Bar dataKey="quizAvg" name="Quiz Avg %" fill="#0284c7" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="assnAvg" name="Assignment Avg %" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="quizAvg" name="Quiz Avg %" fill="#14b8a6" radius={[5, 5, 0, 0]} />
+                  <Bar dataKey="assnAvg" name="Assignment Avg %" fill="#f59e0b" radius={[5, 5, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -528,11 +523,11 @@ export default function InstructorAnalyticsDashboard({
         {/* Pass/Fail Donut + Grade Distribution */}
         <div className="glass-card p-5 flex flex-col justify-between">
           <div className="flex items-center gap-2 mb-2">
-            <PieIcon className="h-4 w-4 text-emerald-600" />
-            <h2 className="text-sm font-bold">Pass Rate &amp; Grade Bands</h2>
+            <PieIcon className="h-4 w-4 text-emerald-500" />
+            <h2 className="text-sm font-bold text-slate-900 dark:text-white">Pass Rate &amp; Grade Bands</h2>
           </div>
           {results.length === 0 ? (
-            <div className="h-52 flex items-center justify-center text-xs text-slate-500">
+            <div className="h-52 flex items-center justify-center text-xs text-slate-500 dark:text-slate-400">
               No quiz attempts recorded yet.
             </div>
           ) : (
@@ -561,16 +556,16 @@ export default function InstructorAnalyticsDashboard({
               <div className="h-44">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={gradeBuckets}>
-                    <XAxis dataKey="range" tick={{ fontSize: 9 }} />
+                    <XAxis dataKey="range" tick={{ fontSize: 9, fill: "#94a3b8" }} />
                     <YAxis allowDecimals={false} hide />
                     <Tooltip />
-                    <Bar dataKey="count" name="Students" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="count" name="Students" fill="#14b8a6" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>
           )}
-          <div className="text-[11px] text-slate-500 dark:text-slate-400 border-t border-white/40 dark:border-white/10 pt-2 flex justify-between">
+          <div className="text-[11px] text-slate-500 dark:text-slate-400 border-t border-slate-200/70 dark:border-white/10 pt-2 flex justify-between">
             <span>Passed: {passCount}</span>
             <span>Needs Review: {failCount}</span>
           </div>
@@ -663,22 +658,22 @@ export default function InstructorAnalyticsDashboard({
       </div>
 
       {/* Student Progress Tracking Table */}
-      <div className="glass-card overflow-hidden">
-        <div className="px-5 py-3.5 border-b border-white/40 dark:border-white/10 flex items-center justify-between">
-          <h2 className="text-sm font-bold flex items-center gap-2">
-            <Users className="h-4 w-4 text-indigo-600" />
+      <div className="glass-panel rounded-[24px] overflow-hidden">
+        <div className="px-5 py-3.5 border-b border-slate-200/70 dark:border-white/10 flex items-center justify-between flex-wrap gap-2">
+          <h2 className="text-sm font-bold flex items-center gap-2 text-slate-900 dark:text-white">
+            <Users className="h-4 w-4 text-teal-500" />
             Student Progress &amp; Performance Tracker
           </h2>
           {showManageLinks && (
             <div className="flex items-center gap-3 text-xs font-semibold">
               <Link
                 to="/instructor/progress-tracker"
-                className="text-indigo-600 dark:text-indigo-300 hover:underline flex items-center gap-1"
+                className="text-teal-600 dark:text-teal-300 hover:underline flex items-center gap-1"
               >
                 {lang === "ar" ? "تتبع التقدم والتقارير" : "Progress Tracker & Reports"}
                 <ArrowUpRight className="h-3.5 w-3.5" />
               </Link>
-              <Link to="/instructor/students" className="text-sky-600 hover:underline">
+              <Link to="/instructor/students" className="text-sky-600 dark:text-sky-300 hover:underline">
                 Manage Students ({approvedStudents.length})
               </Link>
             </div>
@@ -686,7 +681,7 @@ export default function InstructorAnalyticsDashboard({
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-xs text-start">
-            <thead className="bg-slate-900/5 dark:bg-white/5 uppercase text-slate-600 dark:text-slate-300">
+            <thead className="bg-slate-900/5 dark:bg-white/[0.04] border-b border-slate-200/70 dark:border-white/10 uppercase tracking-wider text-slate-600 dark:text-slate-300">
               <tr>
                 <th className="px-4 py-2.5 text-start">Student</th>
                 <th className="px-4 py-2.5 text-start">Enrolled Courses</th>
@@ -700,16 +695,16 @@ export default function InstructorAnalyticsDashboard({
                 )}
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/40 dark:divide-white/10">
+            <tbody className="divide-y divide-slate-200/70 dark:divide-white/10">
               {studentProgressRows.length === 0 ? (
                 <tr>
-                  <td colSpan={showManageLinks ? 8 : 7} className="px-4 py-6 text-center text-slate-500">
+                  <td colSpan={showManageLinks ? 8 : 7} className="px-4 py-6 text-center text-slate-500 dark:text-slate-400">
                     No approved students linked yet.
                   </td>
                 </tr>
               ) : (
                 studentProgressRows.map((st) => (
-                  <tr key={st.uid} className={`transition-colors ${st.needsSupport ? "bg-rose-500/5 hover:bg-rose-500/10" : "hover:bg-white/40 dark:hover:bg-white/5"}`}>
+                  <tr key={st.uid} className={`transition-colors ${st.needsSupport ? "bg-rose-500/5 hover:bg-rose-500/10" : "hover:bg-teal-500/5"}`}>
                     <td className="px-4 py-2.5">
                       <div className="font-bold flex items-center gap-1.5">
                         <span>{st.name}</span>
@@ -819,7 +814,7 @@ export default function InstructorAnalyticsDashboard({
                           </button>
                           <Link
                             to={`/instructor/progress-tracker?studentId=${st.uid}`}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 text-sky-700 dark:text-sky-300 font-bold"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-teal-500/15 hover:bg-teal-500/25 text-teal-700 dark:text-teal-300 border border-teal-400/25 font-bold"
                           >
                             {lang === "ar" ? "تقرير" : "Track"}
                             <ArrowUpRight className="h-3 w-3" />

@@ -18,11 +18,11 @@ const MEDAL_CONFIG = {
     num: "1",
     suffix: "st",
     pillarGradient:
-      "bg-gradient-to-b from-amber-300/55 via-yellow-400/35 to-amber-500/30 dark:from-amber-400/35 dark:via-yellow-500/20 dark:to-amber-600/20 border-amber-300/80 dark:border-amber-400/50 shadow-amber-500/20",
-    avatarGradient: "from-pink-500 via-rose-500 to-amber-500",
+      "bg-gradient-to-b from-teal-300/45 via-emerald-300/25 to-teal-500/20 dark:from-teal-500/30 dark:via-emerald-500/15 dark:to-[#0a1822]/90 border-teal-400/75 dark:border-teal-400/70 shadow-[0_0_32px_rgba(20,184,166,0.22)]",
+    avatarGradient: "from-rose-500 via-pink-500 to-amber-500",
     ribbonBg: "bg-gradient-to-b from-amber-300 to-amber-500 border-amber-200 text-amber-950",
-    starColor: "text-amber-600 dark:text-amber-300 fill-amber-500 dark:fill-amber-300",
-    dividerColor: "via-amber-500/50",
+    starColor: "text-amber-500 dark:text-amber-400 fill-amber-500 dark:fill-amber-400",
+    dividerColor: "via-teal-400/60",
     btnClass:
       "bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 shadow-lg shadow-amber-500/25",
     certLabelEn: "Gold Certificate PDF",
@@ -34,11 +34,11 @@ const MEDAL_CONFIG = {
     num: "2",
     suffix: "nd",
     pillarGradient:
-      "bg-gradient-to-b from-slate-200/70 via-indigo-200/40 to-slate-300/45 dark:from-slate-500/35 dark:via-indigo-500/20 dark:to-slate-600/25 border-slate-300/80 dark:border-indigo-300/40 shadow-indigo-500/15",
+      "bg-gradient-to-b from-slate-200/70 via-indigo-200/35 to-slate-300/45 dark:from-indigo-950/60 dark:via-slate-800/50 dark:to-[#0b1622]/90 border-slate-300/80 dark:border-indigo-300/25 shadow-indigo-500/15",
     avatarGradient: "from-violet-600 via-purple-600 to-indigo-600",
     ribbonBg: "bg-gradient-to-b from-slate-200 to-slate-400 border-white/80 text-slate-800",
-    starColor: "text-indigo-500 dark:text-indigo-300 fill-indigo-400 dark:fill-indigo-300",
-    dividerColor: "via-slate-400/50",
+    starColor: "text-indigo-500 dark:text-indigo-400 fill-indigo-400 dark:fill-indigo-400",
+    dividerColor: "via-indigo-400/45",
     btnClass:
       "bg-gradient-to-r from-indigo-500 to-slate-600 hover:from-indigo-600 hover:to-slate-700 text-white shadow-lg shadow-indigo-500/25",
     certLabelEn: "Silver Certificate PDF",
@@ -50,11 +50,11 @@ const MEDAL_CONFIG = {
     num: "3",
     suffix: "rd",
     pillarGradient:
-      "bg-gradient-to-b from-orange-300/55 via-amber-400/35 to-orange-500/30 dark:from-orange-500/35 dark:via-amber-600/20 dark:to-rose-500/20 border-orange-300/75 dark:border-orange-400/45 shadow-orange-500/20",
+      "bg-gradient-to-b from-orange-200/60 via-amber-200/35 to-orange-300/35 dark:from-amber-950/45 dark:via-[#1b1414]/75 dark:to-[#0e1318]/90 border-orange-300/75 dark:border-amber-500/30 shadow-orange-500/15",
     avatarGradient: "from-emerald-600 via-teal-600 to-cyan-600",
     ribbonBg: "bg-gradient-to-b from-orange-300 to-orange-600 border-orange-200 text-white",
-    starColor: "text-orange-600 dark:text-orange-300 fill-orange-500 dark:fill-orange-300",
-    dividerColor: "via-orange-500/50",
+    starColor: "text-orange-600 dark:text-amber-500 fill-orange-500 dark:fill-amber-500",
+    dividerColor: "via-orange-500/45",
     btnClass:
       "bg-gradient-to-r from-teal-600 to-orange-600 hover:from-teal-700 hover:to-orange-700 text-white shadow-lg shadow-teal-500/25",
     certLabelEn: "Bronze Certificate PDF",
@@ -406,13 +406,15 @@ export default function ScoreboardModule({ mode = "admin", activeInstructorId = 
                                       </span>
                                     </div>
                                   )}
-                                  <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/60 dark:bg-slate-900/50 border border-white/60 dark:border-white/15 text-xs font-extrabold text-slate-900 dark:text-white shadow-sm">
-                                    <Award className="h-3.5 w-3.5 text-sky-600 dark:text-sky-300" />
-                                    {entry.totalPoints} {lang === "ar" ? "نقطة" : "pts"}
+                                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/65 dark:bg-[#091620]/70 border border-white/60 dark:border-white/15 text-xs font-extrabold text-slate-900 dark:text-white shadow-sm">
+                                    <Award className="h-3.5 w-3.5 text-teal-600 dark:text-teal-300" />
+                                    <span>
+                                      {lang === "ar" ? "النقاط:" : "Points:"} {entry.totalPoints} {lang === "ar" ? "نقطة" : "pts"}
+                                    </span>
                                   </div>
-                                  <div className="text-[11px] font-medium text-slate-700 dark:text-slate-200/80">
+                                  <div className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
                                     {lang === "ar" ? "اختبارات" : "Quiz"}: {entry.quizPoints}{" "}
-                                    {lang === "ar" ? "ن" : "pts"} ·{" "}
+                                    {lang === "ar" ? "ن" : "pts"} •{" "}
                                     {lang === "ar" ? "واجبات" : "Assign"}: {entry.assignmentPoints}{" "}
                                     {lang === "ar" ? "ن" : "pts"}
                                   </div>
@@ -456,10 +458,10 @@ export default function ScoreboardModule({ mode = "admin", activeInstructorId = 
 
                     {/* Rest of Students Standings Table (Rank #4 and below) */}
                     {restOfStudents.length > 0 ? (
-                      <div className="space-y-3 pt-4 border-t border-white/40 dark:border-white/10">
+                      <div className="space-y-3 pt-4 border-t border-slate-200/70 dark:border-white/10">
                         <div className="flex flex-wrap items-center justify-between gap-2 px-1">
                           <div className="flex items-center gap-2">
-                            <span className="h-6 px-2 rounded-lg bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 font-extrabold text-xs flex items-center justify-center">
+                            <span className="h-6 px-2.5 rounded-lg bg-teal-500/15 border border-teal-400/25 text-teal-700 dark:text-teal-300 font-extrabold text-xs flex items-center justify-center">
                               #4+
                             </span>
                             <div>
@@ -475,16 +477,16 @@ export default function ScoreboardModule({ mode = "admin", activeInstructorId = 
                               </div>
                             </div>
                           </div>
-                          <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-white/70 dark:bg-slate-900/60 border border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-slate-300 shadow-sm">
+                          <span className="px-2.5 py-1 rounded-full text-xs font-bold glass-subtle text-slate-700 dark:text-slate-300">
                             {restOfStudents.length} {lang === "ar" ? "طالب في الجدول" : "Students"}
                           </span>
                         </div>
 
                         {/* Arranged Table */}
-                        <div className="rounded-2xl border border-slate-200/90 dark:border-white/10 overflow-hidden bg-white/70 dark:bg-slate-900/50 shadow-sm">
+                        <div className="glass-panel rounded-[22px] overflow-hidden shadow-sm">
                           <div className="overflow-x-auto">
                             <table className="w-full text-xs text-start">
-                              <thead className="bg-slate-100/90 dark:bg-white/5 uppercase font-bold text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-white/10">
+                              <thead className="bg-slate-900/5 dark:bg-white/[0.04] uppercase tracking-wider font-bold text-slate-600 dark:text-slate-300 border-b border-slate-200/70 dark:border-white/10">
                                 <tr>
                                   <th className="px-4 py-3 text-start w-16">
                                     {lang === "ar" ? "الترتيب" : "Rank"}
@@ -503,7 +505,7 @@ export default function ScoreboardModule({ mode = "admin", activeInstructorId = 
                                   </th>
                                 </tr>
                               </thead>
-                              <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+                              <tbody className="divide-y divide-slate-200/70 dark:divide-white/10">
                                 {restOfStudents.map((entry, idx) => {
                                   const rank = idx + 4;
                                   const isMe = user?.uid && entry.studentId === user.uid;
@@ -526,13 +528,13 @@ export default function ScoreboardModule({ mode = "admin", activeInstructorId = 
                                   return (
                                     <tr
                                       key={entry.studentId}
-                                      className={`hover:bg-indigo-50/50 dark:hover:bg-white/5 transition-colors ${
-                                        isMe ? "bg-sky-50/80 dark:bg-sky-950/30 font-bold" : ""
+                                      className={`hover:bg-teal-500/5 transition-colors ${
+                                        isMe ? "bg-teal-500/10 font-bold" : ""
                                       }`}
                                     >
                                       {/* Rank */}
                                       <td className="px-4 py-3">
-                                        <span className="inline-flex items-center justify-center h-7 w-7 rounded-xl bg-slate-200/90 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-extrabold text-xs shadow-sm">
+                                        <span className="inline-flex items-center justify-center h-7 w-7 rounded-xl glass-subtle text-slate-800 dark:text-slate-200 font-extrabold text-xs">
                                           #{rank}
                                         </span>
                                       </td>
@@ -541,7 +543,7 @@ export default function ScoreboardModule({ mode = "admin", activeInstructorId = 
                                       <td className="px-4 py-3">
                                         <div className="flex items-center gap-2.5 min-w-0">
                                           <div
-                                            className={`h-8 w-8 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-sky-500 text-white font-bold text-[11px] flex items-center justify-center shrink-0 shadow-sm transition-all ${
+                                            className={`h-8 w-8 rounded-full bg-gradient-to-br from-sky-500 via-teal-500 to-emerald-500 text-white font-bold text-[11px] flex items-center justify-center shrink-0 shadow-sm transition-all ${
                                               rowFrame?.frameClass || ""
                                             }`}
                                           >
@@ -551,14 +553,14 @@ export default function ScoreboardModule({ mode = "admin", activeInstructorId = 
                                             <div className="font-bold text-slate-900 dark:text-white truncate flex items-center gap-1.5">
                                               <span>{entry.studentName}</span>
                                               {isMe && (
-                                                <span className="px-1.5 py-0.5 rounded-full bg-sky-500/20 text-[9.5px] font-extrabold text-sky-600 dark:text-sky-300">
+                                                <span className="px-1.5 py-0.5 rounded-full bg-teal-500/20 text-[9.5px] font-extrabold text-teal-600 dark:text-teal-300 border border-teal-400/25">
                                                   {lang === "ar" ? "أنت" : "YOU"}
                                                 </span>
                                               )}
                                             </div>
                                             {rowTag && (
                                               <div
-                                                className={`inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[9px] font-black border mt-0.5 max-w-full truncate shadow-xs ${rowTag.badgeClass}`}
+                                                className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-black border mt-0.5 max-w-full truncate shadow-xs ${rowTag.badgeClass}`}
                                               >
                                                 <span>{rowTag.icon}</span>
                                                 <span className="truncate">{rowTag.name[lang]}</span>
@@ -590,8 +592,8 @@ export default function ScoreboardModule({ mode = "admin", activeInstructorId = 
 
                                       {/* Total Points */}
                                       <td className="px-4 py-3 text-end">
-                                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/60 dark:to-purple-950/60 border border-indigo-200/90 dark:border-indigo-800/80 font-extrabold text-xs text-indigo-700 dark:text-indigo-300 shadow-sm">
-                                          <Award className="h-3.5 w-3.5 text-indigo-500" />
+                                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-teal-500/15 border border-teal-400/30 font-extrabold text-xs text-teal-700 dark:text-teal-300 shadow-sm">
+                                          <Award className="h-3.5 w-3.5 text-teal-500" />
                                           <span>
                                             {entry.totalPoints} {lang === "ar" ? "نقطة" : "pts"}
                                           </span>

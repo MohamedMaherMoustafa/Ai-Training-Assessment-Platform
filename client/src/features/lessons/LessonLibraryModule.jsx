@@ -252,7 +252,7 @@ export default function LessonLibraryModule({
     <div className="space-y-6">
       <div className="glass-panel rounded-[26px] p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0 flex-1">
-          <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-2xl bg-gradient-to-br from-emerald-500 via-cyan-500 to-blue-600 text-white flex items-center justify-center shadow-lg shadow-cyan-500/25 shrink-0">
+          <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-2xl bg-gradient-to-br from-sky-500 via-teal-500 to-emerald-500 text-white flex items-center justify-center shadow-lg shadow-teal-500/25 shrink-0">
             <BookOpenCheck className="h-5 w-5 sm:h-6 sm:w-6" />
           </div>
           <div className="min-w-0">
@@ -287,7 +287,7 @@ export default function LessonLibraryModule({
       {showForm && mode === "instructor" && (
         <form onSubmit={handleCreate} autoComplete="off" className="glass-form-card p-6 sm:p-7 space-y-6">
           <div className="flex items-center gap-3 pb-3 border-b border-slate-200/60 dark:border-white/10">
-            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-emerald-500 to-cyan-600 text-white flex items-center justify-center shadow-md shadow-emerald-500/20">
+            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-sky-500 to-emerald-500 text-white flex items-center justify-center shadow-md shadow-teal-500/25">
               <BookOpenCheck className="h-5 w-5" />
             </div>
             <div>
@@ -438,15 +438,15 @@ export default function LessonLibraryModule({
                 key={m.id}
                 className="glass-card p-5 space-y-3 flex flex-col justify-between"
               >
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="h-10 w-10 rounded-xl bg-sky-500/15 text-sky-600 dark:text-sky-300 flex items-center justify-center shrink-0">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="h-10 w-10 rounded-xl bg-teal-500/15 border border-teal-400/25 text-teal-600 dark:text-teal-300 flex items-center justify-center shrink-0">
                         <FileText className="h-5 w-5" />
                       </div>
                       <div className="min-w-0">
-                        <h3 className="font-bold text-sm truncate">{m.title}</h3>
-                        <p className="text-xs text-slate-500 truncate">
+                        <h3 className="font-extrabold text-sm text-slate-900 dark:text-white truncate">{m.title}</h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
                           {c?.title?.[lang] || c?.title?.en || m.courseId} ·{" "}
                           {m.pdfPages.length} {lang === "ar" ? "صفحات" : "pages"}
                         </p>
@@ -454,19 +454,19 @@ export default function LessonLibraryModule({
                     </div>
 
                     {mode === "student" && hasSavedNotes && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-[11px] font-bold shrink-0">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-400/30 text-emerald-700 dark:text-emerald-300 text-[11px] font-bold shrink-0">
                         <Lock className="h-3 w-3" />
-                        {lang === "ar" ? "ملاحظاتك محفوظة" : "Saved Notes"}
+                        {lang === "ar" ? "ملاحظاتك محفوظة ✓" : "Saved Notes ✓"}
                       </span>
                     )}
                   </div>
 
                   {m.description && (
-                    <p className="text-xs text-slate-600 dark:text-slate-300">{m.description}</p>
+                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{m.description}</p>
                   )}
                 </div>
 
-                <div className="flex flex-wrap items-center justify-end gap-2 pt-3 border-t border-white/40 dark:border-white/10">
+                <div className="flex flex-wrap items-center justify-end gap-2 pt-3 border-t border-slate-200/60 dark:border-white/10">
                   {mode === "instructor" ? (
                     <>
                       <button
@@ -482,7 +482,7 @@ export default function LessonLibraryModule({
                         }
                         className="glass-btn-secondary px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1"
                       >
-                        <Eye className="h-3.5 w-3.5 text-sky-600" />
+                        <Eye className="h-3.5 w-3.5 text-teal-500" />
                         {lang === "ar" ? "معاينة" : "Preview"}
                       </button>
                       <button
@@ -507,16 +507,16 @@ export default function LessonLibraryModule({
                             initialNotes: mySaved?.notes || "",
                           })
                         }
-                        className="glass-btn-secondary px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5"
+                        className="glass-btn-secondary px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer"
                         title={lang === "ar" ? "قراءة ملف الدرس" : "Read PDF Document"}
                       >
-                        <Eye className="h-3.5 w-3.5 text-sky-600" />
+                        <Eye className="h-3.5 w-3.5 text-teal-500 dark:text-teal-300" />
                         <span>{lang === "ar" ? "قراءة" : "Read"}</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => handleOpenStudentAnnotator(m)}
-                        className="glass-btn-primary px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5"
+                        className="glass-btn-primary px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 cursor-pointer"
                       >
                         <PenTool className="h-3.5 w-3.5" />
                         <span>

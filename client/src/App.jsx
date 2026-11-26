@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { Component, lazy, Suspense, useEffect, useState } from "react";
 import { MemoryRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -50,6 +50,39 @@ function shouldShowSplash() {
     return true;
   } catch {
     return false;
+  }
+}
+
+class AppErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { error };
+  }
+  componentDidCatch(error) {
+    console.error("Application render error:", error);
+  }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="min-h-screen flex items-center justify-center p-6 bg-slate-950 text-slate-100">
+          <div className="max-w-md w-full rounded-3xl border border-rose-500/30 bg-slate-900/90 p-6 space-y-3 text-center shadow-2xl">
+            <h2 className="text-lg font-black text-rose-400">Something went wrong</h2>
+            <p className="text-xs text-slate-300 break-words">{this.state.error?.message}</p>
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 text-xs font-extrabold cursor-pointer"
+            >
+              Reload Platform
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
   }
 }
 
@@ -120,7 +153,8 @@ export default function App() {
   }, []);
 
   return (
-    <ThemeProvider>
+    <AppErrorBoundary>
+      <ThemeProvider>
       <LangProvider>
         <AuthProvider>
           <PopupProvider>
@@ -188,5 +222,6 @@ export default function App() {
         </AuthProvider>
       </LangProvider>
     </ThemeProvider>
+    </AppErrorBoundary>
   );
 }

@@ -169,7 +169,7 @@ export default function CoursesModule({ mode = "admin", activeInstructorId = nul
     <div className="space-y-6">
       <div className="glass-panel rounded-[26px] p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0 flex-1">
-          <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-2xl bg-gradient-to-br from-cyan-500 via-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-cyan-500/25 shrink-0">
+          <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-2xl bg-gradient-to-br from-sky-500 via-teal-500 to-emerald-500 text-white flex items-center justify-center shadow-lg shadow-teal-500/25 shrink-0">
             <BookOpen className="h-5 w-5 sm:h-6 sm:w-6" />
           </div>
           <div className="min-w-0">
@@ -206,7 +206,7 @@ export default function CoursesModule({ mode = "admin", activeInstructorId = nul
           className="glass-form-card p-6 sm:p-7 space-y-6"
         >
           <div className="flex items-center gap-3 pb-3 border-b border-slate-200/60 dark:border-white/10">
-            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 text-white flex items-center justify-center shadow-md shadow-cyan-500/20">
+            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-sky-500 to-emerald-500 text-white flex items-center justify-center shadow-md shadow-teal-500/25">
               <BookOpen className="h-5 w-5" />
             </div>
             <div>
@@ -312,7 +312,7 @@ export default function CoursesModule({ mode = "admin", activeInstructorId = nul
           className="glass-form-card p-6 sm:p-7 space-y-6"
         >
           <div className="flex items-center gap-3 pb-3 border-b border-slate-200/60 dark:border-white/10">
-            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-sky-500/20">
+            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-sky-500 to-emerald-500 text-white flex items-center justify-center shadow-md shadow-teal-500/25">
               <FileText className="h-5 w-5" />
             </div>
             <div>
@@ -351,15 +351,15 @@ export default function CoursesModule({ mode = "admin", activeInstructorId = nul
               <label className="glass-form-label">
                 Upload Lesson File (PDF / TXT / MD — auto-extracts text for Platform AI)
               </label>
-              <div className="p-4 rounded-2xl glass-subtle border border-dashed border-sky-400/60 dark:border-sky-500/40">
+              <div className="p-4 rounded-2xl glass-subtle border border-dashed border-teal-400/50">
                 <input
                   type="file"
                   accept=".pdf,.txt,.md"
                   onChange={handleLessonFilePick}
-                  className="w-full text-xs text-slate-600 dark:text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-sky-600 file:text-white hover:file:bg-sky-500 cursor-pointer"
+                  className="w-full text-xs text-slate-600 dark:text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-gradient-to-r file:from-sky-500 file:to-emerald-500 file:text-white hover:file:opacity-90 cursor-pointer"
                 />
                 {extractingPdf && (
-                  <div className="text-xs text-sky-600 dark:text-sky-400 font-semibold mt-2 animate-pulse">
+                  <div className="text-xs text-teal-600 dark:text-teal-400 font-semibold mt-2 animate-pulse">
                     Extracting lesson text for AI features...
                   </div>
                 )}
@@ -410,14 +410,14 @@ export default function CoursesModule({ mode = "admin", activeInstructorId = nul
       {loading ? (
         <div className="text-sm text-slate-500 py-8 text-center">{t("app.loading")}</div>
       ) : courses.length === 0 ? (
-        <div className="rounded-[26px] bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-white/10 p-8 text-center text-sm text-slate-500 shadow-sm">
+        <div className="glass-panel rounded-[26px] p-8 text-center text-sm text-slate-500">
           {t("app.noData")}
         </div>
       ) : (
-        <div className="rounded-[26px] bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-white/10 shadow-sm p-5 sm:p-6 mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-4 border-b border-slate-100 dark:border-white/5">
+        <div className="glass-panel rounded-[26px] p-5 sm:p-6 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-4 border-b border-slate-200/70 dark:border-white/10">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-600/25 shrink-0">
+              <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-sky-500 to-teal-500 text-white flex items-center justify-center shadow-md shadow-teal-500/25 shrink-0">
                 <BookOpen className="h-5 w-5" />
               </div>
               <div>
@@ -433,14 +433,14 @@ export default function CoursesModule({ mode = "admin", activeInstructorId = nul
             </div>
 
             {mode === "student" && (
-              <div className="flex items-center gap-1.5 p-1 rounded-2xl glass-subtle text-xs font-bold">
+              <div className="flex items-center gap-4 border-b border-slate-200/60 dark:border-white/10 text-xs font-bold">
                 <button
                   type="button"
                   onClick={() => setStudentCourseFilter("all")}
-                  className={`px-3 py-1.5 rounded-xl transition-all ${
+                  className={`pb-2 border-b-2 transition-all cursor-pointer ${
                     studentCourseFilter === "all"
-                      ? "bg-indigo-600 text-white shadow-sm"
-                      : "text-slate-600 dark:text-slate-300 hover:bg-white/50"
+                      ? "border-teal-400 text-teal-600 dark:text-white"
+                      : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
                   }`}
                 >
                   {lang === "ar" ? "جميع المقررات" : "All Courses"} ({courses.length})
@@ -448,10 +448,10 @@ export default function CoursesModule({ mode = "admin", activeInstructorId = nul
                 <button
                   type="button"
                   onClick={() => setStudentCourseFilter("enrolled")}
-                  className={`px-3 py-1.5 rounded-xl transition-all ${
+                  className={`pb-2 border-b-2 transition-all cursor-pointer ${
                     studentCourseFilter === "enrolled"
-                      ? "bg-emerald-600 text-white shadow-sm"
-                      : "text-slate-600 dark:text-slate-300 hover:bg-white/50"
+                      ? "border-teal-400 text-teal-600 dark:text-white"
+                      : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
                   }`}
                 >
                   {lang === "ar" ? "مقرراتي المسجلة" : "My Enrolled Courses"} (
@@ -461,7 +461,7 @@ export default function CoursesModule({ mode = "admin", activeInstructorId = nul
             )}
           </div>
 
-          <div className="space-y-5">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             {courses
               .filter((c) =>
                 mode === "student" && studentCourseFilter === "enrolled"
@@ -470,155 +470,211 @@ export default function CoursesModule({ mode = "admin", activeInstructorId = nul
               )
               .map((c) => {
                 const isEnrolled = c.enrolledStudents.includes(user?.uid);
-              return (
-                <div
-                  key={c.id}
-                  className="rounded-[22px] border border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800/40 p-5 space-y-4 transition-all"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <div className="h-11 w-11 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 font-mono font-bold text-sm flex items-center justify-center shrink-0 border border-indigo-100 dark:border-indigo-900/50 shadow-sm">
-                        {"</>"}
-                      </div>
-                      <div>
-                        <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
-                          {c.title?.[lang] || c.title?.en}
-                        </h3>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1">
-                          <span>👤 {t("courses.instructor")}:</span>
-                          <strong className="text-slate-700 dark:text-slate-300">
-                            {c.instructorName || c.instructorId}
-                          </strong>
-                        </p>
-                      </div>
-                    </div>
-                    {canManage && (
-                      <button
-                        onClick={() => handleDeleteCourse(c.id)}
-                        className="p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-600 transition-colors"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    )}
-                  </div>
-
-                  {c.description && (
-                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed ps-1">
-                      {c.description?.[lang] || c.description?.en}
-                    </p>
-                  )}
-
-                  {/* Lessons Section */}
-                  <div className="pt-3 border-t border-slate-200/60 dark:border-white/5">
-                    <div className="flex items-center justify-between mb-2.5">
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                        <BookOpen className="h-3.5 w-3.5 text-indigo-500" />
-                        <span>
-                          {t("courses.lessons")} ({c.lessons.length})
-                        </span>
-                      </span>
-                      {canManage && (
-                        <button
-                          onClick={() => setLessonCourseId(c.id)}
-                          className="text-xs font-bold text-indigo-600 dark:text-cyan-400 hover:underline"
-                        >
-                          + {t("courses.addLesson")}
-                        </button>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      {c.lessons.map((l) => (
-                        <div
-                          key={l.id}
-                          onClick={() => {
-                            if (mode === "student" && !isEnrolled) {
-                              toast.error(
-                                lang === "ar"
-                                  ? "يجب التسجيل في المقرر أولاً للوصول إلى محتوى الدرس"
-                                  : "Please enroll in this course first to access its lessons"
-                              );
-                              return;
-                            }
-                            setReadingLesson(l);
-                          }}
-                          className={`p-3 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
-                            mode === "student" && !isEnrolled
-                              ? "bg-slate-100/60 dark:bg-slate-900/40 border-dashed border-slate-300 dark:border-white/10 opacity-75 cursor-not-allowed"
-                              : isEnrolled
-                              ? "bg-[#f0fdf4] dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/40 hover:bg-emerald-50/70 cursor-pointer"
-                              : "bg-white dark:bg-slate-800/60 border-slate-200/70 hover:bg-indigo-50/40 cursor-pointer"
-                          }`}
-                        >
-                          <div className="flex items-start gap-2.5 min-w-0">
-                            {mode === "student" && !isEnrolled ? (
-                              <Lock className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
-                            ) : (
-                              <FileText className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
-                            )}
-                            <div className="min-w-0">
-                              <div className="font-bold text-xs text-slate-900 dark:text-white truncate">
-                                {l.title?.[lang] || l.title?.en}
-                              </div>
-                              {mode === "student" && !isEnrolled ? (
-                                <p className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold mt-0.5">
-                                  {lang === "ar"
-                                    ? "مغلق — يتطلب التسجيل في المقرر"
-                                    : "Locked — Requires course enrollment"}
-                                </p>
-                              ) : (
-                                l.content && (
-                                  <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
-                                    {l.content}
-                                  </p>
-                                )
-                              )}
-                            </div>
+                return (
+                  <div
+                    key={c.id}
+                    className="glass-card p-5 flex flex-col justify-between space-y-4"
+                  >
+                    <div className="space-y-3.5">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="h-11 w-11 rounded-2xl bg-teal-500/15 text-teal-600 dark:text-teal-300 font-mono font-bold text-sm flex items-center justify-center shrink-0 border border-teal-400/25 shadow-sm">
+                            {"</>"}
                           </div>
-
-                          <div className="flex items-center gap-2 shrink-0">
-                            {isEnrolled && (
-                              <span className="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-[11px] font-bold flex items-center gap-1">
-                                <CheckCircle2 className="h-3 w-3" />
-                                <span>{lang === "ar" ? "مسجّل" : "Enrolled"}</span>
-                              </span>
-                            )}
-                            {l.fileUrl && (isEnrolled || mode !== "student") && (
-                              <a
-                                href={l.fileUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                                onClick={(e) => e.stopPropagation()}
-                                className="inline-flex items-center gap-1 text-xs text-indigo-600 dark:text-cyan-400 hover:underline font-bold"
-                              >
-                                PDF <ExternalLink className="h-3 w-3" />
-                              </a>
-                            )}
+                          <div className="min-w-0">
+                            <h3 className="font-extrabold text-base text-slate-900 dark:text-white leading-snug">
+                              {c.title?.[lang] || c.title?.en}
+                            </h3>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1 truncate">
+                              <span>{t("courses.instructor")}:</span>
+                              <strong className="text-slate-700 dark:text-slate-200">
+                                {c.instructorName || c.instructorId}
+                              </strong>
+                            </p>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  </div>
+                        {canManage && (
+                          <button
+                            onClick={() => handleDeleteCourse(c.id)}
+                            className="p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-600 transition-colors shrink-0"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
 
-                  <div className="flex items-center justify-between pt-3 border-t border-slate-200/60 dark:border-white/5 text-xs font-semibold text-slate-500">
-                    <span className="flex items-center gap-1.5">
-                      <span>👥 {t("courses.studentsCount")}:</span>
-                      <strong className="text-slate-800 dark:text-slate-200">
-                        {c.enrolledStudents.length}
-                      </strong>
-                    </span>
-                    {mode === "student" && !isEnrolled && (
-                      <button
-                        onClick={() => handleEnrol(c.id)}
-                        className="px-4 py-1.5 rounded-xl font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition-all"
-                      >
-                        {t("courses.enrol")}
-                      </button>
+                      {/* Metadata Pill Badges matching PM.jpeg */}
+                      <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-bold">
+                        <span className="px-2.5 py-0.5 rounded-full bg-teal-500/10 border border-teal-400/30 text-teal-700 dark:text-teal-300">
+                          {lang === "ar" ? "مسار متقدم" : "Advanced Track"}
+                        </span>
+                        <span className="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-white/[0.06] border border-slate-200/80 dark:border-white/10 text-slate-600 dark:text-slate-300">
+                          {c.lessons.length} {c.lessons.length === 1 ? (lang === "ar" ? "درس" : "Lesson") : (lang === "ar" ? "دروس" : "Lessons")}
+                        </span>
+                        <span className="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-white/[0.06] border border-slate-200/80 dark:border-white/10 text-slate-600 dark:text-slate-300">
+                          {c.enrolledStudents.length} {lang === "ar" ? "مسجّل" : "Enrolled"}
+                        </span>
+                        {isEnrolled && (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-400/30 text-emerald-700 dark:text-emerald-300">
+                            <CheckCircle2 className="h-3 w-3" />
+                            <span>{lang === "ar" ? "مسجّل" : "Enrolled"}</span>
+                          </span>
+                        )}
+                      </div>
+
+                      {c.description && (
+                        <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-2">
+                          {c.description?.[lang] || c.description?.en}
+                        </p>
+                      )}
+
+                      {/* Course Readiness / Enrollment Progress Bar (matching PM.jpeg) */}
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between text-[11px] font-bold">
+                          <span className="text-teal-600 dark:text-teal-300">
+                            {isEnrolled
+                              ? lang === "ar"
+                                ? `${Math.min(100, Math.max(40, c.lessons.length * 35))}% مكتمل`
+                                : `${Math.min(100, Math.max(40, c.lessons.length * 35))}% Complete`
+                              : lang === "ar"
+                              ? "متاح للتسجيل"
+                              : "Available to Enroll"}
+                          </span>
+                          <span className="text-slate-400 font-mono">
+                            {c.lessons.length} {lang === "ar" ? "دروس" : "Lessons"}
+                          </span>
+                        </div>
+                        <div className="w-full h-1.5 rounded-full bg-slate-200/80 dark:bg-white/10 overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-sky-400 via-teal-400 to-emerald-400 transition-all duration-500"
+                            style={{
+                              width: `${
+                                isEnrolled
+                                  ? Math.min(100, Math.max(40, c.lessons.length * 35))
+                                  : 18
+                              }%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Lessons List */}
+                      <div className="pt-2 border-t border-slate-200/60 dark:border-white/10 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                            <BookOpen className="h-3.5 w-3.5 text-teal-500" />
+                            <span>
+                              {t("courses.lessons")} ({c.lessons.length})
+                            </span>
+                          </span>
+                          {canManage && (
+                            <button
+                              onClick={() => setLessonCourseId(c.id)}
+                              className="text-xs font-bold text-teal-600 dark:text-teal-300 hover:underline"
+                            >
+                              + {t("courses.addLesson")}
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="space-y-2">
+                          {c.lessons.map((l) => (
+                            <div
+                              key={l.id}
+                              onClick={() => {
+                                if (mode === "student" && !isEnrolled) {
+                                  toast.error(
+                                    lang === "ar"
+                                      ? "يجب التسجيل في المقرر أولاً للوصول إلى محتوى الدرس"
+                                      : "Please enroll in this course first to access its lessons"
+                                  );
+                                  return;
+                                }
+                                setReadingLesson(l);
+                              }}
+                              className={`p-3 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
+                                mode === "student" && !isEnrolled
+                                  ? "bg-slate-100/60 dark:bg-white/[0.03] border-dashed border-slate-300 dark:border-white/10 opacity-75 cursor-not-allowed"
+                                  : isEnrolled
+                                  ? "glass-subtle cursor-pointer"
+                                  : "glass-subtle cursor-pointer"
+                              }`}
+                            >
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                {mode === "student" && !isEnrolled ? (
+                                  <Lock className="h-4 w-4 text-amber-500 shrink-0" />
+                                ) : (
+                                  <FileText className="h-4 w-4 text-teal-500 shrink-0" />
+                                )}
+                                <div className="min-w-0">
+                                  <div className="font-bold text-xs text-slate-900 dark:text-white truncate">
+                                    {l.title?.[lang] || l.title?.en}
+                                  </div>
+                                  {mode === "student" && !isEnrolled ? (
+                                    <p className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold mt-0.5">
+                                      {lang === "ar"
+                                        ? "مغلق — يتطلب التسجيل في المقرر"
+                                        : "Locked — Requires course enrollment"}
+                                    </p>
+                                  ) : (
+                                    l.content && (
+                                      <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
+                                        {l.content}
+                                      </p>
+                                    )
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-2 shrink-0">
+                                {l.fileUrl && (isEnrolled || mode !== "student") && (
+                                  <a
+                                    href={l.fileUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="px-2.5 py-1 rounded-lg bg-white/80 dark:bg-white/[0.08] border border-slate-200 dark:border-white/15 inline-flex items-center gap-1 text-[11px] text-slate-700 dark:text-slate-200 hover:border-teal-400 font-bold"
+                                  >
+                                    <span>{lang === "ar" ? "فتح PDF" : "Open PDF"}</span>
+                                    <ExternalLink className="h-3 w-3" />
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Course Action Footer */}
+                    {mode === "student" && (
+                      <div className="pt-2">
+                        {!isEnrolled ? (
+                          <button
+                            type="button"
+                            onClick={() => handleEnrol(c.id)}
+                            className="w-full glass-btn-primary py-2.5 px-4 text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer"
+                          >
+                            <span>{t("courses.enrol")}</span>
+                            <span>→</span>
+                          </button>
+                        ) : (
+                          c.lessons[0] && (
+                            <button
+                              type="button"
+                              onClick={() => setReadingLesson(c.lessons[0])}
+                              className="w-full glass-btn-primary py-2.5 px-4 text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer"
+                            >
+                              <span>{lang === "ar" ? "دخول المقرر" : "Enter Course"}</span>
+                              <span className="rtl:rotate-180">→</span>
+                            </button>
+                          )
+                        )}
+                      </div>
                     )}
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
           </div>
         </div>
       )}

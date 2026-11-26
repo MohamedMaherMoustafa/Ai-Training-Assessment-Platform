@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
@@ -16,6 +16,7 @@ import {
   VolumeX,
   Globe,
   ChevronDown,
+  ChevronLeft,
   Settings,
 } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
@@ -44,6 +45,7 @@ export default function AppLayout({ navItems, children }) {
   const location = useLocation();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadChatCount, setUnreadChatCount] = useState(0);
@@ -179,10 +181,62 @@ export default function AppLayout({ navItems, children }) {
   );
   const currentBreadcrumb = activeItem?.label || (lang === "ar" ? "لوحة التحكم" : "Dashboard");
 
+  // Fluid active menu indicator tracking with item refs
+  const navRef = useRef(null);
+  const itemRefs = useRef({});
+  const [indicatorStyle, setIndicatorStyle] = useState({ top: 0, height: 42, opacity: 0 });
+
+  useLayoutEffect(() => {
+    if (!activeItem || !navRef.current) return;
+    const targetEl = itemRefs.current[activeItem.to];
+    if (targetEl) {
+      const navRect = navRef.current.getBoundingClientRect();
+      const targetRect = targetEl.getBoundingClientRect();
+      setIndicatorStyle({
+        top: targetRect.top - navRect.top + navRef.current.scrollTop,
+        height: targetRect.height,
+        opacity: 1,
+      });
+    } else {
+      setIndicatorStyle((prev) => ({ ...prev, opacity: 0 }));
+    }
+  }, [location.pathname, activeItem?.to, sidebarCollapsed]);
+
+  useEffect(() => {
+    if (!navRef.current) return;
+    const navEl = navRef.current;
+    const handleReposition = () => {
+      const targetEl = itemRefs.current[activeItem?.to];
+      if (targetEl) {
+        const navRect = navEl.getBoundingClientRect();
+        const targetRect = targetEl.getBoundingClientRect();
+        setIndicatorStyle((prev) => ({
+          ...prev,
+          top: targetRect.top - navRect.top + navEl.scrollTop,
+          height: targetRect.height,
+          opacity: 1,
+        }));
+      }
+    };
+    navEl.addEventListener("scroll", handleReposition, { passive: true });
+    window.addEventListener("resize", handleReposition);
+    return () => {
+      navEl.removeEventListener("scroll", handleReposition);
+      window.removeEventListener("resize", handleReposition);
+    };
+  }, [activeItem?.to]);
+
   return (
-    <div className="relative h-screen overflow-hidden flex lg:p-3 lg:gap-3.5 text-slate-900 dark:text-slate-100">
-      {/* Subtle Dot Pattern Overlay */}
-      <div className="pointer-events-none fixed inset-0 bg-dot-pattern opacity-40 dark:opacity-20 -z-10" />
+    <div className="relative h-screen w-full overflow-hidden flex items-center justify-center p-4 sm:p-6 md:p-8 lg:p-10 xl:p-12 text-slate-900 dark:text-slate-100">
+      {/* Full-bleed Library Backdrop matching Login page */}
+      <div
+        className="pointer-events-none fixed inset-0 bg-cover bg-center transition-all duration-700 -z-20"
+        style={{
+          backgroundImage: theme === "dark" ? "url('/login-library-dark-bg.jpg')" : "url('/login-library-bg.jpg')",
+        }}
+      />
+      <div className="pointer-events-none fixed inset-0 bg-slate-950/10 dark:bg-black/15 -z-15" />
+      <div className="pointer-events-none fixed inset-0 bg-dot-pattern opacity-15 dark:opacity-10 -z-10" />
 
       {/* Mobile Sidebar Backdrop */}
       {sidebarOpen && (
@@ -192,404 +246,364 @@ export default function AppLayout({ navItems, children }) {
         />
       )}
 
-      {/* Light Glassy Sidebar */}
-      <aside
-        className={`fixed lg:static inset-y-0 start-0 z-40 h-screen lg:h-full shrink-0 w-[86vw] max-w-[310px] lg:w-[280px] xl:w-[290px] bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl text-slate-800 dark:text-white lg:rounded-[28px] border border-slate-200/90 dark:border-white/10 flex flex-col justify-between overflow-hidden shadow-[0_12px_36px_rgba(30,41,59,0.08)] dark:shadow-[0_16px_40px_rgba(0,0,0,0.6)] transition-transform duration-300 ${
-          sidebarOpen
-            ? "translate-x-0"
-            : "-translate-x-full rtl:translate-x-full lg:translate-x-0 lg:rtl:translate-x-0"
-        }`}
-      >
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Top Brand Section */}
-          <div className="pt-6 pb-4 px-4 text-center border-b border-slate-200/90 dark:border-white/10 relative bg-gradient-to-b from-indigo-50/40 via-white to-transparent dark:from-indigo-950/20 dark:via-slate-900/40 dark:to-transparent">
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="lg:hidden absolute top-4 end-4 p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-white transition-colors cursor-pointer"
-            >
-              <X className="h-4 w-4" />
-            </button>
-
-            {/* Glowing Brand Logo Container */}
-            <div className="relative mx-auto mb-2.5 h-20 w-20 sm:h-22 sm:w-22 rounded-2xl bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-indigo-950/50 dark:via-slate-800/80 dark:to-purple-950/40 p-2 border border-indigo-150/80 dark:border-white/10 shadow-[0_4px_16px_rgba(79,70,229,0.12)] flex items-center justify-center transition-transform hover:scale-105 group">
-              <img
-                src={logoSrc}
-                alt="Athar Educational Platform"
-                className="w-full h-full object-contain filter drop-shadow-md group-hover:brightness-105 transition-all scale-105"
-              />
-            </div>
-
-            {/* Platform Title */}
-            <div className="font-black text-sm sm:text-[15px] leading-snug tracking-tight text-slate-900 dark:text-white">
-              {lang === "ar" ? "منصة أثر التعليمية" : "Athar Educational"}
-            </div>
-            <div className="text-[11px] font-extrabold text-indigo-600 dark:text-indigo-400 tracking-wider uppercase mt-0.5">
-              {lang === "ar" ? "Athar Educational Platform" : "Platform"}
-            </div>
-
-            {/* Platform Slogan Badge */}
-            <div className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-indigo-50/95 to-purple-50/95 dark:from-indigo-950/60 dark:to-purple-950/60 border border-indigo-200/80 dark:border-indigo-800/60 shadow-xs max-w-full">
-              <span className="h-1.5 w-1.5 rounded-full bg-indigo-600 dark:bg-cyan-400 animate-pulse shrink-0" />
-              <span className="text-[10px] font-bold text-indigo-700 dark:text-indigo-300 truncate">
-                {t("auth.learnTagline")}
-              </span>
-            </div>
-          </div>
-
-          {/* Navigation Links */}
-          <nav className="flex-1 px-3 py-3.5 space-y-1 overflow-y-auto">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isChat = item.to.endsWith("/chat") || item.isChat;
-              return (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  end={item.end}
-                  onClick={() => setSidebarOpen(false)}
-                  className={({ isActive }) =>
-                    `group relative flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-[12.5px] transition-all duration-200 ${
-                      isActive
-                        ? "bg-gradient-to-r from-[#4f3df7] to-[#703bf7] text-white font-extrabold shadow-md shadow-indigo-600/30"
-                        : "text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white hover:bg-indigo-50/70 dark:hover:bg-white/5 font-bold"
-                    }`
-                  }
-                >
-                  {({ isActive }) => (
-                    <>
-                      {isActive && (
-                        <span className="absolute -start-2 top-1/2 -translate-y-1/2 w-1 h-6 rounded-full bg-indigo-500" />
-                      )}
-                      <Icon
-                        className={`h-4 w-4 shrink-0 transition-colors ${
-                          isActive
-                            ? "text-white"
-                            : "text-slate-500 group-hover:text-indigo-600 dark:group-hover:text-white"
-                        }`}
-                      />
-                      <span className="truncate">{item.label}</span>
-
-                      {/* Direct Chat Live Unread Counter Badge */}
-                      {isChat && unreadChatCount > 0 && (
-                        <span className="ms-auto flex items-center gap-1.5 shrink-0">
-                          <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500" />
-                          </span>
-                          <span
-                            className={`min-w-[20px] h-5 px-1.5 rounded-full text-[10.5px] font-black flex items-center justify-center shadow-md transition-all ${
-                              isActive
-                                ? "bg-white text-indigo-700 shadow-white/30"
-                                : "bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-rose-500/30 animate-pulse"
-                            }`}
-                            title={
-                              lang === "ar"
-                                ? `${unreadChatCount} رسائل جديدة غير مقروءة`
-                                : `${unreadChatCount} unread direct messages`
-                            }
-                          >
-                            {unreadChatCount > 99 ? "99+" : unreadChatCount}
-                          </span>
-                        </span>
-                      )}
-                    </>
-                  )}
-                </NavLink>
-              );
-            })}
-          </nav>
-        </div>
-
-        {/* Bottom User Card */}
-        <div className="p-3 border-t border-slate-200/80 dark:border-white/10 bg-slate-50/80 dark:bg-slate-950/50 backdrop-blur-md">
-          <div className="bg-white dark:bg-slate-800/90 rounded-2xl p-2.5 flex items-center justify-between border border-slate-200/90 dark:border-white/10 shadow-xs mb-2 group hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors">
-            <div
-              onClick={() => setProfileModalOpen(true)}
-              className="flex items-center gap-2.5 min-w-0 cursor-pointer flex-1"
-              title={t("profile.editTooltip") || "Edit Profile & Password"}
-            >
-              <div
-                className={`h-9 w-9 rounded-xl bg-gradient-to-tr from-teal-500 to-emerald-500 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-all ${
-                  equippedFrame?.frameClass || ""
-                }`}
-              >
-                {String(displayName || "U").slice(0, 2).toUpperCase()}
-              </div>
-              <div className="min-w-0">
-                <div className="text-xs font-black text-slate-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                  {displayName}
-                </div>
-                <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 capitalize truncate">
-                  {t(`roles.${user?.role || "student"}`)}
-                </div>
-                {equippedTag && (
-                  <div
-                    className={`inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[9px] font-black border mt-1 max-w-full truncate shadow-xs ${equippedTag.badgeClass}`}
-                  >
-                    <span>{equippedTag.icon}</span>
-                    <span className="truncate">{equippedTag.name[lang]}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => setProfileModalOpen(true)}
-              title={t("profile.editTooltip") || "Edit Profile & Password"}
-              aria-label="Edit Profile"
-              className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 cursor-pointer shrink-0"
-            >
-              <Settings className="h-4 w-4" />
-            </button>
-          </div>
-
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50/90 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-950/60 border border-rose-200/80 dark:border-rose-900/40 transition-all cursor-pointer shadow-xs active:scale-[0.99]"
-          >
-            <LogOut className="h-3.5 w-3.5" />
-            <span>{t("app.logout")}</span>
-          </button>
-        </div>
-      </aside>
-
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 h-screen lg:h-full overflow-y-auto px-2 sm:px-4 lg:px-1">
-        {/* Top Header Bar */}
-        <header className="min-h-[48px] sm:min-h-[52px] shrink-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-2xl sm:rounded-full mt-1.5 sm:mt-2 lg:mt-0 px-2.5 sm:px-5 py-1.5 flex items-center justify-between gap-1.5 sm:gap-2 shadow-[0_4px_20px_rgba(30,41,59,0.06)] dark:shadow-xl border border-slate-200/90 dark:border-white/10 sticky top-1 sm:top-2 lg:top-0 z-20">
-          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              aria-label="Open menu"
-              className="lg:hidden relative h-8 w-8 sm:h-9 sm:w-9 rounded-full border border-slate-200/90 dark:border-slate-700 bg-slate-50/90 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shrink-0 cursor-pointer shadow-xs"
-            >
-              <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
-              {unreadChatCount > 0 && (
-                <span className="absolute -top-1 -end-1 flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500 ring-2 ring-white dark:ring-slate-900" />
-                </span>
-              )}
-            </button>
-            <div className="rounded-full border border-slate-200/90 dark:border-slate-700 bg-slate-50/90 dark:bg-slate-800 px-2 sm:px-3 py-1 flex items-center gap-2 text-xs font-black text-slate-900 dark:text-slate-100 shadow-xs shrink-0 max-w-[150px] sm:max-w-none">
-              <img src={logoSrc} alt="Athar Educational Platform" className="h-7 w-7 sm:h-8 sm:w-8 object-contain shrink-0 drop-shadow-sm filter hover:scale-105 transition-transform" />
-              <span className="truncate">{t(`roles.${user?.role || "student"}`)}</span>
-            </div>
-            {/* Breadcrumb for tablet & desktop */}
-            <span className="hidden md:inline-block text-slate-300 dark:text-slate-700 font-bold">/</span>
-            <span className="hidden md:inline-block text-xs font-bold text-slate-500 dark:text-slate-400 truncate max-w-[180px]">
-              {currentBreadcrumb}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-            {/* Student Store & Coins Pill */}
-            {user?.role === "student" && (
-              <NavLink
-                to="/student/store"
-                className="h-8 sm:h-9 px-2.5 sm:px-3 rounded-full border border-amber-300 dark:border-amber-500/40 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/40 text-amber-700 dark:text-amber-300 flex items-center gap-1.5 text-xs font-black shadow-xs hover:scale-105 transition-all cursor-pointer shrink-0"
-                title={lang === "ar" ? "رصيد العملات — اضغط لفتح المتجر" : "Coins balance — Click to open Store"}
-              >
-                <span>🪙</span>
-                <span className="font-mono text-[12px]">
-                  {(customization?.availableCoins || 0).toLocaleString()}
-                </span>
-                <span className="hidden md:inline text-[10px] text-amber-600/80 dark:text-amber-400/80">
-                  {lang === "ar" ? "عملة" : "Coins"}
-                </span>
-              </NavLink>
-            )}
-
-            {/* Notification Bell */}
-            <div className="relative" ref={notifBoxRef}>
+      {/* Unified Ultra-Translucent Liquid Glass Container floating over library background */}
+      <div className="w-full max-w-[1280px] xl:max-w-[1320px] h-[86vh] max-h-[820px] min-h-[580px] rounded-[32px] sm:rounded-[36px] bg-white/[0.04] dark:bg-black/[0.10] backdrop-blur-2xl shadow-[0_30px_90px_rgba(0,0,0,0.5),inset_0_1px_1.5px_rgba(255,255,255,0.2),inset_0_-1px_1px_rgba(45,212,191,0.05),0_0_35px_rgba(20,184,166,0.05)] border border-white/35 dark:border-white/[0.07] flex overflow-hidden relative">
+        {/* Sidebar Dock */}
+        <aside
+          className={`fixed lg:static inset-y-0 start-0 z-40 h-screen lg:h-full shrink-0 w-[86vw] max-w-[280px] ${
+            sidebarCollapsed ? "lg:w-[76px]" : "lg:w-[230px] xl:w-[245px]"
+          } bg-white/40 dark:bg-transparent lg:bg-transparent lg:dark:bg-transparent backdrop-blur-2xl lg:backdrop-blur-none text-slate-800 dark:text-white border-e border-teal-500/25 dark:border-teal-400/35 flex flex-col justify-between overflow-hidden transition-all duration-300 ${
+            sidebarOpen
+              ? "translate-x-0 bg-white/95 dark:bg-[#07131b]/95"
+              : "-translate-x-full rtl:translate-x-full lg:translate-x-0 lg:rtl:translate-x-0"
+          }`}
+        >
+          <div className="flex-1 flex flex-col overflow-hidden">
+            {/* Top Brand Section matching attached reference */}
+            <div className="pt-6 pb-4 px-4 text-start relative">
               <button
-                onClick={() => setNotifOpen((o) => !o)}
-                aria-label="Notifications"
-                className="h-8 w-8 sm:h-9 sm:w-9 rounded-full border border-slate-200/90 dark:border-slate-700 bg-slate-50/90 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 shadow-xs hover:bg-indigo-50/70 dark:hover:bg-slate-700 hover:border-indigo-300 transition-all relative cursor-pointer"
+                onClick={() => setSidebarOpen(false)}
+                className="lg:hidden absolute top-4 end-4 p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-white transition-colors cursor-pointer"
               >
-                <Bell className="h-4 w-4" />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-0.5 -end-0.5 min-w-[16px] h-4 px-1 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center ring-2 ring-white dark:ring-slate-900 shadow">
-                    {unreadCount > 99 ? "99+" : unreadCount}
-                  </span>
-                )}
+                <X className="h-4 w-4" />
               </button>
 
-              {notifOpen && (
-                <div className="fixed sm:absolute inset-x-2.5 sm:inset-x-auto sm:end-0 top-[56px] sm:top-auto sm:mt-2 sm:w-96 max-h-[80vh] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-white/15 overflow-hidden z-50">
-                  <div className="px-4 py-3 border-b border-slate-200/60 dark:border-white/10 flex items-center justify-between">
-                    <span className="font-bold text-xs flex items-center gap-1.5">
-                      <Bell className="h-3.5 w-3.5 text-indigo-600" />
-                      {lang === "ar" ? "الإشعارات" : "Notifications"} ({unreadCount})
-                    </span>
-                    <div className="flex items-center gap-2 text-[11px]">
-                      {unreadCount > 0 && (
-                        <button
-                          onClick={handleMarkAllRead}
-                          className="text-indigo-600 dark:text-cyan-400 font-semibold hover:underline flex items-center gap-1"
-                        >
-                          <CheckCheck className="h-3 w-3" />
-                          {lang === "ar" ? "تحديد كمقروء" : "Mark all read"}
-                        </button>
-                      )}
-                      <button
-                        onClick={handleClearAll}
-                        className="text-slate-400 hover:text-rose-500 flex items-center gap-1"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                        {lang === "ar" ? "مسح الكل" : "Clear"}
-                      </button>
-                    </div>
-                  </div>
-                  <div className="max-h-72 overflow-y-auto divide-y divide-slate-100 dark:divide-white/5">
-                    {notifications.length === 0 ? (
-                      <div className="p-6 text-center text-xs text-slate-400">
-                        {lang === "ar" ? "لا توجد إشعارات حالياً" : "No notifications yet."}
-                      </div>
-                    ) : (
-                      notifications.map((n) => {
-                        const title =
-                          lang === "ar"
-                            ? n.titleAr || n.titleEn || n.title || "إشعار جديد"
-                            : n.titleEn || n.titleAr || n.title || "New Notification";
-                        const body =
-                          lang === "ar"
-                            ? n.bodyAr || n.bodyEn || n.message || n.body || ""
-                            : n.bodyEn || n.bodyAr || n.message || n.body || "";
+              {/* Desktop Sidebar Collapse Toggle */}
+              <button
+                type="button"
+                onClick={() => setSidebarCollapsed((c) => !c)}
+                aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                className="hidden lg:flex absolute top-5 end-2.5 h-6 w-6 rounded-lg bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-slate-500 dark:text-slate-300 items-center justify-center transition-colors cursor-pointer text-xs z-30"
+              >
+                <ChevronLeft className={`h-3.5 w-3.5 transition-transform duration-300 ${sidebarCollapsed ? "rotate-180 rtl:rotate-0" : "rotate-0 rtl:rotate-180"}`} />
+              </button>
 
-                        return (
-                          <div
-                            key={n.id}
-                            onClick={() => handleNotificationClick(n)}
-                            className={`p-3 text-xs cursor-pointer transition-colors flex items-start gap-2.5 ${
-                              n.read
-                                ? "bg-transparent text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                                : "bg-indigo-50/60 dark:bg-indigo-950/30 text-slate-800 dark:text-slate-100 font-medium hover:bg-indigo-50 dark:hover:bg-indigo-950/50"
-                            }`}
-                          >
-                            <div
-                              className={`h-2 w-2 rounded-full mt-1.5 shrink-0 ${
-                                n.read ? "bg-slate-300 dark:bg-slate-700" : "bg-indigo-600 dark:bg-cyan-400"
-                              }`}
-                            />
-                            <div className="flex-1 min-w-0">
-                              <div className="font-bold text-xs text-slate-900 dark:text-white leading-snug">
-                                {title}
-                              </div>
-                              {body && (
-                                <div className="text-[11px] text-slate-600 dark:text-slate-300 mt-0.5 leading-relaxed break-words">
-                                  {body}
-                                </div>
-                              )}
-                              {n.createdAt && (
-                                <div className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
-                                  {new Date(n.createdAt).toLocaleTimeString([], {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
+              {/* Glowing Arabic Logo Title */}
+              <div className={`font-black text-teal-400 tracking-tight drop-shadow-[0_0_15px_rgba(45,212,191,0.6)] font-sans select-none transition-all duration-300 ${sidebarCollapsed ? "text-2xl text-center" : "text-3xl"}`}>
+                {sidebarCollapsed ? "أ" : "أثر"}
+              </div>
+              {!sidebarCollapsed && (
+                <div className="text-[10.5px] font-black text-slate-950 dark:text-teal-200/90 tracking-wider mt-1 select-none truncate">
+                  • Learn • Develop • Achieve Your Goals
                 </div>
               )}
             </div>
 
-            {/* Sound Toggle */}
+            {/* Navigation Links with fluid sliding tab indicator */}
+            <nav ref={navRef} className="flex-1 ps-3 pe-0 py-2 space-y-1 overflow-y-auto relative [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {/* Fluid Liquid Sliding Indicator with Connected Fillet Bridge */}
+              <div
+                className="athar-sliding-indicator pointer-events-none"
+                style={{
+                  transform: `translateY(${indicatorStyle.top}px)`,
+                  height: `${indicatorStyle.height}px`,
+                  opacity: indicatorStyle.opacity,
+                }}
+              />
+
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const isChat = item.to.endsWith("/chat") || item.isChat;
+                return (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    end={item.end}
+                    ref={(el) => {
+                      if (el) itemRefs.current[item.to] = el;
+                    }}
+                    onClick={() => setSidebarOpen(false)}
+                    title={sidebarCollapsed ? item.label : undefined}
+                    className={({ isActive }) =>
+                      `group relative flex items-center ${sidebarCollapsed ? "justify-center px-2 py-2" : "gap-3 ps-3.5 pe-4 py-2.5"} text-xs transition-all duration-200 z-30 ${
+                        isActive
+                          ? "rounded-s-2xl rounded-e-none text-white font-black"
+                          : `rounded-xl ${sidebarCollapsed ? "mx-1" : "me-3"} text-slate-900 dark:text-slate-100 hover:text-black dark:hover:text-white hover:bg-black/[0.05] dark:hover:bg-white/[0.08] font-bold`
+                      }`
+                    }
+                  >
+                    {({ isActive }) => (
+                      <div className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-2.5"} w-full`}>
+                        <span
+                          className={`h-7 w-7 rounded-lg flex items-center justify-center shrink-0 transition-all duration-300 transform ${
+                            isActive
+                              ? "bg-white/20 text-white border border-white/30 shadow-sm scale-105 dark:bg-teal-400/25 dark:text-teal-300 dark:border-teal-400/60 dark:shadow-[0_0_14px_rgba(45,212,191,0.5)]"
+                              : "text-slate-900 dark:text-slate-200 group-hover:text-black dark:group-hover:text-white group-hover:scale-105"
+                          }`}
+                        >
+                          <Icon className="h-4 w-4 shrink-0 stroke-[2.2]" />
+                        </span>
+                        {!sidebarCollapsed && <span className="truncate tracking-wide font-bold">{item.label}</span>}
+
+                        {/* Direct Chat Live Unread Counter Badge */}
+                        {isChat && unreadChatCount > 0 && !sidebarCollapsed && (
+                          <span className="ms-auto flex items-center gap-1.5 shrink-0">
+                            <span className="relative flex h-2 w-2">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500" />
+                            </span>
+                            <span
+                              className={`min-w-[20px] h-5 px-1.5 rounded-full text-[10.5px] font-black flex items-center justify-center shadow-md transition-all ${
+                                isActive
+                                  ? "bg-white text-teal-700 shadow-white/30"
+                                  : "bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-rose-500/30 animate-pulse"
+                              }`}
+                            >
+                              {unreadChatCount > 99 ? "99+" : unreadChatCount}
+                            </span>
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </NavLink>
+                );
+              })}
+            </nav>
+          </div>
+
+          {/* Bottom User Card with bold high-contrast styling */}
+          <div className="p-3">
+            <div className={`p-2.5 rounded-2xl bg-white/40 dark:bg-white/[0.06] backdrop-blur-xl border border-white/60 dark:border-white/[0.1] shadow-sm mb-2 transition-all duration-300 ${sidebarCollapsed ? "flex items-center justify-center p-2" : ""}`}>
+              <div className="flex items-center justify-between gap-2 w-full">
+                {!sidebarCollapsed && (
+                  <div
+                    onClick={() => setProfileModalOpen(true)}
+                    className="min-w-0 cursor-pointer flex-1"
+                    title={t("profile.editTooltip") || "Edit Profile & Password"}
+                  >
+                    <div className="text-sm font-black text-slate-950 dark:text-white truncate hover:text-teal-600 dark:hover:text-teal-400 transition-colors">
+                      {displayName || "motaz"}
+                    </div>
+                    <div className="text-xs font-bold text-slate-800 dark:text-slate-300 capitalize truncate">
+                      {t(`roles.${user?.role || "student"}`)}
+                    </div>
+                    <div className="mt-1 inline-block px-2 py-0.5 rounded-full bg-slate-900/10 dark:bg-white/10 border border-slate-900/20 dark:border-white/20 text-[9.5px] text-slate-900 dark:text-slate-100 font-black max-w-full truncate">
+                      {equippedTag?.name?.[lang] || "Prompt Engineer"}
+                    </div>
+                  </div>
+                )}
+                <div
+                  onClick={() => setProfileModalOpen(true)}
+                  className={`h-10 w-10 rounded-xl bg-teal-500/20 dark:bg-teal-950/40 border border-teal-500/50 text-teal-700 dark:text-teal-300 font-black text-xs flex items-center justify-center shrink-0 cursor-pointer hover:scale-105 transition-transform ${sidebarCollapsed ? "mx-auto" : ""}`}
+                >
+                  {String(displayName || "MO").slice(0, 2).toUpperCase()}
+                </div>
+              </div>
+            </div>
+
             <button
-              onClick={toggleSound}
-              aria-label="Toggle sound"
-              className="h-8 w-8 sm:h-9 sm:w-9 rounded-full border border-slate-200/90 dark:border-slate-700 bg-slate-50/90 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 shadow-xs hover:bg-indigo-50/70 dark:hover:bg-slate-700 hover:border-indigo-300 transition-all cursor-pointer"
+              onClick={handleLogout}
+              title={t("app.logout")}
+              className="w-full flex items-center justify-center gap-2 px-3 py-1.5 rounded-xl border border-slate-900/20 dark:border-white/15 bg-white/40 dark:bg-white/[0.06] hover:bg-white/70 dark:hover:bg-white/15 text-xs text-slate-950 dark:text-white font-bold transition-colors cursor-pointer"
             >
-              {soundOn ? <Volume2 className="h-4 w-4 text-emerald-500" /> : <VolumeX className="h-4 w-4 text-slate-400" />}
+              <span className="text-sm font-black">→</span>
+              {!sidebarCollapsed && <span className="font-bold">{t("app.logout")}</span>}
             </button>
+          </div>
+        </aside>
 
-            {/* Language Switcher */}
-            <LanguageDropdown />
+        {/* Main Workspace inside an inner card */}
+        <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden rounded-[26px] bg-white/[0.06] dark:bg-white/[0.02] backdrop-blur-2xl border border-white/35 dark:border-white/[0.07] shadow-[inset_0_1px_1px_rgba(255,255,255,0.15),0_12px_40px_rgba(0,0,0,0.2)] my-2.5 me-2.5 relative z-10">
+          {/* Top Header Bar */}
+          <header className="px-6 py-3.5 flex items-center justify-between gap-4 border-b border-slate-200/80 dark:border-teal-500/10 shrink-0">
+            <div className="flex items-center gap-2 min-w-0">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                aria-label="Open menu"
+                className="lg:hidden relative h-8 w-8 rounded-full border border-slate-200/90 dark:border-white/15 bg-slate-50/90 dark:bg-white/5 flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors shrink-0 cursor-pointer"
+              >
+                <Menu className="h-4 w-4" />
+              </button>
+              <div className="flex items-center gap-1.5 text-xs font-semibold">
+                <span className="text-slate-500 dark:text-white/60">Student /</span>
+                <span className="text-slate-900 dark:text-white/90 font-bold">{currentBreadcrumb}</span>
+              </div>
+            </div>
 
-            {/* Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              aria-label="Toggle theme"
-              className="h-8 w-8 sm:h-9 sm:w-auto sm:px-3.5 py-1.5 rounded-full border border-slate-200/90 dark:border-slate-700 bg-slate-50/90 dark:bg-slate-800 flex items-center justify-center gap-1.5 text-xs font-black text-slate-800 dark:text-slate-200 shadow-xs hover:bg-indigo-50/70 dark:hover:bg-slate-700 hover:border-indigo-300 transition-all cursor-pointer shrink-0"
-            >
-              {theme === "dark" ? (
-                <>
-                  <Sun className="h-4 w-4 text-amber-400 shrink-0" />
-                  <span className="hidden sm:inline">{t("app.light")}</span>
-                </>
-              ) : (
-                <>
-                  <Moon className="h-4 w-4 text-indigo-600 shrink-0" />
-                  <span className="hidden sm:inline">{t("app.dark")}</span>
-                </>
+            <div className="flex items-center gap-3 shrink-0">
+              {/* Student Store & Coins Pill */}
+              {user?.role === "student" && (
+                <NavLink
+                  to="/student/store"
+                  className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/5 dark:bg-white/10 border border-slate-300/80 dark:border-white/15 text-slate-900 dark:text-white/90 text-xs font-bold shadow-sm hover:scale-105 transition-all cursor-pointer"
+                  title={lang === "ar" ? "رصيد العملات — اضغط لفتح المتجر" : "Coins balance — Click to open Store"}
+                >
+                  <span className="text-amber-500 text-xs">🟡</span>
+                  <span className="font-mono">
+                    {(customization?.availableCoins || 702).toLocaleString()}
+                  </span>
+                  <span>Coins</span>
+                </NavLink>
               )}
-            </button>
-          </div>
-        </header>
 
-        {/* Welcome Hero Banner with 3D Books Artwork */}
-        <div
-          className={`my-2 sm:my-3 rounded-2xl sm:rounded-[26px] bg-gradient-to-r from-[#edf0fe] via-[#f2f4fe] to-[#e4e9fd] dark:from-slate-900 dark:via-indigo-950/30 dark:to-slate-900 border border-slate-200/80 dark:border-white/10 ${
-            user?.role === "instructor"
-              ? "py-4 sm:py-6 px-4 sm:px-8 min-h-[76px] sm:min-h-[108px]"
-              : "p-4 sm:p-6 min-h-[76px] sm:min-h-[108px]"
-          } shadow-sm relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4`}
-        >
-          <div className="relative z-10 flex-1">
-            <h2 className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-snug">
-              {lang === "ar"
-                ? `مرحباً بعودتك، ${displayName || t(`roles.${user?.role || "student"}`)}!`
-                : `Welcome Back, ${displayName || t(`roles.${user?.role || "student"}`)}!`}
-            </h2>
-            {user?.role === "student" && (
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 sm:mt-1.5 font-medium leading-relaxed">
-                {lang === "ar"
-                  ? "تابع رحلتك التعليمية وحقق أهدافك الدراسية 🚀"
-                  : "Continue your learning journey and achieve your goals 🚀"}
-              </p>
+              {/* Notification Bell */}
+              <div className="relative" ref={notifBoxRef}>
+                <button
+                  onClick={() => setNotifOpen((o) => !o)}
+                  aria-label="Notifications"
+                  className="text-slate-800 dark:text-white/90 hover:text-slate-950 dark:hover:text-white transition-colors relative p-1 cursor-pointer"
+                >
+                  <Bell className="h-4 w-4" />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-0 end-0 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-black" />
+                  )}
+                </button>
+
+                {notifOpen && (
+                  <div className="fixed sm:absolute inset-x-2.5 sm:inset-x-auto sm:end-0 top-[56px] sm:top-auto sm:mt-2 sm:w-96 max-h-[80vh] bg-white/55 dark:bg-[#07131e]/60 backdrop-blur-2xl backdrop-saturate-150 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.18)] dark:shadow-[0_25px_70px_rgba(0,0,0,0.7)] border border-white/60 dark:border-white/15 overflow-hidden z-50">
+                    <div className="px-4 py-3 border-b border-slate-900/10 dark:border-white/10 bg-white/25 dark:bg-white/[0.03] backdrop-blur-md flex items-center justify-between">
+                      <span className="font-extrabold text-xs flex items-center gap-1.5 text-slate-950 dark:text-white">
+                        <Bell className="h-3.5 w-3.5 text-teal-600 dark:text-teal-400" />
+                        {lang === "ar" ? "الإشعارات" : "Notifications"} ({unreadCount})
+                      </span>
+                      <div className="flex items-center gap-2 text-[11px]">
+                        {unreadCount > 0 && (
+                          <button
+                            onClick={handleMarkAllRead}
+                            className="text-teal-700 dark:text-teal-300 font-bold hover:underline flex items-center gap-1 cursor-pointer"
+                          >
+                            <CheckCheck className="h-3 w-3" />
+                            {lang === "ar" ? "تحديد كمقروء" : "Mark all read"}
+                          </button>
+                        )}
+                        <button
+                          onClick={handleClearAll}
+                          className="text-slate-600 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 font-semibold flex items-center gap-1 cursor-pointer"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                          {lang === "ar" ? "مسح الكل" : "Clear"}
+                        </button>
+                      </div>
+                    </div>
+                    <div className="max-h-72 overflow-y-auto divide-y divide-slate-900/10 dark:divide-white/10 [scrollbar-width:thin]">
+                      {notifications.length === 0 ? (
+                        <div className="p-6 text-center text-xs text-slate-600 dark:text-slate-400 font-medium">
+                          {lang === "ar" ? "لا توجد إشعارات حالياً" : "No notifications yet."}
+                        </div>
+                      ) : (
+                        notifications.map((n) => {
+                          const title =
+                            lang === "ar"
+                              ? n.titleAr || n.titleEn || n.title || "إشعار جديد"
+                              : n.titleEn || n.titleAr || n.title || "New Notification";
+                          const body =
+                            lang === "ar"
+                              ? n.bodyAr || n.bodyEn || n.message || n.body || ""
+                              : n.bodyEn || n.bodyAr || n.message || n.body || "";
+
+                          return (
+                            <div
+                              key={n.id}
+                              onClick={() => handleNotificationClick(n)}
+                              className={`p-3 text-xs cursor-pointer transition-colors flex items-start gap-2.5 ${
+                                n.read
+                                  ? "bg-transparent text-slate-700 dark:text-slate-400 hover:bg-white/30 dark:hover:bg-white/5"
+                                  : "bg-teal-500/10 dark:bg-teal-400/10 text-slate-950 dark:text-slate-100 font-medium hover:bg-teal-500/15 dark:hover:bg-teal-400/15"
+                              }`}
+                            >
+                              <div
+                                className={`h-2 w-2 rounded-full mt-1.5 shrink-0 ${
+                                  n.read
+                                    ? "bg-slate-400 dark:bg-slate-600"
+                                    : "bg-teal-500 dark:bg-teal-400 shadow-[0_0_8px_rgba(45,212,191,0.6)]"
+                                }`}
+                              />
+                              <div className="flex-1 min-w-0">
+                                <div className="font-extrabold text-xs text-slate-950 dark:text-white leading-snug">
+                                  {title}
+                                </div>
+                                {body && (
+                                  <div className="text-[11px] text-slate-700 dark:text-slate-300 font-medium mt-0.5 leading-relaxed break-words">
+                                    {body}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Sound Toggle */}
+              <button
+                onClick={toggleSound}
+                aria-label="Toggle sound"
+                className="text-slate-800 dark:text-white/90 hover:text-slate-950 dark:hover:text-white transition-colors p-1 cursor-pointer"
+              >
+                {soundOn ? <Volume2 className="h-4 w-4 text-slate-900 dark:text-white/90" /> : <VolumeX className="h-4 w-4 text-slate-400" />}
+              </button>
+
+              {/* Language Switcher */}
+              <LanguageDropdown />
+
+              {/* Theme Toggle switch matching reference */}
+              <button
+                onClick={toggleTheme}
+                aria-label="Toggle theme"
+                className="w-10 h-5 rounded-full bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 p-0.5 flex items-center transition-colors cursor-pointer shrink-0"
+              >
+                <div
+                  className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${
+                    theme === "dark" ? "translate-x-5" : "translate-x-0"
+                  }`}
+                />
+              </button>
+
+              {/* Header User Avatar Circle */}
+              <button
+                type="button"
+                onClick={() => setProfileModalOpen(true)}
+                title={t("profile.editTooltip") || "Profile & Settings"}
+                className="h-7 w-7 rounded-full bg-slate-900 text-white dark:bg-white/15 dark:text-white/90 border border-slate-700 dark:border-white/20 font-bold text-[10px] flex items-center justify-center shrink-0 hover:scale-105 transition-transform cursor-pointer"
+              >
+                {String(displayName || "MO").slice(0, 2).toUpperCase()}
+              </button>
+            </div>
+          </header>
+
+          {/* Main Content Body */}
+          <div className="flex-1 flex flex-col px-6 py-4 overflow-y-auto">
+            {/* Welcome Hero Banner (Hidden on Choose Instructor screen & Chat) */}
+            {location.pathname !== "/student" && !location.pathname.endsWith("/chat") && (
+              <div
+                className={`mb-4 rounded-2xl sm:rounded-[22px] bg-white/[0.12] dark:bg-white/[0.03] backdrop-blur-2xl border border-white/40 dark:border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_8px_24px_rgba(0,0,0,0.06)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.08),0_8px_24px_rgba(0,0,0,0.3)] ${
+                  user?.role === "instructor"
+                    ? "py-4 sm:py-5 px-5 sm:px-7 min-h-[76px] sm:min-h-[100px]"
+                    : "px-5 sm:px-6 py-4 sm:py-5 min-h-[76px] sm:min-h-[100px]"
+                } shadow-sm dark:shadow-lg relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4`}
+              >
+                <div className="pointer-events-none absolute -top-12 -end-10 h-36 w-36 rounded-full bg-teal-400/15 blur-2xl" />
+                <div className="relative z-10 flex-1">
+                  <h2 className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-snug">
+                    {lang === "ar"
+                      ? `مرحباً بعودتك، ${displayName || t(`roles.${user?.role || "student"}`)}!`
+                      : `Welcome Back, ${displayName || t(`roles.${user?.role || "student"}`)}!`}
+                  </h2>
+                  {user?.role === "student" && (
+                    <p className="text-xs sm:text-sm text-slate-800 dark:text-slate-200 mt-1 font-bold leading-relaxed">
+                      {lang === "ar"
+                        ? "تابع رحلتك التعليمية وحقق أهدافك الدراسية 🚀"
+                        : "Continue your learning journey and achieve your goals 🚀"}
+                    </p>
+                  )}
+                </div>
+              </div>
             )}
-          </div>
-          {/* 3D Illustration of Graduation Cap & Books */}
-          <div className="hidden sm:flex shrink-0 items-center justify-end">
-            <svg viewBox="15 22 150 90" className="w-28 sm:w-32 h-auto drop-shadow-md select-none pointer-events-none" fill="none">
-              <defs>
-                <linearGradient id="wbBookGrad1" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#1e1b4b" />
-                  <stop offset="100%" stopColor="#4338ca" />
-                </linearGradient>
-                <linearGradient id="wbBookGrad2" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#2e1065" />
-                  <stop offset="100%" stopColor="#6366f1" />
-                </linearGradient>
-                <linearGradient id="wbGold" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#fde047" />
-                  <stop offset="100%" stopColor="#f59e0b" />
-                </linearGradient>
-              </defs>
-              <ellipse cx="90" cy="100" rx="65" ry="8" fill="#09051d" fillOpacity="0.15" />
-              <path d="M 40 88 L 130 76 L 140 84 L 50 96 Z" fill="url(#wbBookGrad1)" />
-              <path d="M 50 96 L 140 84 L 140 90 L 50 102 Z" fill="#e2e8f0" />
-              <path d="M 46 76 L 134 64 L 144 72 L 56 84 Z" fill="url(#wbBookGrad2)" />
-              <path d="M 56 84 L 144 72 L 144 78 L 56 90 Z" fill="#f8fafc" />
-              <ellipse cx="90" cy="54" rx="20" ry="7" fill="#090d16" />
-              <polygon points="90,32 132,46 90,60 48,46" fill="#0f172a" stroke="#475569" strokeWidth="0.8" />
-              <circle cx="90" cy="46" r="2.5" fill="url(#wbGold)" />
-              <path d="M 90 46 Q 106 49 114 62 L 115 72" stroke="url(#wbGold)" strokeWidth="2" strokeLinecap="round" />
-              <polygon points="113,72 117,72 118,78 112,78" fill="url(#wbGold)" />
-            </svg>
+
+            {/* Dynamic Main Workspace Content with smooth fluid page transition */}
+            <main className="flex-1 flex flex-col">
+              <div key={location.pathname} className="athar-page-transition flex-1 flex flex-col">
+                {children}
+              </div>
+            </main>
           </div>
         </div>
-
-        {/* Dynamic Main Workspace Content */}
-        <main className="flex-1 pb-16">{children}</main>
       </div>
 
-      {/* Walking Robot AI Chatbot (Retained Exactly as Requested) */}
+      {/* Walking Robot AI Chatbot */}
       <PlatformChatbotWidget />
 
       {/* Profile & Credentials Settings Modal (Accessible by all roles) */}

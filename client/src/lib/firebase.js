@@ -5,8 +5,13 @@ import { getDatabase } from "firebase/database";
 import { getStorage } from "firebase/storage";
 import { getAnalytics, isSupported } from "firebase/analytics";
 
+const rawApiKey = import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDcFiKm1P-vUPy11SDGtzhwUhcQew87efU";
+export const isFirebaseConfigured = Boolean(
+  rawApiKey && rawApiKey !== "your_firebase_api_key"
+);
+
 export const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDcFiKm1P-vUPy11SDGtzhwUhcQew87efU",
+  apiKey: rawApiKey,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "training-assessment-platform.firebaseapp.com",
   databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL || "https://training-assessment-platform-default-rtdb.firebaseio.com",
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "training-assessment-platform",
@@ -17,27 +22,48 @@ export const firebaseConfig = {
 };
 
 export const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-export const auth = getAuth(app);
+
+// Guard getAuth() so missing VITE_FIREBASE_API_KEY never crashes the entire SPA at module load time
+export let auth = null;
+if (isFirebaseConfigured) {
+  try {
+    auth = getAuth(app);
+  } catch (err) {
+    console.warn("Firebase Auth initialization skipped:", err?.message);
+  }
+} else {
+  console.warn(
+    "Firebase API key is not configured (client/.env VITE_FIREBASE_API_KEY). Running without Firebase Auth."
+  );
+}
+
 export const firestore = getFirestore(app);
 export const rtdb = getDatabase(app);
 export const storage = getStorage(app);
 
 export let analytics = null;
-isSupported()
-  .then((supported) => {
-    if (supported) {
-      analytics = getAnalytics(app);
-    }
-  })
-  .catch(() => {});
+if (isFirebaseConfigured) {
+  isSupported()
+    .then((supported) => {
+      if (supported) {
+        analytics = getAnalytics(app);
+      }
+    })
+    .catch(() => {});
+}
 
 /**
  * Secondary Auth instance used by Admin when creating Instructor accounts
  * so creating a teacher in Firebase Auth does not sign out the active Admin.
  */
 export function getSecondaryAuth() {
-  const existing = getApps().find((a) => a.name === "AdminUserCreator");
-  const secondaryApp = existing || initializeApp(firebaseConfig, "AdminUserCreator");
-  return getAuth(secondaryApp);
+  if (!isFirebaseConfigured) return null;
+  try {
+    const existing = getApps().find((a) => a.name === "AdminUserCreator");
+    const secondaryApp = existing || initializeApp(firebaseConfig, "AdminUserCreator");
+    return getAuth(secondaryApp);
+  } catch {
+    return null;
+  }
 }
 

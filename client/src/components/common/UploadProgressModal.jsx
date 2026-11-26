@@ -74,10 +74,10 @@ export default function UploadProgressModal({
       role="dialog"
       aria-modal="true"
     >
-      <div className="relative w-full max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-slate-200/90 dark:border-white/10 rounded-3xl shadow-2xl p-6 sm:p-7 overflow-hidden text-slate-800 dark:text-slate-100 animate-scaleUp">
+      <div className="glass-panel relative w-full max-w-md border-teal-400/25 rounded-3xl shadow-2xl p-6 sm:p-7 overflow-hidden text-slate-800 dark:text-slate-100 animate-scaleUp">
         {/* Ambient background glow orbs */}
-        <div className="absolute -top-24 -left-24 w-52 h-52 bg-indigo-500/20 dark:bg-indigo-500/25 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -right-24 w-52 h-52 bg-purple-500/20 dark:bg-purple-500/25 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -top-24 -left-24 w-52 h-52 bg-sky-500/20 dark:bg-sky-500/25 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 w-52 h-52 bg-teal-500/20 dark:bg-teal-500/25 rounded-full blur-3xl pointer-events-none" />
 
         {/* Cancel button if error or user allows cancel */}
         {onCancel && (
@@ -85,7 +85,7 @@ export default function UploadProgressModal({
             type="button"
             onClick={onCancel}
             aria-label="Cancel"
-            className="absolute top-4 right-4 rtl:right-auto rtl:left-4 p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            className="absolute top-4 right-4 rtl:right-auto rtl:left-4 p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
           >
             <X className="h-4 w-4" />
           </button>
@@ -100,7 +100,7 @@ export default function UploadProgressModal({
                   ? "bg-gradient-to-tr from-emerald-500 to-teal-400 shadow-emerald-500/30"
                   : isError
                   ? "bg-gradient-to-tr from-rose-500 to-red-600 shadow-rose-500/30"
-                  : "bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 shadow-indigo-500/30"
+                  : "bg-gradient-to-tr from-sky-500 via-teal-500 to-emerald-500 shadow-teal-500/30"
               }`}
             >
               {isSuccess ? (
@@ -112,7 +112,7 @@ export default function UploadProgressModal({
               )}
             </div>
             {!isSuccess && !isError && (
-              <span className="absolute -inset-1 rounded-2xl border-2 border-indigo-500/40 pulse-ring-anim pointer-events-none" />
+              <span className="absolute -inset-1 rounded-2xl border-2 border-teal-400/40 pulse-ring-anim pointer-events-none" />
             )}
           </div>
 
@@ -120,7 +120,7 @@ export default function UploadProgressModal({
             <h3 className="text-base font-bold text-slate-900 dark:text-white truncate">
               {displayTitle}
             </h3>
-            <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium truncate mt-0.5">
+            <p className="text-xs text-teal-600 dark:text-teal-300 font-medium truncate mt-0.5">
               {displayStage}
             </p>
           </div>
@@ -128,14 +128,14 @@ export default function UploadProgressModal({
 
         {/* File information pill */}
         {fileName && (
-          <div className="flex items-center justify-between gap-2 p-2.5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200/70 dark:border-white/10 mb-4 text-xs">
+          <div className="flex items-center justify-between gap-2 p-2.5 rounded-2xl glass-subtle mb-4 text-xs">
             <div className="flex items-center gap-2 min-w-0">
-              <FileText className="h-4 w-4 text-indigo-500 shrink-0" />
+              <FileText className="h-4 w-4 text-teal-500 shrink-0" />
               <span className="font-semibold text-slate-800 dark:text-slate-200 truncate" title={fileName}>
                 {fileName}
               </span>
             </div>
-            <span className="font-mono text-[11px] text-slate-500 dark:text-slate-400 shrink-0 bg-white dark:bg-slate-700 px-2 py-0.5 rounded-lg border border-slate-200/60 dark:border-white/5">
+            <span className="font-mono text-[11px] text-slate-500 dark:text-slate-400 shrink-0 glass-subtle px-2 py-0.5 rounded-lg">
               {formatBytes(totalBytes || fileSize)}
             </span>
           </div>
@@ -157,14 +157,14 @@ export default function UploadProgressModal({
         </div>
 
         {/* Smooth Glassy Progress Bar */}
-        <div className="relative w-full h-3 rounded-full bg-slate-100 dark:bg-slate-800/90 border border-slate-200/70 dark:border-white/10 overflow-hidden mb-4 shadow-inner">
+        <div className="relative w-full h-3 rounded-full bg-slate-200/70 dark:bg-white/10 border border-slate-200/70 dark:border-white/10 overflow-hidden mb-4 shadow-inner">
           <div
             className={`h-full rounded-full transition-all duration-300 ease-out relative overflow-hidden ${
               isSuccess
                 ? "bg-gradient-to-r from-emerald-500 to-teal-400 shadow-md shadow-emerald-500/50"
                 : isError
                 ? "bg-gradient-to-r from-rose-500 to-red-500"
-                : "bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 shadow-md shadow-indigo-500/40"
+                : "bg-gradient-to-r from-sky-500 via-teal-500 to-emerald-500 shadow-md shadow-teal-500/40"
             }`}
             style={{ width: `${Math.max(4, progressPercent)}%` }}
           >
@@ -178,8 +178,8 @@ export default function UploadProgressModal({
         {/* Real-time Speed & Estimated Time (ETA) Grid */}
         <div className="grid grid-cols-2 gap-2.5 mb-2">
           {/* Speed Card */}
-          <div className="p-3 rounded-2xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200/60 dark:border-white/10 flex items-center gap-2.5">
-            <div className="h-8 w-8 rounded-xl bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+          <div className="p-3 rounded-2xl glass-subtle flex items-center gap-2.5">
+            <div className="h-8 w-8 rounded-xl bg-sky-500/15 text-sky-600 dark:text-sky-300 flex items-center justify-center shrink-0">
               <Zap className="h-4 w-4" />
             </div>
             <div className="min-w-0">
@@ -193,8 +193,8 @@ export default function UploadProgressModal({
           </div>
 
           {/* Calculated Estimated Time Card */}
-          <div className="p-3 rounded-2xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200/60 dark:border-white/10 flex items-center gap-2.5">
-            <div className="h-8 w-8 rounded-xl bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+          <div className="p-3 rounded-2xl glass-subtle flex items-center gap-2.5">
+            <div className="h-8 w-8 rounded-xl bg-teal-500/15 text-teal-600 dark:text-teal-300 flex items-center justify-center shrink-0">
               <Clock className="h-4 w-4" />
             </div>
             <div className="min-w-0">
@@ -202,7 +202,7 @@ export default function UploadProgressModal({
                 {t("upload.eta") || "Estimated Time"}
               </div>
               <div
-                className="text-xs font-bold text-indigo-600 dark:text-indigo-400 truncate font-mono"
+                className="text-xs font-bold text-teal-600 dark:text-teal-300 truncate font-mono"
                 title={formatEta(etaSeconds, lang)}
               >
                 {formatEta(etaSeconds, lang)}

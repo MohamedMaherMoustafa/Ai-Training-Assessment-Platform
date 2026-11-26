@@ -184,23 +184,23 @@ export default function IQPuzzlesModule() {
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 sm:space-y-8 animate-fadeIn pb-16">
       {/* Top Hero Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 border border-indigo-500/20 p-6 sm:p-8 shadow-2xl text-white">
+      <div className="relative overflow-hidden rounded-[26px] glass-panel border-teal-400/35 p-6 sm:p-7 shadow-2xl">
         {/* Glowing Ambient Background Elements */}
-        <div className="absolute -top-24 -end-24 w-72 h-72 rounded-full bg-indigo-500/15 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -start-24 w-72 h-72 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
+        <div className="absolute -top-24 -end-24 w-72 h-72 rounded-full bg-teal-500/15 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -start-24 w-72 h-72 rounded-full bg-sky-500/10 blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs font-bold">
-              <Sparkles className="h-3.5 w-3.5 text-amber-300 animate-spin" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/15 border border-teal-400/30 text-teal-700 dark:text-teal-300 text-xs font-bold">
+              <Sparkles className="h-3.5 w-3.5 text-amber-400" />
               <span>{lang === "ar" ? "ألعاب وألغاز تنمية الذكاء" : "Cognitive IQ & Brain Training"}</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
               {lang === "ar"
                 ? "مختبر ألغاز الذكاء والقدرات المعرفية 🧠"
                 : "IQ Puzzles & Cognitive Brain Hub 🧠"}
             </h1>
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
               {lang === "ar"
                 ? "تدرّج عبر 50 مستوى فريد من ألغاز الذكاء الرياضي والمكاني والمنطقي، واجمع العملات الذهبية وطور رتبتك المعرفية من مفكر مبتدئ إلى أستاذ الذكاء الأكبر!"
                 : "Progress through 50 unique cognitive puzzle levels, earn coins based on difficulty, and elevate your mental rank from Novice Thinker to IQ Grandmaster!"}
@@ -210,43 +210,43 @@ export default function IQPuzzlesModule() {
           {/* Wallet & Rank Stat Cluster */}
           <div className="flex flex-wrap items-center gap-3">
             {/* Coins Wallet Card */}
-            <div className="px-5 py-3.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 flex items-center gap-3 shadow-lg">
+            <div className="px-4 py-3 rounded-2xl glass-subtle flex items-center gap-3">
               <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-amber-400 to-amber-600 flex items-center justify-center text-white shadow-md shadow-amber-500/30">
                 <Coins className="h-5 w-5 fill-current" />
               </div>
               <div>
-                <span className="text-[11px] uppercase font-bold tracking-wider text-amber-200">
+                <span className="text-[10.5px] uppercase font-bold tracking-wider text-amber-600 dark:text-amber-300">
                   {lang === "ar" ? "رصيد العملات" : "IQ Coins"}
                 </span>
-                <div className="text-xl sm:text-2xl font-black text-amber-300">
+                <div className="text-xl font-black text-slate-900 dark:text-white">
                   {stats.coins.toLocaleString()}
                 </div>
               </div>
             </div>
 
             {/* IQ Rank Pill Card */}
-            <div className="px-5 py-3.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 flex items-center gap-3 shadow-lg">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-xl shadow-md shadow-indigo-500/30">
+            <div className="px-4 py-3 rounded-2xl glass-subtle flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-sky-500 to-emerald-500 flex items-center justify-center text-xl shadow-md shadow-teal-500/30">
                 {currentRank.badge}
               </div>
               <div>
-                <span className="text-[11px] uppercase font-bold tracking-wider text-indigo-200">
+                <span className="text-[10.5px] uppercase font-bold tracking-wider text-teal-600 dark:text-teal-300">
                   {lang === "ar" ? "الرتبة المعرفية" : "IQ Rank"}
                 </span>
-                <div className="text-sm sm:text-base font-extrabold text-white">
+                <div className="text-sm font-extrabold text-slate-900 dark:text-white">
                   {lang === "ar" ? currentRank.title.ar : currentRank.title.en}
                 </div>
               </div>
             </div>
 
             {/* Daily Streak Card */}
-            <div className="px-4 py-3.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 flex items-center gap-2.5 shadow-lg">
+            <div className="px-4 py-3 rounded-2xl glass-subtle flex items-center gap-2.5">
               <Flame className="h-6 w-6 text-orange-400 fill-orange-400 animate-pulse" />
               <div>
-                <span className="text-[10px] uppercase font-bold tracking-wider text-orange-200">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-orange-500 dark:text-orange-300">
                   {lang === "ar" ? "الحماس" : "Streak"}
                 </span>
-                <div className="text-sm font-extrabold text-white">
+                <div className="text-sm font-extrabold text-slate-900 dark:text-white">
                   {stats.dailyStreak} {lang === "ar" ? "أيام" : "Days"}
                 </div>
               </div>
@@ -255,24 +255,24 @@ export default function IQPuzzlesModule() {
         </div>
 
         {/* Level Progression Progress Bar */}
-        <div className="mt-6 pt-5 border-t border-white/10">
+        <div className="mt-6 pt-4 border-t border-slate-200/70 dark:border-white/10">
           <div className="flex items-center justify-between text-xs font-semibold mb-2">
-            <span className="text-slate-300">
+            <span className="text-slate-600 dark:text-slate-300">
               {lang === "ar"
                 ? `المراحل المكتملة: ${stats.solvedLevels.length} من أصل ${PUZZLE_LEVELS.length}`
                 : `Progress: ${stats.solvedLevels.length} of ${PUZZLE_LEVELS.length} Levels Mastered`}
             </span>
             {nextRank && (
-              <span className="text-indigo-300">
+              <span className="text-teal-600 dark:text-teal-300">
                 {lang === "ar"
                   ? `الرتبة التالية: ${nextRank.title.ar} (${stats.coins}/${nextRank.minCoins} عملة)`
                   : `Next Rank: ${nextRank.title.en} (${stats.coins}/${nextRank.minCoins} coins)`}
               </span>
             )}
           </div>
-          <div className="w-full h-2.5 rounded-full bg-white/10 overflow-hidden">
+          <div className="w-full h-2.5 rounded-full bg-slate-200/80 dark:bg-white/10 overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-amber-400 via-indigo-400 to-emerald-400 transition-all duration-500"
+              className="h-full bg-gradient-to-r from-sky-400 via-teal-400 to-emerald-400 transition-all duration-500"
               style={{
                 width: `${Math.round(
                   (stats.solvedLevels.length / PUZZLE_LEVELS.length) * 100
@@ -284,14 +284,14 @@ export default function IQPuzzlesModule() {
       </div>
 
       {/* Navigation Tab Selector */}
-      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-white/10 pb-3">
+      <div className="flex flex-wrap items-center gap-2 pb-1">
         <button
           type="button"
           onClick={() => setActiveTab("levels")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-bold transition-all cursor-pointer ${
             activeTab === "levels"
-              ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/25"
-              : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+              ? "glass-btn-primary"
+              : "glass-btn-secondary"
           }`}
         >
           <Compass className="h-4 w-4" />
@@ -301,10 +301,10 @@ export default function IQPuzzlesModule() {
         <button
           type="button"
           onClick={() => setActiveTab("daily")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-bold transition-all cursor-pointer ${
             activeTab === "daily"
-              ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/25"
-              : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+              ? "glass-btn-primary"
+              : "glass-btn-secondary"
           }`}
         >
           <CalendarCheck className="h-4 w-4 text-amber-400" />
@@ -314,10 +314,10 @@ export default function IQPuzzlesModule() {
         <button
           type="button"
           onClick={() => setActiveTab("profile")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-bold transition-all cursor-pointer ${
             activeTab === "profile"
-              ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/25"
-              : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+              ? "glass-btn-primary"
+              : "glass-btn-secondary"
           }`}
         >
           <Award className="h-4 w-4" />
@@ -344,19 +344,19 @@ export default function IQPuzzlesModule() {
               return (
                 <div
                   key={p.id}
-                  className={`relative p-5 sm:p-6 rounded-3xl border transition-all flex flex-col justify-between ${
+                  className={`relative p-5 rounded-[22px] border transition-all flex flex-col justify-between ${
                     !isUnlocked
-                      ? "bg-slate-100/70 dark:bg-slate-900/40 border-slate-200 dark:border-white/5 opacity-70"
+                      ? "bg-slate-100/70 dark:bg-white/[0.03] border-slate-200 dark:border-white/5 opacity-65"
                       : isSolved
-                      ? "bg-white dark:bg-slate-900 border-emerald-300 dark:border-emerald-500/30 shadow-md shadow-emerald-500/5 hover:border-emerald-500"
-                      : "bg-white dark:bg-slate-900 border-indigo-200 dark:border-indigo-900/50 shadow-md shadow-indigo-500/5 hover:border-indigo-500 hover:scale-[1.02]"
+                      ? "glass-card border-emerald-400/35 dark:border-teal-400/30"
+                      : "glass-card border-teal-400/50 dark:border-teal-400/45"
                   }`}
                 >
                   {/* Card Header */}
                   <div>
                     <div className="flex items-center justify-between gap-2 mb-3">
                       <div className="flex items-center gap-2">
-                        <span className="h-8 w-8 rounded-xl bg-indigo-500/15 text-indigo-600 dark:text-cyan-400 font-black text-xs flex items-center justify-center">
+                        <span className="h-7 px-2.5 rounded-lg bg-teal-500/15 text-teal-600 dark:text-teal-300 font-black text-xs flex items-center justify-center border border-teal-400/20">
                           #{p.levelNumber}
                         </span>
                         <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
@@ -376,7 +376,7 @@ export default function IQPuzzlesModule() {
                           <span>{lang === "ar" ? "مقفل" : "Locked"}</span>
                         </span>
                       ) : (
-                        <span className="flex items-center gap-1 text-[11px] font-bold text-indigo-600 dark:text-cyan-400 bg-indigo-500/10 px-2.5 py-0.5 rounded-full">
+                        <span className="flex items-center gap-1 text-[11px] font-bold text-teal-600 dark:text-teal-300 bg-teal-500/15 border border-teal-400/25 px-2.5 py-0.5 rounded-full">
                           <Unlock className="h-3 w-3" />
                           <span>{lang === "ar" ? "متاح" : "Ready"}</span>
                         </span>
@@ -393,7 +393,7 @@ export default function IQPuzzlesModule() {
                   </div>
 
                   {/* Card Bottom: Bounty & Action */}
-                  <div className="pt-4 border-t border-slate-100 dark:border-white/5 flex items-center justify-between gap-3">
+                  <div className="pt-3.5 border-t border-slate-200/60 dark:border-white/10 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-1.5 text-xs font-extrabold text-amber-600 dark:text-amber-300">
                       <Coins className="h-4 w-4 fill-amber-500 text-amber-500" />
                       <span>+{p.coins} {lang === "ar" ? "عملة" : "Coins"}</span>
@@ -405,10 +405,10 @@ export default function IQPuzzlesModule() {
                       onClick={() => handleLevelSelect(p)}
                       className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                         !isUnlocked
-                          ? "bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed"
+                          ? "bg-slate-200 dark:bg-white/10 text-slate-400 cursor-not-allowed"
                           : isSolved
-                          ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100"
-                          : "bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/20"
+                          ? "bg-teal-500/20 hover:bg-teal-500/30 border border-teal-400/40 text-teal-700 dark:text-teal-200"
+                          : "glass-btn-primary"
                       }`}
                     >
                       <Play className="h-3.5 w-3.5 fill-current" />
@@ -432,7 +432,7 @@ export default function IQPuzzlesModule() {
 
       {/* TAB 2: Daily Challenge */}
       {activeTab === "daily" && (
-        <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-white/10 shadow-xl shadow-indigo-500/5 space-y-6 max-w-3xl mx-auto">
+        <div className="glass-panel p-6 sm:p-8 rounded-3xl space-y-6 max-w-3xl mx-auto">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-xs font-extrabold text-amber-600 dark:text-amber-400">
               <CalendarCheck className="h-4 w-4" />
@@ -459,7 +459,7 @@ export default function IQPuzzlesModule() {
             <button
               type="button"
               onClick={() => handleLevelSelect(dailyChallenge)}
-              className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-indigo-600 hover:from-amber-600 hover:to-indigo-700 text-white font-extrabold text-xs sm:text-sm shadow-lg shadow-indigo-500/25 transition-all cursor-pointer"
+              className="glass-btn-primary flex items-center gap-2 px-6 py-3 rounded-2xl text-xs sm:text-sm cursor-pointer"
             >
               <Zap className="h-4 w-4" />
               <span>{lang === "ar" ? "بدء تحدي اليوم الآن ⚡" : "Start Today's Teaser ⚡"}</span>
@@ -471,7 +471,7 @@ export default function IQPuzzlesModule() {
       {/* TAB 3: Cognitive Profile & Badges */}
       {activeTab === "profile" && (
         <div className="space-y-6">
-          <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-white/10 shadow-xl shadow-indigo-500/5">
+          <div className="glass-panel p-6 sm:p-8 rounded-3xl">
             <h3 className="text-lg font-black text-slate-900 dark:text-white mb-4">
               {lang === "ar" ? "المهارات الإدراكية المدربة" : "Trained Cognitive Aptitudes"}
             </h3>
@@ -483,8 +483,8 @@ export default function IQPuzzlesModule() {
                     key={p.id}
                     className={`p-3.5 rounded-2xl border text-xs flex items-center justify-between gap-3 ${
                       isMastered
-                        ? "bg-emerald-50/60 dark:bg-emerald-950/20 border-emerald-300 dark:border-emerald-800/40 text-emerald-900 dark:text-emerald-200"
-                        : "bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-white/5 text-slate-600 dark:text-slate-400"
+                        ? "bg-emerald-500/15 border-emerald-400/35 text-emerald-800 dark:text-emerald-200"
+                        : "glass-subtle text-slate-600 dark:text-slate-400"
                     }`}
                   >
                     <div>

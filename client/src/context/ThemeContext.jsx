@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 const ThemeContext = createContext(null);
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(() => localStorage.getItem("app_theme") || "light");
+  const [theme, setTheme] = useState(() => localStorage.getItem("app_theme") || "dark");
   const logoSrc = theme === "dark" ? "/logo-dark.png" : "/logo-light.png";
 
   useEffect(() => {

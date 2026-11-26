@@ -20,63 +20,68 @@ export default function SettingsModule() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-extrabold">{t("settings.firebaseStatus")}</h1>
-        <p className="text-xs text-slate-500 dark:text-slate-400">
-          Live status of your provisioned Firebase project and local AI runtime.
-        </p>
+      <div className="glass-panel rounded-[26px] p-5 flex items-center gap-3">
+        <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-sky-500 via-teal-500 to-emerald-500 text-white flex items-center justify-center shadow-lg shadow-teal-500/25">
+          <Server className="h-6 w-6" />
+        </div>
+        <div>
+          <h1 className="text-xl font-black">{t("settings.firebaseStatus")}</h1>
+          <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
+            Live status of your provisioned Firebase project and local AI runtime.
+          </p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="glass-card p-5 space-y-3">
           <div className="flex items-center gap-2 font-bold text-sm">
-            <Database className="h-4 w-4 text-sky-600" />
+            <Database className="h-4 w-4 text-teal-500" />
             Firebase Configuration
           </div>
-          <div className="text-xs space-y-2">
+          <div className="text-xs space-y-2.5">
             <div>
-              <span className="text-slate-500">{t("settings.projectId")}:</span>{" "}
-              <code className="font-semibold">{firebaseConfig.projectId}</code>
+              <span className="text-slate-500 dark:text-slate-400">{t("settings.projectId")}:</span>{" "}
+              <code className="font-semibold text-teal-700 dark:text-teal-300">{firebaseConfig.projectId}</code>
             </div>
             <div>
-              <span className="text-slate-500">{t("settings.authStatus")}:</span>{" "}
-              <span className="inline-flex items-center gap-1 text-emerald-600 font-semibold">
+              <span className="text-slate-500 dark:text-slate-400">{t("settings.authStatus")}:</span>{" "}
+              <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold">
                 <CheckCircle2 className="h-3.5 w-3.5" /> {t("settings.connected")}
               </span>
             </div>
             <div>
-              <span className="text-slate-500">{t("settings.rtdbStatus")}:</span>{" "}
+              <span className="text-slate-500 dark:text-slate-400">{t("settings.rtdbStatus")}:</span>{" "}
               {rtdbOk === null ? (
                 "Checking…"
               ) : rtdbOk ? (
-                <span className="inline-flex items-center gap-1 text-emerald-600 font-semibold">
+                <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold">
                   <CheckCircle2 className="h-3.5 w-3.5" /> {t("settings.connected")}
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 text-rose-600 font-semibold">
+                <span className="inline-flex items-center gap-1 text-rose-600 dark:text-rose-400 font-semibold">
                   <AlertTriangle className="h-3.5 w-3.5" /> Disconnected
                 </span>
               )}
             </div>
-            <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200">
+            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-400/30 text-amber-900 dark:text-amber-200">
               <div className="font-bold">{t("settings.firestoreStatus")}</div>
               <div className="mt-1">{t("settings.lockedNote")}</div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-3">
+        <div className="glass-card p-5 space-y-3">
           <div className="flex items-center gap-2 font-bold text-sm">
-            <Server className="h-4 w-4 text-emerald-600" />
+            <Server className="h-4 w-4 text-emerald-500" />
             {t("settings.llmProxyStatus")}
           </div>
           <div className="text-xs space-y-2">
             {llmOk ? (
-              <div className="inline-flex items-center gap-1.5 text-emerald-600 font-semibold">
+              <div className="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold">
                 <CheckCircle2 className="h-4 w-4" /> Local LLM Proxy Online (localhost:3001)
               </div>
             ) : (
-              <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+              <div className="p-3 rounded-xl glass-subtle text-slate-600 dark:text-slate-300">
                 <div className="font-semibold flex items-center gap-1.5">
                   <AlertTriangle className="h-4 w-4 text-amber-500" /> {t("settings.offlineNote")}
                 </div>

@@ -235,48 +235,13 @@ export default function DirectChatModule({
 
   return (
     <div className="space-y-4">
-      {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-[26px] p-5 sm:p-6 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-xl shadow-indigo-500/20">
-        <div className="pointer-events-none absolute -top-10 -end-10 h-36 w-36 rounded-full bg-white/15 blur-2xl" />
-        <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="space-y-1">
-            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-white/20 backdrop-blur-md text-xs font-bold text-white border border-white/25">
-              <Sparkles className="h-3 w-3 text-cyan-300" />
-              <span>
-                {lang === "ar"
-                  ? "محادثة فورية مشفرة ومباشرة"
-                  : "Real-Time Direct Messaging Channel"}
-              </span>
-            </div>
-            <h1 className="text-xl sm:text-2xl font-black tracking-tight">
-              {mode === "instructor"
-                ? lang === "ar"
-                  ? "المحادثات المباشرة مع الطلاب"
-                  : "Instructor Direct Student Messenger"
-                : lang === "ar"
-                ? "محادثة المحاضر المباشرة"
-                : "Direct Chat with Your Instructor"}
-            </h1>
-            <p className="text-xs text-sky-100/90 font-medium max-w-xl">
-              {mode === "instructor"
-                ? lang === "ar"
-                  ? "تواصل لحظياً مع طلابك، أجب على استفساراتهم وتابع تقدمهم الدراسي مباشرة بدون أي تأخير."
-                  : "Communicate directly with your enrolled students, answer questions, and provide instant real-time guidance."
-                : lang === "ar"
-                ? "اطرح استفساراتك وتواصل مباشرة مع معلمك ومحاضرك في أي وقت مع إشعارات فورية."
-                : "Ask questions, discuss lectures, and receive instant direct responses from your instructor."}
-            </p>
-          </div>
-        </div>
-      </div>
-
       {/* Main Two-Column Messenger Container */}
-      <div className="glass-card overflow-hidden h-[620px] max-h-[78vh] flex rounded-[24px] border border-slate-200/80 dark:border-white/10 shadow-xl">
+      <div className="glass-panel overflow-hidden h-[620px] max-h-[78vh] flex rounded-[24px] shadow-xl">
         {/* ============================================================== */}
         {/* LEFT COLUMN: CONTACTS LIST */}
         {/* ============================================================== */}
         <div
-          className={`w-full md:w-80 shrink-0 border-e border-slate-200/80 dark:border-white/10 flex flex-col bg-white/60 dark:bg-slate-900/60 backdrop-blur-md ${
+          className={`w-full md:w-72 lg:w-80 shrink-0 border-e border-slate-200/80 dark:border-white/10 flex flex-col bg-white/60 dark:bg-[#091620]/70 backdrop-blur-md ${
             mobileChatOpen ? "hidden md:flex" : "flex"
           }`}
         >
@@ -297,16 +262,16 @@ export default function DirectChatModule({
                     ? "بحث عن محاضر..."
                     : "Search instructor..."
                 }
-                className="w-full ps-9 pe-3 py-2 rounded-xl bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-white/10 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white"
+                className="w-full ps-9 pe-3 py-2 rounded-xl glass-input text-xs"
               />
             </div>
           </div>
 
           {/* Contacts Scroll Area */}
-          <div className="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60">
+          <div className="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-white/5">
             {loadingContacts ? (
               <div className="p-8 text-center text-xs text-slate-400 animate-pulse">
-                <RefreshCw className="h-5 w-5 animate-spin mx-auto mb-2 text-indigo-500" />
+                <RefreshCw className="h-5 w-5 animate-spin mx-auto mb-2 text-teal-500" />
                 <span>{lang === "ar" ? "جاري تحميل جهات الاتصال..." : "Loading contacts..."}</span>
               </div>
             ) : filteredContacts.length === 0 ? (
@@ -340,16 +305,16 @@ export default function DirectChatModule({
                     }}
                     className={`w-full p-3.5 text-start flex items-center gap-3 transition-all cursor-pointer ${
                       isSelected
-                        ? "bg-indigo-50 dark:bg-indigo-950/40 border-s-4 border-indigo-600"
-                        : "hover:bg-slate-50 dark:hover:bg-slate-800/40"
+                        ? "bg-teal-500/10 dark:bg-white/[0.06] border-s-4 border-sky-400"
+                        : "hover:bg-slate-50 dark:hover:bg-white/[0.03]"
                     }`}
                   >
                     {/* Avatar with Status Dot */}
                     <div className="relative shrink-0">
-                      <div className="h-11 w-11 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-extrabold text-sm flex items-center justify-center shadow-md">
+                      <div className="h-11 w-11 rounded-full bg-gradient-to-tr from-sky-500 to-emerald-500 text-white font-extrabold text-sm flex items-center justify-center shadow-md">
                         {contactName.charAt(0).toUpperCase()}
                       </div>
-                      <span className="absolute -bottom-0.5 -end-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-900 shadow-sm" />
+                      <span className="absolute -bottom-0.5 -end-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-[#091620] shadow-sm" />
                     </div>
 
                     {/* Contact Info & Last Message Snippet */}
@@ -359,22 +324,26 @@ export default function DirectChatModule({
                           {contactName}
                         </span>
                         {unreadCount > 0 && (
-                          <span className="h-5 min-w-[20px] px-1.5 rounded-full bg-indigo-600 text-white font-black text-[10px] flex items-center justify-center shadow-md shadow-indigo-500/30">
+                          <span className="h-5 min-w-[20px] px-1.5 rounded-full bg-teal-500 text-white font-black text-[10px] flex items-center justify-center shadow-md shadow-teal-500/30">
                             {unreadCount}
                           </span>
                         )}
                       </div>
 
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                        {lastMsg ||
-                          (mode === "instructor"
-                            ? lang === "ar"
-                              ? "طالب في مقرراتك"
-                              : "Student in your classes"
-                            : lang === "ar"
-                            ? "محاضر المادة"
-                            : "Course Instructor")}
+                      <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold truncate">
+                        {mode === "instructor"
+                          ? lang === "ar"
+                            ? "طالب • متصل"
+                            : "Student • Online"
+                          : lang === "ar"
+                          ? "محاضر • متصل"
+                          : "Instructor • Online"}
                       </p>
+                      {lastMsg && (
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                          {lastMsg}
+                        </p>
+                      )}
                     </div>
                   </button>
                 );
@@ -387,27 +356,27 @@ export default function DirectChatModule({
         {/* RIGHT COLUMN: ACTIVE CHAT ROOM */}
         {/* ============================================================== */}
         <div
-          className={`flex-1 flex flex-col bg-slate-50/50 dark:bg-slate-950/40 ${
+          className={`flex-1 flex flex-col bg-slate-50/40 dark:bg-[#07121b]/60 ${
             !mobileChatOpen ? "hidden md:flex" : "flex"
           }`}
         >
           {selectedContact ? (
             <>
               {/* Chat Room Top Header */}
-              <div className="px-4 py-3 bg-white/80 dark:bg-slate-900/80 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between gap-3 backdrop-blur-md">
+              <div className="px-4 py-3 bg-white/80 dark:bg-[#0a1822]/85 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between gap-3 backdrop-blur-md">
                 <div className="flex items-center gap-3 min-w-0">
                   {/* Mobile Back Button */}
                   <button
                     type="button"
                     onClick={() => setMobileChatOpen(false)}
-                    className="p-1.5 rounded-xl md:hidden text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+                    className="p-1.5 rounded-xl md:hidden text-slate-500 hover:bg-slate-100 dark:hover:bg-white/10"
                     title={lang === "ar" ? "رجوع" : "Back"}
                   >
                     {lang === "ar" ? <ArrowRight className="h-5 w-5" /> : <ArrowLeft className="h-5 w-5" />}
                   </button>
 
                   <div className="relative shrink-0">
-                    <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-bold text-sm flex items-center justify-center shadow-sm">
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-sky-500 to-emerald-500 text-white font-bold text-sm flex items-center justify-center shadow-sm">
                       {(
                         selectedContact.name?.[lang] ||
                         selectedContact.displayName ||
@@ -417,7 +386,7 @@ export default function DirectChatModule({
                         .charAt(0)
                         .toUpperCase()}
                     </div>
-                    <span className="absolute -bottom-0.5 -end-0.5 h-3 w-3 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-900" />
+                    <span className="absolute -bottom-0.5 -end-0.5 h-3 w-3 rounded-full bg-emerald-500 border-2 border-white dark:border-[#0a1822]" />
                   </div>
 
                   <div className="min-w-0">
@@ -427,7 +396,7 @@ export default function DirectChatModule({
                           selectedContact.displayName ||
                           selectedContact.username}
                       </h2>
-                      <span className="px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-700 dark:text-cyan-300 text-[10px] font-bold">
+                      <span className="px-2 py-0.5 rounded-full bg-teal-500/15 border border-teal-400/30 text-teal-700 dark:text-teal-300 text-[10px] font-bold">
                         {mode === "instructor"
                           ? lang === "ar"
                             ? "طالب"
@@ -444,7 +413,7 @@ export default function DirectChatModule({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5 text-xs text-slate-500 font-semibold">
+                <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-300 font-semibold">
                   <ShieldCheck className="h-4 w-4 text-emerald-500 shrink-0" />
                   <span className="hidden sm:inline text-[11px]">
                     {lang === "ar" ? "محادثة آمنة" : "Direct & Encrypted"}
@@ -456,7 +425,7 @@ export default function DirectChatModule({
               <div className="flex-1 overflow-y-auto p-4 space-y-3.5">
                 {messages.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-3 text-slate-400">
-                    <div className="h-14 w-14 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-cyan-400 flex items-center justify-center">
+                    <div className="h-14 w-14 rounded-2xl bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center">
                       <MessageSquare className="h-7 w-7" />
                     </div>
                     <div>
@@ -482,17 +451,17 @@ export default function DirectChatModule({
                         className={`flex flex-col ${isMine ? "items-end" : "items-start"}`}
                       >
                         <div
-                          className={`max-w-[85%] sm:max-w-[75%] rounded-[20px] px-4 py-2.5 shadow-sm transition-all text-xs sm:text-sm leading-relaxed ${
+                          className={`max-w-[85%] sm:max-w-[75%] rounded-[18px] px-4 py-2.5 shadow-sm transition-all text-xs sm:text-sm leading-relaxed ${
                             isMine
-                              ? "rounded-tr-none rtl:rounded-tr-[20px] rtl:rounded-tl-none bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-indigo-500/20"
-                              : "rounded-tl-none rtl:rounded-tl-[20px] rtl:rounded-tr-none bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200/80 dark:border-white/10"
+                              ? "rounded-br-sm rtl:rounded-br-[18px] rtl:rounded-bl-sm bg-gradient-to-r from-sky-500 to-emerald-500 text-white shadow-teal-500/20"
+                              : "rounded-bl-sm rtl:rounded-bl-[18px] rtl:rounded-br-sm bg-white dark:bg-white/[0.08] text-slate-900 dark:text-slate-100 border border-slate-200/80 dark:border-white/10"
                           }`}
                         >
                           <p className="whitespace-pre-line break-words font-medium">{msg.text}</p>
 
                           <div
                             className={`mt-1 flex items-center justify-end gap-1.5 text-[9.5px] ${
-                              isMine ? "text-sky-200/90" : "text-slate-400"
+                              isMine ? "text-white/80" : "text-slate-400"
                             }`}
                           >
                             <span>
@@ -503,7 +472,7 @@ export default function DirectChatModule({
                                   })
                                 : ""}
                             </span>
-                            {isMine && <CheckCheck className="h-3 w-3 text-sky-200" />}
+                            {isMine && <CheckCheck className="h-3 w-3 text-white/90" />}
                           </div>
                         </div>
                       </div>
@@ -514,8 +483,8 @@ export default function DirectChatModule({
               </div>
 
               {/* Suggestion Chips */}
-              <div className="px-4 py-1.5 bg-slate-100/50 dark:bg-slate-900/40 border-t border-slate-200/40 dark:border-white/5 flex items-center gap-2 overflow-x-auto scrollbar-none">
-                <span className="text-[10px] font-bold text-slate-400 shrink-0">
+              <div className="px-4 py-2 bg-slate-100/50 dark:bg-[#09151f]/70 border-t border-slate-200/40 dark:border-white/10 flex items-center gap-2 overflow-x-auto scrollbar-none">
+                <span className="text-[10.5px] font-bold text-slate-400 shrink-0">
                   {lang === "ar" ? "مقترحات سريعة:" : "Quick replies:"}
                 </span>
                 {quickChips.map((chip, idx) => (
@@ -526,7 +495,7 @@ export default function DirectChatModule({
                       setInputText(chip);
                       textInputRef.current?.focus();
                     }}
-                    className="px-2.5 py-1 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-[10.5px] font-medium text-slate-700 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-slate-700 hover:text-indigo-600 dark:hover:text-cyan-400 transition-colors shrink-0 cursor-pointer"
+                    className="px-3 py-1 rounded-full bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/15 text-[10.5px] font-medium text-slate-700 dark:text-slate-200 hover:border-teal-400/60 hover:text-teal-600 dark:hover:text-teal-300 transition-colors shrink-0 cursor-pointer"
                   >
                     {chip}
                   </button>
@@ -536,7 +505,7 @@ export default function DirectChatModule({
               {/* Message Input Dock */}
               <form
                 onSubmit={handleSendMessage}
-                className="p-3 bg-white/90 dark:bg-slate-900/90 border-t border-slate-200/80 dark:border-white/10 flex items-center gap-2 backdrop-blur-md"
+                className="p-3 bg-white/90 dark:bg-[#091620]/90 border-t border-slate-200/80 dark:border-white/10 flex items-center gap-2 backdrop-blur-md"
               >
                 <input
                   ref={textInputRef}
@@ -552,13 +521,13 @@ export default function DirectChatModule({
                       ? `اكتب سؤالك أو استفسارك للمحاضر...`
                       : `Type your message or question to the instructor...`
                   }
-                  className="flex-1 px-4 py-2.5 rounded-2xl bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-white/10 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 dark:text-white"
+                  className="flex-1 px-4 py-2.5 rounded-2xl glass-input text-xs sm:text-sm"
                 />
 
                 <button
                   type="submit"
                   disabled={!inputText.trim() || sending}
-                  className="h-10 w-10 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white flex items-center justify-center shadow-lg shadow-indigo-500/25 hover:opacity-95 active:scale-95 disabled:opacity-40 transition-all cursor-pointer shrink-0"
+                  className="h-10 w-10 rounded-2xl glass-btn-primary text-white flex items-center justify-center active:scale-95 disabled:opacity-40 transition-all cursor-pointer shrink-0"
                   title={lang === "ar" ? "إرسال الرسالة" : "Send message"}
                 >
                   <Send className={`h-4 w-4 ${lang === "ar" ? "rotate-180" : ""}`} />
@@ -567,7 +536,7 @@ export default function DirectChatModule({
             </>
           ) : (
             <div className="h-full flex flex-col items-center justify-center p-8 text-center space-y-3 text-slate-400">
-              <div className="h-16 w-16 rounded-3xl bg-indigo-500/10 text-indigo-600 dark:text-cyan-400 flex items-center justify-center">
+              <div className="h-16 w-16 rounded-3xl bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center">
                 <MessageSquare className="h-8 w-8" />
               </div>
               <h3 className="font-extrabold text-base text-slate-800 dark:text-white">

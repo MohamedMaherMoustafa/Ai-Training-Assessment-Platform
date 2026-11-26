@@ -379,17 +379,17 @@ export default function GradesModule({ mode = "admin", activeInstructorId = null
           </div>
         </div>
         {results.length > 0 && (
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={exportCsv}
-              className="glass-btn-secondary flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold"
+              className="glass-btn-secondary flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold cursor-pointer"
             >
-              <Download className="h-4 w-4 text-sky-600" />
+              <Download className="h-4 w-4 text-teal-500 dark:text-teal-300" />
               {t("quizzes.exportCsv")}
             </button>
             <button
               onClick={exportPdf}
-              className="glass-btn-primary flex items-center gap-2 px-4 py-2 rounded-xl text-xs"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-400 hover:to-cyan-400 text-white shadow-lg shadow-sky-500/25 transition-all cursor-pointer"
             >
               <FileText className="h-4 w-4" />
               Export Branded PDF
@@ -405,62 +405,84 @@ export default function GradesModule({ mode = "admin", activeInstructorId = null
           {t("app.noData")}
         </div>
       ) : (
-        <div className="space-y-3.5">
-          {results.map((r) => (
-            <div
-              key={r.id}
-              className="glass-card p-5 rounded-[22px] space-y-3.5 hover:shadow-md transition-all text-start"
-            >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-white/5">
-                <div className="space-y-1 min-w-0">
-                  <div className="font-black text-sm sm:text-base text-slate-900 dark:text-white truncate">
-                    {r.quizTitle || r.quizId}
-                  </div>
-                  <div className="text-xs text-slate-500 dark:text-slate-400 flex flex-wrap items-center gap-2">
-                    <span className="font-semibold text-slate-700 dark:text-slate-300">
-                      {r.studentName || r.studentId}
-                    </span>
-                    <span>·</span>
-                    <span className="font-mono">
-                      {r.submittedAt ? new Date(r.submittedAt).toLocaleString() : "—"}
-                    </span>
-                  </div>
-                </div>
-                <div className="self-start sm:self-auto shrink-0">
-                  <span
-                    className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-black shadow-xs ${
-                      r.score >= 60
-                        ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60"
-                        : "bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60"
-                    }`}
-                  >
-                    <span className="font-mono text-sm">{getPoints(r)}</span>
-                    <span className="text-[10px] opacity-75">/ {r.total || getPoints(r) || 1} pts</span>
-                    <span className="text-[11px] font-bold">({r.score}%)</span>
-                  </span>
-                </div>
-              </div>
-
-              {r.aiFeedback && (
-                <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-sky-500/10 via-indigo-500/5 to-transparent border border-sky-300/40 dark:border-sky-700/40 text-xs text-sky-950 dark:text-sky-200 flex items-start gap-3">
-                  <div className="h-8 w-8 rounded-xl bg-sky-500/15 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 shadow-xs">
-                    <Sparkles className="h-4 w-4" />
-                  </div>
-                  <div className="space-y-1 min-w-0 flex-1">
-                    <div className="font-extrabold text-sky-950 dark:text-sky-200 flex items-center gap-1.5">
-                      <span>{t("quizzes.aiFeedback")}</span>
-                      <span className="text-[9px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-md bg-sky-600 text-white">
-                        AI Coach
+        <div className="space-y-4">
+          {results.map((r) => {
+            const pts = getPoints(r);
+            const tot = Number(r.total) || pts || 1;
+            const passed = (Number(r.score) || 0) >= 60;
+            return (
+              <div
+                key={r.id}
+                className="glass-card p-5 rounded-[22px] space-y-4 text-start"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/60 dark:border-white/10">
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-black text-base text-slate-900 dark:text-white truncate">
+                        {r.quizTitle || r.quizId}
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full bg-teal-500/10 border border-teal-400/25 text-[10px] font-bold text-teal-700 dark:text-teal-300">
+                        Exam Assessment
                       </span>
                     </div>
-                    <div className="text-slate-700 dark:text-slate-200 leading-relaxed font-medium whitespace-pre-line text-start">
-                      {r.aiFeedback}
+                    <div className="text-xs text-slate-500 dark:text-slate-400 flex flex-wrap items-center gap-2">
+                      <span className="font-semibold text-slate-700 dark:text-slate-300">
+                        {r.studentName || r.studentId}
+                      </span>
+                      <span>·</span>
+                      <span className="font-mono">
+                        {r.submittedAt ? new Date(r.submittedAt).toLocaleString() : "—"}
+                      </span>
                     </div>
                   </div>
+                  <div className="self-start sm:self-auto shrink-0">
+                    <span
+                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black shadow-sm ${
+                        passed
+                          ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-emerald-500/25"
+                          : "bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60"
+                      }`}
+                    >
+                      <span className="font-mono text-base">{pts}</span>
+                      <span className="text-[11px] opacity-90">/ {tot} pts</span>
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[10.5px] font-bold ${
+                          passed ? "bg-white/20 text-white" : "bg-rose-500/15"
+                        }`}
+                      >
+                        {r.score}% • {passed ? "Passed" : "Review"}
+                      </span>
+                    </span>
+                  </div>
                 </div>
-              )}
-            </div>
-          ))}
+
+                {r.aiFeedback && (
+                  <div className="p-4 rounded-2xl bg-gradient-to-r from-teal-500/10 via-sky-500/5 to-transparent border border-teal-400/25 dark:border-teal-400/20 text-xs text-slate-800 dark:text-slate-200 flex items-start gap-3">
+                    <div className="h-8 w-8 rounded-xl bg-teal-500/15 text-teal-600 dark:text-teal-300 flex items-center justify-center shrink-0 border border-teal-400/25">
+                      <Sparkles className="h-4 w-4" />
+                    </div>
+                    <div className="space-y-2 min-w-0 flex-1">
+                      <div className="font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                        <span>{t("quizzes.aiFeedback")}</span>
+                        <span className="text-[9px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-md bg-teal-500/20 border border-teal-400/30 text-teal-700 dark:text-teal-300">
+                          AI Coach
+                        </span>
+                      </div>
+                      <div className="w-full h-1.5 rounded-full bg-slate-200/70 dark:bg-white/10 overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full"
+                          style={{ width: `${Math.min(100, Math.max(8, Number(r.score) || 0))}%` }}
+                        />
+                      </div>
+                      <div className="text-slate-700 dark:text-slate-200 leading-relaxed font-medium whitespace-pre-line text-start">
+                        {r.aiFeedback}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

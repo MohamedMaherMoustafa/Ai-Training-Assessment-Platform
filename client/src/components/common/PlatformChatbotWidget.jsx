@@ -879,31 +879,37 @@ export default function PlatformChatbotWidget() {
         >
           {/* Robot Mascot Launcher */}
           <div className="flex flex-col items-center relative">
-            <div className="drop-shadow-[0_8px_18px_rgba(2,132,199,0.4)]">
+            <div className="drop-shadow-[0_8px_18px_rgba(20,184,166,0.38)] -mb-2">
               <RobotMascotSvg
                 skinId={botCustomization.botColor || "skin_classic_blue"}
                 hatId={botCustomization.botHat || "hat_none"}
                 glassesId={botCustomization.botGlasses || "glasses_none"}
                 shoesId={botCustomization.botShoes || "shoes_none"}
-                width={88}
-                height={94}
-                className="w-[78px] h-[84px] sm:w-[86px] sm:h-[92px] overflow-visible"
+                width={82}
+                height={88}
+                className="w-[74px] h-[80px] sm:w-[82px] sm:h-[88px] overflow-visible"
                 signText={lang === "ar" ? "مساعدة!" : "HELP!"}
                 idPrefix="widget"
               />
             </div>
-            <div className="w-14 sm:w-16 h-3 -mt-0.5 rounded-full bg-slate-900/30 dark:bg-sky-400/25 blur-[3px]" />
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/90 dark:bg-[#0c1a26]/90 backdrop-blur-xl border border-slate-200/80 dark:border-teal-500/35 shadow-[0_8px_22px_rgba(0,0,0,0.35)] text-[11px] font-bold text-slate-900 dark:text-white">
+              <span>{lang === "ar" ? "أثر AI" : "Athar AI"}</span>
+              <span className="text-teal-400 font-black">•</span>
+              <span className="text-teal-600 dark:text-teal-300 font-bold">
+                {lang === "ar" ? "متصل" : "Online"}
+              </span>
+            </div>
           </div>
         </button>
       ) : (
         <div
-          className={`chatbot-pop-in bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-[28px] shadow-2xl border border-slate-200/80 dark:border-white/10 flex flex-col overflow-hidden transition-all duration-200 ${expanded
+          className={`chatbot-pop-in bg-white/95 dark:bg-[#091620]/95 backdrop-blur-2xl rounded-[28px] shadow-2xl border border-slate-200/80 dark:border-teal-400/20 flex flex-col overflow-hidden transition-all duration-200 ${expanded
             ? "w-[94vw] sm:w-[620px] h-[86vh]"
             : "w-[94vw] sm:w-[440px] h-[580px]"
             }`}
         >
           {/* Header */}
-          <div className="px-4 py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white flex items-center justify-between gap-2 shadow-sm">
+          <div className="px-4 py-3 bg-gradient-to-r from-[#072632] via-[#0c3a46] to-[#082b36] border-b border-teal-400/20 text-white flex items-center justify-between gap-2 shadow-sm">
             <div className="flex items-center gap-3 min-w-0">
               <div className="h-12 w-12 sm:h-13 sm:w-13 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/25 p-1 shadow-md">
                 <img src={logoSrc} alt="Athar AI Logo" className="h-full w-full object-contain filter drop-shadow-md scale-110" />
@@ -962,8 +968,8 @@ export default function PlatformChatbotWidget() {
                 {/* Bubble Container */}
                 <div
                   className={`max-w-[88%] sm:max-w-[85%] rounded-[22px] px-4 py-3 shadow-sm transition-all ${m.sender === "user"
-                    ? "rounded-tr-none rtl:rounded-tr-[22px] rtl:rounded-tl-none bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-indigo-500/20"
-                    : "rounded-tl-none rtl:rounded-tl-[22px] rtl:rounded-tr-none bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 border border-slate-200/80 dark:border-white/10"
+                    ? "rounded-tr-none rtl:rounded-tr-[22px] rtl:rounded-tl-none bg-gradient-to-r from-sky-500 to-emerald-500 text-white shadow-teal-500/20"
+                    : "rounded-tl-none rtl:rounded-tl-[22px] rtl:rounded-tr-none bg-slate-50 dark:bg-white/[0.06] text-slate-800 dark:text-slate-100 border border-slate-200/80 dark:border-white/10"
                     }`}
                 >
                   {/* Attached media display in user bubble */}
@@ -1356,7 +1362,7 @@ export default function PlatformChatbotWidget() {
             <button
               type="submit"
               disabled={busy || (!input.trim() && attachments.length === 0)}
-              className="p-2.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md shadow-indigo-600/30 transition-all disabled:opacity-40 shrink-0 cursor-pointer"
+              className="p-2.5 rounded-2xl glass-btn-primary text-white transition-all disabled:opacity-40 shrink-0 cursor-pointer"
               aria-label="Send message"
             >
               <Send className="h-4 w-4 rtl:rotate-180" />

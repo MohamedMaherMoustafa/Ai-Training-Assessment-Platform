@@ -163,20 +163,20 @@ export default function StudentsModule({ filterInstructorId = null }) {
         </div>
 
         {/* Quick Stats Pill Counters for Instructor */}
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-white/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-white/10 shadow-sm text-xs font-bold text-slate-700 dark:text-slate-200">
-            <Users className="h-3.5 w-3.5 text-indigo-500" />
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-white/80 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 shadow-sm text-xs font-bold text-slate-700 dark:text-slate-200">
+            <Users className="h-3.5 w-3.5 text-teal-500" />
             <span>
               {lang === "ar" ? "الإجمالي:" : "Total:"} {students.length}
             </span>
           </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-emerald-50/90 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs font-bold text-emerald-700 dark:text-emerald-300 shadow-sm">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-emerald-500/15 border border-emerald-400/30 text-xs font-bold text-emerald-700 dark:text-emerald-300 shadow-sm">
             <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
             <span>
               {lang === "ar" ? "نشط:" : "Active:"} {activeCount}
             </span>
           </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-rose-50/90 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-xs font-bold text-rose-700 dark:text-rose-300 shadow-sm">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-rose-500/15 border border-rose-400/30 text-xs font-bold text-rose-700 dark:text-rose-300 shadow-sm">
             <span className="h-2 w-2 rounded-full bg-rose-500"></span>
             <span>
               {lang === "ar" ? "معطل:" : "Inactive:"} {inactiveCount}
@@ -187,7 +187,7 @@ export default function StudentsModule({ filterInstructorId = null }) {
 
       {/* Pending Requests Section for Instructors */}
       {filterInstructorId && (
-        <div className="glass-card border-amber-400/50 dark:border-amber-500/30 overflow-hidden shadow-sm">
+        <div className="glass-panel rounded-[24px] border-amber-400/40 overflow-hidden shadow-sm">
           <div className="px-5 py-3.5 bg-amber-500/15 border-b border-amber-400/30 flex items-center justify-between">
             <div className="flex items-center gap-2 font-bold text-sm text-amber-900 dark:text-amber-200">
               <Clock className="h-4 w-4" />
@@ -197,13 +197,13 @@ export default function StudentsModule({ filterInstructorId = null }) {
             </div>
           </div>
           {pendingRequests.length === 0 ? (
-            <div className="p-5 text-xs text-slate-500 text-center">
+            <div className="p-5 text-xs text-slate-500 dark:text-slate-400 text-center">
               {lang === "ar"
                 ? "لا توجد طلبات معلقة حالياً."
                 : "No pending registration requests right now."}
             </div>
           ) : (
-            <div className="divide-y divide-slate-200 dark:divide-slate-800">
+            <div className="divide-y divide-slate-200/70 dark:divide-white/10">
               {pendingRequests.map((req) => (
                 <div
                   key={req.uid}
@@ -211,7 +211,7 @@ export default function StudentsModule({ filterInstructorId = null }) {
                 >
                   <div>
                     <div className="font-bold text-sm">{req.displayName}</div>
-                    <div className="text-xs text-slate-500">
+                    <div className="text-xs text-slate-500 dark:text-slate-400">
                       @{req.username} · {req.email}
                       {(req.phoneNumber || req.phone) && (
                         <span className="ms-2 font-mono text-emerald-600 dark:text-emerald-400">
@@ -223,14 +223,14 @@ export default function StudentsModule({ filterInstructorId = null }) {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleApprove(req.uid)}
-                      className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all"
+                      className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
                     >
                       <UserCheck className="h-3.5 w-3.5" />
                       {lang === "ar" ? "قبول" : "Accept"}
                     </button>
                     <button
                       onClick={() => handleReject(req.uid)}
-                      className="px-3.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all"
+                      className="px-3.5 py-1.5 rounded-xl bg-rose-500/90 hover:bg-rose-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
                     >
                       <UserX className="h-3.5 w-3.5" />
                       {lang === "ar" ? "رفض" : "Decline"}
@@ -244,11 +244,11 @@ export default function StudentsModule({ filterInstructorId = null }) {
       )}
 
       {editingStudent && (
-        <div className="bg-white dark:bg-slate-900 border border-sky-300 dark:border-sky-800 rounded-2xl p-5 shadow-sm space-y-3">
-          <div className="font-bold text-sm">
+        <div className="glass-panel rounded-[24px] border-teal-400/35 p-5 shadow-sm space-y-4">
+          <div className="font-bold text-sm text-slate-900 dark:text-white">
             {t("admin.assignInstructors")}: {editingStudent.displayName}
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
             {instructors.map((inst) => {
               const selected = selectedInstructorIds.includes(inst.uid);
               return (
@@ -256,14 +256,14 @@ export default function StudentsModule({ filterInstructorId = null }) {
                   key={inst.uid}
                   type="button"
                   onClick={() => toggleInst(inst.uid)}
-                  className={`p-2.5 rounded-xl border text-start flex items-center gap-2 text-xs font-semibold transition-all ${
+                  className={`p-2.5 rounded-xl border text-start flex items-center gap-2 text-xs font-semibold transition-all cursor-pointer ${
                     selected
-                      ? "bg-sky-50 dark:bg-sky-950/50 border-sky-500 text-sky-700 dark:text-sky-300"
-                      : "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                      ? "bg-teal-500/15 border-teal-400/60 text-teal-800 dark:text-teal-200"
+                      : "bg-slate-50/70 dark:bg-white/[0.04] border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-slate-300"
                   }`}
                 >
                   {selected ? (
-                    <CheckCircle2 className="h-4 w-4 text-sky-600 shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 text-teal-500 shrink-0" />
                   ) : (
                     <Circle className="h-4 w-4 text-slate-400 shrink-0" />
                   )}
@@ -275,13 +275,13 @@ export default function StudentsModule({ filterInstructorId = null }) {
           <div className="flex justify-end gap-2">
             <button
               onClick={() => setEditingStudent(null)}
-              className="px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 text-xs font-semibold"
+              className="glass-btn-secondary px-4 py-1.5 rounded-xl text-xs font-semibold cursor-pointer"
             >
               {t("app.cancel")}
             </button>
             <button
               onClick={saveInstructors}
-              className="px-4 py-1.5 rounded-lg bg-sky-600 text-white text-xs font-semibold"
+              className="glass-btn-primary px-5 py-1.5 rounded-xl text-xs font-bold cursor-pointer"
             >
               {t("app.save")}
             </button>
@@ -290,7 +290,7 @@ export default function StudentsModule({ filterInstructorId = null }) {
       )}
 
       {/* Main Students List with Search & Status Filter */}
-      <div className="glass-card overflow-hidden shadow-sm">
+      <div className="glass-panel rounded-[24px] overflow-hidden shadow-sm">
         {/* Search & Filter Toolbar */}
         <div className="p-4 border-b border-slate-200/80 dark:border-white/10 flex flex-wrap items-center justify-between gap-3 bg-slate-50/50 dark:bg-white/[0.02]">
           {/* Search Box */}
@@ -305,7 +305,7 @@ export default function StudentsModule({ filterInstructorId = null }) {
                   ? "البحث بالاسم أو اسم المستخدم أو البريد..."
                   : "Search students by name, username, or email..."
               }
-              className="w-full ps-9 pe-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full ps-9 pe-3 py-1.5 rounded-xl glass-input text-xs"
             />
           </div>
 
@@ -314,10 +314,10 @@ export default function StudentsModule({ filterInstructorId = null }) {
             <button
               type="button"
               onClick={() => setStatusFilter("all")}
-              className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
+              className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
                 statusFilter === "all"
-                  ? "bg-indigo-600 text-white shadow-sm"
-                  : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100"
+                  ? "bg-teal-500/20 text-teal-700 dark:text-white border border-teal-400/60 shadow-[0_0_12px_rgba(20,184,166,0.2)]"
+                  : "bg-white dark:bg-white/[0.04] text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/10 hover:border-teal-400/40"
               }`}
             >
               {lang === "ar" ? "الكل" : "All"} ({students.length})
@@ -325,10 +325,10 @@ export default function StudentsModule({ filterInstructorId = null }) {
             <button
               type="button"
               onClick={() => setStatusFilter("active")}
-              className={`px-3 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                 statusFilter === "active"
                   ? "bg-emerald-600 text-white shadow-sm"
-                  : "bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-50"
+                  : "bg-white dark:bg-white/[0.04] text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-400/30 hover:bg-emerald-50 dark:hover:bg-emerald-500/10"
               }`}
             >
               <span className="h-1.5 w-1.5 rounded-full bg-current"></span>
@@ -337,10 +337,10 @@ export default function StudentsModule({ filterInstructorId = null }) {
             <button
               type="button"
               onClick={() => setStatusFilter("inactive")}
-              className={`px-3 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                 statusFilter === "inactive"
                   ? "bg-rose-600 text-white shadow-sm"
-                  : "bg-white dark:bg-slate-800 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800 hover:bg-rose-50"
+                  : "bg-white dark:bg-white/[0.04] text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-400/30 hover:bg-rose-50 dark:hover:bg-rose-500/10"
               }`}
             >
               <span className="h-1.5 w-1.5 rounded-full bg-current"></span>
@@ -351,7 +351,7 @@ export default function StudentsModule({ filterInstructorId = null }) {
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-start">
-            <thead className="bg-slate-900/5 dark:bg-white/5 text-xs uppercase text-slate-600 dark:text-slate-300">
+            <thead className="bg-slate-900/5 dark:bg-white/[0.04] border-b border-slate-200/70 dark:border-white/10 text-xs uppercase tracking-wider text-slate-600 dark:text-slate-300">
               <tr>
                 <th className="px-4 py-3 text-start">{t("auth.fullName")}</th>
                 <th className="px-4 py-3 text-start">{t("auth.username")} / {t("auth.email")}</th>
@@ -359,16 +359,16 @@ export default function StudentsModule({ filterInstructorId = null }) {
                 <th className="px-4 py-3 text-end">{t("app.actions")}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+            <tbody className="divide-y divide-slate-200/70 dark:divide-white/10">
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center text-slate-500">
+                  <td colSpan={4} className="px-4 py-8 text-center text-slate-500 dark:text-slate-400">
                     {t("app.loading")}
                   </td>
                 </tr>
               ) : filteredStudents.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center text-slate-500">
+                  <td colSpan={4} className="px-4 py-8 text-center text-slate-500 dark:text-slate-400">
                     {searchQuery.trim() || statusFilter !== "all"
                       ? lang === "ar"
                         ? "لا توجد نتائج مطابقة لفلتر البحث."
@@ -380,14 +380,14 @@ export default function StudentsModule({ filterInstructorId = null }) {
                 filteredStudents.map((st) => {
                   const active = st.active !== false;
                   return (
-                    <tr key={st.uid} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                    <tr key={st.uid} className="hover:bg-teal-500/5 transition-colors">
                       <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white">
                         {st.displayName}
                       </td>
                       <td className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400">
                         <div>@{st.username} · {st.email}</div>
                         {(st.phoneNumber || st.phone) && (
-                          <div className="text-[11px] text-slate-500 font-mono mt-0.5 font-medium">
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono mt-0.5 font-medium">
                             📞 {st.phoneNumber || st.phone}
                           </div>
                         )}
@@ -396,8 +396,8 @@ export default function StudentsModule({ filterInstructorId = null }) {
                         <span
                           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border transition-colors ${
                             active
-                              ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
-                              : "bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border-rose-200 dark:border-rose-800"
+                              ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-400/30"
+                              : "bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-400/30"
                           }`}
                         >
                           <span
@@ -414,7 +414,7 @@ export default function StudentsModule({ filterInstructorId = null }) {
                             <button
                               onClick={() => startEdit(st)}
                               title={t("admin.assignInstructors")}
-                              className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-sky-600 transition-colors"
+                              className="p-1.5 rounded-xl border border-slate-200/80 dark:border-white/10 bg-white/50 dark:bg-white/[0.04] hover:border-teal-400/50 hover:bg-teal-500/10 text-sky-500 transition-colors cursor-pointer"
                             >
                               <Edit3 className="h-4 w-4" />
                             </button>
@@ -430,10 +430,10 @@ export default function StudentsModule({ filterInstructorId = null }) {
                                   ? "تفعيل حساب الطالب"
                                   : "Activate student account"
                             }
-                            className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all inline-flex items-center gap-1.5 shadow-sm active:scale-95 ${
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all inline-flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer ${
                               active
-                                ? "border-amber-300/80 bg-amber-50 hover:bg-amber-100 text-amber-800 dark:border-amber-700/60 dark:bg-amber-950/40 dark:text-amber-300"
-                                : "border-emerald-300/80 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 dark:border-emerald-700/60 dark:bg-emerald-950/40 dark:text-emerald-300"
+                                ? "border-amber-400/40 bg-amber-500/15 hover:bg-amber-500/25 text-amber-800 dark:text-amber-300"
+                                : "border-emerald-400/40 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-800 dark:text-emerald-300"
                             }`}
                           >
                             <Power className="h-3.5 w-3.5" />

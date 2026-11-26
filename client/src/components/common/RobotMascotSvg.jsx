@@ -224,8 +224,8 @@ export default function RobotMascotSvg({
 
       {/* Legs */}
       <g className="robot-legs">
-        <rect x="30" y="67" width="9" height="15" rx="4" fill="#334155" />
-        <rect x="47" y="67" width="9" height="15" rx="4" fill="#334155" />
+        <rect x="30" y="67" width="9" height="15" rx="4" fill="#334155" className="robot-leg-l" />
+        <rect x="47" y="67" width="9" height="15" rx="4" fill="#334155" className="robot-leg-r" />
 
         {/* Footwear / Shoes */}
         {shoesId === "shoes_cyber_sneakers" && (
@@ -305,8 +305,8 @@ export default function RobotMascotSvg({
         {(!shoesId || shoesId === "shoes_none") && (
           /* Default Magnetic Pads */
           <>
-            <rect x="28" y="78" width="13" height="6" rx="3" fill={colors.glowColor} />
-            <rect x="45" y="78" width="13" height="6" rx="3" fill={colors.glowColor} />
+            <rect x="28" y="78" width="13" height="6" rx="3" fill={colors.glowColor} className="robot-leg-l" />
+            <rect x="45" y="78" width="13" height="6" rx="3" fill={colors.glowColor} className="robot-leg-r" />
           </>
         )}
       </g>

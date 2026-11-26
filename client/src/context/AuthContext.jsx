@@ -1,10 +1,40 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { ref, get } from "firebase/database";
-import { auth, rtdb } from "../lib/firebase";
+import { auth, rtdb, isFirebaseConfigured } from "../lib/firebase";
 import { loginWithCredentials, logoutAll } from "../services/platformService";
 
 const AuthContext = createContext(null);
+const PREVIEW_STORAGE_KEY = "athar_preview_session";
+
+function buildPreviewUser(role) {
+  if (role === "instructor") {
+    return {
+      uid: "preview_instructor",
+      role: "instructor",
+      username: "preview_instructor",
+      email: "instructor.preview@athar.local",
+      displayName: "Preview Instructor",
+      name: { en: "Preview Instructor", ar: "معاينة المحاضر" },
+      specialization: { en: "UI Preview Mode", ar: "وضع معاينة الواجهة" },
+      active: true,
+      isPreview: true,
+    };
+  }
+  return {
+    uid: "preview_student",
+    role: "student",
+    username: "preview_student",
+    email: "student.preview@athar.local",
+    displayName: "Preview Student",
+    name: { en: "Preview Student", ar: "معاينة الطالب" },
+    instructorIds: ["preview_instructor"],
+    enrolledCourseIds: [],
+    approvalStatus: "approved",
+    active: true,
+    isPreview: true,
+  };
+}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
@@ -14,6 +44,14 @@ export function AuthProvider({ children }) {
         try {
           return JSON.parse(savedAdmin);
         } catch {}
+      }
+      if (!isFirebaseConfigured) {
+        const savedPreview = sessionStorage.getItem(PREVIEW_STORAGE_KEY);
+        if (savedPreview) {
+          try {
+            return JSON.parse(savedPreview);
+          } catch {}
+        }
       }
     }
     return null;
@@ -30,6 +68,26 @@ export function AuthProvider({ children }) {
       } catch {
         localStorage.removeItem("admin_session");
       }
+    }
+
+    if (isFirebaseConfigured) {
+      sessionStorage.removeItem(PREVIEW_STORAGE_KEY);
+    } else {
+      const savedPreview = sessionStorage.getItem(PREVIEW_STORAGE_KEY);
+      if (savedPreview) {
+        try {
+          setUser(JSON.parse(savedPreview));
+          setLoading(false);
+          return undefined;
+        } catch {
+          sessionStorage.removeItem(PREVIEW_STORAGE_KEY);
+        }
+      }
+    }
+
+    if (!auth) {
+      setLoading(false);
+      return undefined;
     }
 
     const unsub = onAuthStateChanged(auth, async (fbUser) => {
@@ -64,6 +122,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (identifier, password) => {
+    sessionStorage.removeItem(PREVIEW_STORAGE_KEY);
     const profile = await loginWithCredentials(identifier, password);
     if (profile.role === "admin") {
       localStorage.setItem("admin_session", JSON.stringify(profile));
@@ -74,8 +133,17 @@ export function AuthProvider({ children }) {
     return profile;
   };
 
+  const enterPreviewMode = (role) => {
+    if (isFirebaseConfigured) return null;
+    localStorage.removeItem("admin_session");
+    const mockUser = buildPreviewUser(role === "instructor" ? "instructor" : "student");
+    sessionStorage.setItem(PREVIEW_STORAGE_KEY, JSON.stringify(mockUser));
+    setUser(mockUser);
+    return mockUser;
+  };
+
   const refreshProfile = async () => {
-    if (!user) return;
+    if (!user || user.isPreview) return;
     if (user.role === "admin" || user.uid === "admin_123") {
       try {
         const snap = await get(ref(rtdb, "admins/admin_123"));
@@ -96,12 +164,15 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
+    sessionStorage.removeItem(PREVIEW_STORAGE_KEY);
     await logoutAll();
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, setUser, loading, login, logout, refreshProfile }}>
+    <AuthContext.Provider
+      value={{ user, setUser, loading, login, logout, refreshProfile, enterPreviewMode }}
+    >
       {children}
     </AuthContext.Provider>
   );

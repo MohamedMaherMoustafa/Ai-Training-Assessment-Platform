@@ -234,49 +234,52 @@ export default function AdminOverview() {
       value: instructors.length,
       sub: `${instructors.filter((i) => i.active !== false).length} ${t("app.active")}`,
       icon: Users,
-      color: "text-sky-600 bg-sky-100 dark:bg-sky-900/50 dark:text-sky-300",
+      color: "text-sky-600 bg-sky-500/15 border border-sky-400/25 dark:text-sky-300",
     },
     {
       label: t("admin.kpiStudents"),
       value: students.length,
       sub: `${students.filter((s) => (s.enrolledCourseIds || []).length > 0).length} ${t("courses.enrolled")}`,
       icon: GraduationCap,
-      color: "text-indigo-600 bg-indigo-100 dark:bg-indigo-900/50 dark:text-indigo-300",
+      color: "text-teal-600 bg-teal-500/15 border border-teal-400/25 dark:text-teal-300",
     },
     {
       label: `${t("admin.kpiCourses")} & Assignments`,
       value: `${courses.length} / ${totalAssignmentsAndLessons}`,
       sub: `${totalLessons} Lessons · ${totalAssignmentsAndLessons} Assignments`,
       icon: BookOpen,
-      color: "text-emerald-600 bg-emerald-100 dark:bg-emerald-900/50 dark:text-emerald-300",
+      color: "text-emerald-600 bg-emerald-500/15 border border-emerald-400/25 dark:text-emerald-300",
     },
     {
       label: t("admin.kpiQuizzes"),
       value: `${publishedQuizzes} / ${quizzes.length}`,
       sub: `${draftQuizzes} ${t("quizzes.draft")}`,
       icon: ClipboardCheck,
-      color: "text-amber-600 bg-amber-100 dark:bg-amber-900/50 dark:text-amber-300",
+      color: "text-amber-600 bg-amber-500/15 border border-amber-400/25 dark:text-amber-300",
     },
     {
       label: `${t("quizzes.score")} (${t("admin.kpiResults")})`,
       value: `${avgScore}%`,
       sub: `${results.length} attempts · ${passRate}% pass`,
       icon: Award,
-      color: "text-rose-600 bg-rose-100 dark:bg-rose-900/50 dark:text-rose-300",
+      color: "text-cyan-600 bg-cyan-500/15 border border-cyan-400/25 dark:text-cyan-300",
     },
   ];
 
   return (
     <div className="space-y-6">
-      {/* Colorful Hero Banner */}
-      <div className="relative overflow-hidden rounded-[28px] p-6 bg-gradient-to-r from-fuchsia-600 via-violet-600 to-indigo-600 text-white shadow-xl shadow-violet-500/20">
-        <div className="pointer-events-none absolute -top-12 -end-12 h-44 w-44 rounded-full bg-white/15 blur-2xl" />
-        <div className="pointer-events-none absolute -bottom-14 start-1/3 h-40 w-40 rounded-full bg-cyan-400/25 blur-2xl" />
+      {/* Dark-Teal Glass Hero Banner */}
+      <div className="relative overflow-hidden rounded-[26px] p-6 glass-panel border-teal-400/25 shadow-xl">
+        <div className="pointer-events-none absolute -top-12 -end-12 h-44 w-44 rounded-full bg-teal-400/15 blur-2xl" />
+        <div className="pointer-events-none absolute -bottom-14 start-1/3 h-40 w-40 rounded-full bg-sky-400/15 blur-2xl" />
         <div className="relative">
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
+          <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-teal-500/15 border border-teal-400/30 text-[11px] font-bold text-teal-700 dark:text-teal-300 mb-2">
+            Platform Control &amp; Analytics
+          </span>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
             {t("admin.title")}
           </h1>
-          <p className="text-xs sm:text-sm text-white/85 mt-1">
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1">
             Full analytics across Instructors, Students, Courses &amp; Assignments, Quizzes, and Grades.
           </p>
         </div>
@@ -284,28 +287,22 @@ export default function AdminOverview() {
 
       {/* KPI Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        {kpis.map((k, idx) => {
+        {kpis.map((k) => {
           const Icon = k.icon;
-          const topStripes = [
-            "from-cyan-400 to-blue-500",
-            "from-violet-500 to-fuchsia-500",
-            "from-emerald-400 to-teal-500",
-            "from-amber-400 to-orange-500",
-            "from-rose-400 to-pink-500",
-          ];
           return (
-            <div key={k.label} className="glass-card p-4 pt-5">
-              <div className={`absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r ${topStripes[idx % topStripes.length]}`} />
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
+            <div key={k.label} className="glass-card p-4 flex flex-col justify-between">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-300">
                   {k.label}
                 </span>
-                <div className={`h-9 w-9 rounded-2xl flex items-center justify-center shadow-sm ${k.color}`}>
+                <div className={`h-9 w-9 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ${k.color}`}>
                   <Icon className="h-4 w-4" />
                 </div>
               </div>
-              <div className="text-2xl font-black mt-2.5">{loading ? "…" : k.value}</div>
-              <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{k.sub}</div>
+              <div className="text-2xl font-black mt-3 text-slate-900 dark:text-white">
+                {loading ? "…" : k.value}
+              </div>
+              <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">{k.sub}</div>
             </div>
           );
         })}
@@ -316,28 +313,28 @@ export default function AdminOverview() {
         {/* Per-Instructor Activity Bar Chart */}
         <div className="lg:col-span-2 glass-card p-5">
           <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="h-4 w-4 text-sky-600" />
-            <h2 className="text-base font-bold">
+            <TrendingUp className="h-4 w-4 text-teal-500" />
+            <h2 className="text-base font-bold text-slate-900 dark:text-white">
               Instructor Workload &amp; Activity (Students, Courses, Lessons, Quizzes)
             </h2>
           </div>
           {instructorAnalytics.length === 0 ? (
-            <div className="h-60 flex items-center justify-center text-xs text-slate-500">
+            <div className="h-60 flex items-center justify-center text-xs text-slate-500 dark:text-slate-400">
               Add instructors to see per-instructor analytics.
             </div>
           ) : (
             <div className="h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={instructorAnalytics}>
-                  <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
-                  <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                  <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                  <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.15} />
+                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#94a3b8" }} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "#94a3b8" }} />
                   <Tooltip />
                   <Legend wrapperStyle={{ fontSize: 11 }} />
-                  <Bar dataKey="studentsCount" name={t("nav.students")} fill="#6366f1" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="coursesCount" name={t("admin.kpiCourses")} fill="#0284c7" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="assignmentsCount" name={t("courses.lessons")} fill="#10b981" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="quizzesCount" name="Quizzes" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="studentsCount" name={t("nav.students")} fill="#0ea5e9" radius={[5, 5, 0, 0]} />
+                  <Bar dataKey="coursesCount" name={t("admin.kpiCourses")} fill="#14b8a6" radius={[5, 5, 0, 0]} />
+                  <Bar dataKey="assignmentsCount" name={t("courses.lessons")} fill="#10b981" radius={[5, 5, 0, 0]} />
+                  <Bar dataKey="quizzesCount" name="Quizzes" fill="#f59e0b" radius={[5, 5, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -346,9 +343,9 @@ export default function AdminOverview() {
 
         {/* Quiz Status Pie + Score Summary */}
         <div className="glass-card p-5 flex flex-col justify-between">
-          <h2 className="text-base font-bold mb-2">Quiz Status Breakdown</h2>
+          <h2 className="text-base font-bold text-slate-900 dark:text-white mb-2">Quiz Status Breakdown</h2>
           {quizzes.length === 0 ? (
-            <div className="h-48 flex items-center justify-center text-xs text-slate-500">
+            <div className="h-48 flex items-center justify-center text-xs text-slate-500 dark:text-slate-400">
               No quizzes created yet.
             </div>
           ) : (
@@ -375,7 +372,7 @@ export default function AdminOverview() {
               </ResponsiveContainer>
             </div>
           )}
-          <div className="text-xs text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-slate-800 pt-2.5 flex justify-between">
+          <div className="text-xs text-slate-500 dark:text-slate-400 border-t border-slate-200/70 dark:border-white/10 pt-2.5 flex justify-between">
             <span>Pass Rate (&ge;60%)</span>
             <strong className="text-emerald-600 dark:text-emerald-400">{passRate}%</strong>
           </div>
@@ -385,36 +382,36 @@ export default function AdminOverview() {
       {/* Grade Distribution Chart */}
       <div className="glass-card p-5">
         <div className="flex items-center gap-2 mb-4">
-          <Award className="h-4 w-4 text-rose-600" />
-          <h2 className="text-base font-bold">Student Grade Distribution</h2>
+          <Award className="h-4 w-4 text-teal-500" />
+          <h2 className="text-base font-bold text-slate-900 dark:text-white">Student Grade Distribution</h2>
         </div>
         <div className="h-52 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={scoreDistribution}>
-              <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
-              <XAxis dataKey="range" tick={{ fontSize: 12 }} />
-              <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
+              <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.15} />
+              <XAxis dataKey="range" tick={{ fontSize: 12, fill: "#94a3b8" }} />
+              <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: "#94a3b8" }} />
               <Tooltip />
-              <Bar dataKey="count" name="Attempts" fill="#e11d48" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="count" name="Attempts" fill="#14b8a6" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
 
       {/* Full Instructor Analysis Table */}
-      <div className="glass-card overflow-hidden">
-        <div className="px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-          <h2 className="text-sm font-bold flex items-center gap-2">
-            <Users className="h-4 w-4 text-sky-600" />
+      <div className="glass-panel rounded-[24px] overflow-hidden">
+        <div className="px-5 py-3.5 border-b border-slate-200/70 dark:border-white/10 flex items-center justify-between">
+          <h2 className="text-sm font-bold flex items-center gap-2 text-slate-900 dark:text-white">
+            <Users className="h-4 w-4 text-teal-500" />
             Instructors Analysis
           </h2>
-          <Link to="/admin/instructors" className="text-xs font-semibold text-sky-600 hover:underline">
+          <Link to="/admin/instructors" className="text-xs font-semibold text-teal-600 dark:text-teal-400 hover:underline">
             {t("admin.manageInstructors")}
           </Link>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-xs text-start">
-            <thead className="bg-slate-900/5 dark:bg-white/5 uppercase text-slate-600 dark:text-slate-300">
+            <thead className="bg-slate-900/5 dark:bg-white/[0.04] border-b border-slate-200/70 dark:border-white/10 uppercase tracking-wider text-slate-600 dark:text-slate-300">
               <tr>
                 <th className="px-4 py-2.5 text-start">Instructor</th>
                 <th className="px-4 py-2.5 text-start">Specialization</th>
@@ -426,10 +423,10 @@ export default function AdminOverview() {
                 <th className="px-4 py-2.5 text-start">Avg Quiz</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+            <tbody className="divide-y divide-slate-200/70 dark:divide-white/10">
               {instructorAnalytics.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-6 text-center text-slate-500">
+                  <td colSpan={8} className="px-4 py-6 text-center text-slate-500 dark:text-slate-400">
                     {t("app.noData")}
                   </td>
                 </tr>
@@ -438,14 +435,14 @@ export default function AdminOverview() {
                   <tr
                     key={row.uid}
                     onClick={() => setSelectedInstUid(row.uid)}
-                    className="hover:bg-sky-500/10 cursor-pointer transition-colors"
+                    className="hover:bg-teal-500/5 cursor-pointer transition-colors"
                   >
-                    <td className="px-4 py-2.5 font-semibold">{row.name}</td>
-                    <td className="px-4 py-2.5 text-slate-500">{row.spec}</td>
+                    <td className="px-4 py-2.5 font-semibold text-slate-900 dark:text-white">{row.name}</td>
+                    <td className="px-4 py-2.5 text-slate-500 dark:text-slate-400">{row.spec}</td>
                     <td className="px-4 py-2.5 font-bold">
                       {row.studentsCount}{" "}
                       {row.pendingStudentsCount > 0 && (
-                        <span className="text-amber-600">({row.pendingStudentsCount} pending)</span>
+                        <span className="text-amber-500">({row.pendingStudentsCount} pending)</span>
                       )}
                     </td>
                     <td className="px-4 py-2.5">
@@ -460,7 +457,7 @@ export default function AdminOverview() {
                     <td className="px-4 py-2.5">
                       {row.attemptsCount} / {row.passRate}%
                     </td>
-                    <td className="px-4 py-2.5 font-bold text-sky-600">{row.avgScore}%</td>
+                    <td className="px-4 py-2.5 font-bold text-teal-600 dark:text-teal-400">{row.avgScore}%</td>
                   </tr>
                 ))
               )}
@@ -473,8 +470,8 @@ export default function AdminOverview() {
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="text-lg font-extrabold flex items-center gap-2">
-              <Users className="h-5 w-5 text-sky-600" />
+            <h2 className="text-lg font-extrabold flex items-center gap-2 text-slate-900 dark:text-white">
+              <Users className="h-5 w-5 text-teal-500" />
               {lang === "ar"
                 ? "التحليل التفصيلي الكامل لكل محاضر"
                 : "Full Deep-Dive Analysis per Instructor"}
@@ -557,30 +554,30 @@ export default function AdminOverview() {
 
       {/* Students & Recent Grades Analysis */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="glass-card overflow-hidden">
-          <div className="px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 font-bold text-sm flex items-center gap-2">
-            <GraduationCap className="h-4 w-4 text-indigo-600" />
+        <div className="glass-panel rounded-[24px] overflow-hidden">
+          <div className="px-5 py-3.5 border-b border-slate-200/70 dark:border-white/10 font-bold text-sm flex items-center gap-2 text-slate-900 dark:text-white">
+            <GraduationCap className="h-4 w-4 text-teal-500" />
             Students Enrollment &amp; Instructor Links
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-start">
-              <thead className="bg-slate-100 dark:bg-slate-800 uppercase text-slate-600 dark:text-slate-300">
+              <thead className="bg-slate-900/5 dark:bg-white/[0.04] border-b border-slate-200/70 dark:border-white/10 uppercase tracking-wider text-slate-600 dark:text-slate-300">
                 <tr>
                   <th className="px-4 py-2.5 text-start">Student</th>
                   <th className="px-4 py-2.5 text-start">Enrolled Courses</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+              <tbody className="divide-y divide-slate-200/70 dark:divide-white/10">
                 {students.length === 0 ? (
                   <tr>
-                    <td colSpan={2} className="px-4 py-6 text-center text-slate-500">
+                    <td colSpan={2} className="px-4 py-6 text-center text-slate-500 dark:text-slate-400">
                       {t("app.noData")}
                     </td>
                   </tr>
                 ) : (
                   students.slice(0, 10).map((s) => (
-                    <tr key={s.uid}>
-                      <td className="px-4 py-2.5 font-semibold">{s.displayName}</td>
+                    <tr key={s.uid} className="hover:bg-teal-500/5 transition-colors">
+                      <td className="px-4 py-2.5 font-semibold text-slate-900 dark:text-white">{s.displayName}</td>
                       <td className="px-4 py-2.5">{(s.enrolledCourseIds || []).length}</td>
                     </tr>
                   ))
@@ -590,29 +587,29 @@ export default function AdminOverview() {
           </div>
         </div>
 
-        <div className="glass-card overflow-hidden">
-          <div className="px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 font-bold text-sm flex items-center justify-between">
+        <div className="glass-panel rounded-[24px] overflow-hidden">
+          <div className="px-5 py-3.5 border-b border-slate-200/70 dark:border-white/10 font-bold text-sm flex items-center justify-between text-slate-900 dark:text-white">
             <span className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-emerald-600" />
+              <FileText className="h-4 w-4 text-emerald-500" />
               Recent Quiz Grades &amp; Assignments
             </span>
-            <Link to="/admin/grades" className="text-xs font-semibold text-sky-600 hover:underline">
+            <Link to="/admin/grades" className="text-xs font-semibold text-teal-600 dark:text-teal-400 hover:underline">
               View All
             </Link>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-start">
-              <thead className="bg-slate-100 dark:bg-slate-800 uppercase text-slate-600 dark:text-slate-300">
+              <thead className="bg-slate-900/5 dark:bg-white/[0.04] border-b border-slate-200/70 dark:border-white/10 uppercase tracking-wider text-slate-600 dark:text-slate-300">
                 <tr>
                   <th className="px-4 py-2.5 text-start">Student</th>
                   <th className="px-4 py-2.5 text-start">Quiz</th>
                   <th className="px-4 py-2.5 text-start">Score</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+              <tbody className="divide-y divide-slate-200/70 dark:divide-white/10">
                 {results.length === 0 ? (
                   <tr>
-                    <td colSpan={3} className="px-4 py-6 text-center text-slate-500">
+                    <td colSpan={3} className="px-4 py-6 text-center text-slate-500 dark:text-slate-400">
                       {t("app.noData")}
                     </td>
                   </tr>
@@ -624,15 +621,15 @@ export default function AdminOverview() {
                         : Math.round(((Number(r.score) || 0) / 100) * (Number(r.total) || 1));
                     const tot = Number(r.total) || pts || 1;
                     return (
-                      <tr key={r.id}>
-                        <td className="px-4 py-2.5 font-semibold">{r.studentName || r.studentId}</td>
-                        <td className="px-4 py-2.5 text-slate-500">{r.quizTitle || r.quizId}</td>
+                      <tr key={r.id} className="hover:bg-teal-500/5 transition-colors">
+                        <td className="px-4 py-2.5 font-semibold text-slate-900 dark:text-white">{r.studentName || r.studentId}</td>
+                        <td className="px-4 py-2.5 text-slate-500 dark:text-slate-400">{r.quizTitle || r.quizId}</td>
                         <td className="px-4 py-2.5">
                           <span
-                            className={`px-2 py-0.5 rounded-full font-bold ${
+                            className={`px-2.5 py-0.5 rounded-full font-bold border ${
                               (Number(r.score) || 0) >= 60
-                                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
-                                : "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300"
+                                ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-400/30"
+                                : "bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-400/30"
                             }`}
                           >
                             {pts}/{tot} pts ({r.score}%)

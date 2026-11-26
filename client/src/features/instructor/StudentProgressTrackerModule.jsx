@@ -451,7 +451,7 @@ export default function StudentProgressTrackerModule() {
       {/* Header Banner */}
       <div className="glass-panel rounded-[26px] p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3.5">
         <div className="flex items-center gap-3 min-w-0 flex-1">
-          <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-2xl bg-gradient-to-br from-cyan-500 via-violet-600 to-fuchsia-600 text-white flex items-center justify-center shadow-lg shadow-violet-500/25 shrink-0">
+          <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-2xl bg-gradient-to-br from-sky-500 via-teal-500 to-emerald-500 text-white flex items-center justify-center shadow-lg shadow-teal-500/25 shrink-0">
             <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6" />
           </div>
           <div className="min-w-0">
@@ -613,9 +613,9 @@ export default function StudentProgressTrackerModule() {
                 key={tab.id}
                 type="button"
                 onClick={() => setTypeFilter(tab.id)}
-                className={`px-3 py-1 rounded-full text-[11px] font-bold transition-all ${
+                className={`px-3 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer ${
                   typeFilter === tab.id
-                    ? "bg-sky-600 text-white shadow-sm"
+                    ? "bg-teal-500/20 text-teal-700 dark:text-white border border-teal-400/60 shadow-[0_0_12px_rgba(20,184,166,0.25)]"
                     : "glass-subtle text-slate-600 dark:text-slate-300"
                 }`}
               >
@@ -641,13 +641,13 @@ export default function StudentProgressTrackerModule() {
           {/* 4 Interval KPI Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Total Points */}
-            <div className="p-5 rounded-[22px] bg-gradient-to-br from-white/95 to-slate-50/80 dark:from-slate-800/80 dark:to-slate-900/90 border border-slate-200/90 dark:border-white/10 shadow-sm flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all text-start">
+            <div className="glass-card p-5 flex flex-col justify-between text-start">
               <div>
                 <div className="flex items-center justify-between text-amber-600 dark:text-amber-400 mb-3">
                   <div className="h-11 w-11 rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 shadow-xs">
                     <Award className="h-5 w-5" />
                   </div>
-                  <span className="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200/60 uppercase tracking-wide">
+                  <span className="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-amber-50 dark:bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-400/30 uppercase tracking-wide">
                     TOTAL PTS
                   </span>
                 </div>
@@ -658,7 +658,7 @@ export default function StudentProgressTrackerModule() {
                   {lang === "ar" ? "إجمالي النقاط المكتسبة" : "Total Points Earned"}
                 </div>
               </div>
-              <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-3 pt-2.5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
+              <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-3 pt-2.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between">
                 <span>{lang === "ar" ? "الفترة المحددة" : "Selected Interval"}</span>
                 <span className="font-mono font-bold text-slate-700 dark:text-slate-300">
                   {summary.totalPoints} pts
@@ -667,13 +667,13 @@ export default function StudentProgressTrackerModule() {
             </div>
 
             {/* Quiz Points */}
-            <div className="p-5 rounded-[22px] bg-gradient-to-br from-white/95 to-slate-50/80 dark:from-slate-800/80 dark:to-slate-900/90 border border-slate-200/90 dark:border-white/10 shadow-sm flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all text-start">
+            <div className="glass-card p-5 flex flex-col justify-between text-start">
               <div>
                 <div className="flex items-center justify-between text-sky-600 dark:text-sky-400 mb-3">
                   <div className="h-11 w-11 rounded-2xl bg-sky-500/15 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 shadow-xs">
                     <ClipboardCheck className="h-5 w-5" />
                   </div>
-                  <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-200/60 dark:border-sky-800/60 uppercase tracking-wide">
+                  <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-sky-50 dark:bg-sky-500/15 text-sky-700 dark:text-sky-300 border border-sky-200/60 dark:border-sky-400/30 uppercase tracking-wide">
                     {summary.quizCount} {lang === "ar" ? "اختبار" : "Quizzes"}
                   </span>
                 </div>
@@ -684,7 +684,7 @@ export default function StudentProgressTrackerModule() {
                   {lang === "ar" ? "نقاط الاختبارات" : "Quiz Points"}
                 </div>
               </div>
-              <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-3 pt-2.5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
+              <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-3 pt-2.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between">
                 <span>{lang === "ar" ? "المعدل" : "Average"}</span>
                 <span className="font-mono font-bold text-slate-700 dark:text-slate-300">
                   {summary.avgQuizPct}% ({summary.passRate}% {lang === "ar" ? "نجاح" : "pass"})
@@ -693,39 +693,39 @@ export default function StudentProgressTrackerModule() {
             </div>
 
             {/* Assignment Points */}
-            <div className="p-5 rounded-[22px] bg-gradient-to-br from-white/95 to-slate-50/80 dark:from-slate-800/80 dark:to-slate-900/90 border border-slate-200/90 dark:border-white/10 shadow-sm flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all text-start">
+            <div className="glass-card p-5 flex flex-col justify-between text-start">
               <div>
-                <div className="flex items-center justify-between text-indigo-600 dark:text-indigo-400 mb-3">
-                  <div className="h-11 w-11 rounded-2xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 shadow-xs">
+                <div className="flex items-center justify-between text-teal-600 dark:text-teal-400 mb-3">
+                  <div className="h-11 w-11 rounded-2xl bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0 shadow-xs">
                     <ClipboardList className="h-5 w-5" />
                   </div>
-                  <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/60 uppercase tracking-wide">
+                  <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-teal-50 dark:bg-teal-500/15 text-teal-700 dark:text-teal-300 border border-teal-200/60 dark:border-teal-400/30 uppercase tracking-wide">
                     {summary.gradedAssignments}/{summary.assignmentCount} {lang === "ar" ? "تم تقييمها" : "Graded"}
                   </span>
                 </div>
-                <div className="text-3xl sm:text-4xl font-black text-indigo-600 dark:text-indigo-400 font-mono tracking-tight">
+                <div className="text-3xl sm:text-4xl font-black text-teal-600 dark:text-teal-400 font-mono tracking-tight">
                   {summary.assignmentPoints}
                 </div>
                 <div className="text-xs sm:text-[13px] font-bold text-slate-700 dark:text-slate-200 mt-1">
                   {lang === "ar" ? "نقاط الواجبات" : "Assignment Points"}
                 </div>
               </div>
-              <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-3 pt-2.5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
+              <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-3 pt-2.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between">
                 <span>{lang === "ar" ? "حالة التصحيح" : "Grading Status"}</span>
-                <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                <span className="font-mono font-bold text-teal-600 dark:text-teal-400">
                   {summary.gradedAssignments} of {summary.assignmentCount}
                 </span>
               </div>
             </div>
 
             {/* Recorded Logs */}
-            <div className="p-5 rounded-[22px] bg-gradient-to-br from-white/95 to-slate-50/80 dark:from-slate-800/80 dark:to-slate-900/90 border border-slate-200/90 dark:border-white/10 shadow-sm flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all text-start">
+            <div className="glass-card p-5 flex flex-col justify-between text-start">
               <div>
                 <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400 mb-3">
                   <div className="h-11 w-11 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-xs">
                     <Activity className="h-5 w-5" />
                   </div>
-                  <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60 uppercase tracking-wide">
+                  <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-400/30 uppercase tracking-wide">
                     {summary.passRate}% {lang === "ar" ? "نجاح" : "Pass"}
                   </span>
                 </div>
@@ -736,7 +736,7 @@ export default function StudentProgressTrackerModule() {
                   {lang === "ar" ? "الأنشطة المسجلة" : "Recorded Logs"}
                 </div>
               </div>
-              <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-3 pt-2.5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
+              <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-3 pt-2.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between">
                 <span>{lang === "ar" ? "نسبة النجاح" : "Success Rate"}</span>
                 <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
                   {summary.passRate}%
@@ -774,7 +774,7 @@ export default function StudentProgressTrackerModule() {
                           fontSize: "12px",
                         }}
                       />
-                      <Bar dataKey="points" fill="#0284c7" radius={[8, 8, 0, 0]} />
+                      <Bar dataKey="points" fill="#14b8a6" radius={[8, 8, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -783,7 +783,7 @@ export default function StudentProgressTrackerModule() {
 
             <div className="lg:col-span-5 glass-card p-5 space-y-3">
               <h2 className="text-sm font-extrabold flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-indigo-500" />
+                <CheckCircle2 className="h-4 w-4 text-teal-500" />
                 {lang === "ar" ? "ملخص النقاط حسب المقرر" : "Course Points Breakdown"}
               </h2>
               {courseBreakdown.length === 0 ? (
@@ -809,7 +809,7 @@ export default function StudentProgressTrackerModule() {
                           {cb.assignmentCount})
                         </div>
                       </div>
-                      <span className="px-2.5 py-1 rounded-full bg-sky-500/15 text-sky-700 dark:text-sky-300 text-xs font-extrabold shrink-0">
+                      <span className="px-2.5 py-1 rounded-full bg-teal-500/15 text-teal-700 dark:text-teal-300 border border-teal-400/25 text-xs font-extrabold shrink-0">
                         {cb.totalPoints} pts
                       </span>
                     </div>
@@ -856,7 +856,7 @@ export default function StudentProgressTrackerModule() {
                           log.category === "quiz"
                             ? "bg-sky-500/15 text-sky-600 dark:text-sky-300"
                             : log.category === "assignment"
-                            ? "bg-indigo-500/15 text-indigo-600 dark:text-indigo-300"
+                            ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300"
                             : "bg-amber-500/15 text-amber-600 dark:text-amber-300"
                         }`}
                       >

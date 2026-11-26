@@ -154,20 +154,20 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
         aria-labelledby="profile-modal-title"
       >
         {/* Top Header Banner */}
-        <div className="relative px-6 pt-6 pb-4 border-b border-slate-100 dark:border-white/10 bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/50 dark:from-indigo-950/30 dark:via-slate-900 dark:to-purple-950/20">
+        <div className="relative px-6 pt-6 pb-4 border-b border-slate-200/70 dark:border-white/10 bg-gradient-to-br from-sky-50/70 via-white to-teal-50/50 dark:from-[#081a28]/90 dark:via-[#071521] dark:to-[#071d20]/90">
           <button
             type="button"
             onClick={onClose}
             disabled={saving}
             aria-label="Close"
-            className="absolute top-5 right-5 rtl:right-auto rtl:left-5 p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 cursor-pointer"
+            className="absolute top-5 right-5 rtl:right-auto rtl:left-5 p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors disabled:opacity-50 cursor-pointer"
           >
             <X className="h-5 w-5" />
           </button>
 
           <div className="flex items-center gap-3">
             <div
-              className={`h-11 w-11 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-sm flex items-center justify-center shadow-md shadow-indigo-500/20 shrink-0 transition-all ${
+              className={`h-11 w-11 rounded-2xl bg-gradient-to-tr from-sky-500 via-teal-500 to-emerald-500 text-white font-black text-sm flex items-center justify-center shadow-md shadow-teal-500/25 shrink-0 transition-all ${
                 equippedFrame?.frameClass || ""
               }`}
             >
@@ -185,7 +185,7 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
 
           {/* User metadata badge */}
           <div className="mt-3 flex items-center flex-wrap gap-2 text-xs">
-            <span className="px-2.5 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-semibold border border-indigo-200/60 dark:border-indigo-800/60 capitalize">
+            <span className="px-2.5 py-0.5 rounded-full bg-teal-500/15 text-teal-700 dark:text-teal-300 font-semibold border border-teal-400/30 capitalize">
               {roleName}
             </span>
             {equippedTag && (
@@ -336,7 +336,7 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-md shadow-indigo-500/25 active:scale-95 transition-all disabled:opacity-60 cursor-pointer"
+              className="glass-btn-primary inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl text-xs disabled:opacity-60 cursor-pointer"
             >
               {saving ? (
                 <>

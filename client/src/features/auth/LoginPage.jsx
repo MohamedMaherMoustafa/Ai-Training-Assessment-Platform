@@ -4,34 +4,37 @@ import { useTranslation } from "react-i18next";
 import {
   Lock,
   User,
-  Mail,
   Sun,
   Moon,
-  Globe,
-  ChevronDown,
   ArrowRight,
   Eye,
   EyeOff,
   Sparkles,
   UserPlus,
   ShieldCheck,
-  Laptop,
-  Bot,
-  Trophy,
-  BarChart3,
+  Volume2,
+  VolumeX,
+  GraduationCap,
+  Briefcase,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import { usePopup } from "../../context/PopupContext";
 import { useLang } from "../../context/LangContext";
-import { playLoginSuccessSound } from "../../utils/soundEffects";
+import { isFirebaseConfigured } from "../../lib/firebase";
+import {
+  isSoundEnabled,
+  playClickSound,
+  playLoginSuccessSound,
+  setSoundEnabled,
+} from "../../utils/soundEffects";
 import LanguageDropdown from "../../components/common/LanguageDropdown";
 import RobotMascotSvg from "../../components/common/RobotMascotSvg";
 
 export default function LoginPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { lang } = useLang();
-  const { user, login } = useAuth();
+  const { user, login, enterPreviewMode } = useAuth();
   const { theme, toggleTheme, logoSrc } = useTheme();
   const { showPopup } = usePopup();
   const navigate = useNavigate();
@@ -41,10 +44,29 @@ export default function LoginPage() {
   const [showPass, setShowPass] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [soundOn, setSoundOn] = useState(isSoundEnabled());
 
   const [isTypingPassword, setIsTypingPassword] = useState(false);
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+  const [isTransitioningToRegister, setIsTransitioningToRegister] = useState(false);
   const typingTimeoutRef = useRef(null);
+  const isDark = theme === "dark";
+
+  const toggleSound = () => {
+    const next = !soundOn;
+    setSoundEnabled(next);
+    setSoundOn(next);
+    if (next) playClickSound();
+  };
+
+  const handleGoToRegister = (e) => {
+    e.preventDefault();
+    if (soundOn) playClickSound();
+    setIsTransitioningToRegister(true);
+    setTimeout(() => {
+      navigate("/register", { state: { fromButton: true } });
+    }, 180);
+  };
 
   useEffect(() => {
     if (user) {
@@ -131,6 +153,15 @@ export default function LoginPage() {
         showPopup({ title: t("auth.loginTitle"), message: t("auth.pendingApproval"), type: "warning" });
       } else if (err.message === "REQUEST_REJECTED") {
         showPopup({ title: t("auth.loginTitle"), message: t("auth.requestRejected"), type: "error" });
+      } else if (err.message === "FIREBASE_NOT_CONFIGURED") {
+        showPopup({
+          title: t("auth.loginTitle"),
+          message:
+            lang === "ar"
+              ? "مفتاح Firebase API غير مضبوط في client/.env (VITE_FIREBASE_API_KEY). يمكنك تسجيل الدخول كمسؤول باستخدام admin@123 أو ضبط المفاتيح أولاً."
+              : "Firebase API key is not configured in client/.env (VITE_FIREBASE_API_KEY). You can still sign in as Admin (admin@123) or configure Firebase keys first.",
+          type: "warning",
+        });
       } else {
         showPopup({ title: t("auth.loginTitle"), message: t("auth.invalidCredentials"), type: "error" });
       }
@@ -140,364 +171,553 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="h-screen max-h-screen overflow-hidden bg-gradient-to-br from-[#eef2fb] via-[#f4f3fe] to-[#ebeffc] dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex flex-col justify-between p-2 sm:p-3 md:p-4 select-none transition-colors duration-300">
-      {/* Top Floating Pill Navigation Bar (Compact Height) */}
-      <header className="shrink-0 max-w-6xl xl:max-w-7xl w-full mx-auto bg-white/95 dark:bg-slate-900/90 backdrop-blur-md rounded-full px-4 sm:px-6 py-2 flex items-center justify-between gap-3 shadow-sm border border-slate-200/80 dark:border-white/10">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="h-9 w-9 sm:h-11 sm:w-11 shrink-0 flex items-center justify-center">
-            <img src={logoSrc} alt="Athar Educational Platform" className="w-full h-full object-contain filter drop-shadow-sm hover:scale-105 transition-transform" />
+    <div
+      className={`relative min-h-screen w-full overflow-hidden flex flex-col justify-between p-3 sm:p-5 select-none transition-colors duration-300 ${
+        isDark ? "bg-[#040d14] text-white" : "bg-[#f3f0e8] text-slate-900"
+      }`}
+    >
+      {/* Full-Screen High-Resolution Digital Library Backdrops (2560x1440 YCbCr-Deblocked & Mitchell-Restored) */}
+      <div aria-hidden="true" className="pointer-events-none fixed inset-0 overflow-hidden z-0">
+        <img
+          src="/login-library-bg.jpg?v=clean"
+          alt=""
+          decoding="async"
+          fetchPriority="high"
+          className={`absolute inset-0 w-full h-full object-cover object-center scale-[1.03] origin-[50%_30%] transition-opacity duration-700 brightness-[1.03] contrast-[1.02] saturate-[1.02] ${
+            isDark ? "opacity-0" : "opacity-100"
+          }`}
+        />
+        <img
+          src="/login-library-dark-bg.jpg?v=clean"
+          alt=""
+          decoding="async"
+          fetchPriority="high"
+          className={`absolute inset-0 w-full h-full object-cover object-center scale-[1.03] origin-[50%_30%] transition-opacity duration-700 ${
+            isDark ? "opacity-100" : "opacity-0"
+          }`}
+        />
+      </div>
+
+      {/* Atmospheric Daylight Rays (Light Mode Only — Dark Mode Displays the Natural Nighttime Photograph) */}
+      {!isDark && (
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 1600 900"
+          preserveAspectRatio="xMidYMid slice"
+          className="pointer-events-none fixed inset-0 w-full h-full scale-[1.03] origin-[50%_30%] z-0"
+          style={{ mixBlendMode: "screen" }}
+        >
+          <defs>
+            <filter id="sunbeamDefinedBlur" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="11" />
+            </filter>
+            <filter id="sunbeamSoftBlur" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="24" />
+            </filter>
+            <filter id="sunbeamWideBlur" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="42" />
+            </filter>
+
+            <radialGradient id="windowGlowHalo" cx="56%" cy="32%" r="54%">
+              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.98" />
+              <stop offset="28%" stopColor="#fffef2" stopOpacity="0.72" />
+              <stop offset="62%" stopColor="#fef3c7" stopOpacity="0.24" />
+              <stop offset="100%" stopColor="#e0f2fe" stopOpacity="0" />
+            </radialGradient>
+
+            <linearGradient id="sunShaftGradMain" x1="0.72" y1="0" x2="0.28" y2="1">
+              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.88" />
+              <stop offset="22%" stopColor="#fffef5" stopOpacity="0.54" />
+              <stop offset="58%" stopColor="#fef9db" stopOpacity="0.22" />
+              <stop offset="86%" stopColor="#fde68a" stopOpacity="0.06" />
+              <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+            </linearGradient>
+            <linearGradient id="sunShaftGradSoft" x1="0.65" y1="0" x2="0.35" y2="1">
+              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.52" />
+              <stop offset="38%" stopColor="#f8fafc" stopOpacity="0.22" />
+              <stop offset="78%" stopColor="#fef3c7" stopOpacity="0.06" />
+              <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+            </linearGradient>
+
+            <radialGradient id="dayFloorPool" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.78" />
+              <stop offset="36%" stopColor="#fffef2" stopOpacity="0.42" />
+              <stop offset="72%" stopColor="#fef3c7" stopOpacity="0.12" />
+              <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+            </radialGradient>
+          </defs>
+
+          {/* Subtle Solar Glow At Overhead Skylight & Central Tall Arch Window */}
+          <ellipse cx="815" cy="36" rx="190" ry="92" fill="url(#windowGlowHalo)" filter="url(#sunbeamSoftBlur)" opacity="0.48" />
+          <ellipse cx="800" cy="310" rx="110" ry="155" fill="url(#windowGlowHalo)" filter="url(#sunbeamSoftBlur)" opacity="0.34" />
+
+          {/* Delicate Diagonal Sunlight Shafts Streaming Through Skylight & Archway */}
+          <g filter="url(#sunbeamDefinedBlur)" opacity="0.46">
+            <polygon points="815,28 875,36 585,845 455,845" fill="url(#sunShaftGradMain)" />
+            <polygon points="755,34 805,40 420,820 295,820" fill="url(#sunShaftGradSoft)" />
+            <polygon points="765,240 835,240 945,840 655,840" fill="url(#sunShaftGradSoft)" opacity="0.65" />
+          </g>
+
+          {/* Soft Floor Sunlight Catch Along Center Marble Walkway */}
+          <ellipse cx="760" cy="730" rx="280" ry="130" fill="url(#dayFloorPool)" filter="url(#sunbeamWideBlur)" opacity="0.32" />
+        </svg>
+      )}
+
+      {/* Dark Vignette Scrim (Only in Dark Mode for Moody Contrast) */}
+      {isDark && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none fixed inset-0 bg-gradient-to-br from-[#020c14]/30 via-transparent to-[#040f17]/35"
+        />
+      )}
+
+      {/* Subtle Drifting Glowing Particles */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden z-0">
+        <span className="login-sparkle absolute start-[18%] top-[28%] h-2 w-2 rounded-full bg-teal-300/70 blur-[1px]" />
+        <span className="login-sparkle absolute start-[42%] top-[22%] h-1.5 w-1.5 rounded-full bg-amber-300/75 blur-[1px]" style={{ animationDelay: "1.1s" }} />
+        <span className="login-sparkle absolute start-[26%] bottom-[26%] h-2 w-2 rounded-full bg-cyan-300/70 blur-[1px]" style={{ animationDelay: "2.2s" }} />
+        <span className="login-sparkle absolute start-[52%] bottom-[20%] h-1.5 w-1.5 rounded-full bg-emerald-300/75 blur-[1px]" style={{ animationDelay: "0.7s" }} />
+      </div>
+
+      {/* Moving Animated Robot Patrolling in the Background */}
+      <div
+        aria-hidden="true"
+        className={`pointer-events-none fixed bottom-5 sm:bottom-8 start-[10%] sm:start-[18%] lg:start-[24%] z-10 login-robot-patrol ${
+          isCoveringEyes ? "login-robot-paused" : "login-robot-walking"
+        }`}
+      >
+        <div className="flex flex-col items-center">
+          {/* Floating Tagline Pill Moving with the Robot */}
+          <div
+            className={`mb-2 px-3 py-1 rounded-full backdrop-blur-xl border text-[10px] sm:text-[11px] font-semibold whitespace-nowrap flex items-center gap-1.5 ${
+              isDark
+                ? "bg-white/[0.14] border-white/25 shadow-[0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.22)] text-teal-50"
+                : "bg-white/75 border-white/80 shadow-[0_8px_24px_rgba(15,23,42,0.12),inset_0_1px_0_rgba(255,255,255,0.85)] text-slate-800"
+            }`}
+          >
+            <span className={`h-1.5 w-1.5 rounded-full animate-pulse ${isDark ? "bg-teal-300" : "bg-teal-500"}`} />
+            <span>
+              {isCoveringEyes
+                ? lang === "ar"
+                  ? "🙈 أغمض عينيّ لحماية كلمة مرورك!"
+                  : "Covering my eyes for privacy!"
+                : isPasswordFocused
+                ? lang === "ar"
+                  ? "👀 مستعد لحماية كلمة مرورك"
+                  : "Ready to cover my eyes!"
+                : `• ${t("auth.learnTagline")}`}
+            </span>
+          </div>
+
+          {/* Walking Robot Body with Floor Hologram Ring */}
+          <div className="relative flex flex-col items-center">
+            <div className="login-robot-facing robot-bob-anim drop-shadow-[0_18px_32px_rgba(20,184,166,0.45)]">
+              <RobotMascotSvg
+                isCoveringEyes={isCoveringEyes}
+                isPeeking={false}
+                showSign={false}
+                width={215}
+                height={230}
+                className="w-[144px] h-[154px] sm:w-[186px] sm:h-[200px] lg:w-[215px] lg:h-[230px] overflow-visible"
+                idPrefix="login_bg_bot"
+              />
+            </div>
+            {/* Glowing Floor Reflection Ring */}
+            <div className={`w-36 sm:w-44 h-5 -mt-3 rounded-full blur-md ${isDark ? "bg-teal-400/35" : "bg-slate-900/20"}`} />
+          </div>
+        </div>
+      </div>
+
+      {/* Top Floating Glass Bar (Matching Screenshot) */}
+      <header
+        className={`relative z-20 shrink-0 max-w-7xl w-full mx-auto rounded-2xl backdrop-blur-2xl backdrop-saturate-150 px-4 sm:px-5 py-2.5 flex items-center justify-between gap-3 border transition-all ${
+          isDark
+            ? "bg-[#0b1f2c]/40 border-white/25 text-white shadow-[0_12px_36px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.22)]"
+            : "border-white/80 text-slate-900 shadow-[0_12px_36px_rgba(15,23,42,0.12),inset_0_1px_0_rgba(255,255,255,0.9)]"
+        }`}
+        style={
+          !isDark
+            ? {
+                background:
+                  "linear-gradient(90deg, rgba(249, 248, 245, 0.92) 0%, rgba(235, 232, 226, 0.80) 60%, rgba(214, 210, 205, 0.72) 100%)",
+              }
+            : undefined
+        }
+      >
+        <div className="flex items-center gap-3 min-w-0">
+          <div
+            className={`h-9 w-9 sm:h-10 sm:w-10 rounded-xl p-1 shrink-0 flex items-center justify-center shadow-inner border ${
+              isDark ? "bg-white/15 border-white/30" : "bg-white/75 border-slate-900/10"
+            }`}
+          >
+            <img
+              src={logoSrc}
+              alt="Athar Educational Platform"
+              className="w-full h-full object-contain filter drop-shadow-sm"
+            />
           </div>
           <div className="min-w-0">
-            <h1 className="font-extrabold text-xs sm:text-sm text-slate-900 dark:text-white truncate">
+            <h1 className={`font-extrabold text-xs sm:text-sm truncate ${isDark ? "text-white" : "text-slate-900"}`}>
               {t("app.title")}
             </h1>
-            <p className="hidden sm:block text-[10px] text-slate-500 dark:text-slate-400 font-medium truncate">
-              {t("app.subtitle")}
+            <p className={`hidden sm:block text-[10px] font-medium truncate ${isDark ? "text-teal-100/85" : "text-slate-600"}`}>
+              • {t("app.subtitle")}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
-          <LanguageDropdown />
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 flex-wrap justify-end">
+          <LanguageDropdown
+            buttonClassName={
+              isDark
+                ? "!bg-white/[0.1] hover:!bg-white/[0.18] !border-white/20 !text-slate-100 !h-8"
+                : "!bg-white/65 hover:!bg-white/90 !border-slate-900/10 !text-slate-800 !h-8 shadow-xs"
+            }
+          />
 
           <button
+            type="button"
             onClick={toggleTheme}
             aria-label="Toggle theme"
-            className="flex items-center gap-1 px-3 py-1 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/60 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition-all"
+            className={`h-8 flex items-center gap-1.5 px-3 rounded-full border text-xs font-bold transition-all cursor-pointer ${
+              isDark
+                ? "border-white/20 bg-white/[0.1] hover:bg-white/[0.18] hover:border-teal-300/60 text-slate-100"
+                : "border-slate-900/10 bg-white/65 hover:bg-white/90 text-slate-800 shadow-xs"
+            }`}
           >
-            {theme === "dark" ? (
+            {isDark ? (
               <>
-                <Sun className="h-3 w-3 text-amber-400 shrink-0" />
-                <span className="hidden sm:inline">{t("app.light")}</span>
+                <Moon className="h-3.5 w-3.5 text-teal-300 shrink-0" />
+                <span className="hidden sm:inline">{t("app.dark")}</span>
               </>
             ) : (
               <>
-                <Moon className="h-3 w-3 text-indigo-600 shrink-0" />
-                <span className="hidden sm:inline">{t("app.dark")}</span>
+                <Sun className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                <span className="hidden sm:inline">{t("app.light")}</span>
               </>
             )}
           </button>
+
+          <button
+            type="button"
+            onClick={toggleSound}
+            aria-label="Toggle sound"
+            className={`h-8 flex items-center gap-1.5 px-3 rounded-full border text-xs font-bold transition-all cursor-pointer ${
+              isDark
+                ? "border-white/20 bg-white/[0.1] hover:bg-white/[0.18] hover:border-teal-300/60 text-slate-100"
+                : "border-slate-900/10 bg-white/65 hover:bg-white/90 text-slate-800 shadow-xs"
+            }`}
+          >
+            {soundOn ? (
+              <Volume2 className={`h-3.5 w-3.5 shrink-0 ${isDark ? "text-teal-300" : "text-slate-700"}`} />
+            ) : (
+              <VolumeX className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+            )}
+            <span className="hidden sm:inline">{lang === "ar" ? "الصوت" : "Sound"}</span>
+          </button>
+
+          <div
+            className={`hidden md:flex h-8 items-center gap-1.5 px-3 rounded-full border text-xs font-bold ${
+              isDark
+                ? "border-white/20 bg-white/[0.1] text-slate-100"
+                : "border-slate-900/10 bg-white/65 text-slate-800 shadow-xs"
+            }`}
+          >
+            <Lock className={`h-3 w-3 shrink-0 ${isDark ? "text-teal-300" : "text-slate-700"}`} />
+            <span>{lang === "ar" ? "بيئة آمنة" : "Secure Workspace"}</span>
+          </div>
         </div>
       </header>
 
-      {/* Main Split Showcase Login Card (Locked Inside Screen Height) */}
-      <main className="flex-1 min-h-0 max-w-6xl xl:max-w-7xl w-full mx-auto my-1.5 sm:my-2.5 flex items-center justify-center">
-        <div className="w-full h-full max-h-[calc(100vh-100px)] rounded-[28px] sm:rounded-[36px] overflow-hidden shadow-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-white/10 grid grid-cols-1 lg:grid-cols-12 transition-all">
-          {/* Left Column: Royal Purple Showcase Banner (Centered & Elegantly Restyled) */}
-          <section className="hidden lg:flex lg:col-span-5 relative p-6 sm:p-7 xl:p-8 bg-gradient-to-b from-[#181580] via-[#3523b0] to-[#5a189a] text-white flex-col justify-between items-center text-center overflow-hidden">
-            {/* Ambient Background Lighting Orbs */}
-            <div className="pointer-events-none absolute -top-12 -end-12 h-64 w-64 rounded-full bg-violet-400/25 blur-3xl" />
-            <div className="pointer-events-none absolute bottom-0 -start-10 h-64 w-64 rounded-full bg-indigo-500/25 blur-3xl" />
-
-            {/* Top Centered Header & Branding */}
-            <div className="relative z-10 flex flex-col items-center text-center w-full">
-              {/* Floating Glowing Glass Logo Container */}
-              <div className="h-20 w-20 sm:h-22 sm:w-22 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 flex items-center justify-center shadow-2xl shadow-black/25 p-2 mb-2 hover:scale-105 transition-transform">
-                <img src={logoSrc} alt="Athar Educational Platform" className="w-full h-full object-contain filter drop-shadow-md scale-105" />
-              </div>
-
-              {/* Platform Title */}
-              <h2 className="text-xl sm:text-2xl xl:text-3xl font-black text-white tracking-tight leading-tight">
-                {t("app.title")}
-              </h2>
-
-              {/* Tagline Badge */}
-              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-xs font-semibold text-indigo-100 mt-2 shadow-xs">
-                <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
-                <span>{t("auth.learnTagline")}</span>
-              </div>
-
-              {/* Hero Description */}
-              <p className="text-xs sm:text-[12.5px] text-white/85 mt-2.5 leading-relaxed max-w-sm mx-auto">
-                {t("auth.heroDesc")}
-              </p>
+      {/* Main Content Stage Over Futuristic Library Scene */}
+      <main className="relative z-20 flex-1 max-w-7xl w-full mx-auto flex flex-col lg:flex-row items-center justify-between gap-6 py-4 sm:py-6 px-1 sm:px-4">
+        {/* Left/Center Floating Hero Brand Callout */}
+        <div className="hidden lg:flex flex-col items-start max-w-xs mt-[-70px]">
+          <div
+            className={`w-full rounded-2xl overflow-hidden backdrop-blur-xl border transition-all ${
+              isDark
+                ? "bg-white/[0.12] border-white/25 shadow-[0_8px_28px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.22)]"
+                : "bg-white/[0.22] border-white/50 shadow-[0_8px_28px_rgba(15,23,42,0.14)]"
+            }`}
+          >
+            <div
+              className={`px-4 py-2 text-xs font-black ${
+                isDark ? "text-white" : "bg-white/80 text-slate-900"
+              }`}
+            >
+              Athar Educational Platform | منصة أثر التعليمية
             </div>
-
-            {/* Centered 2x2 Feature Showcase Grid */}
-            <div className="relative z-10 w-full max-w-sm my-auto pt-3 pb-2">
-              <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
-                {/* 1. PDF Annotations */}
-                <div className="flex flex-col items-center text-center p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 hover:bg-white/15 transition-all shadow-sm">
-                  <div className="h-8 w-8 rounded-xl bg-white/20 backdrop-blur-md border border-white/25 flex items-center justify-center text-white mb-1.5 shadow-xs">
-                    <Laptop className="h-4 w-4" />
-                  </div>
-                  <div className="text-xs font-bold text-white leading-tight">{t("auth.featPdf")}</div>
-                  <div className="text-[10px] text-indigo-200 mt-0.5 leading-tight">{t("auth.featPdfDesc")}</div>
-                </div>
-
-                {/* 2. Quiz & Chatbot */}
-                <div className="flex flex-col items-center text-center p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 hover:bg-white/15 transition-all shadow-sm">
-                  <div className="h-8 w-8 rounded-xl bg-white/20 backdrop-blur-md border border-white/25 flex items-center justify-center text-white mb-1.5 shadow-xs">
-                    <Bot className="h-4 w-4" />
-                  </div>
-                  <div className="text-xs font-bold text-white leading-tight">{t("auth.featQuiz")}</div>
-                  <div className="text-[10px] text-indigo-200 mt-0.5 leading-tight">{t("auth.featQuizDesc")}</div>
-                </div>
-
-                {/* 3. Points & Certificates */}
-                <div className="flex flex-col items-center text-center p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 hover:bg-white/15 transition-all shadow-sm">
-                  <div className="h-8 w-8 rounded-xl bg-white/20 backdrop-blur-md border border-white/25 flex items-center justify-center text-white mb-1.5 shadow-xs">
-                    <Trophy className="h-4 w-4" />
-                  </div>
-                  <div className="text-xs font-bold text-white leading-tight">{t("auth.featPoints")}</div>
-                  <div className="text-[10px] text-indigo-200 mt-0.5 leading-tight">{t("auth.featPointsDesc")}</div>
-                </div>
-
-                {/* 4. Progress Reports */}
-                <div className="flex flex-col items-center text-center p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 hover:bg-white/15 transition-all shadow-sm">
-                  <div className="h-8 w-8 rounded-xl bg-white/20 backdrop-blur-md border border-white/25 flex items-center justify-center text-white mb-1.5 shadow-xs">
-                    <BarChart3 className="h-4 w-4" />
-                  </div>
-                  <div className="text-xs font-bold text-white leading-tight">{t("auth.featReports")}</div>
-                  <div className="text-[10px] text-indigo-200 mt-0.5 leading-tight">{t("auth.featReportsDesc")}</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom 3D Artwork Composition (Centered) */}
-            <div className="relative z-10 w-full flex items-center justify-center mt-1">
-              <svg
-                viewBox="0 0 320 180"
-                className="w-44 sm:w-52 h-auto drop-shadow-2xl select-none pointer-events-none mx-auto"
-                fill="none"
-              >
-                <defs>
-                  <linearGradient id="book1Grad" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#2e1065" />
-                    <stop offset="100%" stopColor="#4338ca" />
-                  </linearGradient>
-                  <linearGradient id="book2Grad" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#3b0764" />
-                    <stop offset="100%" stopColor="#6366f1" />
-                  </linearGradient>
-                  <linearGradient id="capGrad" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#0f172a" />
-                    <stop offset="100%" stopColor="#1e1b4b" />
-                  </linearGradient>
-                  <linearGradient id="laptopScreen" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#0b0f19" />
-                    <stop offset="100%" stopColor="#1e293b" />
-                  </linearGradient>
-                  <linearGradient id="goldTassel" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#fde047" />
-                    <stop offset="100%" stopColor="#f59e0b" />
-                  </linearGradient>
-                </defs>
-                <ellipse cx="190" cy="165" rx="100" ry="12" fill="#09051d" fillOpacity="0.4" />
-                <path d="M 120 150 L 250 135 L 265 145 L 135 160 Z" fill="url(#book1Grad)" />
-                <path d="M 120 150 L 135 160 L 135 167 L 120 157 Z" fill="#1e1b4b" />
-                <path d="M 135 160 L 265 145 L 265 152 L 135 167 Z" fill="#e2e8f0" />
-                <path d="M 130 135 L 255 120 L 268 128 L 143 143 Z" fill="url(#book2Grad)" />
-                <path d="M 130 135 L 143 143 L 143 150 L 130 142 Z" fill="#2e1065" />
-                <path d="M 143 143 L 268 128 L 268 135 L 143 150 Z" fill="#f8fafc" />
-                <ellipse cx="198" cy="98" rx="26" ry="10" fill="#090d16" />
-                <polygon points="198,68 250,86 198,104 146,86" fill="url(#capGrad)" stroke="#475569" strokeWidth="1" />
-                <circle cx="198" cy="86" r="3.5" fill="url(#goldTassel)" />
-                <path d="M 198 86 Q 220 90 230 108 L 232 122" stroke="url(#goldTassel)" strokeWidth="2.5" strokeLinecap="round" />
-                <polygon points="230,122 234,122 235,130 229,130" fill="url(#goldTassel)" />
-                <g transform="translate(10, 10)">
-                  <polygon points="65,160 145,152 175,165 95,173" fill="#334155" />
-                  <polygon points="75,160 138,154 163,164 100,170" fill="#1e293b" />
-                  <polygon points="80,110 148,102 145,152 77,160" fill="#0f172a" stroke="#475569" strokeWidth="1.5" />
-                  <polygon points="83,113 145,106 142,149 80,156" fill="url(#laptopScreen)" />
-                  <path d="M 112 123 L 126 128 L 112 133 L 98 128 Z" fill="#38bdf8" opacity="0.9" />
-                </g>
-              </svg>
-            </div>
-          </section>
-
-          {/* Right Column: Clean Authentication Form */}
-          <section className="col-span-1 lg:col-span-7 p-6 sm:p-9 lg:p-10 xl:p-14 bg-white dark:bg-slate-900 flex flex-col justify-center overflow-y-auto transition-colors">
-            <div className="max-w-md xl:max-w-lg mx-auto w-full">
-              {/* Interactive Athar AI Mascot */}
-              <div className="flex flex-col items-center justify-center mb-3">
-                <div className="relative flex flex-col items-center select-none group">
-                  <div className="drop-shadow-[0_8px_20px_rgba(37,99,235,0.35)] transition-transform hover:scale-105 duration-200">
-                    <RobotMascotSvg
-                      isCoveringEyes={isCoveringEyes}
-                      isPeeking={false}
-                      showSign={!isCoveringEyes && !isPasswordFocused}
-                      signText={lang === "ar" ? "أهلاً!" : "ATHAR"}
-                      width={96}
-                      height={102}
-                      className="w-[84px] h-[90px] sm:w-[94px] sm:h-[100px] overflow-visible"
-                      idPrefix="login_bot"
-                    />
-                  </div>
-
-                  {/* Mascot Speech Bubble / Status Pill */}
-                  <div className="mt-1 flex items-center justify-center text-center">
-                    {showPass ? (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-400/30 text-[11px] font-black animate-pulse shadow-sm">
-                        <span>🙈</span>
-                        <span>
-                          {lang === "ar"
-                            ? "أغمض عينيّ تماماً... أظهرت كلمة المرور ولن أنظر إليها!"
-                            : "Hiding my eyes completely! You revealed your password and I won't look!"}
-                        </span>
-                      </span>
-                    ) : isCoveringEyes ? (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-400/30 text-[11px] font-black animate-pulse shadow-sm">
-                        <span>🙈</span>
-                        <span>
-                          {lang === "ar"
-                            ? "مغمض عينيّ تماماً... لن أنظر إلى كلمة المرور!"
-                            : "Covering my eyes! No peeking at your password!"}
-                        </span>
-                      </span>
-                    ) : isPasswordFocused ? (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-400/30 text-[11px] font-black shadow-sm">
-                        <span>👀</span>
-                        <span>
-                          {lang === "ar"
-                            ? "عيناي مفتوحتان... سأغمضهما فور أن تبدأ الكتابة أو تظهر كلمة المرور!"
-                            : "Eyes open... I'll hide them when you type or reveal password!"}
-                        </span>
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-cyan-400 border border-blue-400/20 text-[10.5px] font-bold">
-                        <span>🤖</span>
-                        <span>
-                          {lang === "ar" ? "مساعد أثر AI يرحب بك" : "Athar AI Assistant"}
-                        </span>
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Header */}
-              <div className="text-center mb-4 sm:mb-5">
-                <h2 className="text-2xl sm:text-3xl xl:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
-                  {t("auth.welcomeBack")}
-                </h2>
-                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-                  {t("auth.welcomeDesc")}
-                </p>
-              </div>
-
-              <form onSubmit={handleSubmit} autoComplete="off" className="space-y-3 sm:space-y-3.5">
-                {/* Username or Email */}
-                <div>
-                  <label className="flex items-center gap-1.5 text-xs sm:text-[13px] font-bold text-slate-800 dark:text-slate-200 mb-1">
-                    <User className="h-3.5 w-3.5 text-blue-600 dark:text-cyan-400" />
-                    <span>{t("auth.identifier")}</span>
-                  </label>
-                  <div className="relative flex items-center">
-                    <Mail className="h-4 w-4 text-slate-400 absolute start-3.5 pointer-events-none" />
-                    <input
-                      type="text"
-                      name="platform_login_id"
-                      autoComplete="off"
-                      required
-                      value={identifier}
-                      onChange={(e) => setIdentifier(e.target.value)}
-                      placeholder={t("auth.identifierPlaceholder")}
-                      className="w-full ps-10 pe-3.5 py-2.5 sm:py-3 glass-input text-xs sm:text-sm"
-                    />
-                  </div>
-                </div>
-
-                {/* Password */}
-                <div>
-                  <label className="flex items-center gap-1.5 text-xs sm:text-[13px] font-bold text-slate-800 dark:text-slate-200 mb-1">
-                    <Lock className="h-3.5 w-3.5 text-blue-600 dark:text-cyan-400" />
-                    <span>{t("auth.password")}</span>
-                  </label>
-                  <div className="relative flex items-center">
-                    <Lock className="h-4 w-4 text-slate-400 absolute start-3.5 pointer-events-none" />
-                    <input
-                      type={showPass ? "text" : "password"}
-                      name="platform_login_pw"
-                      autoComplete="new-password"
-                      required
-                      value={password}
-                      onChange={handlePasswordChange}
-                      onFocus={handlePasswordFocus}
-                      onBlur={handlePasswordBlur}
-                      placeholder={t("auth.passwordPlaceholder")}
-                      className="w-full ps-10 pe-10 py-2.5 sm:py-3 glass-input text-xs sm:text-sm"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPass((p) => !p)}
-                      aria-label="Toggle password visibility"
-                      className="absolute end-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1"
-                    >
-                      {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Remember Me & Forgot Password */}
-                <div className="flex items-center justify-between text-xs sm:text-[13px]">
-                  <label className="flex items-center gap-1.5 cursor-pointer select-none text-slate-700 dark:text-slate-300 font-semibold">
-                    <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                      className="h-3.5 w-3.5 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 dark:border-slate-700 dark:bg-slate-800 cursor-pointer"
-                    />
-                    <span>{t("auth.rememberMe")}</span>
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      showPopup({
-                        title: t("auth.forgotPassword"),
-                        message: t("auth.forgotPasswordHint"),
-                        type: "info",
-                      })
-                    }
-                    className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
-                  >
-                    {t("auth.forgotPassword")}
-                  </button>
-                </div>
-
-                {/* Gradient Sign In Button */}
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="w-full mt-2 py-3 sm:py-3.5 px-5 rounded-xl sm:rounded-2xl font-bold text-xs sm:text-sm text-white bg-gradient-to-r from-[#2055d5] via-[#4834d4] to-[#8c25cf] hover:from-[#1b48b5] hover:to-[#7b20b6] shadow-md shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60 cursor-pointer"
-                >
-                  <ArrowRight className="h-4 w-4 rtl:rotate-180" />
-                  <span>{submitting ? t("auth.signingIn") : t("auth.signIn")}</span>
-                </button>
-              </form>
-
-              {/* Divider */}
-              <div className="relative my-3 flex items-center justify-center">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-slate-200 dark:border-slate-800" />
-                </div>
-                <span className="relative bg-white dark:bg-slate-900 px-3 text-[11px] font-semibold text-slate-400 dark:text-slate-500">
-                  {t("auth.noAccount")}
-                </span>
-              </div>
-
-              {/* Register Secondary Button */}
-              <Link
-                to="/register"
-                className="w-full py-2.5 px-4 rounded-xl sm:rounded-2xl border border-indigo-200 dark:border-indigo-900/60 hover:border-indigo-500 dark:hover:border-indigo-400 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/20 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-sm group"
-              >
-                <UserPlus className="h-4 w-4 text-indigo-500 group-hover:scale-110 transition-transform" />
-                <span>{t("auth.registerAction")}</span>
-              </Link>
-
-              {/* Trust Footer Badge */}
-              <div className="mt-3 py-1.5 px-4 rounded-full bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800/80 flex items-center justify-center gap-2 text-[11px] font-medium text-slate-500 dark:text-slate-400 mx-auto w-fit">
-                <ShieldCheck className="h-3.5 w-3.5 text-blue-500" />
-                <span>{t("auth.trustBadge")}</span>
-              </div>
-            </div>
-          </section>
+            <p
+              className={`px-4 py-2.5 text-xs font-medium leading-relaxed ${
+                isDark
+                  ? "text-white/95 border-t border-white/15"
+                  : "text-white bg-slate-900/30 drop-shadow-xs"
+              }`}
+            >
+              {lang === "ar"
+                ? "رفيقك الذكي للتعليم التقني وتطوير المهارات."
+                : "Your smart companion for technical education & skill development."}
+            </p>
+          </div>
         </div>
-      </main>
 
-      <footer className="shrink-0 text-center text-[10.5px] text-slate-400 dark:text-slate-500 py-0.5">
-        {t("app.title")} © {new Date().getFullYear()}
-      </footer>
+        {/* Right Floating Frosted Liquid-Glass Login Card */}
+        <section
+          className={`w-full max-w-[430px] ms-auto me-auto lg:me-4 rounded-[28px] backdrop-blur-2xl backdrop-saturate-150 border p-6 sm:p-8 transition-all ${
+            isDark
+              ? "border-white/30 shadow-[0_24px_80px_rgba(0,0,0,0.55),inset_0_1px_1px_rgba(255,255,255,0.32),inset_0_-1px_0_rgba(255,255,255,0.08)]"
+              : "border-white/75 shadow-[0_24px_80px_rgba(15,23,42,0.18),inset_0_1px_1px_rgba(255,255,255,0.9),inset_0_-1px_0_rgba(255,255,255,0.25)]"
+          }`}
+          style={{
+            background: isDark
+              ? "linear-gradient(155deg, rgba(168, 214, 226, 0.22) 0%, rgba(28, 66, 82, 0.30) 48%, rgba(15, 42, 54, 0.38) 100%)"
+              : "linear-gradient(180deg, rgba(248, 246, 243, 0.90) 0%, rgba(218, 214, 208, 0.74) 42%, rgba(162, 158, 154, 0.62) 74%, rgba(136, 132, 128, 0.66) 100%)",
+          }}
+        >
+          {/* Card Header */}
+          <div className="text-center mb-6">
+            <h2
+              className={`text-2xl sm:text-3xl font-black tracking-tight flex items-center justify-center gap-2 drop-shadow-sm ${
+                isDark ? "text-white" : "text-slate-900"
+              }`}
+            >
+              <Sparkles className={`h-6 w-6 shrink-0 ${isDark ? "text-cyan-300" : "text-slate-800"}`} />
+              <span>{t("auth.welcomeBack")}</span>
+            </h2>
+            <p className={`text-xs sm:text-sm mt-1.5 font-medium ${isDark ? "text-white/80" : "text-slate-700"}`}>
+              {lang === "ar" ? t("auth.welcomeDesc") : "Sign in to your learning workspace"}
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4">
+            {/* Username or Email */}
+            <div>
+              <label
+                className={`block text-xs sm:text-[13px] font-bold mb-1.5 ${
+                  isDark ? "text-white/95" : "text-slate-800"
+                }`}
+              >
+                {t("auth.identifier")}
+              </label>
+              <div className="relative flex items-center">
+                <User
+                  className={`h-4 w-4 absolute start-3.5 pointer-events-none ${
+                    isDark ? "text-white/75" : "text-slate-600"
+                  }`}
+                />
+                <input
+                  type="text"
+                  name="platform_login_id"
+                  autoComplete="off"
+                  required
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  placeholder="e.g., student@athar.edu"
+                  className={`w-full ps-10 pe-3.5 py-3 rounded-xl backdrop-blur-md border text-xs sm:text-sm focus:outline-none focus:ring-2 transition-all ${
+                    isDark
+                      ? "bg-white/[0.14] hover:bg-white/[0.17] focus:bg-white/[0.20] border-white/25 text-white placeholder-white/55 shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] focus:ring-cyan-300/60 focus:border-white/45"
+                      : "bg-[#f4f2ef]/80 hover:bg-[#f7f5f2]/90 focus:bg-white/95 border-white/85 text-slate-900 placeholder-slate-700/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] focus:ring-stone-500/30 focus:border-white"
+                  }`}
+                />
+              </div>
+            </div>
+
+            {/* Password */}
+            <div>
+              <label
+                className={`block text-xs sm:text-[13px] font-bold mb-1.5 ${
+                  isDark ? "text-white/95" : "text-slate-800"
+                }`}
+              >
+                {t("auth.password")}
+              </label>
+              <div className="relative flex items-center">
+                <Lock
+                  className={`h-4 w-4 absolute start-3.5 pointer-events-none ${
+                    isDark ? "text-white/75" : "text-slate-600"
+                  }`}
+                />
+                <input
+                  type={showPass ? "text" : "password"}
+                  name="platform_login_pw"
+                  autoComplete="new-password"
+                  required
+                  value={password}
+                  onChange={handlePasswordChange}
+                  onFocus={handlePasswordFocus}
+                  onBlur={handlePasswordBlur}
+                  placeholder={t("auth.passwordPlaceholder")}
+                  className={`w-full ps-10 pe-10 py-3 rounded-xl backdrop-blur-md border text-xs sm:text-sm focus:outline-none focus:ring-2 transition-all ${
+                    isDark
+                      ? "bg-white/[0.14] hover:bg-white/[0.17] focus:bg-white/[0.20] border-white/25 text-white placeholder-white/55 shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] focus:ring-cyan-300/60 focus:border-white/45"
+                      : "bg-[#f4f2ef]/80 hover:bg-[#f7f5f2]/90 focus:bg-white/95 border-white/85 text-slate-900 placeholder-slate-700/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] focus:ring-stone-500/30 focus:border-white"
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass((p) => !p)}
+                  aria-label="Toggle password visibility"
+                  className={`absolute end-3 transition-colors p-1 cursor-pointer ${
+                    isDark ? "text-slate-300 hover:text-white" : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Remember Me Switch & Forgot Password */}
+            <div className="flex items-center justify-between text-xs pt-0.5">
+              <button
+                type="button"
+                role="switch"
+                aria-checked={rememberMe}
+                onClick={() => setRememberMe((r) => !r)}
+                className={`flex items-center gap-2 cursor-pointer select-none font-semibold ${
+                  isDark ? "text-slate-200" : "text-white drop-shadow-xs"
+                }`}
+              >
+                <span
+                  className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border transition-colors ${
+                    rememberMe
+                      ? isDark
+                        ? "bg-teal-400/80 border-teal-300"
+                        : "bg-slate-800 border-slate-700"
+                      : isDark
+                      ? "bg-white/15 border-white/25"
+                      : "bg-slate-800/75 border-slate-700/60"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${
+                      rememberMe ? "translate-x-4 rtl:-translate-x-4" : "translate-x-0.5 rtl:-translate-x-0.5"
+                    }`}
+                  />
+                </span>
+                <span>{t("auth.rememberMe")}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  showPopup({
+                    title: t("auth.forgotPassword"),
+                    message: t("auth.forgotPasswordHint"),
+                    type: "info",
+                  })
+                }
+                className={`font-bold hover:underline cursor-pointer ${
+                  isDark ? "text-cyan-300 hover:text-cyan-200" : "text-white/95 hover:text-white drop-shadow-xs"
+                }`}
+              >
+                {t("auth.forgotPassword")}
+              </button>
+            </div>
+
+            {/* Sign In Button (Theme-Matched: Cyan-to-Violet in Dark, Frosted White Pearl in Light) */}
+            <button
+              type="submit"
+              disabled={submitting}
+              className={`w-full mt-2 py-3.5 px-5 rounded-xl font-black text-sm hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer ${
+                isDark
+                  ? "bg-gradient-to-r from-[#2dd4bf] via-[#38bdf8] to-[#a855f7] hover:brightness-110 text-white shadow-[0_10px_30px_rgba(56,189,248,0.35)]"
+                  : "bg-[#f8f7f4]/95 hover:bg-white text-slate-900 border border-white shadow-[0_8px_24px_rgba(0,0,0,0.14)]"
+              }`}
+            >
+              <span>{submitting ? t("auth.signingIn") : t("auth.signIn")}</span>
+              <ArrowRight className="h-4 w-4 rtl:rotate-180" />
+            </button>
+          </form>
+
+          {/* Divider */}
+          <div className="relative my-5 flex items-center justify-center">
+            <div className={`w-full border-t ${isDark ? "border-white/15" : "border-white/30"}`} />
+            <span
+              className={`px-3 text-[11px] font-semibold whitespace-nowrap ${
+                isDark ? "text-slate-300/85" : "text-white/95 drop-shadow-xs"
+              }`}
+            >
+              {t("auth.noAccount")}
+            </span>
+            <div className={`w-full border-t ${isDark ? "border-white/15" : "border-white/30"}`} />
+          </div>
+
+          {/* Register Secondary Glass Button with Smooth Expand Transition */}
+          <button
+            type="button"
+            onClick={handleGoToRegister}
+            className={`w-full py-3 px-4 rounded-xl backdrop-blur-md border font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer group ${
+              isDark
+                ? "bg-white/[0.12] hover:bg-white/[0.20] border-white/25 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]"
+                : "bg-white/25 hover:bg-white/35 border-white/50 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.45)] drop-shadow-xs"
+            } ${isTransitioningToRegister ? "scale-105 opacity-60 duration-200" : ""}`}
+          >
+            <UserPlus
+              className={`h-4 w-4 group-hover:scale-110 transition-transform ${
+                isDark ? "text-cyan-300" : "text-white"
+              }`}
+            />
+            <span>{t("auth.registerAction")}</span>
+          </button>
+
+          {/* Temporary UI Preview Buttons (Shown only while VITE_FIREBASE_API_KEY is unset) */}
+          {!isFirebaseConfigured && (
+            <div className="mt-3 pt-3 border-t border-white/25 space-y-2">
+              <div
+                className={`text-center text-[10.5px] font-semibold ${
+                  isDark ? "text-teal-200/80" : "text-white/90 drop-shadow-xs"
+                }`}
+              >
+                {lang === "ar"
+                  ? "معاينة سريعة للواجهات (بدون VITE_FIREBASE_API_KEY)"
+                  : "Temporary UI Preview (Firebase key not set)"}
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    enterPreviewMode("student");
+                    navigate("/student");
+                  }}
+                  className={`py-2 px-3 rounded-xl backdrop-blur-md border text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                    isDark
+                      ? "bg-teal-500/15 hover:bg-teal-500/25 border-teal-300/30 text-teal-100"
+                      : "bg-white/25 hover:bg-white/35 border-white/45 text-white drop-shadow-xs"
+                  }`}
+                >
+                  <GraduationCap className="h-3.5 w-3.5 shrink-0" />
+                  <span>{lang === "ar" ? "معاينة الطالب" : "Preview Student UI"}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    enterPreviewMode("instructor");
+                    navigate("/instructor");
+                  }}
+                  className={`py-2 px-3 rounded-xl backdrop-blur-md border text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                    isDark
+                      ? "bg-sky-500/15 hover:bg-sky-500/25 border-sky-300/30 text-sky-100"
+                      : "bg-white/25 hover:bg-white/35 border-white/45 text-white drop-shadow-xs"
+                  }`}
+                >
+                  <Briefcase className="h-3.5 w-3.5 shrink-0" />
+                  <span>{lang === "ar" ? "معاينة المحاضر" : "Preview Instructor UI"}</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Trust Footer Badge */}
+          <div
+            className={`mt-5 flex items-center justify-center gap-2 text-[11px] font-medium ${
+              isDark ? "text-slate-300/80" : "text-white/90 drop-shadow-xs"
+            }`}
+          >
+            <ShieldCheck className={`h-3.5 w-3.5 ${isDark ? "text-teal-300" : "text-white/90"}`} />
+            <span>{t("auth.trustBadge")}</span>
+          </div>
+        </section>
+      </main>
     </div>
   );
 }

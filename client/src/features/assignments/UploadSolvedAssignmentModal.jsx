@@ -275,7 +275,7 @@ export default function UploadSolvedAssignmentModal({
         aria-modal="true"
       >
         {/* Header */}
-        <div className="px-6 py-4.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white flex items-center justify-between gap-3 shadow-md shrink-0">
+        <div className="px-6 py-4 bg-gradient-to-r from-sky-500 via-teal-500 to-emerald-500 text-white flex items-center justify-between gap-3 shadow-md shrink-0">
           <div className="flex items-center gap-3 min-w-0">
             <div className="h-10 w-10 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/25">
               <Upload className="h-5 w-5 text-white" />
@@ -310,8 +310,8 @@ export default function UploadSolvedAssignmentModal({
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4">
           {/* Assignment instructions banner */}
           {assignment.instructions && (
-            <div className="p-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-400/25 text-xs text-slate-700 dark:text-slate-200 space-y-1">
-              <div className="font-bold flex items-center gap-1.5 text-indigo-700 dark:text-cyan-300">
+            <div className="p-3.5 rounded-2xl bg-teal-500/10 border border-teal-400/25 text-xs text-slate-700 dark:text-slate-200 space-y-1">
+              <div className="font-bold flex items-center gap-1.5 text-teal-700 dark:text-teal-300">
                 <AlertCircle className="h-3.5 w-3.5 shrink-0" />
                 <span>{lang === "ar" ? "تعليمات المعلم:" : "Instructor Instructions:"}</span>
               </div>
@@ -320,12 +320,12 @@ export default function UploadSolvedAssignmentModal({
           )}
 
           {/* AI Auto-Grading Feature Badge */}
-          <div className="p-3 rounded-2xl bg-gradient-to-r from-amber-500/10 via-indigo-500/10 to-purple-500/10 border border-indigo-400/25 text-xs flex items-center gap-2.5">
-            <div className="h-8 w-8 rounded-xl bg-indigo-500/20 text-indigo-600 dark:text-cyan-300 flex items-center justify-center shrink-0">
+          <div className="p-3 rounded-2xl bg-teal-500/10 border border-teal-400/25 text-xs flex items-center gap-2.5">
+            <div className="h-8 w-8 rounded-xl bg-teal-500/20 text-teal-600 dark:text-teal-300 flex items-center justify-center shrink-0">
               <Sparkles className="h-4 w-4" />
             </div>
             <div className="min-w-0">
-              <div className="font-extrabold text-[12px] text-indigo-800 dark:text-cyan-200">
+              <div className="font-extrabold text-[12px] text-teal-800 dark:text-teal-200">
                 {lang === "ar"
                   ? "التصحيح الذكي الآلي مفعل (AI Auto-Grading)"
                   : "AI Auto-Grading Enabled"}
@@ -339,7 +339,7 @@ export default function UploadSolvedAssignmentModal({
           </div>
 
           {/* Step 1: Download Original Worksheet with Platform Watermark Banner */}
-          <div className="p-3.5 rounded-2xl bg-gradient-to-r from-sky-500/10 via-indigo-500/10 to-violet-500/10 border border-sky-400/30 text-xs flex flex-wrap items-center justify-between gap-3 shadow-xs">
+          <div className="p-3.5 rounded-2xl bg-sky-500/10 border border-sky-400/30 text-xs flex flex-wrap items-center justify-between gap-3 shadow-xs">
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="h-8 w-8 rounded-xl bg-sky-500/20 text-sky-600 dark:text-cyan-300 flex items-center justify-center shrink-0">
                 <Download className="h-4 w-4" />
@@ -391,10 +391,10 @@ export default function UploadSolvedAssignmentModal({
               onClick={() => fileInputRef.current?.click()}
               className={`p-6 border-2 border-dashed rounded-2xl text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-2 ${
                 isDragging
-                  ? "border-indigo-500 bg-indigo-500/15"
+                  ? "border-teal-400 bg-teal-500/15"
                   : selectedFile
                   ? "border-emerald-500/60 bg-emerald-500/5 dark:bg-emerald-950/20"
-                  : "border-slate-300 dark:border-white/15 hover:border-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/20"
+                  : "border-slate-300 dark:border-white/15 hover:border-teal-400 hover:bg-teal-500/5"
               }`}
             >
               <input
@@ -424,13 +424,13 @@ export default function UploadSolvedAssignmentModal({
                       className="mt-2 max-h-36 rounded-xl border border-slate-200 dark:border-white/15 object-contain shadow-sm"
                     />
                   )}
-                  <span className="text-[11px] text-indigo-600 dark:text-cyan-400 font-semibold underline mt-1">
+                  <span className="text-[11px] text-teal-600 dark:text-teal-300 font-semibold underline mt-1">
                     {lang === "ar" ? "اضغط لتغيير الملف" : "Click to choose a different file"}
                   </span>
                 </div>
               ) : (
                 <>
-                  <div className="h-12 w-12 rounded-2xl bg-indigo-500/15 text-indigo-600 dark:text-cyan-400 flex items-center justify-center">
+                  <div className="h-12 w-12 rounded-2xl bg-teal-500/15 text-teal-600 dark:text-teal-300 flex items-center justify-center">
                     <Upload className="h-6 w-6" />
                   </div>
                   <div className="font-bold text-sm text-slate-800 dark:text-slate-100">
@@ -488,7 +488,7 @@ export default function UploadSolvedAssignmentModal({
             <button
               type="submit"
               disabled={isSubmitting || (!selectedFile && !answerNotes.trim())}
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-xs font-bold shadow-md shadow-indigo-600/30 flex items-center gap-2 disabled:opacity-50 transition-all cursor-pointer"
+              className="glass-btn-primary px-5 py-2.5 rounded-xl text-xs flex items-center gap-2 disabled:opacity-50 cursor-pointer"
             >
               {isSubmitting ? (
                 <>

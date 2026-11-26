@@ -166,40 +166,40 @@ export default function WeeklyReportsModule({ mode = "student", activeInstructor
   return (
     <div className="space-y-6 animate-fadeIn pb-12">
       {/* Top Hero Banner */}
-      <div className="relative overflow-hidden rounded-[28px] p-6 sm:p-7 bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 text-white shadow-xl shadow-indigo-600/20">
-        <div className="pointer-events-none absolute -top-16 -end-16 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-16 -start-16 h-56 w-56 rounded-full bg-cyan-400/20 blur-3xl" />
+      <div className="relative overflow-hidden rounded-[26px] p-6 sm:p-7 glass-panel border-teal-400/25 shadow-xl">
+        <div className="pointer-events-none absolute -top-16 -end-16 h-56 w-56 rounded-full bg-teal-400/15 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-16 -start-16 h-56 w-56 rounded-full bg-sky-400/15 blur-3xl" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="max-w-xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-xs font-bold mb-3 shadow-xs">
-              <CalendarCheck className="h-3.5 w-3.5 text-cyan-300" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/15 border border-teal-400/30 text-teal-700 dark:text-teal-300 text-xs font-bold mb-3 shadow-xs">
+              <CalendarCheck className="h-3.5 w-3.5 text-teal-500 dark:text-teal-300" />
               <span>{t("weeklyReports.title")}</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-snug">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-snug text-slate-900 dark:text-white">
               {lang === "ar"
                 ? `تقارير الأداء الأسبوعية — ${user?.displayName || "الطالب"}`
                 : `Weekly Performance Hub — ${user?.displayName || "Student"}`}
             </h1>
-            <p className="text-xs sm:text-sm text-indigo-100/90 mt-1.5 leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed">
               {t("weeklyReports.subtitle")}
             </p>
           </div>
 
           {/* Quick Metrics Bar */}
-          <div className="flex items-center gap-3 sm:gap-4 bg-white/10 backdrop-blur-md p-3 sm:p-4 rounded-2xl border border-white/15 self-start md:self-auto">
+          <div className="flex items-center gap-3 sm:gap-4 glass-subtle p-3 sm:p-4 rounded-2xl self-start md:self-auto">
             <div className="text-center px-2 sm:px-3">
-              <div className="text-xl sm:text-2xl font-black text-white">{reports.length}</div>
-              <div className="text-[10px] sm:text-xs text-indigo-200 uppercase font-bold tracking-wider">
+              <div className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">{reports.length}</div>
+              <div className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider">
                 {t("weeklyReports.totalWeeks")}
               </div>
             </div>
-            <div className="w-px h-8 bg-white/20" />
+            <div className="w-px h-8 bg-slate-200 dark:bg-white/15" />
             <div className="text-center px-2 sm:px-3">
-              <div className="text-xl sm:text-2xl font-black text-cyan-300">
+              <div className="text-xl sm:text-2xl font-black text-teal-600 dark:text-teal-300">
                 {allTimeAverage > 0 ? `${allTimeAverage}%` : "—"}
               </div>
-              <div className="text-[10px] sm:text-xs text-indigo-200 uppercase font-bold tracking-wider">
+              <div className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider">
                 {t("weeklyReports.allTimeAvg")}
               </div>
             </div>
@@ -211,7 +211,7 @@ export default function WeeklyReportsModule({ mode = "student", activeInstructor
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+            <TrendingUp className="h-4 w-4 text-teal-600 dark:text-teal-400" />
             <span>{lang === "ar" ? "التسلسل الزمني للأسابيع" : "Weekly Chronology & Cycles"}</span>
           </h2>
           <span className="text-[11px] font-semibold text-slate-500">
@@ -229,15 +229,15 @@ export default function WeeklyReportsModule({ mode = "student", activeInstructor
                 onClick={() => setSelectedWeekId(rep.id)}
                 className={`flex-shrink-0 flex items-center gap-3 px-4 py-3 rounded-2xl border transition-all text-start cursor-pointer shadow-sm ${
                   isSelected
-                    ? "bg-white dark:bg-slate-800 border-indigo-600 dark:border-indigo-400 shadow-indigo-500/15 ring-2 ring-indigo-500/30"
-                    : "bg-white/80 dark:bg-slate-900/80 border-slate-200/80 dark:border-white/10 hover:border-indigo-300 dark:hover:border-slate-700"
+                    ? "bg-teal-500/15 dark:bg-teal-500/15 border-teal-400/70 shadow-teal-500/15 ring-2 ring-teal-400/30"
+                    : "glass-card"
                 }`}
               >
                 <div
                   className={`h-9 w-9 rounded-xl flex items-center justify-center font-black text-xs shrink-0 ${
                     rep.isCurrentWeek
-                      ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
-                      : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                      ? "bg-gradient-to-br from-sky-500 to-emerald-500 text-white shadow-md shadow-teal-500/30"
+                      : "bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-200"
                   }`}
                 >
                   {rep.weekNumber}
@@ -271,10 +271,10 @@ export default function WeeklyReportsModule({ mode = "student", activeInstructor
       {activeReport ? (
         <div className="space-y-6">
           {/* Main Card Header */}
-          <div className="rounded-[26px] bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-white/10 shadow-sm p-5 sm:p-6 space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100 dark:border-white/5">
+          <div className="glass-panel rounded-[26px] p-5 sm:p-6 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-200/70 dark:border-white/10">
               <div className="flex items-center gap-3.5">
-                <div className="h-12 w-12 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-600 text-white font-black text-base flex items-center justify-center shadow-lg shadow-indigo-500/25 shrink-0">
+                <div className="h-12 w-12 rounded-2xl bg-gradient-to-tr from-sky-500 to-emerald-500 text-white font-black text-base flex items-center justify-center shadow-lg shadow-teal-500/25 shrink-0">
                   W{activeReport.weekNumber}
                 </div>
                 <div>
@@ -286,8 +286,8 @@ export default function WeeklyReportsModule({ mode = "student", activeInstructor
                     <span
                       className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
                         activeReport.isCurrentWeek
-                          ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200"
-                          : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200"
+                          ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-400/35"
+                          : "bg-slate-100 text-slate-700 dark:bg-white/10 dark:text-slate-300 border-slate-200 dark:border-white/15"
                       }`}
                     >
                       {activeReport.isCurrentWeek
@@ -305,7 +305,7 @@ export default function WeeklyReportsModule({ mode = "student", activeInstructor
               <button
                 type="button"
                 onClick={handleDownloadPdf}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-md shadow-indigo-500/20 transition-all cursor-pointer self-start sm:self-auto"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold glass-btn-primary cursor-pointer self-start sm:self-auto"
               >
                 <Download className="h-3.5 w-3.5" />
                 <span>{t("weeklyReports.downloadPdf")}</span>
@@ -315,24 +315,24 @@ export default function WeeklyReportsModule({ mode = "student", activeInstructor
             {/* 4 Stat KPI Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Quizzes Accuracy */}
-              <div className="p-5 rounded-[22px] bg-gradient-to-br from-white/95 to-slate-50/80 dark:from-slate-800/80 dark:to-slate-900/90 border border-slate-200/90 dark:border-white/10 shadow-sm flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all text-start">
+              <div className="glass-card p-5 flex flex-col justify-between text-start">
                 <div>
-                  <div className="flex items-center justify-between text-indigo-600 dark:text-indigo-400 mb-3">
-                    <div className="h-11 w-11 rounded-2xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 shadow-xs">
+                  <div className="flex items-center justify-between text-sky-600 dark:text-sky-400 mb-3">
+                    <div className="h-11 w-11 rounded-2xl bg-sky-500/15 border border-sky-400/25 text-sky-600 dark:text-sky-300 flex items-center justify-center shrink-0">
                       <ClipboardCheck className="h-5 w-5" />
                     </div>
-                    <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/60 uppercase tracking-wide">
+                    <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-sky-500/15 text-sky-700 dark:text-sky-300 border border-sky-400/25 uppercase tracking-wide">
                       {activeReport.quizzesCount} {lang === "ar" ? "اختبار" : "Quizzes"}
                     </span>
                   </div>
-                  <div className="text-3xl sm:text-4xl font-black text-indigo-600 dark:text-indigo-400 font-mono tracking-tight">
+                  <div className="text-3xl sm:text-4xl font-black text-sky-600 dark:text-sky-300 font-mono tracking-tight">
                     {activeReport.quizAvgScore > 0 ? `${activeReport.quizAvgScore}%` : "—"}
                   </div>
                   <div className="text-xs sm:text-[13px] font-bold text-slate-700 dark:text-slate-200 mt-1">
                     {t("weeklyReports.quizzesAccuracy")}
                   </div>
                 </div>
-                <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-3 pt-2.5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
+                <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-3 pt-2.5 border-t border-slate-200/60 dark:border-white/10 flex items-center justify-between">
                   <span>{t("weeklyReports.points")}</span>
                   <span className="font-mono font-bold text-slate-700 dark:text-slate-300">
                     {activeReport.quizPoints} / {activeReport.quizMaxPoints || "0"}
@@ -341,24 +341,24 @@ export default function WeeklyReportsModule({ mode = "student", activeInstructor
               </div>
 
               {/* Assignments Mastery */}
-              <div className="p-5 rounded-[22px] bg-gradient-to-br from-white/95 to-slate-50/80 dark:from-slate-800/80 dark:to-slate-900/90 border border-slate-200/90 dark:border-white/10 shadow-sm flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all text-start">
+              <div className="glass-card p-5 flex flex-col justify-between text-start">
                 <div>
-                  <div className="flex items-center justify-between text-purple-600 dark:text-purple-400 mb-3">
-                    <div className="h-11 w-11 rounded-2xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0 shadow-xs">
+                  <div className="flex items-center justify-between text-teal-600 dark:text-teal-400 mb-3">
+                    <div className="h-11 w-11 rounded-2xl bg-teal-500/15 border border-teal-400/25 text-teal-600 dark:text-teal-300 flex items-center justify-center shrink-0">
                       <ClipboardList className="h-5 w-5" />
                     </div>
-                    <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200/60 dark:border-purple-800/60 uppercase tracking-wide">
+                    <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-teal-500/15 text-teal-700 dark:text-teal-300 border border-teal-400/25 uppercase tracking-wide">
                       {activeReport.assignmentsCount} {lang === "ar" ? "واجب" : "Tasks"}
                     </span>
                   </div>
-                  <div className="text-3xl sm:text-4xl font-black text-purple-600 dark:text-purple-400 font-mono tracking-tight">
+                  <div className="text-3xl sm:text-4xl font-black text-teal-600 dark:text-teal-300 font-mono tracking-tight">
                     {activeReport.assignmentAvgScore > 0 ? `${activeReport.assignmentAvgScore}%` : "—"}
                   </div>
                   <div className="text-xs sm:text-[13px] font-bold text-slate-700 dark:text-slate-200 mt-1">
                     {t("weeklyReports.assignmentsMastery")}
                   </div>
                 </div>
-                <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-3 pt-2.5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
+                <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-3 pt-2.5 border-t border-slate-200/60 dark:border-white/10 flex items-center justify-between">
                   <span>{t("weeklyReports.points")}</span>
                   <span className="font-mono font-bold text-slate-700 dark:text-slate-300">
                     {activeReport.assignmentPoints} / {activeReport.assignmentMaxMarks || "0"}
@@ -367,24 +367,24 @@ export default function WeeklyReportsModule({ mode = "student", activeInstructor
               </div>
 
               {/* Total Weekly Points */}
-              <div className="p-5 rounded-[22px] bg-gradient-to-br from-white/95 to-slate-50/80 dark:from-slate-800/80 dark:to-slate-900/90 border border-slate-200/90 dark:border-white/10 shadow-sm flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all text-start">
+              <div className="glass-card p-5 flex flex-col justify-between text-start">
                 <div>
                   <div className="flex items-center justify-between text-cyan-600 dark:text-cyan-400 mb-3">
-                    <div className="h-11 w-11 rounded-2xl bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0 shadow-xs">
+                    <div className="h-11 w-11 rounded-2xl bg-cyan-500/15 border border-cyan-400/25 text-cyan-600 dark:text-cyan-300 flex items-center justify-center shrink-0">
                       <Award className="h-5 w-5" />
                     </div>
-                    <span className="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-cyan-50 dark:bg-cyan-950/50 text-cyan-700 dark:text-cyan-300 border border-cyan-200/60 uppercase tracking-wide">
+                    <span className="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 border border-cyan-400/25 uppercase tracking-wide">
                       PTS
                     </span>
                   </div>
-                  <div className="text-3xl sm:text-4xl font-black text-cyan-600 dark:text-cyan-400 font-mono tracking-tight">
+                  <div className="text-3xl sm:text-4xl font-black text-cyan-600 dark:text-cyan-300 font-mono tracking-tight">
                     +{activeReport.totalWeeklyPoints}
                   </div>
                   <div className="text-xs sm:text-[13px] font-bold text-slate-700 dark:text-slate-200 mt-1">
                     {t("weeklyReports.totalPointsEarned")}
                   </div>
                 </div>
-                <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-3 pt-2.5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
+                <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-3 pt-2.5 border-t border-slate-200/60 dark:border-white/10 flex items-center justify-between">
                   <span>{lang === "ar" ? "دورة الـ 7 أيام" : "7-Day Cycle"}</span>
                   <span className="font-mono font-bold text-cyan-700 dark:text-cyan-300">
                     +{activeReport.totalWeeklyPoints} pts
@@ -393,10 +393,10 @@ export default function WeeklyReportsModule({ mode = "student", activeInstructor
               </div>
 
               {/* Overall Grade Tier */}
-              <div className="p-5 rounded-[22px] bg-gradient-to-br from-white/95 to-slate-50/80 dark:from-slate-800/80 dark:to-slate-900/90 border border-slate-200/90 dark:border-white/10 shadow-sm flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all text-start">
+              <div className="glass-card p-5 flex flex-col justify-between text-start">
                 <div>
                   <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400 mb-3">
-                    <div className="h-11 w-11 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-xs">
+                    <div className="h-11 w-11 rounded-2xl bg-emerald-500/15 border border-emerald-400/25 text-emerald-600 dark:text-emerald-300 flex items-center justify-center shrink-0">
                       <ShieldCheck className="h-5 w-5" />
                     </div>
                     <span
@@ -405,14 +405,14 @@ export default function WeeklyReportsModule({ mode = "student", activeInstructor
                       {lang === "ar" ? activeReport.tier.labelAr : activeReport.tier.labelEn}
                     </span>
                   </div>
-                  <div className="text-3xl sm:text-4xl font-black text-emerald-600 dark:text-emerald-400 font-mono tracking-tight">
+                  <div className="text-3xl sm:text-4xl font-black text-emerald-600 dark:text-emerald-300 font-mono tracking-tight">
                     {activeReport.overallScore > 0 ? `${activeReport.overallScore}%` : "—"}
                   </div>
                   <div className="text-xs sm:text-[13px] font-bold text-slate-700 dark:text-slate-200 mt-1">
                     {t("weeklyReports.overallScore")} ({activeReport.tier.grade})
                   </div>
                 </div>
-                <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-3 pt-2.5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
+                <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-3 pt-2.5 border-t border-slate-200/60 dark:border-white/10 flex items-center justify-between">
                   <span>{lang === "ar" ? "الرتبة المكتسبة" : "Standing Tier"}</span>
                   <span className="font-bold text-slate-700 dark:text-slate-300">
                     Grade {activeReport.tier.grade}
@@ -456,10 +456,10 @@ export default function WeeklyReportsModule({ mode = "student", activeInstructor
                   {activeReport.quizzes.map((q) => (
                     <div
                       key={q.id}
-                      className="p-4 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-white/10 shadow-xs hover:shadow-sm transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-start"
+                      className="glass-subtle p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-start"
                     >
                       <div className="flex items-center gap-3.5 min-w-0">
-                        <div className="h-10 w-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-cyan-400 font-black text-xs flex items-center justify-center shrink-0 border border-indigo-200/60 dark:border-indigo-800/60 shadow-xs">
+                        <div className="h-10 w-10 rounded-xl bg-sky-500/15 border border-sky-400/25 text-sky-600 dark:text-sky-300 font-black text-xs flex items-center justify-center shrink-0">
                           {q.score}%
                         </div>
                         <div className="min-w-0">
@@ -478,7 +478,7 @@ export default function WeeklyReportsModule({ mode = "student", activeInstructor
                       </div>
 
                       <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
-                        <span className="text-xs font-black text-indigo-700 dark:text-indigo-300 px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200/80 dark:border-indigo-800/60 shadow-xs">
+                        <span className="text-xs font-black text-sky-700 dark:text-sky-300 px-3 py-1.5 rounded-xl bg-sky-500/15 border border-sky-400/25">
                           +{q.points} {t("weeklyReports.points")}
                         </span>
                       </div>
@@ -492,7 +492,7 @@ export default function WeeklyReportsModule({ mode = "student", activeInstructor
               </h4>
 
               {activeReport.assignments.length === 0 ? (
-                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-white/5 text-xs text-slate-500">
+                <div className="glass-subtle p-4 rounded-xl text-xs text-slate-500 dark:text-slate-400">
                   {t("weeklyReports.noActivity")}
                 </div>
               ) : (
@@ -500,10 +500,10 @@ export default function WeeklyReportsModule({ mode = "student", activeInstructor
                   {activeReport.assignments.map((a) => (
                     <div
                       key={a.assignmentId}
-                      className="p-4 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-white/10 shadow-xs hover:shadow-sm transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-start"
+                      className="glass-subtle p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-start"
                     >
                       <div className="flex items-center gap-3.5 min-w-0">
-                        <div className="h-10 w-10 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 font-black text-xs flex items-center justify-center shrink-0 border border-purple-200/60 dark:border-purple-800/60 shadow-xs">
+                        <div className="h-10 w-10 rounded-xl bg-teal-500/15 border border-teal-400/25 text-teal-600 dark:text-teal-300 font-black text-xs flex items-center justify-center shrink-0">
                           <ClipboardList className="h-5 w-5" />
                         </div>
                         <div className="min-w-0">
@@ -522,7 +522,7 @@ export default function WeeklyReportsModule({ mode = "student", activeInstructor
                       </div>
 
                       <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
-                        <span className="text-xs font-black text-purple-700 dark:text-purple-300 px-3 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-950/60 border border-purple-200/80 dark:border-purple-800/60 shadow-xs">
+                        <span className="text-xs font-black text-teal-700 dark:text-teal-300 px-3 py-1.5 rounded-xl bg-teal-500/15 border border-teal-400/25">
                           {a.score !== null ? `${a.score} / ${a.maxMarks}` : "Submitted"} {t("weeklyReports.points")}
                         </span>
                       </div>
@@ -533,14 +533,14 @@ export default function WeeklyReportsModule({ mode = "student", activeInstructor
             </div>
 
             {/* Bottom 7-Day Auto Dispatch Explanation Card */}
-            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-white/10 flex items-center gap-3 text-xs text-slate-600 dark:text-slate-300">
-              <Clock className="h-5 w-5 text-indigo-600 dark:text-cyan-400 shrink-0" />
+            <div className="glass-subtle p-4 rounded-2xl flex items-center gap-3 text-xs text-slate-600 dark:text-slate-300">
+              <Clock className="h-5 w-5 text-teal-500 dark:text-teal-300 shrink-0" />
               <span>{t("weeklyReports.autoDispatchNote")}</span>
             </div>
           </div>
         </div>
       ) : (
-        <div className="rounded-3xl p-12 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10">
+        <div className="glass-panel rounded-3xl p-12 text-center">
           <CalendarCheck className="h-10 w-10 text-slate-400 mx-auto mb-2" />
           <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300">
             {t("weeklyReports.noActivity")}

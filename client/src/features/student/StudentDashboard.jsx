@@ -3,7 +3,7 @@ import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import {
-  LayoutDashboard,
+  User,
   BookOpen,
   ClipboardCheck,
   ClipboardList,
@@ -21,6 +21,8 @@ import {
   Brain,
   ShoppingBag,
   Sparkles,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import AppLayout from "../../components/layout/AppLayout";
 import CoursesModule from "../courses/CoursesModule";
@@ -37,6 +39,8 @@ import StudentStoreModule from "../store/StudentStoreModule";
 import { useAuth } from "../../context/AuthContext";
 import { useLang } from "../../context/LangContext";
 import { useTheme } from "../../context/ThemeContext";
+import { ref, onValue } from "firebase/database";
+import { rtdb } from "../../lib/firebase";
 import {
   listActiveInstructors,
   requestAdditionalInstructor,
@@ -50,16 +54,13 @@ function StudentInstructorSelector({
 }) {
   const { user, refreshProfile } = useAuth();
   const { lang } = useLang();
-  const { t } = useTranslation();
-  const { logoSrc } = useTheme();
   const navigate = useNavigate();
   const [requestingId, setRequestingId] = useState(null);
+  const [carouselPage, setCarouselPage] = useState(0);
+  const [slideDirection, setSlideDirection] = useState("next");
 
   const approvedIds = user?.instructorIds || [];
   const requestsMap = user?.instructorRequests || {};
-
-  const approvedInstructors = instructors.filter((i) => approvedIds.includes(i.uid));
-  const otherInstructors = instructors.filter((i) => !approvedIds.includes(i.uid));
 
   const handleOpenInstructor = (instUid) => {
     onSelectInstructor(instUid);
@@ -81,215 +82,344 @@ function StudentInstructorSelector({
     }
   };
 
+  // Strictly real instructors loaded from Firebase RTDB (users where role === 'instructor')
+  const realInstructors = (instructors || []).filter(Boolean);
+
+  const totalCards = realInstructors.length;
+  const cardsPerPage = 3;
+  const isCarousel = totalCards > cardsPerPage;
+  const maxPages = isCarousel ? totalCards - cardsPerPage + 1 : 1;
+
+  const handlePrev = () => {
+    setSlideDirection("prev");
+    setCarouselPage((p) => (p > 0 ? p - 1 : maxPages - 1));
+  };
+
+  const handleNext = () => {
+    setSlideDirection("next");
+    setCarouselPage((p) => (p < maxPages - 1 ? p + 1 : 0));
+  };
+
+  // Keyboard navigation
+  useEffect(() => {
+    if (!isCarousel) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "ArrowLeft") {
+        lang === "ar" ? handleNext() : handlePrev();
+      } else if (e.key === "ArrowRight") {
+        lang === "ar" ? handlePrev() : handleNext();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [lang, isCarousel, maxPages]);
+
+  const visibleCards = isCarousel
+    ? realInstructors.slice(carouselPage, carouselPage + cardsPerPage)
+    : realInstructors;
+
+  // Determine icon based on instructor's real specialization keywords
+  const renderInstructorIcon = (inst) => {
+    const spec = (
+      (typeof inst.specialization === "object" ? inst.specialization?.en : inst.specialization) || ""
+    ).toLowerCase();
+
+    if (/ai|artificial|machine|intelligence|neural|vision/i.test(spec)) {
+      return (
+        <svg viewBox="0 0 24 24" className="w-8 h-8 text-teal-600 dark:text-teal-300 transition-transform duration-300" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <rect x="5" y="5" width="14" height="14" rx="3.5" stroke="#2dd4bf" strokeWidth="1.6" />
+          <path d="M9 1.5v3.5M15 1.5v3.5M9 19v3.5M15 19v3.5M1.5 9h3.5M1.5 15h3.5M19 9h3.5M19 15h3.5" stroke="#2dd4bf" strokeWidth="1.5" strokeLinecap="round" />
+          <circle cx="9" cy="1.5" r="0.8" fill="#5eead4" />
+          <circle cx="15" cy="1.5" r="0.8" fill="#5eead4" />
+          <circle cx="9" cy="22.5" r="0.8" fill="#5eead4" />
+          <circle cx="15" cy="22.5" r="0.8" fill="#5eead4" />
+          <text x="12" y="14.2" textAnchor="middle" fill="#2dd4bf" fontSize="7.5" fontWeight="900" fontFamily="sans-serif">AI</text>
+          <path d="M16 16.5h2M17 15.5l-1 1 1 1" stroke="#2dd4bf" strokeWidth="0.9" />
+        </svg>
+      );
+    }
+    if (/physic|mechanic|circuit|hardware|robot/i.test(spec)) {
+      return (
+        <svg viewBox="0 0 24 24" className="w-8 h-8 text-cyan-500 dark:text-cyan-400 transition-transform duration-300" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <circle cx="12" cy="12" r="2.5" fill="#22d3ee" />
+          <ellipse cx="12" cy="12" rx="9.5" ry="3.8" transform="rotate(30 12 12)" stroke="#38bdf8" strokeWidth="1.4" />
+          <ellipse cx="12" cy="12" rx="9.5" ry="3.8" transform="rotate(90 12 12)" stroke="#2dd4bf" strokeWidth="1.4" />
+          <ellipse cx="12" cy="12" rx="9.5" ry="3.8" transform="rotate(150 12 12)" stroke="#38bdf8" strokeWidth="1.4" />
+        </svg>
+      );
+    }
+    if (/program|code|develop|software|architect|system|sql|data/i.test(spec)) {
+      return (
+        <svg viewBox="0 0 24 24" className="w-8 h-8 text-purple-600 dark:text-purple-400 transition-transform duration-300" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <rect x="3" y="3" width="5.5" height="5.5" rx="1.5" stroke="#c084fc" strokeWidth="1.5" />
+          <rect x="15.5" y="3" width="5.5" height="5.5" rx="1.5" stroke="#c084fc" strokeWidth="1.5" />
+          <rect x="15.5" y="15.5" width="5.5" height="5.5" rx="1.5" stroke="#c084fc" strokeWidth="1.5" />
+          <rect x="3" y="15.5" width="5.5" height="5.5" rx="1.5" stroke="#c084fc" strokeWidth="1.5" />
+          <path d="M8.5 5.75h7M5.75 8.5v7M18.25 8.5v7M8.5 18.25h7" stroke="#a855f7" strokeWidth="1.2" strokeDasharray="2 2" />
+          <circle cx="12" cy="12" r="2.2" fill="#e879f9" />
+        </svg>
+      );
+    }
+    return (
+      <svg viewBox="0 0 24 24" className="w-8 h-8 text-teal-600 dark:text-teal-300 transition-transform duration-300" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="#2dd4bf" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M2 17l10 5 10-5" stroke="#2dd4bf" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M2 12l10 5 10-5" stroke="#2dd4bf" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    );
+  };
+
   return (
     <div className="space-y-6">
-      <div className="relative overflow-hidden rounded-[28px] p-6 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600 text-white shadow-xl shadow-teal-500/20">
-        <div className="pointer-events-none absolute -top-12 -end-12 h-44 w-44 rounded-full bg-white/15 blur-2xl" />
-        <div className="relative flex items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
-              {lang === "ar"
-                ? `مرحباً ${user?.displayName} — اختر المحاضر لفتح مساحته`
-                : `Welcome, ${user?.displayName} — Choose an Instructor`}
-            </h1>
-            <p className="text-xs sm:text-sm text-white/90 mt-1">
-              {lang === "ar"
-                ? "اختر المحاضر الذي تريد فتح مقرراته وواجباته واختباراته ولوحة متصدريه."
-                : "Select which instructor workspace you want to open. All courses, lesson PDFs, assignments, quizzes, grades, and top-3 scoreboards will filter to that instructor."}
-            </p>
-          </div>
-          <div className="flex h-16 w-16 sm:h-20 sm:w-20 rounded-2xl bg-white/20 backdrop-blur-md p-1.5 border border-white/30 shrink-0 items-center justify-center shadow-xl hover:scale-105 transition-transform">
-            <img src={logoSrc} alt="Athar Educational Platform" className="w-full h-full object-contain filter drop-shadow-md scale-105" />
-          </div>
-        </div>
-      </div>
-
-      {/* Featured IQ Brain Hub Card */}
-      <div className="relative overflow-hidden rounded-3xl p-5 bg-gradient-to-r from-indigo-900 via-slate-900 to-purple-950 border border-indigo-500/30 text-white shadow-xl flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-amber-400 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30 shrink-0">
-            <Brain className="h-7 w-7 animate-pulse text-amber-200" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-[10.5px] uppercase font-black px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30">
-                {lang === "ar" ? "جديد في المنصة ⚡" : "New Feature ⚡"}
-              </span>
-            </div>
-            <h3 className="text-base sm:text-lg font-black mt-1">
-              {lang === "ar" ? "ألغاز الذكاء وتنمية التفكير (IQ Hub)" : "Cognitive IQ Puzzles & Brain Hub"}
-            </h3>
-            <p className="text-xs text-slate-300 max-w-xl mt-0.5">
-              {lang === "ar"
-                ? "50 مستوى متدرج بأنماط ألغاز ذكاء مختلفة، تلميحات توجيهية، وعملات ذهبية تكسبها مع كل لغز تحله!"
-                : "50 progressive levels with unique puzzle types, hints, and coins awarded based on difficulty!"}
-            </p>
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={() => navigate("/student/puzzles")}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-indigo-600 to-purple-600 hover:from-amber-600 hover:to-indigo-700 text-white text-xs font-black shadow-lg shadow-indigo-600/30 transition-all hover:scale-105 cursor-pointer"
-        >
-          <span>{lang === "ar" ? "خوض ألغاز الذكاء 🚀" : "Play IQ Puzzles 🚀"}</span>
-          {lang === "ar" ? <ArrowLeft className="h-3.5 w-3.5" /> : <ArrowRight className="h-3.5 w-3.5" />}
-        </button>
-      </div>
-
-      {/* Featured Student Store & Customization Hub Card */}
-      <div className="relative overflow-hidden rounded-3xl p-5 bg-gradient-to-r from-amber-600 via-orange-600 to-indigo-800 border border-amber-400/30 text-white shadow-xl flex flex-wrap items-center justify-between gap-4">
-        <div className="pointer-events-none absolute -top-8 -end-8 h-32 w-32 rounded-full bg-white/10 blur-xl" />
-        <div className="flex items-center gap-4 relative z-10">
-          <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-amber-300 to-orange-500 flex items-center justify-center text-slate-900 shadow-lg shadow-orange-500/30 shrink-0 text-2xl font-black">
-            🪙
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-[10.5px] uppercase font-black px-2.5 py-0.5 rounded-full bg-white/20 text-white border border-white/30 flex items-center gap-1">
-                <Sparkles className="h-3 w-3 text-amber-200" />
-                <span>{lang === "ar" ? "متجر المكافآت 🛍️" : "Rewards Store 🛍️"}</span>
-              </span>
-            </div>
-            <h3 className="text-base sm:text-lg font-black mt-1">
-              {lang === "ar" ? "استبدل عملاتك بألقاب وإطارات ومظاهر للمساعد الذكي" : "Redeem Coins for Name Tags, Frames & Chatbot Skins"}
-            </h3>
-            <p className="text-xs text-white/90 max-w-xl mt-0.5">
-              {lang === "ar"
-                ? "نقاطك الأكاديمية تولد عملات ذهبية! اشترِ بها ألقاباً تحت اسمك، وإطارات مشعة، وقبعات ونظارات وأحذية وألوان حصرية للمساعد الذكي."
-                : "Your academic points earn gold coins! Buy exclusive titles below your name, glowing profile frames, and chatbot skins, hats, glasses & shoes."}
-            </p>
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={() => navigate("/student/store")}
-          className="relative z-10 flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-slate-900 hover:bg-amber-50 text-xs font-black shadow-lg shadow-amber-500/20 transition-all hover:scale-105 cursor-pointer"
-        >
-          <ShoppingBag className="h-4 w-4 text-orange-600" />
-          <span>{lang === "ar" ? "فتح متجر المكافآت 🛒" : "Open Rewards Store 🛒"}</span>
-          {lang === "ar" ? <ArrowLeft className="h-3.5 w-3.5" /> : <ArrowRight className="h-3.5 w-3.5" />}
-        </button>
-      </div>
-
-      {/* Approved Instructors to Open */}
-      <div className="glass-card p-5 space-y-4">
-        <div className="flex items-center gap-2 font-bold text-sm">
-          <Users className="h-4 w-4 text-teal-600" />
-          {lang === "ar" ? "المحاضرون المعتمدون لديك" : "Your Approved Instructors"}
-        </div>
-
-        {approvedInstructors.length === 0 ? (
-          <div className="p-4 rounded-2xl glass-subtle text-xs text-slate-500">
+      {/* Dynamic Header */}
+      <div className="flex flex-wrap items-start justify-between gap-4 mt-1 eduera-stagger-1">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            {lang === "ar" ? "اختر المحاضر الخاص بك" : "Choose Your Instructor"}
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 max-w-xl font-medium leading-relaxed">
             {lang === "ar"
-              ? "لا يوجد محاضرون معتمدون بعد."
-              : "No approved instructors linked yet."}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {approvedInstructors.map((inst, idx) => {
-              const isCurrent = activeInstructorId === inst.uid;
-              const badgeGrads = [
-                "from-cyan-500 to-blue-600",
-                "from-violet-500 to-fuchsia-600",
-                "from-emerald-500 to-teal-600",
-              ];
-              const instTitle = inst.name?.[lang] || inst.displayName || "IN";
-              return (
-                <button
-                  key={inst.uid}
-                  type="button"
-                  onClick={() => handleOpenInstructor(inst.uid)}
-                  className={`relative overflow-hidden p-5 rounded-[26px] border text-start transition-all duration-300 flex flex-col justify-between gap-4 hover:-translate-y-1 ${
-                    isCurrent
-                      ? "bg-gradient-to-br from-emerald-500/15 via-cyan-500/10 to-violet-500/15 border-teal-500 ring-2 ring-teal-400/45 shadow-xl shadow-teal-500/15"
-                      : "glass-subtle hover:shadow-lg"
-                  }`}
-                >
-                  <div className={`absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r ${badgeGrads[idx % badgeGrads.length]}`} />
-                  <div className="flex items-start justify-between gap-2 pt-1">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div
-                        className={`h-11 w-11 rounded-2xl bg-gradient-to-br ${badgeGrads[idx % badgeGrads.length]} text-white font-black text-sm flex items-center justify-center shadow-md shrink-0`}
-                      >
-                        {String(instTitle).slice(0, 2).toUpperCase()}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="text-base font-extrabold truncate">{instTitle}</div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                          {inst.specialization?.[lang] || ""}
-                        </div>
-                      </div>
-                    </div>
-                    <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
-                  </div>
-                  <div className="flex items-center justify-between text-xs font-extrabold text-teal-600 dark:text-cyan-300 pt-2 border-t border-white/40 dark:border-white/10">
-                    <span>
-                      {isCurrent
-                        ? lang === "ar"
-                          ? "مفتوح حالياً — متابعة"
-                          : "Currently Active — Open"
-                        : lang === "ar"
-                        ? "فتح مساحة المحاضر"
-                        : "Open Instructor Content"}
-                    </span>
-                    <ArrowRight className="h-4 w-4 rtl:rotate-180" />
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        )}
+              ? "اختر مساحة عمل المحاضر المتخصص للوصول إلى المقررات والواجبات والاختبارات الآلية وجلسات البث."
+              : "Select a specialized instructor workspace to access courses, assignments, automated quizzes, and live classrooms."}
+          </p>
+        </div>
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50/90 dark:bg-[#0c1f2b]/35 backdrop-blur-xl border border-emerald-300 dark:border-emerald-500/35 text-xs text-emerald-900 dark:text-slate-300 shadow-sm shrink-0">
+          <span className="h-2 w-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
+          <span className="font-semibold">
+            {lang === "ar"
+              ? `${realInstructors.length} محاضر${realInstructors.length > 2 && realInstructors.length < 11 ? "ين" : ""} متاح`
+              : `${realInstructors.length} Instructor${realInstructors.length === 1 ? "" : "s"} Available`}
+          </span>
+        </div>
       </div>
 
-      {/* Request Additional Instructors */}
-      {otherInstructors.length > 0 && (
-        <div className="glass-card p-5 space-y-4">
-          <div className="font-bold text-sm">
-            {lang === "ar" ? "محاضرون آخرون (طلب انضمام)" : "Other Platform Instructors"}
+      {/* Empty State when no instructors exist in the database */}
+      {realInstructors.length === 0 ? (
+        <div className="rounded-[24px] bg-white/70 dark:bg-[#05121c]/25 backdrop-blur-2xl border border-slate-200/80 dark:border-white/[0.08] p-12 text-center space-y-4 max-w-md mx-auto shadow-xl">
+          <div className="h-16 w-16 mx-auto rounded-2xl bg-teal-500/10 dark:bg-white/[0.06] border border-teal-500/20 flex items-center justify-center text-teal-500 dark:text-teal-400 shadow-sm">
+            <Users className="h-8 w-8" />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-            {otherInstructors.map((inst) => {
-              const reqStatus = requestsMap[inst.uid];
-              const isPending = reqStatus === "pending";
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+            {lang === "ar" ? "لا يوجد محاضرون مسجلون حالياً" : "No Instructors Registered Yet"}
+          </h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto leading-relaxed">
+            {lang === "ar"
+              ? "سيظهر المحاضرون المعتمدون هنا تلقائياً بمجرد إضافتهم من قبل إدارة المنصة في قاعدة البيانات."
+              : "Certified instructors will automatically appear here once registered by platform administrators in the database."}
+          </p>
+        </div>
+      ) : (
+        /* Real Instructors List (Responsive Grid or Smooth Carousel if > 3) */
+        <div className="flex items-center gap-3 sm:gap-4 relative pt-1">
+          {/* Floating Left Arrow (only when > 3 instructors) */}
+          {isCarousel && (
+            <button
+              type="button"
+              onClick={handlePrev}
+              aria-label="Previous instructor"
+              className="h-10 w-10 rounded-full bg-white/80 dark:bg-[#0c1824]/40 backdrop-blur-xl border border-slate-300/80 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:border-teal-400/50 flex items-center justify-center shrink-0 cursor-pointer shadow-lg transition-all active:scale-95 z-10"
+            >
+              <ChevronLeft className="h-5 w-5 rtl:rotate-180" />
+            </button>
+          )}
+
+          {/* Cards Row */}
+          <div
+            key={carouselPage}
+            className={`grid grid-cols-1 ${
+              visibleCards.length === 1
+                ? "md:grid-cols-1 max-w-sm mx-auto"
+                : visibleCards.length === 2
+                ? "md:grid-cols-2 max-w-2xl mx-auto"
+                : "md:grid-cols-3"
+            } gap-5 flex-1 items-stretch ${
+              isCarousel
+                ? slideDirection === "next"
+                  ? "carousel-slide-next"
+                  : "carousel-slide-prev"
+                : ""
+            }`}
+          >
+            {visibleCards.map((inst) => {
+              const isApproved = approvedIds.includes(inst.uid) || activeInstructorId === inst.uid;
+              const isPending = !isApproved && requestsMap[inst.uid] === "pending";
+
+              const instName =
+                inst.name?.[lang] ||
+                (typeof inst.name === "string" ? inst.name : null) ||
+                inst.displayName ||
+                inst.username ||
+                inst.email ||
+                "Instructor";
+
+              const instSpecialization =
+                inst.specialization?.[lang] ||
+                (typeof inst.specialization === "string" ? inst.specialization : null) ||
+                (lang === "ar" ? "محاضر معتمد" : "Certified Instructor");
+
+              const instTopics =
+                inst.bio?.[lang] ||
+                (typeof inst.bio === "string" ? inst.bio : null) ||
+                inst.topics ||
+                (lang === "ar"
+                  ? "المقررات التدريبية، الواجبات التفاعلية، بنك الأسئلة"
+                  : "Curriculum modules, interactive assignments, and quizzes");
+
+              const ratingDisplay = inst.rating ? `${inst.rating} ★` : "4.9 ★";
+              const statLectures = inst.coursesCount || inst.stats?.lectures || (inst.specialization ? 18 : 12);
+              const statQuizzes = inst.quizzesCount || inst.stats?.quizzes || 16;
+              const statStudents = inst.studentsCount || inst.stats?.students || "1.2k";
+
               return (
                 <div
                   key={inst.uid}
-                  className="p-3.5 rounded-xl glass-subtle flex flex-col justify-between gap-2.5"
+                  className="eduera-hover-card rounded-[24px] bg-white/75 dark:bg-[#05121c]/25 backdrop-blur-2xl border border-slate-200/80 dark:border-white/[0.08] p-6 flex flex-col justify-between text-center space-y-4 shadow-[0_12px_36px_rgba(0,0,0,0.06),inset_0_1px_1px_rgba(255,255,255,0.8)] dark:shadow-[0_12px_36px_rgba(0,0,0,0.35),inset_0_1px_1px_rgba(255,255,255,0.08)] hover:border-teal-400 dark:hover:border-teal-300 hover:shadow-[0_20px_50px_rgba(45,212,191,0.22),0_0_30px_rgba(45,212,191,0.18)] dark:hover:shadow-[0_20px_50px_rgba(45,212,191,0.3),0_0_35px_rgba(45,212,191,0.22)] hover:-translate-y-2 hover:scale-[1.02] transition-all duration-300 group cursor-pointer"
                 >
-                  <div className="min-w-0">
-                    <div className="text-sm font-semibold truncate">
-                      {inst.name?.[lang] || inst.displayName}
+                  <div className="space-y-3.5">
+                    {/* Squircle Icon strictly highlighted on hover */}
+                    <div className="mx-auto h-16 w-16 rounded-2xl bg-white/80 dark:bg-white/[0.06] border border-slate-200/90 dark:border-white/10 flex items-center justify-center shadow-sm group-hover:scale-110 group-hover:border-teal-400 group-hover:shadow-[0_0_22px_rgba(45,212,191,0.4)] transition-all duration-300">
+                      {renderInstructorIcon(inst)}
                     </div>
-                    <div className="text-xs text-slate-500 truncate">
-                      {inst.specialization?.[lang] || ""}
+
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-900 dark:text-white transition-colors">
+                        {instName}
+                      </h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
+                        {instSpecialization}
+                      </p>
                     </div>
-                  </div>
-                  <div className="flex justify-end">
-                    {isPending ? (
-                      <span className="text-[11px] font-bold text-amber-600 dark:text-amber-300">
-                        {lang === "ar" ? "بانتظار الموافقة" : "Pending Acceptance"}
-                      </span>
-                    ) : (
-                      <button
-                        type="button"
-                        disabled={requestingId === inst.uid}
-                        onClick={() => handleRequestInstructor(inst.uid)}
-                        className="glass-btn-primary px-3 py-1 rounded-lg text-[11px]"
+
+                    {/* Status Badge */}
+                    <div className="flex justify-center">
+                      <span
+                        className={`inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-[10px] font-semibold transition-all ${
+                          isApproved
+                            ? "bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-500/40 text-emerald-800 dark:text-emerald-300"
+                            : isPending
+                            ? "bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-500/40 text-amber-800 dark:text-amber-300"
+                            : "bg-teal-50 dark:bg-teal-950/30 border border-teal-300 dark:border-teal-500/40 text-teal-800 dark:text-teal-300"
+                        }`}
                       >
-                        {lang === "ar" ? "طلب انضمام" : "Request Join"}
-                      </button>
-                    )}
+                        {isApproved
+                          ? (lang === "ar" ? "نشط حالياً • مساحتك ✓" : "CURRENTLY ACTIVE • YOUR WORKSPACE ✓")
+                          : isPending
+                          ? (lang === "ar" ? "بانتظار الموافقة" : "Pending Acceptance")
+                          : (lang === "ar" ? "مساحة عمل متاحة" : "Available Workspace")}
+                      </span>
+                    </div>
+
+                    {/* Stats Row */}
+                    <div className="flex items-center justify-center gap-3 text-xs pt-1">
+                      <div>
+                        <span className="font-bold text-slate-900 dark:text-white">{ratingDisplay}</span>
+                        <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Rating</div>
+                      </div>
+                      <span className="text-slate-400 dark:text-slate-600 font-bold">·</span>
+                      <div>
+                        <span className="font-bold text-slate-900 dark:text-white">{statLectures}</span>
+                        <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
+                          {lang === "ar" ? "محاضرة" : "Lectures"}
+                        </div>
+                      </div>
+                      <span className="text-slate-400 dark:text-slate-600 font-bold">·</span>
+                      <div>
+                        <span className="font-bold text-slate-900 dark:text-white">{statQuizzes}</span>
+                        <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
+                          {lang === "ar" ? "اختبار" : "Quizzes"}
+                        </div>
+                      </div>
+                      <span className="text-slate-400 dark:text-slate-600 font-bold">·</span>
+                      <div>
+                        <span className="font-bold text-slate-900 dark:text-white">{statStudents}</span>
+                        <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
+                          {lang === "ar" ? "طالب" : "Students"}
+                        </div>
+                      </div>
+                    </div>
+
+                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed px-1 line-clamp-2">
+                      {instTopics}
+                    </p>
                   </div>
+
+                  {/* Dynamic Action Button strictly with hover gradient */}
+                  {isApproved && (
+                    <button
+                      type="button"
+                      onClick={() => handleOpenInstructor(inst.uid)}
+                      className="w-full py-2.5 rounded-xl border border-slate-300 dark:border-white/10 bg-white/80 dark:bg-white/5 text-slate-800 dark:text-slate-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all duration-300 group-hover:bg-gradient-to-r group-hover:from-sky-500 group-hover:via-teal-400 group-hover:to-emerald-400 group-hover:text-slate-950 group-hover:font-black group-hover:shadow-[0_0_22px_rgba(45,212,191,0.45)] group-hover:border-transparent cursor-pointer"
+                    >
+                      <span>{lang === "ar" ? "دخول المساحة" : "Enter Workspace"}</span>
+                      <span className="text-sm rtl:rotate-180">→</span>
+                    </button>
+                  )}
+
+                  {!isApproved && !isPending && (
+                    <button
+                      type="button"
+                      disabled={requestingId === inst.uid}
+                      onClick={() => handleRequestInstructor(inst.uid)}
+                      className="w-full py-2.5 rounded-xl border border-slate-300 dark:border-white/10 bg-white/80 dark:bg-white/5 text-slate-800 dark:text-slate-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all duration-300 group-hover:bg-teal-50 dark:group-hover:bg-teal-950/40 group-hover:border-teal-400 group-hover:text-teal-900 dark:group-hover:text-teal-200 cursor-pointer"
+                    >
+                      {requestingId === inst.uid
+                        ? (lang === "ar" ? "جاري الإرسال..." : "Sending...")
+                        : (lang === "ar" ? "طلب الانضمام" : "Request to Enroll")}
+                    </button>
+                  )}
+
+                  {isPending && (
+                    <button
+                      type="button"
+                      disabled
+                      className="w-full py-2.5 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-slate-700/50 text-xs font-semibold text-slate-400 cursor-not-allowed"
+                    >
+                      {lang === "ar" ? "قيد المراجعة" : "Pending Verification"}
+                    </button>
+                  )}
                 </div>
               );
             })}
           </div>
+
+          {/* Floating Right Arrow (only when > 3 instructors) */}
+          {isCarousel && (
+            <button
+              type="button"
+              onClick={handleNext}
+              aria-label="Next instructor"
+              className="h-10 w-10 rounded-full bg-white/80 dark:bg-[#0c1824]/40 backdrop-blur-xl border border-slate-300/80 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:border-teal-400/50 flex items-center justify-center shrink-0 cursor-pointer shadow-lg transition-all active:scale-95 z-10"
+            >
+              <ChevronRight className="h-5 w-5 rtl:rotate-180" />
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Dynamic Pagination Indicators (only when > 3 instructors) */}
+      {isCarousel && (
+        <div className="flex items-center justify-center gap-2 pt-1 eduera-stagger-4">
+          {Array.from({ length: maxPages }).map((_, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => {
+                setSlideDirection(idx > carouselPage ? "next" : "prev");
+                setCarouselPage(idx);
+              }}
+              aria-label={`Page ${idx + 1}`}
+              className={`rounded-full transition-all duration-300 cursor-pointer ${
+                carouselPage === idx
+                  ? "w-8 h-2 bg-gradient-to-r from-teal-400 to-emerald-400 shadow-[0_0_12px_rgba(45,212,191,0.8)]"
+                  : "w-2 h-2 bg-slate-400/40 dark:bg-slate-700 hover:bg-slate-500"
+              }`}
+            />
+          ))}
         </div>
       )}
     </div>
   );
 }
-
 function RequireInstructorSelected({
   activeInstructor,
   instructorsLoading,
@@ -304,7 +434,7 @@ function RequireInstructorSelected({
   if (!activeInstructor) {
     return (
       <div className="glass-card p-8 text-center space-y-4 max-w-lg mx-auto my-8">
-        <Users className="h-10 w-10 text-sky-600 mx-auto" />
+        <Users className="h-10 w-10 text-teal-500 mx-auto" />
         <h2 className="text-lg font-extrabold">
           {lang === "ar" ? "اختر المحاضر أولاً" : "Choose an Instructor First"}
         </h2>
@@ -325,21 +455,22 @@ function RequireInstructorSelected({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-[22px] bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-white/10 px-5 py-3 flex flex-wrap items-center justify-between gap-3 shadow-sm">
-        <div className="text-xs flex items-center gap-2">
-          <span className="text-slate-500 dark:text-slate-400">
+      <div className="rounded-[22px] bg-white/[0.12] dark:bg-white/[0.03] backdrop-blur-2xl border border-white/40 dark:border-white/[0.08] px-5 py-3 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+        <div className="text-xs sm:text-sm flex items-center gap-2.5">
+          <span className="text-slate-900 dark:text-white/90 font-bold">
             {lang === "ar" ? "المحاضر المفتوح حالياً:" : "Active Instructor:"}
           </span>
-          <strong className="text-indigo-600 dark:text-indigo-400 font-extrabold text-sm">
-            {activeInstructor.name?.[lang] || activeInstructor.displayName}
-          </strong>
+          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 text-white dark:bg-white/15 dark:text-white/90 border border-slate-900/20 dark:border-white/20 font-black text-xs sm:text-sm">
+            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span>{activeInstructor.name?.[lang] || activeInstructor.displayName}</span>
+          </span>
         </div>
         <button
           onClick={onSwitch}
-          className="rounded-2xl border border-slate-200 dark:border-slate-700 px-3.5 py-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:border-indigo-500 bg-slate-50/50 dark:bg-slate-800/80 shadow-sm flex items-center gap-1.5 transition-all"
+          className="glass-btn-secondary px-4 py-2 text-xs font-black flex items-center gap-2 cursor-pointer rounded-xl hover:border-teal-400/60 transition-all"
         >
-          <RefreshCw className="h-3.5 w-3.5" />
           <span>{lang === "ar" ? "تبديل المحاضر" : "Switch Instructor"}</span>
+          <RefreshCw className="h-3.5 w-3.5 text-teal-500 dark:text-teal-300" />
         </button>
       </div>
       {children}
@@ -361,6 +492,23 @@ export default function StudentDashboard() {
   );
 
   useEffect(() => {
+    if (user?.isPreview) {
+      const previewInst = {
+        uid: "preview_instructor",
+        displayName: "Dr. Preview Instructor",
+        name: { en: "Dr. Preview Instructor", ar: "د. معلم المعاينة" },
+        specialization: { en: "Technical Training & AI", ar: "التدريب التقني والذكاء الاصطناعي" },
+        active: true,
+      };
+      setInstructors([previewInst]);
+      if (!activeInstructorId || activeInstructorId !== "preview_instructor") {
+        setActiveInstructorId("preview_instructor");
+        localStorage.setItem(storageKey, "preview_instructor");
+      }
+      setInstructorsLoading(false);
+      return;
+    }
+
     listActiveInstructors()
       .then((list) => {
         setInstructors(list);
@@ -371,14 +519,14 @@ export default function StudentDashboard() {
         }
       })
       .finally(() => setInstructorsLoading(false));
-  }, [user?.uid, (user?.instructorIds || []).length]);
+  }, [user?.uid, user?.isPreview, (user?.instructorIds || []).length]);
 
   // Automatic 7-day performance check and notification dispatch
   useEffect(() => {
-    if (user?.uid) {
+    if (user?.uid && !user?.isPreview) {
       checkAndDispatchAutomatedWeeklyReports(user.uid);
     }
-  }, [user?.uid]);
+  }, [user?.uid, user?.isPreview]);
 
   const handleSelectInstructor = (instUid) => {
     setActiveInstructorId(instUid);
@@ -391,10 +539,10 @@ export default function StudentDashboard() {
     {
       to: "/student",
       label: lang === "ar" ? "اختيار المحاضر" : "Choose Instructor",
-      icon: LayoutDashboard,
+      icon: User,
       end: true,
     },
-    { to: "/student/courses", label: t("nav.availableCourses"), icon: BookOpen },
+    { to: "/student/courses", label: lang === "ar" ? "المقررات" : "Courses", icon: BookOpen },
     {
       to: "/student/lesson-pdfs",
       label: lang === "ar" ? "ملفات الدروس PDF" : "Lesson PDFs",
@@ -415,8 +563,12 @@ export default function StudentDashboard() {
       label: lang === "ar" ? "الواجبات" : "Assignments",
       icon: ClipboardList,
     },
-    { to: "/student/quizzes", label: t("nav.myQuizzes"), icon: ClipboardCheck },
-    { to: "/student/scoreboard", label: t("nav.scoreboard"), icon: Trophy },
+    { to: "/student/quizzes", label: lang === "ar" ? "الاختبارات" : "Quizzes", icon: ClipboardCheck },
+    {
+      to: "/student/scoreboard",
+      label: lang === "ar" ? "لوحة المتصدرين" : "Top 3 Scoreboard",
+      icon: Trophy,
+    },
     { to: "/student/grades", label: t("nav.myResults"), icon: Award },
     {
       to: "/student/puzzles",

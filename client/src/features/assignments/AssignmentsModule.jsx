@@ -393,7 +393,7 @@ export default function AssignmentsModule({
     <div className="space-y-6">
       <div className="glass-panel rounded-[26px] p-5 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-violet-500 via-purple-600 to-fuchsia-600 text-white flex items-center justify-center shadow-lg shadow-purple-500/25">
+          <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-sky-500 via-teal-500 to-emerald-500 text-white flex items-center justify-center shadow-lg shadow-teal-500/25">
             <ClipboardList className="h-6 w-6" />
           </div>
           <div>
@@ -432,7 +432,7 @@ export default function AssignmentsModule({
       {showForm && mode === "instructor" && (
         <form onSubmit={handleCreate} autoComplete="off" className="glass-form-card p-6 sm:p-7 space-y-6">
           <div className="flex items-center gap-3 pb-3 border-b border-slate-200/60 dark:border-white/10">
-            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-sky-500/20">
+            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-sky-500 to-emerald-500 text-white flex items-center justify-center shadow-md shadow-teal-500/25">
               {editingId ? <Edit3 className="h-5 w-5" /> : <ClipboardList className="h-5 w-5" />}
             </div>
             <div>
@@ -537,8 +537,8 @@ export default function AssignmentsModule({
                     onClick={() => setForm({ ...form, maxMarks: m })}
                     className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                       Number(form.maxMarks) === m
-                        ? "bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-md shadow-sky-500/20 scale-105"
-                        : "glass-card text-slate-700 dark:text-slate-200 hover:border-sky-400"
+                        ? "bg-gradient-to-r from-sky-500 via-teal-500 to-emerald-500 text-white shadow-md shadow-teal-500/25 scale-105"
+                        : "glass-card text-slate-700 dark:text-slate-200 hover:border-teal-400"
                     }`}
                   >
                     {m} pts
@@ -609,8 +609,8 @@ export default function AssignmentsModule({
             />
           </div>
 
-          <div className="p-3 rounded-xl bg-indigo-500/10 border border-indigo-400/25 flex items-center gap-2 text-xs text-indigo-700 dark:text-indigo-300">
-            <Bot className="h-4 w-4 shrink-0 text-indigo-500" />
+          <div className="p-3 rounded-xl bg-teal-500/10 border border-teal-400/25 flex items-center gap-2 text-xs text-teal-800 dark:text-teal-200">
+            <Bot className="h-4 w-4 shrink-0 text-teal-500" />
             <span>
               {lang === "ar"
                 ? "🤖 مدعوم بالتصحيح الذكي الآلي: يفتح الطالب ورقة الـ PDF ويجيب داخلها مباشرة بالقلم أو النص، وتصلك الورقة مصححة آلياً مع إمكانية تعديل الدرجات يدوياً."
@@ -767,7 +767,7 @@ export default function AssignmentsModule({
                               modalMode: "view",
                             })
                           }
-                          className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-500/25 transition-colors font-semibold"
+                          className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-sky-500/15 text-sky-700 dark:text-sky-300 hover:bg-sky-500/25 border border-sky-400/25 transition-colors font-semibold"
                           title={lang === "ar" ? "معاينة الملف" : "Preview PDF"}
                         >
                           <FileText className="h-3 w-3" />
@@ -779,7 +779,7 @@ export default function AssignmentsModule({
                           type="button"
                           disabled={downloadingId === a.id}
                           onClick={() => handleDownloadAssignment(a)}
-                          className="p-1 rounded-full bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-500/25 transition-colors disabled:opacity-50"
+                          className="p-1 rounded-full bg-sky-500/15 text-sky-700 dark:text-sky-300 hover:bg-sky-500/25 border border-sky-400/25 transition-colors disabled:opacity-50"
                           title={
                             lang === "ar"
                               ? "تحميل ورقة الواجب كملف PDF بعلامة المنصة المائية"
@@ -787,7 +787,7 @@ export default function AssignmentsModule({
                           }
                         >
                           {downloadingId === a.id ? (
-                            <Loader2 className="h-3 w-3 animate-spin text-indigo-600" />
+                            <Loader2 className="h-3 w-3 animate-spin text-sky-500" />
                           ) : (
                             <Download className="h-3 w-3" />
                           )}
@@ -834,7 +834,7 @@ export default function AssignmentsModule({
                                     {lang === "ar" ? "✅ معتمد من المعلم" : "✅ Reviewed"}
                                   </span>
                                 ) : sub.status === "ai_graded" || sub.aiGrading ? (
-                                  <span className="px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 text-[11px] font-bold flex items-center gap-1">
+                                  <span className="px-2 py-0.5 rounded-full bg-teal-500/15 text-teal-700 dark:text-teal-300 border border-teal-400/25 text-[11px] font-bold flex items-center gap-1">
                                     <Bot className="h-3 w-3" />
                                     {lang === "ar" ? "🤖 مصحح آلياً بـ AI" : "🤖 AI Graded"}
                                   </span>
@@ -854,9 +854,9 @@ export default function AssignmentsModule({
 
                             {/* AI Diagnostic Summary & What went wrong preview */}
                             {sub.aiGrading && (
-                              <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-400/20 text-xs space-y-1.5">
-                                <div className="flex items-center gap-1.5 font-bold text-indigo-700 dark:text-indigo-300">
-                                  <Bot className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
+                              <div className="p-2.5 rounded-xl bg-teal-500/10 border border-teal-400/25 text-xs space-y-1.5">
+                                <div className="flex items-center gap-1.5 font-bold text-teal-700 dark:text-teal-300">
+                                  <Bot className="h-3.5 w-3.5 text-teal-500 dark:text-teal-400" />
                                   <span>{lang === "ar" ? "ملخص التشخيص الذكي:" : "AI Diagnostic Summary:"}</span>
                                 </div>
                                 {sub.aiGrading.summary && (
@@ -895,7 +895,7 @@ export default function AssignmentsModule({
                                       modalMode: "correct",
                                     })
                                   }
-                                  className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-sky-600 hover:opacity-95 text-white font-extrabold flex items-center gap-1.5 text-xs shadow-md shadow-indigo-500/20 active:scale-95 cursor-pointer"
+                                  className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-sky-500 via-teal-500 to-emerald-500 hover:opacity-95 text-white font-extrabold flex items-center gap-1.5 text-xs shadow-md shadow-teal-500/25 active:scale-95 cursor-pointer"
                                 >
                                   <Bot className="h-3.5 w-3.5 text-sky-200" />
                                   <PenTool className="h-3.5 w-3.5" />
@@ -1023,7 +1023,7 @@ export default function AssignmentsModule({
                           type="button"
                           disabled={downloadingId === a.id}
                           onClick={() => handleDownloadAssignment(a)}
-                          className="glass-btn-secondary px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs active:scale-95 cursor-pointer text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-cyan-300 disabled:opacity-50"
+                          className="glass-btn-secondary px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs active:scale-95 cursor-pointer disabled:opacity-50"
                           title={
                             lang === "ar"
                               ? "تحميل ورقة الواجب كملف PDF بعلامة المنصة المائية للحل أوفلاين أو طباعته"
@@ -1031,11 +1031,11 @@ export default function AssignmentsModule({
                           }
                         >
                           {downloadingId === a.id ? (
-                            <Loader2 className="h-3.5 w-3.5 animate-spin text-indigo-500" />
+                            <Loader2 className="h-3.5 w-3.5 animate-spin text-teal-500" />
                           ) : (
-                            <Download className="h-3.5 w-3.5 text-indigo-500 dark:text-cyan-400" />
+                            <Download className="h-3.5 w-3.5 text-teal-500 dark:text-teal-300" />
                           )}
-                          <span>{lang === "ar" ? "تحميل للحل (Download)" : "Download to Solve"}</span>
+                          <span>{lang === "ar" ? "تحميل للحل" : "Download to Solve"}</span>
                         </button>
 
                         <button
@@ -1048,21 +1048,21 @@ export default function AssignmentsModule({
                               modalMode: "student",
                             })
                           }
-                          className="glass-btn-secondary px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs active:scale-95 cursor-pointer border border-indigo-400/30 text-indigo-700 dark:text-cyan-300 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/40"
+                          className="glass-btn-secondary px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs active:scale-95 cursor-pointer border-teal-400/30 text-teal-700 dark:text-teal-300"
                           title={
                             lang === "ar"
                               ? "حل وتأشير تفاعلي بالقلم والأدوات على ورقة الواجب (Live Annotation)"
                               : "Solve with digital pen & annotation tools on worksheet"
                           }
                         >
-                          <PenTool className="h-3.5 w-3.5 text-indigo-500 dark:text-cyan-400" />
-                          <span>{lang === "ar" ? "حل بالتأشير (Annotation)" : "Solve via Annotation"}</span>
+                          <PenTool className="h-3.5 w-3.5 text-teal-500 dark:text-teal-300" />
+                          <span>{lang === "ar" ? "حل بالتأشير" : "Solve via Annotation"}</span>
                         </button>
 
                         <button
                           type="button"
                           onClick={() => setUploadModalAssignment(a)}
-                          className="glass-btn-primary px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md shadow-indigo-500/20 active:scale-95 cursor-pointer bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                          className="glass-btn-primary px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 active:scale-95 cursor-pointer text-white"
                           title={
                             lang === "ar"
                               ? "رفع الحل كملف PDF محلول أو صورة ورقة الإجابة لتصحيحها ذكياً"
@@ -1070,8 +1070,7 @@ export default function AssignmentsModule({
                           }
                         >
                           <Upload className="h-3.5 w-3.5 text-white" />
-                          <Sparkles className="h-3.5 w-3.5 text-amber-300" />
-                          <span>{lang === "ar" ? "رفع الحل (Upload Solved)" : "Upload Solved File"}</span>
+                          <span>{lang === "ar" ? "رفع الحل" : "Upload Solved File"}</span>
                         </button>
                       </div>
                     )}

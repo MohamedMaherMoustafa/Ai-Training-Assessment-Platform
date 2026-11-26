@@ -70,6 +70,10 @@ export async function loginWithCredentials(identifier, password) {
     throw new Error("auth/wrong-password");
   }
 
+  if (!auth) {
+    throw new Error("FIREBASE_NOT_CONFIGURED");
+  }
+
   let emailToUse = cleanId.toLowerCase();
   const lookupKey = normalizeKey(cleanId);
   const unameSnap = await get(ref(rtdb, `usernames/${lookupKey}`));
@@ -105,7 +109,7 @@ export async function loginWithCredentials(identifier, password) {
 
 export async function logoutAll() {
   localStorage.removeItem("admin_session");
-  if (auth.currentUser) {
+  if (auth?.currentUser) {
     await firebaseSignOut(auth);
   }
 }
@@ -132,6 +136,9 @@ export async function createInstructorAccount({
   const cleanUsername = normalizeKey(username || displayEmail.split("@")[0]);
 
   const secondaryAuth = getSecondaryAuth();
+  if (!secondaryAuth) {
+    throw new Error("FIREBASE_NOT_CONFIGURED");
+  }
   const cred = await createUserWithEmailAndPassword(secondaryAuth, authEmail, password);
   const uid = cred.user.uid;
   await firebaseSignOut(secondaryAuth);
@@ -194,6 +201,9 @@ export async function registerStudentAccount({
     return acc;
   }, {});
 
+  if (!auth) {
+    throw new Error("FIREBASE_NOT_CONFIGURED");
+  }
   const cred = await createUserWithEmailAndPassword(auth, authEmail, password);
   const uid = cred.user.uid;
 
@@ -403,7 +413,7 @@ export async function updateUserProfileAndCredentials(currentUser, { displayName
 
   // 2) Non-Admin (Instructor or Student)
   // Update Firebase Auth current user if signed in
-  if (auth.currentUser) {
+  if (auth?.currentUser) {
     if (trimmedName && auth.currentUser.displayName !== trimmedName) {
       await updateProfile(auth.currentUser, { displayName: trimmedName });
     }

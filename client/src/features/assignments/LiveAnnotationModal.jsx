@@ -999,7 +999,7 @@ export default function LiveAnnotationModal({
                       type="button"
                       onClick={() => setSize(s.px)}
                       className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${size === s.px
-                        ? "bg-indigo-600 text-white"
+                        ? "bg-teal-500 text-white"
                         : "glass-subtle text-slate-600 dark:text-slate-300"
                         }`}
                     >
@@ -1070,7 +1070,7 @@ export default function LiveAnnotationModal({
                       type="button"
                       onClick={() => setSize(s.px)}
                       className={`px-2 py-1 rounded-lg text-[11px] font-bold ${size === s.px
-                        ? "bg-indigo-600 text-white"
+                        ? "bg-teal-500 text-white"
                         : "glass-subtle text-slate-600 dark:text-slate-300"
                         }`}
                     >
@@ -1378,13 +1378,13 @@ export default function LiveAnnotationModal({
                   <div className="space-y-3">
                     {/* AI Auto-Grading & Diagnostic Report Card */}
                     {(activeAiGrading || activeScore !== "—") && (
-                      <div className="p-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-400/30 space-y-2.5">
+                      <div className="p-3.5 rounded-2xl bg-teal-500/10 border border-teal-400/30 space-y-2.5">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5">
-                            <Bot className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                          <span className="text-xs font-bold text-teal-700 dark:text-teal-300 flex items-center gap-1.5">
+                            <Bot className="h-4 w-4 text-teal-500 dark:text-teal-400" />
                             {lang === "ar" ? "التصحيح والتشخيص الذكي (AI)" : "AI Evaluation & Diagnosis"}
                           </span>
-                          <span className="px-2 py-0.5 rounded-full bg-indigo-600 text-white text-[11px] font-extrabold shadow-sm">
+                          <span className="px-2 py-0.5 rounded-full bg-teal-500 text-white text-[11px] font-extrabold shadow-sm">
                             {activeScore} / {maxMarks} pts
                           </span>
                         </div>
@@ -1394,7 +1394,7 @@ export default function LiveAnnotationModal({
                           type="button"
                           disabled={isReevaluating}
                           onClick={handleReevaluateWithAI}
-                          className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-sky-600 hover:opacity-95 text-white font-extrabold flex items-center justify-center gap-2 text-xs shadow-md shadow-indigo-500/25 active:scale-98 transition-all disabled:opacity-60 cursor-pointer"
+                          className="glass-btn-primary w-full py-2 px-3 rounded-xl flex items-center justify-center gap-2 text-xs disabled:opacity-60 cursor-pointer"
                         >
                           {isReevaluating ? (
                             <>
@@ -1531,7 +1531,7 @@ export default function LiveAnnotationModal({
                           </p>
                         )}
 
-                        <div className="pt-0.5 text-[10px] text-indigo-600/90 dark:text-indigo-300/90 font-medium">
+                        <div className="pt-0.5 text-[10px] text-teal-600/90 dark:text-teal-300/90 font-medium">
                           {lang === "ar"
                             ? "✓ تم رصد الدرجة والملاحظات آلياً — يمكنك تعديلها يدوياً أدناه"
                             : "✓ Pre-filled by AI — You can edit marks and comments below"}
@@ -1567,7 +1567,7 @@ export default function LiveAnnotationModal({
                         value={gradeValue}
                         onChange={(e) => setGradeValue(e.target.value)}
                         placeholder={`0 - ${maxMarks}`}
-                        className="w-full px-3 py-2 rounded-xl glass-input text-sm font-bold text-indigo-600 dark:text-indigo-300"
+                        className="w-full px-3 py-2 rounded-xl glass-input text-sm font-bold text-teal-600 dark:text-teal-300"
                       />
                     </div>
 
@@ -1718,7 +1718,7 @@ export default function LiveAnnotationModal({
                   type="button"
                   disabled={saving}
                   onClick={handleFinish}
-                  className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg disabled:opacity-50"
+                  className="glass-btn-primary w-full py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 cursor-pointer"
                 >
                   <Save className="h-4 w-4" />
                   {saving
@@ -1736,7 +1736,7 @@ export default function LiveAnnotationModal({
                   type="button"
                   disabled={saving}
                   onClick={handleFinish}
-                  className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-sky-600 hover:opacity-95 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 cursor-pointer"
+                  className="glass-btn-primary w-full py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 cursor-pointer"
                 >
                   <CheckCircle2 className="h-4 w-4" />
                   {saving

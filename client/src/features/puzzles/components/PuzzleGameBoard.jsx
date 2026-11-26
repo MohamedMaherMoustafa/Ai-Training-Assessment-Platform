@@ -138,20 +138,20 @@ export default function PuzzleGameBoard({
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6 animate-fadeIn pb-12">
       {/* Top Header Card */}
-      <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-white/10 shadow-lg shadow-indigo-500/5">
+      <div className="glass-panel p-5 sm:p-6 rounded-3xl shadow-lg">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={onBackToMap}
-              className="p-2.5 rounded-2xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer"
+              className="p-2.5 rounded-2xl glass-subtle hover:bg-teal-500/10 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer"
               title={lang === "ar" ? "العودة لخريطة المستويات" : "Back to Level Map"}
             >
               {lang === "ar" ? <ArrowRight className="h-4 w-4" /> : <ArrowLeft className="h-4 w-4" />}
             </button>
             <div>
               <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-600 dark:text-cyan-400 font-black text-xs">
+                <span className="px-2.5 py-0.5 rounded-full bg-teal-500/15 border border-teal-400/25 text-teal-600 dark:text-teal-300 font-black text-xs">
                   {lang === "ar" ? `المستوى ${puzzle.levelNumber}` : `Level ${puzzle.levelNumber}`}
                 </span>
                 <span
@@ -192,8 +192,8 @@ export default function PuzzleGameBoard({
         </div>
 
         {/* Cognitive Skill Pill */}
-        <div className="mt-4 pt-4 border-t border-slate-100 dark:border-white/5 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-          <Brain className="h-3.5 w-3.5 text-indigo-500" />
+        <div className="mt-4 pt-4 border-t border-slate-200/70 dark:border-white/10 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+          <Brain className="h-3.5 w-3.5 text-teal-500" />
           <span className="font-semibold">{lang === "ar" ? "المهارة الذهنية:" : "Cognitive Skill:"}</span>
           <span className="font-medium text-slate-700 dark:text-slate-300">
             {lang === "ar" ? puzzle.iqSkill.ar : puzzle.iqSkill.en}
@@ -202,7 +202,7 @@ export default function PuzzleGameBoard({
       </div>
 
       {/* Main Puzzle Interaction Card */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-white/10 shadow-xl shadow-indigo-500/5 space-y-6">
+      <div className="glass-panel p-6 sm:p-8 rounded-3xl space-y-6">
         {/* Question Statement */}
         <div>
           <h3 className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100 leading-relaxed whitespace-pre-line">
@@ -211,7 +211,7 @@ export default function PuzzleGameBoard({
         </div>
 
         {/* Visual Puzzle Area */}
-        <div className="p-6 sm:p-8 rounded-3xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200/60 dark:border-white/5 flex flex-col items-center justify-center min-h-[180px]">
+        <div className="p-6 sm:p-8 rounded-3xl glass-subtle flex flex-col items-center justify-center min-h-[180px]">
           {/* 1. Number Sequence Visual */}
           {puzzle.type === "number_sequence" && (
             <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3.5">
@@ -219,8 +219,8 @@ export default function PuzzleGameBoard({
                 <div
                   key={idx}
                   className={`h-14 sm:h-16 px-4 min-w-[56px] sm:min-w-[64px] rounded-2xl flex items-center justify-center font-mono font-black text-lg sm:text-xl shadow-sm transition-transform hover:scale-105 ${item === "?"
-                      ? "bg-gradient-to-tr from-amber-500 to-indigo-600 text-white animate-pulse"
-                      : "bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-white/10"
+                      ? "bg-gradient-to-tr from-sky-500 to-emerald-500 text-white animate-pulse"
+                      : "glass-card text-slate-900 dark:text-white"
                     }`}
                 >
                   {item}
@@ -231,14 +231,14 @@ export default function PuzzleGameBoard({
 
           {/* 2. Visual Matrix Pattern */}
           {puzzle.type === "matrix_pattern" && puzzle.visualData && (
-            <div className="grid grid-cols-3 gap-3 p-3 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-white/10 shadow-inner">
+            <div className="grid grid-cols-3 gap-3 p-3 glass-card rounded-3xl shadow-inner">
               {puzzle.visualData.rows.map((row, rIdx) =>
                 row.map((cell, cIdx) => (
                   <div
                     key={`${rIdx}_${cIdx}`}
                     className={`h-20 w-20 sm:h-24 sm:w-24 rounded-2xl flex flex-col items-center justify-center font-bold text-xs p-1 transition-all ${cell.shape === "unknown"
-                        ? "bg-indigo-500/10 border-2 border-dashed border-indigo-500 text-indigo-500 text-2xl animate-pulse"
-                        : "bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200"
+                        ? "bg-teal-500/15 border-2 border-dashed border-teal-400 text-teal-500 text-2xl animate-pulse"
+                        : "bg-slate-100 dark:bg-white/[0.06] text-slate-800 dark:text-slate-200"
                       }`}
                   >
                     {cell.shape !== "unknown" ? (
@@ -251,7 +251,7 @@ export default function PuzzleGameBoard({
                         </span>
                         <div className="flex gap-1 mt-1">
                           {Array.from({ length: cell.dots }).map((_, i) => (
-                            <span key={i} className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
+                            <span key={i} className="h-1.5 w-1.5 rounded-full bg-teal-400" />
                           ))}
                         </div>
                       </>
@@ -270,9 +270,9 @@ export default function PuzzleGameBoard({
               {puzzle.visualData.letters.map((item, idx) => (
                 <div
                   key={idx}
-                  className="flex flex-col items-center p-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 shadow-sm min-w-[56px]"
+                  className="flex flex-col items-center p-3 rounded-2xl glass-card shadow-sm min-w-[56px]"
                 >
-                  <span className="font-mono text-xl font-black text-indigo-600 dark:text-cyan-400">
+                  <span className="font-mono text-xl font-black text-teal-600 dark:text-teal-300">
                     {item.char}
                   </span>
                   <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 mt-1">
@@ -289,10 +289,10 @@ export default function PuzzleGameBoard({
               {puzzle.visualData.vaults.map((v) => (
                 <div
                   key={v.id}
-                  className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 shadow-sm flex flex-col items-center text-center gap-2"
+                  className="p-4 rounded-2xl glass-card shadow-sm flex flex-col items-center text-center gap-2"
                 >
                   <span className="text-2xl">🔒</span>
-                  <span className="font-extrabold text-xs text-indigo-600 dark:text-cyan-400">
+                  <span className="font-extrabold text-xs text-teal-600 dark:text-teal-300">
                     {lang === "ar" ? `الخزينة #${v.id}` : `Vault #${v.id}`}
                   </span>
                   <p className="text-xs text-slate-600 dark:text-slate-300 italic font-medium">
@@ -309,14 +309,14 @@ export default function PuzzleGameBoard({
               {puzzle.visualData.scales.map((s, idx) => (
                 <div
                   key={idx}
-                  className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 shadow-sm flex flex-col items-center text-center gap-1.5"
+                  className="p-3.5 rounded-2xl glass-card shadow-sm flex flex-col items-center text-center gap-1.5"
                 >
                   <span className="text-[11px] font-bold text-slate-400">
                     {lang === "ar" ? `الميزان ${idx + 1}` : `Scale ${idx + 1}`}
                   </span>
                   <div className="flex items-center gap-2 text-base font-black">
                     <span>{s.left}</span>
-                    <span className="text-indigo-500 font-bold">=</span>
+                    <span className="text-teal-500 font-bold">=</span>
                     <span>{s.right}</span>
                   </div>
                 </div>
@@ -327,15 +327,15 @@ export default function PuzzleGameBoard({
           {/* 6. Circuit Logic Flow */}
           {puzzle.type === "circuit_flow" && (
             <div className="flex flex-wrap items-center justify-center gap-3 text-xs font-mono font-bold">
-              <span className="px-3 py-1.5 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-400/20">
+              <span className="px-3 py-1.5 rounded-xl bg-sky-500/15 text-sky-600 dark:text-sky-300 border border-sky-400/25">
                 A = 1
               </span>
               <span className="text-slate-400">→</span>
-              <span className="px-3 py-1.5 rounded-xl bg-indigo-500/15 text-indigo-600 dark:text-cyan-400 border border-indigo-400/20">
+              <span className="px-3 py-1.5 rounded-xl bg-teal-500/15 text-teal-600 dark:text-teal-300 border border-teal-400/25">
                 Gate 1 [AND]
               </span>
               <span className="text-slate-400">→</span>
-              <span className="px-3 py-1.5 rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-400/20">
+              <span className="px-3 py-1.5 rounded-xl bg-cyan-500/15 text-cyan-600 dark:text-cyan-300 border border-cyan-400/25">
                 Gate 3 [XOR]
               </span>
               <span className="text-slate-400">→</span>
@@ -448,8 +448,8 @@ export default function PuzzleGameBoard({
                       : isCorrect
                         ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200 shadow-md shadow-emerald-500/10 font-bold"
                         : isSelected
-                          ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-900 dark:text-cyan-200 shadow-md shadow-indigo-500/10 font-bold scale-[1.01]"
-                          : "border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/60 hover:border-slate-300 dark:hover:border-white/20 text-slate-800 dark:text-slate-200"
+                          ? "border-teal-400 bg-teal-500/15 text-teal-900 dark:text-teal-200 shadow-md shadow-teal-500/10 font-bold scale-[1.01]"
+                          : "border-slate-200 dark:border-white/10 glass-card hover:border-teal-400/40 text-slate-800 dark:text-slate-200"
                     }`}
                 >
                   <span className="text-xs sm:text-[13px] font-semibold leading-relaxed">
@@ -461,7 +461,7 @@ export default function PuzzleGameBoard({
                         : isCorrect
                           ? "border-emerald-600 bg-emerald-600 text-white"
                           : isSelected
-                            ? "border-indigo-600 bg-indigo-600 text-white"
+                            ? "border-teal-500 bg-teal-500 text-white"
                             : "border-slate-300 dark:border-slate-600"
                       }`}
                   >
@@ -535,7 +535,7 @@ export default function PuzzleGameBoard({
               onClick={handleSubmit}
               className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-white text-xs sm:text-sm font-extrabold transition-all shadow-lg ${hasSubmitted || !selectedOptionId
                   ? "bg-slate-300 dark:bg-slate-700 cursor-not-allowed text-slate-500 dark:text-slate-400 shadow-none"
-                  : "bg-gradient-to-r from-indigo-600 via-indigo-500 to-emerald-600 hover:from-indigo-500 hover:to-emerald-500 shadow-indigo-500/25 hover:shadow-xl hover:scale-105 active:scale-95 cursor-pointer"
+                  : "glass-btn-primary hover:scale-105 active:scale-95 cursor-pointer"
                 }`}
             >
               <Sparkles className="h-4 w-4" />
