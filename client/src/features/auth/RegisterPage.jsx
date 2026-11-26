@@ -262,7 +262,7 @@ export default function RegisterPage() {
 
       {/* Top Floating Pill Navigation Bar (Exact Match with Login & Mockup) */}
       <header
-        className={`relative z-20 shrink-0 max-w-7xl w-full mx-auto rounded-2xl backdrop-blur-2xl backdrop-saturate-150 px-4 sm:px-5 py-2 flex items-center justify-between gap-3 border transition-all ${
+        className={`relative z-50 shrink-0 max-w-7xl w-full mx-auto rounded-2xl backdrop-blur-2xl backdrop-saturate-150 px-4 sm:px-5 py-2 flex items-center justify-between gap-3 border transition-all ${
           isDark
             ? "bg-[#0b1f2c]/40 border-white/25 text-white shadow-[0_12px_36px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.22)]"
             : "border-white/80 text-slate-900 shadow-[0_12px_36px_rgba(15,23,42,0.12),inset_0_1px_0_rgba(255,255,255,0.9)]"

@@ -263,7 +263,7 @@ export default function LoginPage() {
 
       {/* Top Floating Glass Bar (Matching Screenshot) */}
       <header
-        className={`relative z-20 shrink-0 max-w-7xl w-full mx-auto rounded-2xl backdrop-blur-2xl backdrop-saturate-150 px-4 sm:px-5 py-2.5 flex items-center justify-between gap-3 border transition-all ${
+        className={`relative z-50 shrink-0 max-w-7xl w-full mx-auto rounded-2xl backdrop-blur-2xl backdrop-saturate-150 px-4 sm:px-5 py-2.5 flex items-center justify-between gap-3 border transition-all ${
           isDark
             ? "bg-[#0b1f2c]/40 border-white/25 text-white shadow-[0_12px_36px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.22)]"
             : "border-white/80 text-slate-900 shadow-[0_12px_36px_rgba(15,23,42,0.12),inset_0_1px_0_rgba(255,255,255,0.9)]"
@@ -363,7 +363,7 @@ export default function LoginPage() {
       </header>
 
       {/* Main Content Stage Over Futuristic Library Scene */}
-      <main className="relative z-20 flex-1 max-w-7xl w-full mx-auto flex flex-col lg:flex-row items-center justify-between gap-6 py-4 sm:py-6 px-1 sm:px-4">
+      <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto flex flex-col lg:flex-row items-center justify-between gap-6 py-4 sm:py-6 px-1 sm:px-4">
         {/* Left Floating Hero Brand & Mascot Showcase (Matching Official Athar Design) */}
         <div className="hidden lg:flex flex-col items-start justify-center max-w-lg xl:max-w-xl space-y-5 select-none my-auto ps-2 pe-4">
           {/* Top Brand Logo & Platform Title (Matching Image 1) */}

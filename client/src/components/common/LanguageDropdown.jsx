@@ -71,7 +71,7 @@ export default function LanguageDropdown({ buttonClassName = "" }) {
   const CurrentFlag = currentLang.Flag;
 
   return (
-    <div className="relative inline-block text-start" ref={dropdownRef}>
+    <div className={`relative inline-block text-start ${open ? "z-50" : ""}`} ref={dropdownRef}>
       {/* Pill Trigger Button */}
       <button
         type="button"
