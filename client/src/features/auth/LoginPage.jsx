@@ -423,52 +423,27 @@ export default function LoginPage() {
         </div>
 
         {/* Right Floating Frosted Liquid-Glass Login Card Container with Edge-Peeking Mascot */}
-        <div className="relative w-full max-w-[430px] ms-auto me-auto lg:me-10 xl:me-14">
-          {/* Edge-Peeking Robot Mascot Coming Out From the Right Side Edge */}
+        <div className="relative w-full max-w-[430px] ms-auto me-auto lg:me-20 xl:me-28">
+          {/* Angled Interactive Robot Mascot Coming Out From the Right Side Edge */}
           <div
             aria-hidden="true"
-            className={`absolute end-2 -top-14 sm:top-16 sm:-right-20 md:-right-24 z-0 pointer-events-none transition-all duration-500 ease-out select-none ${
+            className={`absolute end-2 -top-24 sm:top-14 sm:-right-28 md:-right-32 lg:-right-36 sm:end-auto z-20 pointer-events-none transition-all duration-500 ease-out select-none ${
               isFieldFocused
-                ? "opacity-100 translate-x-0 scale-100"
-                : "opacity-0 -translate-x-8 sm:-translate-x-12 scale-75"
+                ? "opacity-100 translate-x-0 scale-100 -rotate-12"
+                : "opacity-0 translate-x-8 scale-75 rotate-0"
             }`}
           >
-            <div className="flex flex-col items-center">
-              {/* Floating Reaction Pill */}
-              <div
-                className={`mb-2 px-3 py-1 rounded-full backdrop-blur-xl border shadow-lg text-[10.5px] font-bold whitespace-nowrap transition-all duration-300 ${
-                  isDark
-                    ? "bg-[#0b1f2c]/95 border-teal-400/40 text-teal-200 shadow-[0_4px_16px_rgba(0,0,0,0.5)]"
-                    : "bg-white/95 border-teal-500/40 text-teal-900 shadow-[0_4px_16px_rgba(15,23,42,0.15)]"
-                }`}
-              >
-                <span>
-                  {isCoveringEyes
-                    ? lang === "ar"
-                      ? "🙈 لا أنظر! أغمضت عينيّ"
-                      : "🙈 I'm not looking!"
-                    : isPeeking
-                    ? lang === "ar"
-                      ? "👀 أتلصص!"
-                      : "👀 Peeking!"
-                    : lang === "ar"
-                    ? "👋 مرحباً بك!"
-                    : "👋 Ready!"}
-                </span>
-              </div>
-
-              {/* Robot Mascot Head & Body Peeking Out */}
-              <div className="drop-shadow-[0_16px_32px_rgba(20,184,166,0.5)]">
-                <RobotMascotSvg
-                  isCoveringEyes={isCoveringEyes}
-                  isPeeking={isPeeking}
-                  showSign={false}
-                  width={130}
-                  height={138}
-                  className="w-[110px] h-[118px] sm:w-[130px] sm:h-[138px] overflow-visible"
-                  idPrefix="login_edge_bot"
-                />
-              </div>
+            {/* Robot Mascot Body & Head fully clear and visible with tilt angle */}
+            <div className="drop-shadow-[0_18px_36px_rgba(20,184,166,0.55)]">
+              <RobotMascotSvg
+                isCoveringEyes={isCoveringEyes}
+                isPeeking={isPeeking}
+                showSign={false}
+                width={130}
+                height={138}
+                className="w-[110px] h-[118px] sm:w-[130px] sm:h-[138px] overflow-visible filter contrast-105"
+                idPrefix="login_edge_bot"
+              />
             </div>
           </div>
 
