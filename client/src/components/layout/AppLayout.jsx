@@ -260,7 +260,7 @@ export default function AppLayout({ navItems, children }) {
         >
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Top Brand Section matching attached reference */}
-            <div className="pt-6 pb-4 px-4 text-start relative">
+            <div className="pt-5 pb-3 px-3.5 text-start relative">
               <button
                 onClick={() => setSidebarOpen(false)}
                 className="lg:hidden absolute top-4 end-4 p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-white transition-colors cursor-pointer"
@@ -273,18 +273,28 @@ export default function AppLayout({ navItems, children }) {
                 type="button"
                 onClick={() => setSidebarCollapsed((c) => !c)}
                 aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-                className="hidden lg:flex absolute top-5 end-2.5 h-6 w-6 rounded-lg bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-slate-500 dark:text-slate-300 items-center justify-center transition-colors cursor-pointer text-xs z-30"
+                className="hidden lg:flex absolute top-4 end-2 h-6 w-6 rounded-lg bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-slate-500 dark:text-slate-300 items-center justify-center transition-colors cursor-pointer text-xs z-30"
               >
                 <ChevronLeft className={`h-3.5 w-3.5 transition-transform duration-300 ${sidebarCollapsed ? "rotate-180 rtl:rotate-0" : "rotate-0 rtl:rotate-180"}`} />
               </button>
 
-              {/* Glowing Arabic Logo Title */}
-              <div className={`font-black text-teal-400 tracking-tight drop-shadow-[0_0_15px_rgba(45,212,191,0.6)] font-sans select-none transition-all duration-300 ${sidebarCollapsed ? "text-2xl text-center" : "text-3xl"}`}>
-                {sidebarCollapsed ? "أ" : "أثر"}
+              {/* Athar Brand Logo: Light & Dark Mode Types */}
+              <div className={`transition-all duration-300 flex items-center ${sidebarCollapsed ? "justify-center" : "pe-6"}`}>
+                <img
+                  src={logoSrc}
+                  alt="Athar Educational Platform"
+                  className={`object-contain transition-all duration-300 filter drop-shadow-sm select-none ${
+                    sidebarCollapsed ? "h-8 w-8 max-w-full" : "h-10 sm:h-11 w-auto max-w-[155px]"
+                  }`}
+                />
               </div>
+
+              {/* Platform Slogan: smaller & fully visible without clipping */}
               {!sidebarCollapsed && (
-                <div className="text-[10.5px] font-black text-slate-950 dark:text-teal-200/90 tracking-wider mt-1 select-none truncate">
-                  • Learn • Develop • Achieve Your Goals
+                <div className="text-[8.5px] xs:text-[9px] font-bold text-slate-900 dark:text-teal-200/95 tracking-tight mt-1.5 select-none leading-none whitespace-nowrap overflow-visible">
+                  {lang === "ar"
+                    ? "• تعلّم • تطوّر • حقّق أهدافك"
+                    : "• Learn • Develop • Achieve Your Goals"}
                 </div>
               )}
             </div>
