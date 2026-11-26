@@ -422,7 +422,7 @@ export default function CoursesModule({ mode = "admin", activeInstructorId = nul
               </div>
               <div>
                 <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight">
-                  {t("courses.title") || "Courses"}
+                  {lang === "ar" ? "المقررات الدراسية" : (t("courses.title") !== "courses.title" ? t("courses.title") : "Courses")}
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                   {lang === "ar"

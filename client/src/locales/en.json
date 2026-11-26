@@ -145,6 +145,7 @@
     "quickActions": "Quick Admin Actions"
   },
   "courses": {
+    "title": "Courses",
     "addCourse": "Add Course",
     "titleEn": "Course Title (English)",
     "titleAr": "Course Title (Arabic)",
