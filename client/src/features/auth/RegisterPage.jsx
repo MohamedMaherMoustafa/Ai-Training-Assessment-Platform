@@ -30,7 +30,6 @@ import {
   setSoundEnabled,
 } from "../../utils/soundEffects";
 import LanguageDropdown from "../../components/common/LanguageDropdown";
-import RobotMascotSvg from "../../components/common/RobotMascotSvg";
 import { ref, onValue } from "firebase/database";
 import { rtdb } from "../../lib/firebase";
 
@@ -259,26 +258,7 @@ export default function RegisterPage() {
       <div className="pointer-events-none fixed inset-0 bg-dot-pattern opacity-15 dark:opacity-10 -z-10" />
 
 
-      {/* Moving Animated Robot Patrolling in the Background */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed bottom-4 sm:bottom-6 start-[8%] sm:start-[14%] lg:start-[18%] -z-5 login-robot-patrol login-robot-walking"
-      >
-        <div className="flex flex-col items-center">
-          <div className="login-robot-facing robot-bob-anim drop-shadow-[0_18px_32px_rgba(20,184,166,0.45)]">
-            <RobotMascotSvg
-              isCoveringEyes={false}
-              isPeeking={false}
-              showSign={false}
-              width={180}
-              height={195}
-              className="w-[110px] h-[120px] sm:w-[145px] sm:h-[155px] lg:w-[180px] lg:h-[195px] overflow-visible"
-              idPrefix="register_bg_bot"
-            />
-          </div>
-          <div className={`w-32 sm:w-40 h-4 -mt-2 rounded-full blur-md ${isDark ? "bg-teal-400/30" : "bg-slate-900/15"}`} />
-        </div>
-      </div>
+
 
       {/* Top Floating Pill Navigation Bar (Exact Match with Login & Mockup) */}
       <header

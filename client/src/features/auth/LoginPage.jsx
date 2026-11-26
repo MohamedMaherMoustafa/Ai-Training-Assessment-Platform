@@ -46,8 +46,9 @@ export default function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
   const [soundOn, setSoundOn] = useState(isSoundEnabled());
 
-  const [isTypingPassword, setIsTypingPassword] = useState(false);
+  const [isIdentifierFocused, setIsIdentifierFocused] = useState(false);
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
   const [isTransitioningToRegister, setIsTransitioningToRegister] = useState(false);
   const typingTimeoutRef = useRef(null);
   const isDark = theme === "dark";
@@ -82,41 +83,27 @@ export default function LoginPage() {
     };
   }, []);
 
-  const handlePasswordChange = (e) => {
-    const val = e.target.value;
-    setPassword(val);
-
-    if (val.length > 0) {
-      setIsTypingPassword(true);
-      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-      // When user stops typing for 1000ms, release his eyes!
-      typingTimeoutRef.current = setTimeout(() => {
-        setIsTypingPassword(false);
-      }, 1000);
-    } else {
-      setIsTypingPassword(false);
-      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-    }
-  };
-
-  const handlePasswordFocus = () => {
-    setIsPasswordFocused(true);
-    if (password.length > 0) {
-      setIsTypingPassword(true);
-      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-      typingTimeoutRef.current = setTimeout(() => {
-        setIsTypingPassword(false);
-      }, 1000);
-    }
-  };
-
-  const handlePasswordBlur = () => {
-    setIsPasswordFocused(false);
-    setIsTypingPassword(false);
+  const handleStartTyping = () => {
+    setIsTyping(true);
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => {
+      setIsTyping(false);
+    }, 900);
   };
 
-  const isCoveringEyes = showPass || isTypingPassword;
+  const handleIdentifierChange = (e) => {
+    setIdentifier(e.target.value);
+    handleStartTyping();
+  };
+
+  const handlePasswordChange = (e) => {
+    setPassword(e.target.value);
+    handleStartTyping();
+  };
+
+  const isFieldFocused = isIdentifierFocused || isPasswordFocused;
+  const isPeeking = isPasswordFocused && showPass && password.length > 0;
+  const isCoveringEyes = isTyping || (isPasswordFocused && !showPass && password.length > 0);
 
   useEffect(() => {
     const saved = localStorage.getItem("platform_remember_user");
@@ -272,53 +259,7 @@ export default function LoginPage() {
       )}
 
 
-      {/* Moving Animated Robot Patrolling in the Background */}
-      <div
-        aria-hidden="true"
-        className={`pointer-events-none fixed bottom-5 sm:bottom-8 start-[10%] sm:start-[18%] lg:start-[24%] z-10 login-robot-patrol ${
-          isCoveringEyes ? "login-robot-paused" : "login-robot-walking"
-        }`}
-      >
-        <div className="flex flex-col items-center">
-          {/* Floating Tagline Pill Moving with the Robot */}
-          <div
-            className={`mb-2 px-3 py-1 rounded-full backdrop-blur-xl border text-[10px] sm:text-[11px] font-semibold whitespace-nowrap flex items-center gap-1.5 ${
-              isDark
-                ? "bg-white/[0.14] border-white/25 shadow-[0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.22)] text-teal-50"
-                : "bg-white/75 border-white/80 shadow-[0_8px_24px_rgba(15,23,42,0.12),inset_0_1px_0_rgba(255,255,255,0.85)] text-slate-800"
-            }`}
-          >
-            <span>
-              {isCoveringEyes
-                ? lang === "ar"
-                  ? "🙈 أغمض عينيّ لحماية كلمة مرورك!"
-                  : "Covering my eyes for privacy!"
-                : isPasswordFocused
-                ? lang === "ar"
-                  ? "👀 مستعد لحماية كلمة مرورك"
-                  : "Ready to cover my eyes!"
-                : `• ${t("auth.learnTagline")}`}
-            </span>
-          </div>
 
-          {/* Walking Robot Body with Floor Hologram Ring */}
-          <div className="relative flex flex-col items-center">
-            <div className="login-robot-facing robot-bob-anim drop-shadow-[0_18px_32px_rgba(20,184,166,0.45)]">
-              <RobotMascotSvg
-                isCoveringEyes={isCoveringEyes}
-                isPeeking={false}
-                showSign={false}
-                width={215}
-                height={230}
-                className="w-[144px] h-[154px] sm:w-[186px] sm:h-[200px] lg:w-[215px] lg:h-[230px] overflow-visible"
-                idPrefix="login_bg_bot"
-              />
-            </div>
-            {/* Glowing Floor Reflection Ring */}
-            <div className={`w-36 sm:w-44 h-5 -mt-3 rounded-full blur-md ${isDark ? "bg-teal-400/35" : "bg-slate-900/20"}`} />
-          </div>
-        </div>
-      </div>
 
       {/* Top Floating Glass Bar (Matching Screenshot) */}
       <header
@@ -490,9 +431,58 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Right Floating Frosted Liquid-Glass Login Card */}
-        <section
-          className={`w-full max-w-[430px] ms-auto me-auto lg:me-4 rounded-[28px] backdrop-blur-2xl backdrop-saturate-150 border p-6 sm:p-8 transition-all ${
+        {/* Right Floating Frosted Liquid-Glass Login Card Container with Edge-Peeking Mascot */}
+        <div className="relative w-full max-w-[430px] ms-auto me-auto lg:me-10 xl:me-14">
+          {/* Edge-Peeking Robot Mascot Coming Out From the Right Side Edge */}
+          <div
+            aria-hidden="true"
+            className={`absolute -right-14 sm:-right-20 md:-right-24 top-16 sm:top-20 z-0 pointer-events-none transition-all duration-500 ease-out select-none ${
+              isFieldFocused
+                ? "opacity-100 translate-x-0 scale-100"
+                : "opacity-0 -translate-x-12 scale-75"
+            }`}
+          >
+            <div className="flex flex-col items-center">
+              {/* Floating Reaction Pill */}
+              <div
+                className={`mb-2 px-3 py-1 rounded-full backdrop-blur-xl border shadow-lg text-[10.5px] font-bold whitespace-nowrap transition-all duration-300 ${
+                  isDark
+                    ? "bg-[#0b1f2c]/95 border-teal-400/40 text-teal-200 shadow-[0_4px_16px_rgba(0,0,0,0.5)]"
+                    : "bg-white/95 border-teal-500/40 text-teal-900 shadow-[0_4px_16px_rgba(15,23,42,0.15)]"
+                }`}
+              >
+                <span>
+                  {isCoveringEyes
+                    ? lang === "ar"
+                      ? "🙈 لا أنظر! أغمضت عينيّ"
+                      : "🙈 I'm not looking!"
+                    : isPeeking
+                    ? lang === "ar"
+                      ? "👀 أتلصص!"
+                      : "👀 Peeking!"
+                    : lang === "ar"
+                    ? "👋 مرحباً بك!"
+                    : "👋 Ready!"}
+                </span>
+              </div>
+
+              {/* Robot Mascot Head & Body Peeking Out */}
+              <div className="drop-shadow-[0_16px_32px_rgba(20,184,166,0.5)]">
+                <RobotMascotSvg
+                  isCoveringEyes={isCoveringEyes}
+                  isPeeking={isPeeking}
+                  showSign={false}
+                  width={130}
+                  height={138}
+                  className="w-[110px] h-[118px] sm:w-[130px] sm:h-[138px] overflow-visible"
+                  idPrefix="login_edge_bot"
+                />
+              </div>
+            </div>
+          </div>
+
+          <section
+            className={`relative z-10 w-full rounded-[28px] backdrop-blur-2xl backdrop-saturate-150 border p-6 sm:p-8 transition-all ${
             isDark
               ? "border-white/30 shadow-[0_24px_80px_rgba(0,0,0,0.55),inset_0_1px_1px_rgba(255,255,255,0.32),inset_0_-1px_0_rgba(255,255,255,0.08)]"
               : "border-white/75 shadow-[0_24px_80px_rgba(15,23,42,0.18),inset_0_1px_1px_rgba(255,255,255,0.9),inset_0_-1px_0_rgba(255,255,255,0.25)]"
@@ -540,7 +530,12 @@ export default function LoginPage() {
                   autoComplete="off"
                   required
                   value={identifier}
-                  onChange={(e) => setIdentifier(e.target.value)}
+                  onChange={handleIdentifierChange}
+                  onFocus={() => setIsIdentifierFocused(true)}
+                  onBlur={() => {
+                    setIsIdentifierFocused(false);
+                    setIsTyping(false);
+                  }}
                   placeholder="e.g., student@athar.edu"
                   className={`w-full ps-10 pe-3.5 py-3 rounded-xl backdrop-blur-md border text-xs sm:text-sm focus:outline-none focus:ring-2 transition-all ${
                     isDark
@@ -573,8 +568,11 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={handlePasswordChange}
-                  onFocus={handlePasswordFocus}
-                  onBlur={handlePasswordBlur}
+                  onFocus={() => setIsPasswordFocused(true)}
+                  onBlur={() => {
+                    setIsPasswordFocused(false);
+                    setIsTyping(false);
+                  }}
                   placeholder={t("auth.passwordPlaceholder")}
                   className={`w-full ps-10 pe-10 py-3 rounded-xl backdrop-blur-md border text-xs sm:text-sm focus:outline-none focus:ring-2 transition-all ${
                     isDark
@@ -746,6 +744,7 @@ export default function LoginPage() {
             <span>{t("auth.trustBadge")}</span>
           </div>
         </section>
+      </div>
       </main>
     </div>
   );
