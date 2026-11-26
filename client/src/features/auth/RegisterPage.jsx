@@ -654,12 +654,12 @@ export default function RegisterPage() {
               )}
             </div>
 
-            {/* Bottom Actions Row: Submit Button at Bottom-Right matching Mockup */}
-            <div className="pt-3 flex flex-col sm:flex-row items-center justify-end gap-4">
+            {/* Centered Actions: Register Button & Below it Back to Login + Trust Badge */}
+            <div className="pt-4 flex flex-col items-center justify-center gap-2.5">
               <button
                 type="submit"
                 disabled={submitting}
-                className={`w-full sm:w-auto px-7 py-3.5 rounded-2xl font-black text-xs sm:text-sm flex items-center justify-center gap-2.5 cursor-pointer transition-all duration-200 disabled:opacity-60 shadow-lg hover:scale-[1.02] active:scale-100 ${
+                className={`w-full max-w-sm sm:w-auto px-9 py-3.5 rounded-2xl font-black text-xs sm:text-sm flex items-center justify-center gap-2.5 cursor-pointer transition-all duration-200 disabled:opacity-60 shadow-lg hover:scale-[1.02] active:scale-100 ${
                   isDark
                     ? "bg-white/[0.12] hover:bg-white/[0.22] text-white border border-white/25 shadow-[0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_1px_rgba(255,255,255,0.2)] hover:border-teal-400/60"
                     : "bg-slate-900/90 hover:bg-slate-950 text-white border border-slate-900 shadow-[0_8px_24px_rgba(15,23,42,0.25)]"
@@ -668,26 +668,25 @@ export default function RegisterPage() {
                 <UserPlus className={`h-4 w-4 ${isDark ? "text-cyan-300" : "text-white"}`} />
                 <span>{submitting ? t("auth.signingIn") : t("auth.registerAction")}</span>
               </button>
+
+              {/* Centered Directly Below Button: Already have an account? Back to Login */}
+              <div className="text-xs text-slate-500 dark:text-slate-400 font-medium text-center pt-1">
+                <span>{t("auth.haveAccount")} </span>
+                <Link
+                  to="/login"
+                  className="font-bold text-teal-600 dark:text-teal-400 hover:underline ms-1"
+                >
+                  {t("auth.backToLogin")}
+                </Link>
+              </div>
+
+              {/* Centered Trust Badge */}
+              <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400 font-medium pt-0.5">
+                <ShieldCheck className={`h-3.5 w-3.5 ${isDark ? "text-teal-400" : "text-teal-600"}`} />
+                <span>{t("auth.trustBadge")}</span>
+              </div>
             </div>
           </form>
-
-          {/* Secure Badge & Back to Login */}
-          <div className="mt-6 pt-4 border-t border-slate-900/10 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
-            <div className="flex items-center gap-1.5 font-medium">
-              <ShieldCheck className={`h-4 w-4 ${isDark ? "text-teal-400" : "text-teal-600"}`} />
-              <span>{t("auth.trustBadge")}</span>
-            </div>
-
-            <div>
-              <span>{t("auth.haveAccount")} </span>
-              <Link
-                to="/login"
-                className="font-bold text-teal-600 dark:text-teal-400 hover:underline ms-1"
-              >
-                {t("auth.backToLogin")}
-              </Link>
-            </div>
-          </div>
         </div>
       </main>
 
