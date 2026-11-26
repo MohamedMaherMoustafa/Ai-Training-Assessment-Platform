@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
@@ -56,8 +56,10 @@ function StudentInstructorSelector({
   const { lang } = useLang();
   const navigate = useNavigate();
   const [requestingId, setRequestingId] = useState(null);
-  const [carouselPage, setCarouselPage] = useState(0);
-  const [slideDirection, setSlideDirection] = useState("next");
+  const scrollContainerRef = useRef(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   const approvedIds = user?.instructorIds || [];
   const requestsMap = user?.instructorRequests || {};
@@ -85,38 +87,96 @@ function StudentInstructorSelector({
   // Strictly real instructors loaded from Firebase RTDB (users where role === 'instructor')
   const realInstructors = (instructors || []).filter(Boolean);
 
-  const totalCards = realInstructors.length;
-  const cardsPerPage = 3;
-  const isCarousel = totalCards > cardsPerPage;
-  const maxPages = isCarousel ? totalCards - cardsPerPage + 1 : 1;
+  const updateScrollState = useCallback(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const { scrollLeft, scrollWidth, clientWidth } = el;
+    const maxScroll = Math.max(0, scrollWidth - clientWidth);
+    const absScroll = Math.abs(scrollLeft);
 
-  const handlePrev = () => {
-    setSlideDirection("prev");
-    setCarouselPage((p) => (p > 0 ? p - 1 : maxPages - 1));
+    setCanScrollLeft(absScroll > 8);
+    setCanScrollRight(absScroll < maxScroll - 8);
+
+    const cardWidth = 340;
+    const idx = Math.round(absScroll / cardWidth);
+    setActiveIndex(Math.min(Math.max(idx, 0), Math.max(0, realInstructors.length - 1)));
+  }, [realInstructors.length]);
+
+  useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    updateScrollState();
+    el.addEventListener("scroll", updateScrollState, { passive: true });
+    window.addEventListener("resize", updateScrollState);
+    return () => {
+      el.removeEventListener("scroll", updateScrollState);
+      window.removeEventListener("resize", updateScrollState);
+    };
+  }, [updateScrollState]);
+
+  const handleScroll = (direction) => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const scrollAmount = 360;
+    const isRtl = lang === "ar" || document.documentElement.dir === "rtl";
+    // For RTL, positive left moves leftwards in standard CSS scrollBy
+    let delta = direction === "left" ? -scrollAmount : scrollAmount;
+    if (isRtl) {
+      delta = -delta;
+    }
+    el.scrollBy({ left: delta, behavior: "smooth" });
   };
 
-  const handleNext = () => {
-    setSlideDirection("next");
-    setCarouselPage((p) => (p < maxPages - 1 ? p + 1 : 0));
+  const scrollToCard = (index) => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const cardWidth = 360;
+    const isRtl = lang === "ar" || document.documentElement.dir === "rtl";
+    const targetLeft = isRtl ? -(index * cardWidth) : index * cardWidth;
+    el.scrollTo({ left: targetLeft, behavior: "smooth" });
+  };
+
+  // Drag-to-scroll support for mouse users
+  const isDraggingRef = useRef(false);
+  const startXRef = useRef(0);
+  const scrollLeftRef = useRef(0);
+
+  const handleMouseDown = (e) => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    // Don't drag if clicking buttons or interactive elements
+    if (e.target.closest("button") || e.target.closest("a")) return;
+    isDraggingRef.current = true;
+    startXRef.current = e.pageX - el.offsetLeft;
+    scrollLeftRef.current = el.scrollLeft;
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDraggingRef.current) return;
+    e.preventDefault();
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const x = e.pageX - el.offsetLeft;
+    const walk = (x - startXRef.current) * 1.5;
+    el.scrollLeft = scrollLeftRef.current - walk;
+  };
+
+  const handleMouseUpOrLeave = () => {
+    isDraggingRef.current = false;
   };
 
   // Keyboard navigation
   useEffect(() => {
-    if (!isCarousel) return;
     const handleKeyDown = (e) => {
       if (e.key === "ArrowLeft") {
-        lang === "ar" ? handleNext() : handlePrev();
+        handleScroll("left");
       } else if (e.key === "ArrowRight") {
-        lang === "ar" ? handlePrev() : handleNext();
+        handleScroll("right");
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [lang, isCarousel, maxPages]);
-
-  const visibleCards = isCarousel
-    ? realInstructors.slice(carouselPage, carouselPage + cardsPerPage)
-    : realInstructors;
+  }, [lang]);
 
   // Determine icon based on instructor's real specialization keywords
   const renderInstructorIcon = (inst) => {
@@ -209,38 +269,33 @@ function StudentInstructorSelector({
           </p>
         </div>
       ) : (
-        /* Real Instructors List (Responsive Grid or Smooth Carousel if > 3) */
-        <div className="flex items-center gap-3 sm:gap-4 relative pt-1">
-          {/* Floating Left Arrow (only when > 3 instructors) */}
-          {isCarousel && (
+        /* Real Instructors List (Smooth Horizontal Scroll from Left to Right and Vice Versa) */
+        <div className="relative group/scroll pt-1">
+          {/* Floating Left Arrow (Left to Right / Vice Versa) */}
+          {realInstructors.length > 1 && (
             <button
               type="button"
-              onClick={handlePrev}
-              aria-label="Previous instructor"
-              className="h-10 w-10 rounded-full bg-white/80 dark:bg-[#0c1824]/40 backdrop-blur-xl border border-slate-300/80 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:border-teal-400/50 flex items-center justify-center shrink-0 cursor-pointer shadow-lg transition-all active:scale-95 z-10"
+              onClick={() => handleScroll("left")}
+              aria-label="Scroll left"
+              className="absolute start-0 top-1/2 -translate-y-1/2 -translate-x-3 rtl:translate-x-3 z-20 h-11 w-11 rounded-full bg-white/95 dark:bg-[#0c1824]/90 backdrop-blur-xl border border-slate-300/80 dark:border-white/15 text-slate-700 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white hover:border-teal-400/60 hover:scale-110 flex items-center justify-center shrink-0 cursor-pointer shadow-xl transition-all active:scale-95"
             >
-              <ChevronLeft className="h-5 w-5 rtl:rotate-180" />
+              <ChevronLeft className="h-6 w-6 rtl:rotate-180" />
             </button>
           )}
 
-          {/* Cards Row */}
+          {/* Cards Horizontal Scroll Container */}
           <div
-            key={carouselPage}
-            className={`grid grid-cols-1 ${
-              visibleCards.length === 1
-                ? "md:grid-cols-1 max-w-sm mx-auto"
-                : visibleCards.length === 2
-                ? "md:grid-cols-2 max-w-2xl mx-auto"
-                : "md:grid-cols-3"
-            } gap-5 flex-1 items-stretch ${
-              isCarousel
-                ? slideDirection === "next"
-                  ? "carousel-slide-next"
-                  : "carousel-slide-prev"
-                : ""
+            ref={scrollContainerRef}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUpOrLeave}
+            onMouseLeave={handleMouseUpOrLeave}
+            className={`flex items-stretch gap-5 overflow-x-auto pb-4 pt-1 px-1 scroll-smooth snap-x snap-mandatory hide-scrollbar select-none cursor-grab active:cursor-grabbing ${
+              realInstructors.length < 3 ? "sm:justify-center" : ""
             }`}
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
-            {visibleCards.map((inst) => {
+            {realInstructors.map((inst) => {
               const isApproved = approvedIds.includes(inst.uid) || activeInstructorId === inst.uid;
               const isPending = !isApproved && requestsMap[inst.uid] === "pending";
 
@@ -273,7 +328,7 @@ function StudentInstructorSelector({
               return (
                 <div
                   key={inst.uid}
-                  className="eduera-hover-card rounded-[24px] bg-white/75 dark:bg-[#05121c]/25 backdrop-blur-2xl border border-slate-200/80 dark:border-white/[0.08] p-6 flex flex-col justify-between text-center space-y-4 shadow-[0_12px_36px_rgba(0,0,0,0.06),inset_0_1px_1px_rgba(255,255,255,0.8)] dark:shadow-[0_12px_36px_rgba(0,0,0,0.35),inset_0_1px_1px_rgba(255,255,255,0.08)] hover:border-teal-400 dark:hover:border-teal-300 hover:shadow-[0_20px_50px_rgba(45,212,191,0.22),0_0_30px_rgba(45,212,191,0.18)] dark:hover:shadow-[0_20px_50px_rgba(45,212,191,0.3),0_0_35px_rgba(45,212,191,0.22)] hover:-translate-y-2 hover:scale-[1.02] transition-all duration-300 group cursor-pointer"
+                  className="w-[290px] sm:w-[320px] md:w-[340px] shrink-0 snap-center eduera-hover-card rounded-[24px] bg-white/75 dark:bg-[#05121c]/25 backdrop-blur-2xl border border-slate-200/80 dark:border-white/[0.08] p-6 flex flex-col justify-between text-center space-y-4 shadow-[0_12px_36px_rgba(0,0,0,0.06),inset_0_1px_1px_rgba(255,255,255,0.8)] dark:shadow-[0_12px_36px_rgba(0,0,0,0.35),inset_0_1px_1px_rgba(255,255,255,0.08)] hover:border-teal-400 dark:hover:border-teal-300 hover:shadow-[0_20px_50px_rgba(45,212,191,0.22),0_0_30px_rgba(45,212,191,0.18)] dark:hover:shadow-[0_20px_50px_rgba(45,212,191,0.3),0_0_35px_rgba(45,212,191,0.22)] hover:-translate-y-2 hover:scale-[1.01] transition-all duration-300 group cursor-pointer"
                 >
                   <div className="space-y-3.5">
                     {/* Squircle Icon strictly highlighted on hover */}
@@ -382,34 +437,31 @@ function StudentInstructorSelector({
             })}
           </div>
 
-          {/* Floating Right Arrow (only when > 3 instructors) */}
-          {isCarousel && (
+          {/* Floating Right Arrow (Left to Right / Vice Versa) */}
+          {realInstructors.length > 1 && (
             <button
               type="button"
-              onClick={handleNext}
-              aria-label="Next instructor"
-              className="h-10 w-10 rounded-full bg-white/80 dark:bg-[#0c1824]/40 backdrop-blur-xl border border-slate-300/80 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:border-teal-400/50 flex items-center justify-center shrink-0 cursor-pointer shadow-lg transition-all active:scale-95 z-10"
+              onClick={() => handleScroll("right")}
+              aria-label="Scroll right"
+              className="absolute end-0 top-1/2 -translate-y-1/2 translate-x-3 rtl:-translate-x-3 z-20 h-11 w-11 rounded-full bg-white/95 dark:bg-[#0c1824]/90 backdrop-blur-xl border border-slate-300/80 dark:border-white/15 text-slate-700 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white hover:border-teal-400/60 hover:scale-110 flex items-center justify-center shrink-0 cursor-pointer shadow-xl transition-all active:scale-95"
             >
-              <ChevronRight className="h-5 w-5 rtl:rotate-180" />
+              <ChevronRight className="h-6 w-6 rtl:rotate-180" />
             </button>
           )}
         </div>
       )}
 
-      {/* Dynamic Pagination Indicators (only when > 3 instructors) */}
-      {isCarousel && (
-        <div className="flex items-center justify-center gap-2 pt-1 eduera-stagger-4">
-          {Array.from({ length: maxPages }).map((_, idx) => (
+      {/* Dynamic Scroll Indicators */}
+      {realInstructors.length > 1 && (
+        <div className="flex items-center justify-center gap-2 pt-2 eduera-stagger-4">
+          {realInstructors.map((_, idx) => (
             <button
               key={idx}
               type="button"
-              onClick={() => {
-                setSlideDirection(idx > carouselPage ? "next" : "prev");
-                setCarouselPage(idx);
-              }}
-              aria-label={`Page ${idx + 1}`}
+              onClick={() => scrollToCard(idx)}
+              aria-label={`Instructor ${idx + 1}`}
               className={`rounded-full transition-all duration-300 cursor-pointer ${
-                carouselPage === idx
+                activeIndex === idx
                   ? "w-8 h-2 bg-gradient-to-r from-teal-400 to-emerald-400 shadow-[0_0_12px_rgba(45,212,191,0.8)]"
                   : "w-2 h-2 bg-slate-400/40 dark:bg-slate-700 hover:bg-slate-500"
               }`}

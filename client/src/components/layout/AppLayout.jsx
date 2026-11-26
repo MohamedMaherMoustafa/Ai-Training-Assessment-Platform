@@ -539,17 +539,19 @@ export default function AppLayout({ navItems, children }) {
               {/* Language Switcher */}
               <LanguageDropdown />
 
-              {/* Theme Toggle switch matching reference */}
+              {/* Theme Toggle Icon */}
               <button
+                type="button"
                 onClick={toggleTheme}
                 aria-label="Toggle theme"
-                className="w-10 h-5 rounded-full bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 p-0.5 flex items-center transition-colors cursor-pointer shrink-0"
+                title={theme === "dark" ? t("app.light") : t("app.dark")}
+                className="text-slate-800 dark:text-white/90 hover:text-slate-950 dark:hover:text-white transition-colors p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center justify-center shrink-0"
               >
-                <div
-                  className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${
-                    theme === "dark" ? "translate-x-5" : "translate-x-0"
-                  }`}
-                />
+                {theme === "dark" ? (
+                  <Sun className="h-4 w-4 text-amber-400 hover:text-amber-300 transition-transform hover:rotate-45" />
+                ) : (
+                  <Moon className="h-4 w-4 text-slate-700 hover:text-indigo-600 transition-transform hover:-rotate-12" />
+                )}
               </button>
 
               {/* Header User Avatar Circle */}
