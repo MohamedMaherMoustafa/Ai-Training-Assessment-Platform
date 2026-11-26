@@ -247,9 +247,6 @@ export default function WeeklyReportsModule({ mode = "student", activeInstructor
                     <span className="text-xs font-bold text-slate-900 dark:text-white">
                       {t("weeklyReports.week")} {rep.weekNumber}
                     </span>
-                    {rep.isCurrentWeek && (
-                      <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" title="Active Week" />
-                    )}
                   </div>
                   <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">
                     {rep.startDateStr} – {rep.endDateStr}

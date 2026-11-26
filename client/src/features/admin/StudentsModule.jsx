@@ -171,13 +171,11 @@ export default function StudentsModule({ filterInstructorId = null }) {
             </span>
           </div>
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-emerald-500/15 border border-emerald-400/30 text-xs font-bold text-emerald-700 dark:text-emerald-300 shadow-sm">
-            <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
             <span>
               {lang === "ar" ? "نشط:" : "Active:"} {activeCount}
             </span>
           </div>
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-rose-500/15 border border-rose-400/30 text-xs font-bold text-rose-700 dark:text-rose-300 shadow-sm">
-            <span className="h-2 w-2 rounded-full bg-rose-500"></span>
             <span>
               {lang === "ar" ? "معطل:" : "Inactive:"} {inactiveCount}
             </span>
@@ -394,17 +392,12 @@ export default function StudentsModule({ filterInstructorId = null }) {
                       </td>
                       <td className="px-4 py-3">
                         <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border transition-colors ${
+                          className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border transition-colors ${
                             active
                               ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-400/30"
                               : "bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-400/30"
                           }`}
                         >
-                          <span
-                            className={`h-2 w-2 rounded-full ${
-                              active ? "bg-emerald-500 animate-pulse" : "bg-rose-500"
-                            }`}
-                          />
                           {active ? t("app.active") : (lang === "ar" ? "معطل" : t("app.inactive"))}
                         </span>
                       </td>

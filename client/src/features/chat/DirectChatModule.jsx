@@ -309,12 +309,11 @@ export default function DirectChatModule({
                         : "hover:bg-slate-50 dark:hover:bg-white/[0.03]"
                     }`}
                   >
-                    {/* Avatar with Status Dot */}
+                    {/* Avatar */}
                     <div className="relative shrink-0">
                       <div className="h-11 w-11 rounded-full bg-gradient-to-tr from-sky-500 to-emerald-500 text-white font-extrabold text-sm flex items-center justify-center shadow-md">
                         {contactName.charAt(0).toUpperCase()}
                       </div>
-                      <span className="absolute -bottom-0.5 -end-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-[#091620] shadow-sm" />
                     </div>
 
                     {/* Contact Info & Last Message Snippet */}
@@ -386,7 +385,6 @@ export default function DirectChatModule({
                         .charAt(0)
                         .toUpperCase()}
                     </div>
-                    <span className="absolute -bottom-0.5 -end-0.5 h-3 w-3 rounded-full bg-emerald-500 border-2 border-white dark:border-[#0a1822]" />
                   </div>
 
                   <div className="min-w-0">
@@ -407,7 +405,6 @@ export default function DirectChatModule({
                       </span>
                     </div>
                     <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                       <span>{lang === "ar" ? "متصل الآن • ردود مباشرة" : "Online • Real-time"}</span>
                     </div>
                   </div>

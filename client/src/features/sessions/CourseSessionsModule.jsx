@@ -1128,7 +1128,6 @@ function ProtectedSessionPlayerModal({ session, onClose, user, lang }) {
               className={`absolute ${getWatermarkStyle()} transition-all duration-700 ease-in-out pointer-events-none select-none z-30`}
             >
               <div className="px-3 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/20 text-[10px] sm:text-[11px] font-mono text-white/70 shadow-lg flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 <span>
                   {user?.displayName || user?.name?.[lang] || "Student"} • {user?.email || user?.uid}
                 </span>

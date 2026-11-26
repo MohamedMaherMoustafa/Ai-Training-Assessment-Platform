@@ -246,7 +246,6 @@ function StudentInstructorSelector({
           </p>
         </div>
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50/90 dark:bg-[#0c1f2b]/35 backdrop-blur-xl border border-emerald-300 dark:border-emerald-500/35 text-xs text-emerald-900 dark:text-slate-300 shadow-sm shrink-0">
-          <span className="h-2 w-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
           <span className="font-semibold">
             {lang === "ar"
               ? `${realInstructors.length} محاضر${realInstructors.length > 2 && realInstructors.length < 11 ? "ين" : ""} متاح`
@@ -527,7 +526,6 @@ function RequireInstructorSelected({
             {lang === "ar" ? "المحاضر المفتوح حالياً:" : "Active Instructor:"}
           </span>
           <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 text-white dark:bg-white/15 dark:text-white/90 border border-slate-900/20 dark:border-white/20 font-black text-xs sm:text-sm">
-            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
             <span>{activeInstructor.name?.[lang] || activeInstructor.displayName}</span>
           </span>
         </div>

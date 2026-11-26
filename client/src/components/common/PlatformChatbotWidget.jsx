@@ -919,7 +919,6 @@ export default function PlatformChatbotWidget() {
                   <span className="text-sm sm:text-base font-black truncate tracking-wide">
                     {lang === "ar" ? "أثر AI" : "Athar AI"}
                   </span>
-                  <span className="h-2 w-2 rounded-full bg-emerald-400 ring-4 ring-emerald-400/20 shrink-0" />
                 </div>
                 <div className="text-[10px] sm:text-[11px] text-sky-100/90 font-medium truncate">
                   {lang === "ar"

@@ -271,13 +271,6 @@ export default function LoginPage() {
         />
       )}
 
-      {/* Subtle Drifting Glowing Particles */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden z-0">
-        <span className="login-sparkle absolute start-[18%] top-[28%] h-2 w-2 rounded-full bg-teal-300/70 blur-[1px]" />
-        <span className="login-sparkle absolute start-[42%] top-[22%] h-1.5 w-1.5 rounded-full bg-amber-300/75 blur-[1px]" style={{ animationDelay: "1.1s" }} />
-        <span className="login-sparkle absolute start-[26%] bottom-[26%] h-2 w-2 rounded-full bg-cyan-300/70 blur-[1px]" style={{ animationDelay: "2.2s" }} />
-        <span className="login-sparkle absolute start-[52%] bottom-[20%] h-1.5 w-1.5 rounded-full bg-emerald-300/75 blur-[1px]" style={{ animationDelay: "0.7s" }} />
-      </div>
 
       {/* Moving Animated Robot Patrolling in the Background */}
       <div
@@ -295,7 +288,6 @@ export default function LoginPage() {
                 : "bg-white/75 border-white/80 shadow-[0_8px_24px_rgba(15,23,42,0.12),inset_0_1px_0_rgba(255,255,255,0.85)] text-slate-800"
             }`}
           >
-            <span className={`h-1.5 w-1.5 rounded-full animate-pulse ${isDark ? "bg-teal-300" : "bg-teal-500"}`} />
             <span>
               {isCoveringEyes
                 ? lang === "ar"

@@ -747,17 +747,12 @@ export default function InstructorAnalyticsDashboard({
                     </td>
                     <td className="px-4 py-2.5">
                       <span
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-bold border ${
+                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-bold border ${
                           st.active
                             ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
                             : "bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border-rose-200 dark:border-rose-800"
                         }`}
                       >
-                        <span
-                          className={`h-1.5 w-1.5 rounded-full ${
-                            st.active ? "bg-emerald-500 animate-pulse" : "bg-rose-500"
-                          }`}
-                        />
                         {st.active ? t("app.active") : (lang === "ar" ? "معطل" : t("app.inactive"))}
                       </span>
                     </td>
