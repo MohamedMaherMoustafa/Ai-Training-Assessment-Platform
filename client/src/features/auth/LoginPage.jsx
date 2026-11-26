@@ -423,17 +423,17 @@ export default function LoginPage() {
         </div>
 
         {/* Right Floating Frosted Liquid-Glass Login Card Container with Edge-Peeking Mascot */}
-        <div className="relative w-full max-w-[430px] ms-auto me-auto lg:me-20 xl:me-28">
-          {/* Angled Interactive Robot Mascot Coming Out From the Right Side Edge */}
+        <div className="relative w-full max-w-[430px] ms-auto me-auto lg:me-16 xl:me-24">
+          {/* Angled Interactive Robot Mascot with Feet Resting on Card Edge & Left-to-Right Tilt */}
           <div
             aria-hidden="true"
-            className={`absolute end-2 -top-24 sm:top-14 sm:-right-28 md:-right-32 lg:-right-36 sm:end-auto z-20 pointer-events-none transition-all duration-500 ease-out select-none ${
+            className={`absolute end-4 -top-20 sm:top-20 sm:-right-16 md:-right-20 lg:-right-20 sm:end-auto z-20 pointer-events-none transition-all duration-500 ease-out select-none origin-bottom-left ${
               isFieldFocused
-                ? "opacity-100 translate-x-0 scale-100 -rotate-12"
-                : "opacity-0 translate-x-8 scale-75 rotate-0"
+                ? "opacity-100 translate-x-0 scale-100 rotate-12"
+                : "opacity-0 translate-x-6 scale-75 rotate-0"
             }`}
           >
-            {/* Robot Mascot Body & Head fully clear and visible with tilt angle */}
+            {/* Robot Mascot Body & Head with feet resting on the card edge */}
             <div className="drop-shadow-[0_18px_36px_rgba(20,184,166,0.55)]">
               <RobotMascotSvg
                 isCoveringEyes={isCoveringEyes}
