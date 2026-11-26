@@ -900,8 +900,8 @@ export default function PlatformChatbotWidget() {
       ) : (
         <div
           className={`chatbot-pop-in bg-white/95 dark:bg-[#091620]/95 backdrop-blur-2xl rounded-[28px] shadow-2xl border border-slate-200/80 dark:border-teal-400/20 flex flex-col overflow-hidden transition-all duration-200 ${expanded
-            ? "w-[94vw] sm:w-[620px] h-[86vh]"
-            : "w-[94vw] sm:w-[440px] h-[580px]"
+            ? "w-[94vw] sm:w-[620px] max-h-[88vh] h-[86vh]"
+            : "w-[94vw] sm:w-[440px] max-h-[85vh] h-[540px] sm:h-[580px]"
             }`}
         >
           {/* Header */}

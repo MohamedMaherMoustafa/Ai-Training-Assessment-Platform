@@ -246,7 +246,7 @@ export default function RegisterPage() {
     username.length >= 8 && /[@_]/.test(username) && !/[^a-zA-Z0-9@_]/.test(username);
 
   return (
-    <div className="relative h-screen w-full overflow-hidden flex flex-col justify-between p-2.5 sm:p-3 md:px-5 md:py-2.5 text-slate-900 dark:text-slate-100 select-none transition-colors duration-300">
+    <div className="relative min-h-screen lg:h-screen w-full overflow-y-auto lg:overflow-hidden flex flex-col justify-between p-2.5 sm:p-3 md:px-5 md:py-2.5 text-slate-900 dark:text-slate-100 select-none transition-colors duration-300">
       {/* Full-bleed Library Backdrop matching Login page */}
       <div
         className="pointer-events-none fixed inset-0 bg-cover bg-center transition-all duration-700 -z-20"
@@ -364,7 +364,7 @@ export default function RegisterPage() {
       {/* Main Registration Card - Centered Frosted Liquid-Glass with Expand Animation */}
       <main className="relative z-10 flex-1 my-1 sm:my-1.5 flex items-center justify-center w-full min-h-0">
         <div
-          className={`modal-expand-entrance w-full max-w-4xl xl:max-w-5xl rounded-[28px] sm:rounded-[32px] overflow-hidden p-4 sm:p-5 md:p-6 lg:py-4 lg:px-8 max-h-[calc(100vh-80px)] overflow-y-auto [scrollbar-width:none] transition-all border ${
+          className={`modal-expand-entrance w-full max-w-4xl xl:max-w-5xl rounded-[28px] sm:rounded-[32px] overflow-hidden p-4 sm:p-5 md:p-6 lg:py-4 lg:px-8 max-h-none lg:max-h-[calc(100vh-80px)] overflow-y-auto [scrollbar-width:none] transition-all border ${
             isDark
               ? "bg-[#07131e]/65 backdrop-blur-2xl backdrop-saturate-150 border-white/15 shadow-[0_30px_90px_rgba(0,0,0,0.7),inset_0_1px_1.5px_rgba(255,255,255,0.25)] text-white"
               : "bg-white/65 backdrop-blur-2xl backdrop-saturate-150 border-white/65 shadow-[0_30px_90px_rgba(15,23,42,0.15),inset_0_1px_1.5px_rgba(255,255,255,0.95)] text-slate-900"

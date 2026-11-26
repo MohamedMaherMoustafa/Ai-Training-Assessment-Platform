@@ -227,7 +227,7 @@ export default function AppLayout({ navItems, children }) {
   }, [activeItem?.to]);
 
   return (
-    <div className="relative h-screen w-full overflow-hidden flex items-center justify-center p-4 sm:p-6 md:p-8 lg:p-10 xl:p-12 text-slate-900 dark:text-slate-100">
+    <div className="relative h-screen w-full overflow-hidden flex items-center justify-center p-0 sm:p-3 md:p-6 lg:p-8 xl:p-10 text-slate-900 dark:text-slate-100">
       {/* Full-bleed Library Backdrop matching Login page */}
       <div
         className="pointer-events-none fixed inset-0 bg-cover bg-center transition-all duration-700 -z-20"
@@ -241,20 +241,20 @@ export default function AppLayout({ navItems, children }) {
       {/* Mobile Sidebar Backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-30 bg-slate-950/60 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-slate-950/70 backdrop-blur-sm lg:hidden transition-opacity"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Unified Ultra-Translucent Liquid Glass Container floating over library background */}
-      <div className="w-full max-w-[1280px] xl:max-w-[1320px] h-[86vh] max-h-[820px] min-h-[580px] rounded-[32px] sm:rounded-[36px] bg-white/[0.04] dark:bg-black/[0.10] backdrop-blur-2xl shadow-[0_30px_90px_rgba(0,0,0,0.5),inset_0_1px_1.5px_rgba(255,255,255,0.2),inset_0_-1px_1px_rgba(45,212,191,0.05),0_0_35px_rgba(20,184,166,0.05)] border border-white/35 dark:border-white/[0.07] flex overflow-hidden relative">
+      <div className="w-full max-w-[1280px] xl:max-w-[1320px] h-full sm:h-[92vh] lg:h-[88vh] max-h-none lg:max-h-[860px] min-h-0 rounded-none sm:rounded-[28px] md:rounded-[36px] bg-white/[0.04] dark:bg-black/[0.10] backdrop-blur-2xl shadow-[0_30px_90px_rgba(0,0,0,0.5),inset_0_1px_1.5px_rgba(255,255,255,0.2),inset_0_-1px_1px_rgba(45,212,191,0.05),0_0_35px_rgba(20,184,166,0.05)] border-0 sm:border border-white/35 dark:border-white/[0.07] flex overflow-hidden relative">
         {/* Sidebar Dock */}
         <aside
-          className={`fixed lg:static inset-y-0 start-0 z-40 h-screen lg:h-full shrink-0 w-[86vw] max-w-[280px] ${
+          className={`fixed lg:static inset-y-0 start-0 z-50 h-full shrink-0 w-[82vw] max-w-[280px] ${
             sidebarCollapsed ? "lg:w-[76px]" : "lg:w-[230px] xl:w-[245px]"
-          } bg-black/25 dark:bg-transparent lg:bg-black/15 lg:dark:bg-transparent backdrop-blur-2xl lg:backdrop-blur-md text-slate-100 dark:text-white border-e border-teal-500/25 dark:border-teal-400/35 flex flex-col justify-between overflow-hidden transition-all duration-300 ${
+          } bg-[#07131b]/98 lg:bg-black/15 lg:dark:bg-transparent backdrop-blur-2xl lg:backdrop-blur-md text-slate-100 dark:text-white border-e border-teal-500/25 dark:border-teal-400/35 flex flex-col justify-between overflow-hidden transition-all duration-300 shadow-2xl lg:shadow-none ${
             sidebarOpen
-              ? "translate-x-0 bg-[#07131b]/95"
+              ? "translate-x-0"
               : "-translate-x-full rtl:translate-x-full lg:translate-x-0 lg:rtl:translate-x-0"
           }`}
         >
@@ -437,10 +437,10 @@ export default function AppLayout({ navItems, children }) {
         </aside>
 
         {/* Main Workspace inside an inner card */}
-        <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden rounded-[26px] bg-white/[0.06] dark:bg-white/[0.02] backdrop-blur-2xl border border-white/35 dark:border-white/[0.07] shadow-[inset_0_1px_1px_rgba(255,255,255,0.15),0_12px_40px_rgba(0,0,0,0.2)] my-2.5 me-2.5 relative z-10">
+        <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden rounded-none sm:rounded-[26px] bg-white/[0.06] dark:bg-white/[0.02] backdrop-blur-2xl border-0 sm:border border-white/35 dark:border-white/[0.07] shadow-[inset_0_1px_1px_rgba(255,255,255,0.15),0_12px_40px_rgba(0,0,0,0.2)] m-0 sm:my-2.5 sm:me-2.5 relative z-10">
           {/* Top Header Bar */}
-          <header className="px-6 py-3.5 flex items-center justify-between gap-4 border-b border-slate-200/80 dark:border-teal-500/10 shrink-0">
-            <div className="flex items-center gap-2 min-w-0">
+          <header className="px-3 sm:px-6 py-2.5 sm:py-3.5 flex items-center justify-between gap-2 sm:gap-4 border-b border-slate-200/80 dark:border-teal-500/10 shrink-0">
+            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
               <button
                 onClick={() => setSidebarOpen(true)}
                 aria-label="Open menu"
@@ -448,25 +448,25 @@ export default function AppLayout({ navItems, children }) {
               >
                 <Menu className="h-4 w-4" />
               </button>
-              <div className="flex items-center gap-1.5 text-xs font-semibold">
-                <span className="text-slate-300 dark:text-white/60">Student /</span>
-                <span className="text-white dark:text-white/90 font-extrabold drop-shadow-sm">{currentBreadcrumb}</span>
+              <div className="flex items-center gap-1 sm:gap-1.5 text-xs font-semibold min-w-0">
+                <span className="hidden md:inline text-slate-300 dark:text-white/60">Student /</span>
+                <span className="text-white dark:text-white/90 font-extrabold drop-shadow-sm truncate max-w-[110px] xs:max-w-[150px] sm:max-w-none">{currentBreadcrumb}</span>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 shrink-0">
+            <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
               {/* Student Store & Coins Pill */}
               {user?.role === "student" && (
                 <NavLink
                   to="/student/store"
-                  className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/5 dark:bg-white/10 border border-slate-300/80 dark:border-white/15 text-slate-900 dark:text-white/90 text-xs font-bold shadow-sm hover:scale-105 transition-all cursor-pointer"
+                  className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-slate-900/5 dark:bg-white/10 border border-slate-300/80 dark:border-white/15 text-slate-900 dark:text-white/90 text-xs font-bold shadow-sm hover:scale-105 transition-all cursor-pointer"
                   title={lang === "ar" ? "رصيد العملات — اضغط لفتح المتجر" : "Coins balance — Click to open Store"}
                 >
                   <span className="text-amber-500 text-xs">🟡</span>
                   <span className="font-mono">
                     {(customization?.availableCoins || 702).toLocaleString()}
                   </span>
-                  <span>Coins</span>
+                  <span className="hidden sm:inline">Coins</span>
                 </NavLink>
               )}
 
@@ -601,25 +601,25 @@ export default function AppLayout({ navItems, children }) {
           </header>
 
           {/* Main Content Body */}
-          <div className="flex-1 flex flex-col px-6 py-4 overflow-y-auto">
+          <div className="flex-1 flex flex-col px-3 sm:px-6 py-3 sm:py-4 overflow-y-auto overflow-x-hidden">
             {/* Welcome Hero Banner (Hidden on Choose Instructor screen & Chat) */}
             {location.pathname !== "/student" && !location.pathname.endsWith("/chat") && (
               <div
-                className={`mb-4 rounded-2xl sm:rounded-[22px] bg-white/[0.12] dark:bg-white/[0.03] backdrop-blur-2xl border border-white/40 dark:border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_8px_24px_rgba(0,0,0,0.06)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.08),0_8px_24px_rgba(0,0,0,0.3)] ${
+                className={`mb-3 sm:mb-4 rounded-xl sm:rounded-[22px] bg-white/[0.12] dark:bg-white/[0.03] backdrop-blur-2xl border border-white/40 dark:border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_8px_24px_rgba(0,0,0,0.06)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.08),0_8px_24px_rgba(0,0,0,0.3)] ${
                   user?.role === "instructor"
-                    ? "py-4 sm:py-5 px-5 sm:px-7 min-h-[76px] sm:min-h-[100px]"
-                    : "px-5 sm:px-6 py-4 sm:py-5 min-h-[76px] sm:min-h-[100px]"
-                } shadow-sm dark:shadow-lg relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4`}
+                    ? "py-3 sm:py-5 px-3.5 sm:px-7 min-h-0 sm:min-h-[100px]"
+                    : "px-3.5 sm:px-6 py-3 sm:py-5 min-h-0 sm:min-h-[100px]"
+                } shadow-sm dark:shadow-lg relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4`}
               >
                 <div className="pointer-events-none absolute -top-12 -end-10 h-36 w-36 rounded-full bg-teal-400/15 blur-2xl" />
                 <div className="relative z-10 flex-1">
-                  <h2 className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-snug">
+                  <h2 className="text-base sm:text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-snug">
                     {lang === "ar"
                       ? `مرحباً بعودتك، ${displayName || t(`roles.${user?.role || "student"}`)}!`
                       : `Welcome Back, ${displayName || t(`roles.${user?.role || "student"}`)}!`}
                   </h2>
                   {user?.role === "student" && (
-                    <p className="text-xs sm:text-sm text-slate-800 dark:text-slate-200 mt-1 font-bold leading-relaxed">
+                    <p className="text-[11px] sm:text-sm text-slate-800 dark:text-slate-200 mt-0.5 sm:mt-1 font-bold leading-relaxed">
                       {lang === "ar"
                         ? "تابع رحلتك التعليمية وحقق أهدافك الدراسية 🚀"
                         : "Continue your learning journey and achieve your goals 🚀"}

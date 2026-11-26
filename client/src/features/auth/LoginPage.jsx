@@ -427,10 +427,10 @@ export default function LoginPage() {
           {/* Edge-Peeking Robot Mascot Coming Out From the Right Side Edge */}
           <div
             aria-hidden="true"
-            className={`absolute -right-14 sm:-right-20 md:-right-24 top-16 sm:top-20 z-0 pointer-events-none transition-all duration-500 ease-out select-none ${
+            className={`absolute end-2 -top-14 sm:top-16 sm:-right-20 md:-right-24 z-0 pointer-events-none transition-all duration-500 ease-out select-none ${
               isFieldFocused
                 ? "opacity-100 translate-x-0 scale-100"
-                : "opacity-0 -translate-x-12 scale-75"
+                : "opacity-0 -translate-x-8 sm:-translate-x-12 scale-75"
             }`}
           >
             <div className="flex flex-col items-center">
