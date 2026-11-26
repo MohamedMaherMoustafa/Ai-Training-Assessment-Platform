@@ -247,7 +247,7 @@ export default function RegisterPage() {
     username.length >= 8 && /[@_]/.test(username) && !/[^a-zA-Z0-9@_]/.test(username);
 
   return (
-    <div className="relative min-h-screen w-full overflow-x-hidden flex flex-col justify-between p-3 sm:p-5 md:p-6 text-slate-900 dark:text-slate-100 select-none transition-colors duration-300">
+    <div className="relative h-screen w-full overflow-hidden flex flex-col justify-between p-2.5 sm:p-3 md:px-5 md:py-2.5 text-slate-900 dark:text-slate-100 select-none transition-colors duration-300">
       {/* Full-bleed Library Backdrop matching Login page */}
       <div
         className="pointer-events-none fixed inset-0 bg-cover bg-center transition-all duration-700 -z-20"
@@ -282,7 +282,7 @@ export default function RegisterPage() {
 
       {/* Top Floating Pill Navigation Bar (Exact Match with Login & Mockup) */}
       <header
-        className={`relative z-20 shrink-0 max-w-7xl w-full mx-auto rounded-2xl backdrop-blur-2xl backdrop-saturate-150 px-4 sm:px-5 py-2.5 flex items-center justify-between gap-3 border transition-all ${
+        className={`relative z-20 shrink-0 max-w-7xl w-full mx-auto rounded-2xl backdrop-blur-2xl backdrop-saturate-150 px-4 sm:px-5 py-2 flex items-center justify-between gap-3 border transition-all ${
           isDark
             ? "bg-[#0b1f2c]/40 border-white/25 text-white shadow-[0_12px_36px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.22)]"
             : "border-white/80 text-slate-900 shadow-[0_12px_36px_rgba(15,23,42,0.12),inset_0_1px_0_rgba(255,255,255,0.9)]"
@@ -382,30 +382,30 @@ export default function RegisterPage() {
       </header>
 
       {/* Main Registration Card - Centered Frosted Liquid-Glass with Expand Animation */}
-      <main className="relative z-10 flex-1 my-4 sm:my-6 flex items-center justify-center w-full">
+      <main className="relative z-10 flex-1 my-1 sm:my-1.5 flex items-center justify-center w-full min-h-0">
         <div
-          className={`modal-expand-entrance w-full max-w-4xl xl:max-w-5xl rounded-[32px] sm:rounded-[36px] overflow-hidden p-6 sm:p-8 lg:p-10 transition-all border ${
+          className={`modal-expand-entrance w-full max-w-4xl xl:max-w-5xl rounded-[28px] sm:rounded-[32px] overflow-hidden p-4 sm:p-5 md:p-6 lg:py-4 lg:px-8 max-h-[calc(100vh-80px)] overflow-y-auto [scrollbar-width:none] transition-all border ${
             isDark
               ? "bg-[#07131e]/65 backdrop-blur-2xl backdrop-saturate-150 border-white/15 shadow-[0_30px_90px_rgba(0,0,0,0.7),inset_0_1px_1.5px_rgba(255,255,255,0.25)] text-white"
               : "bg-white/65 backdrop-blur-2xl backdrop-saturate-150 border-white/65 shadow-[0_30px_90px_rgba(15,23,42,0.15),inset_0_1px_1.5px_rgba(255,255,255,0.95)] text-slate-900"
           }`}
         >
           {/* Centered Heading & Subtitle */}
-          <div className="text-center mb-6 sm:mb-8">
-            <h2 className="text-2xl sm:text-3xl font-black tracking-tight drop-shadow-sm">
+          <div className="text-center mb-2 sm:mb-2.5">
+            <h2 className="text-xl sm:text-2xl font-black tracking-tight drop-shadow-sm">
               {t("auth.registerTitle")}
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1.5 font-medium max-w-xl mx-auto">
+            <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5 font-medium max-w-xl mx-auto">
               {t("auth.registerDesc")}
             </p>
           </div>
 
           {/* Registration Form */}
-          <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4 sm:space-y-5">
+          <form onSubmit={handleSubmit} autoComplete="off" className="space-y-2 sm:space-y-2.5">
             {/* Row 1: Full Name (left) | Username (right) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               <div>
-                <label className="block text-xs sm:text-[13px] font-bold text-slate-800 dark:text-slate-200 mb-1.5">
+                <label className="block text-xs sm:text-[13px] font-bold text-slate-800 dark:text-slate-200 mb-1">
                   {t("auth.fullName")}
                 </label>
                 <input
@@ -416,7 +416,7 @@ export default function RegisterPage() {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder={lang === "ar" ? "الاسم الكامل" : "Full Name"}
-                  className={`w-full px-4 py-3 rounded-2xl text-xs sm:text-sm transition-all shadow-inner focus:outline-none focus:ring-4 focus:ring-teal-500/20 ${
+                  className={`w-full px-4 py-2.5 rounded-2xl text-xs sm:text-sm transition-all shadow-inner focus:outline-none focus:ring-4 focus:ring-teal-500/20 ${
                     isDark
                       ? "bg-black/35 border border-white/10 text-white placeholder:text-slate-500 focus:bg-black/55 focus:border-teal-400/80"
                       : "bg-white/50 border border-slate-900/10 text-slate-950 placeholder:text-slate-400 focus:bg-white/85 focus:border-teal-500/80"
@@ -425,7 +425,7 @@ export default function RegisterPage() {
               </div>
 
               <div>
-                <div className="flex items-center justify-between mb-1.5">
+                <div className="flex items-center justify-between mb-1">
                   <label className="block text-xs sm:text-[13px] font-bold text-slate-800 dark:text-slate-200">
                     {t("auth.username")} <span className="text-rose-500">*</span>
                   </label>
@@ -447,7 +447,7 @@ export default function RegisterPage() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9@_]/g, ""))}
                   placeholder={t("auth.usernamePlaceholder") || "e.g. Username"}
-                  className={`w-full px-4 py-3 rounded-2xl text-xs sm:text-sm font-mono tracking-wide transition-all shadow-inner focus:outline-none focus:ring-4 focus:ring-teal-500/20 ${
+                  className={`w-full px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-mono tracking-wide transition-all shadow-inner focus:outline-none focus:ring-4 focus:ring-teal-500/20 ${
                     isDark
                       ? "bg-black/35 border border-white/10 text-white placeholder:text-slate-500 focus:bg-black/55 focus:border-teal-400/80"
                       : "bg-white/50 border border-slate-900/10 text-slate-950 placeholder:text-slate-400 focus:bg-white/85 focus:border-teal-500/80"
@@ -457,9 +457,9 @@ export default function RegisterPage() {
             </div>
 
             {/* Row 2: Email Address (left) | Phone Number (right) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               <div>
-                <label className="block text-xs sm:text-[13px] font-bold text-slate-800 dark:text-slate-200 mb-1.5">
+                <label className="block text-xs sm:text-[13px] font-bold text-slate-800 dark:text-slate-200 mb-1">
                   {t("auth.email")} <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -470,7 +470,7 @@ export default function RegisterPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="student@academy.com or student@123"
-                  className={`w-full px-4 py-3 rounded-2xl text-xs sm:text-sm transition-all shadow-inner focus:outline-none focus:ring-4 focus:ring-teal-500/20 ${
+                  className={`w-full px-4 py-2.5 rounded-2xl text-xs sm:text-sm transition-all shadow-inner focus:outline-none focus:ring-4 focus:ring-teal-500/20 ${
                     isDark
                       ? "bg-black/35 border border-white/10 text-white placeholder:text-slate-500 focus:bg-black/55 focus:border-teal-400/80"
                       : "bg-white/50 border border-slate-900/10 text-slate-950 placeholder:text-slate-400 focus:bg-white/85 focus:border-teal-500/80"
@@ -479,7 +479,7 @@ export default function RegisterPage() {
               </div>
 
               <div>
-                <div className="flex items-center justify-between mb-1.5">
+                <div className="flex items-center justify-between mb-1">
                   <label className="block text-xs sm:text-[13px] font-bold text-slate-800 dark:text-slate-200">
                     {t("auth.phoneNumber")} <span className="text-rose-500">*</span>
                   </label>
@@ -505,7 +505,7 @@ export default function RegisterPage() {
                   onKeyDown={handlePhoneKeyDown}
                   onPaste={handlePhonePaste}
                   placeholder={t("auth.phonePlaceholder") || "e.g. 01012345678"}
-                  className={`w-full px-4 py-3 rounded-2xl text-xs sm:text-sm font-mono tracking-wider transition-all shadow-inner focus:outline-none focus:ring-4 focus:ring-teal-500/20 ${
+                  className={`w-full px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-mono tracking-wider transition-all shadow-inner focus:outline-none focus:ring-4 focus:ring-teal-500/20 ${
                     isDark
                       ? "bg-black/35 border border-white/10 text-white placeholder:text-slate-500 focus:bg-black/55 focus:border-teal-400/80"
                       : "bg-white/50 border border-slate-900/10 text-slate-950 placeholder:text-slate-400 focus:bg-white/85 focus:border-teal-500/80"
@@ -515,9 +515,9 @@ export default function RegisterPage() {
             </div>
 
             {/* Row 3: Password (left) | Confirm Password (right) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               <div>
-                <label className="block text-xs sm:text-[13px] font-bold text-slate-800 dark:text-slate-200 mb-1.5">
+                <label className="block text-xs sm:text-[13px] font-bold text-slate-800 dark:text-slate-200 mb-1">
                   {t("auth.password")} <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
@@ -530,7 +530,7 @@ export default function RegisterPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className={`w-full px-4 py-3 pe-11 rounded-2xl text-xs sm:text-sm transition-all shadow-inner focus:outline-none focus:ring-4 focus:ring-teal-500/20 ${
+                    className={`w-full px-4 py-2.5 pe-11 rounded-2xl text-xs sm:text-sm transition-all shadow-inner focus:outline-none focus:ring-4 focus:ring-teal-500/20 ${
                       isDark
                         ? "bg-black/35 border border-white/10 text-white placeholder:text-slate-500 focus:bg-black/55 focus:border-teal-400/80"
                         : "bg-white/50 border border-slate-900/10 text-slate-950 placeholder:text-slate-400 focus:bg-white/85 focus:border-teal-500/80"
@@ -547,7 +547,7 @@ export default function RegisterPage() {
               </div>
 
               <div>
-                <label className="block text-xs sm:text-[13px] font-bold text-slate-800 dark:text-slate-200 mb-1.5">
+                <label className="block text-xs sm:text-[13px] font-bold text-slate-800 dark:text-slate-200 mb-1">
                   {t("auth.confirmPassword")} <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
@@ -560,7 +560,7 @@ export default function RegisterPage() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="••••••••"
-                    className={`w-full px-4 py-3 pe-11 rounded-2xl text-xs sm:text-sm transition-all shadow-inner focus:outline-none focus:ring-4 focus:ring-teal-500/20 ${
+                    className={`w-full px-4 py-2.5 pe-11 rounded-2xl text-xs sm:text-sm transition-all shadow-inner focus:outline-none focus:ring-4 focus:ring-teal-500/20 ${
                       isDark
                         ? "bg-black/35 border border-white/10 text-white placeholder:text-slate-500 focus:bg-black/55 focus:border-teal-400/80"
                         : "bg-white/50 border border-slate-900/10 text-slate-950 placeholder:text-slate-400 focus:bg-white/85 focus:border-teal-500/80"
@@ -578,8 +578,8 @@ export default function RegisterPage() {
             </div>
 
             {/* Choose Your Instructor(s) Section */}
-            <div className="pt-2">
-              <div className="flex items-center justify-between mb-2">
+            <div className="pt-1">
+              <div className="flex items-center justify-between mb-1">
                 <label className="flex items-center gap-2 text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white">
                   <GraduationCap className="h-4 w-4 text-teal-500 dark:text-teal-400" />
                   <span>{t("auth.chooseInstructors")}</span>
@@ -606,22 +606,22 @@ export default function RegisterPage() {
               </div>
 
               {loadingInstructors ? (
-                <div className="p-4 text-center text-xs text-slate-500 dark:text-slate-400 font-medium">
+                <div className="p-3 text-center text-xs text-slate-500 dark:text-slate-400 font-medium">
                   {t("app.loading")}
                 </div>
               ) : instructors.length === 0 ? (
-                <div className="p-4 rounded-2xl border border-white/20 dark:border-white/10 bg-white/40 dark:bg-white/[0.03] backdrop-blur-md text-xs text-slate-600 dark:text-slate-300 text-center font-medium">
+                <div className="p-3 rounded-2xl border border-white/20 dark:border-white/10 bg-white/40 dark:bg-white/[0.03] backdrop-blur-md text-xs text-slate-600 dark:text-slate-300 text-center font-medium">
                   {t("auth.noInstructorsYet")}
                 </div>
               ) : (
-                <div className="max-h-36 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 p-2 rounded-2xl border border-slate-900/10 dark:border-white/10 bg-white/30 dark:bg-black/20 backdrop-blur-md [scrollbar-width:thin]">
+                <div className="max-h-24 sm:max-h-28 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 p-1.5 rounded-2xl border border-slate-900/10 dark:border-white/10 bg-white/30 dark:bg-black/20 backdrop-blur-md [scrollbar-width:thin]">
                   {instructors.map((inst) => {
                     const selected = selectedIds.includes(inst.uid);
                     return (
                       <div
                         key={inst.uid}
                         onClick={() => toggleInstructor(inst.uid)}
-                        className={`p-2.5 rounded-xl border text-xs cursor-pointer transition-all flex items-center justify-between gap-2.5 select-none ${
+                        className={`p-2 rounded-xl border text-xs cursor-pointer transition-all flex items-center justify-between gap-2 select-none ${
                           selected
                             ? "bg-teal-500/15 dark:bg-teal-400/15 border-teal-500 dark:border-teal-400 text-teal-950 dark:text-teal-100 font-bold shadow-[0_0_14px_rgba(45,212,191,0.3)] scale-[1.01]"
                             : "bg-white/50 dark:bg-white/[0.04] border-slate-900/10 dark:border-white/10 hover:border-teal-400/50 hover:bg-white/70 dark:hover:bg-white/[0.08]"
@@ -648,11 +648,11 @@ export default function RegisterPage() {
             </div>
 
             {/* Centered Actions: Register Button & Below it Back to Login + Trust Badge */}
-            <div className="pt-4 flex flex-col items-center justify-center gap-2.5">
+            <div className="pt-2 sm:pt-2.5 flex flex-col items-center justify-center gap-1.5">
               <button
                 type="submit"
                 disabled={submitting}
-                className={`w-full max-w-sm sm:w-auto px-9 py-3.5 rounded-2xl font-black text-xs sm:text-sm flex items-center justify-center gap-2.5 cursor-pointer transition-all duration-200 disabled:opacity-60 shadow-lg hover:scale-[1.02] active:scale-100 ${
+                className={`w-full max-w-sm sm:w-auto px-9 py-2.5 sm:py-3 rounded-2xl font-black text-xs sm:text-sm flex items-center justify-center gap-2.5 cursor-pointer transition-all duration-200 disabled:opacity-60 shadow-lg hover:scale-[1.02] active:scale-100 ${
                   isDark
                     ? "bg-white/[0.12] hover:bg-white/[0.22] text-white border border-white/25 shadow-[0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_1px_rgba(255,255,255,0.2)] hover:border-teal-400/60"
                     : "bg-slate-900/90 hover:bg-slate-950 text-white border border-slate-900 shadow-[0_8px_24px_rgba(15,23,42,0.25)]"
@@ -663,7 +663,7 @@ export default function RegisterPage() {
               </button>
 
               {/* Centered Directly Below Button: Already have an account? Back to Login */}
-              <div className="text-xs text-slate-500 dark:text-slate-400 font-medium text-center pt-1">
+              <div className="text-xs text-slate-500 dark:text-slate-400 font-medium text-center">
                 <span>{t("auth.haveAccount")} </span>
                 <Link
                   to="/login"
@@ -674,7 +674,7 @@ export default function RegisterPage() {
               </div>
 
               {/* Centered Trust Badge */}
-              <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400 font-medium pt-0.5">
+              <div className="flex items-center justify-center gap-1.5 text-[10.5px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium">
                 <ShieldCheck className={`h-3.5 w-3.5 ${isDark ? "text-teal-400" : "text-teal-600"}`} />
                 <span>{t("auth.trustBadge")}</span>
               </div>
@@ -684,7 +684,7 @@ export default function RegisterPage() {
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 shrink-0 text-center text-[11px] text-slate-500 dark:text-slate-400 py-1 font-medium">
+      <footer className="relative z-10 shrink-0 text-center text-[10.5px] sm:text-[11px] text-slate-500 dark:text-slate-400 py-0.5 font-medium">
         {t("app.title")} © {new Date().getFullYear()}
       </footer>
     </div>
