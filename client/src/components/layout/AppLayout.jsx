@@ -371,47 +371,68 @@ export default function AppLayout({ navItems, children }) {
             </nav>
           </div>
 
-          {/* Bottom User Card with bold high-contrast styling */}
-          <div className="p-3">
-            <div className={`p-2.5 rounded-2xl bg-white/[0.08] dark:bg-white/[0.06] backdrop-blur-xl border border-white/20 dark:border-white/[0.1] shadow-sm mb-2 transition-all duration-300 hover:border-teal-400/40 ${sidebarCollapsed ? "flex items-center justify-center p-2" : ""}`}>
-              <div className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-3"} w-full`}>
-                {/* User Avatar Initials on the start side */}
-                <div
+          {/* Bottom User Section: Cleanly centered in collapsed mode & fully detailed when expanded */}
+          <div className={`transition-all duration-300 ${sidebarCollapsed ? "p-2 pb-3" : "p-3"}`}>
+            {sidebarCollapsed ? (
+              <div className="flex flex-col items-center gap-2 w-full">
+                <button
+                  type="button"
                   onClick={() => setProfileModalOpen(true)}
-                  title={t("profile.editTooltip") || "Profile & Settings"}
-                  className={`h-11 w-11 rounded-xl bg-teal-500/20 dark:bg-teal-950/50 border border-teal-400/60 text-teal-300 font-black text-xs flex items-center justify-center shrink-0 shadow-[0_0_14px_rgba(45,212,191,0.25)] cursor-pointer hover:scale-105 transition-all ${sidebarCollapsed ? "mx-auto" : ""}`}
+                  title={displayName || t("profile.editTooltip") || "Profile & Settings"}
+                  className="h-10 w-10 rounded-xl bg-teal-500/20 dark:bg-teal-950/50 border border-teal-400/60 text-teal-300 font-black text-xs flex items-center justify-center shadow-[0_0_14px_rgba(45,212,191,0.25)] hover:scale-105 active:scale-95 transition-all cursor-pointer mx-auto"
                 >
                   {String(displayName || "MO").slice(0, 2).toUpperCase()}
-                </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  title={t("app.logout")}
+                  className="h-9 w-10 rounded-xl border border-white/20 bg-white/10 hover:bg-rose-500/20 hover:border-rose-400/40 text-xs text-slate-200 hover:text-rose-200 font-bold flex items-center justify-center transition-all cursor-pointer shadow-xs active:scale-95 mx-auto"
+                >
+                  <span className="text-sm font-black">→</span>
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="p-2.5 rounded-2xl bg-white/[0.08] dark:bg-white/[0.06] backdrop-blur-xl border border-white/20 dark:border-white/[0.1] shadow-sm mb-2 transition-all duration-300 hover:border-teal-400/40">
+                  <div className="flex items-center gap-3 w-full">
+                    {/* User Avatar Initials on the start side */}
+                    <div
+                      onClick={() => setProfileModalOpen(true)}
+                      title={t("profile.editTooltip") || "Profile & Settings"}
+                      className="h-11 w-11 rounded-xl bg-teal-500/20 dark:bg-teal-950/50 border border-teal-400/60 text-teal-300 font-black text-xs flex items-center justify-center shrink-0 shadow-[0_0_14px_rgba(45,212,191,0.25)] cursor-pointer hover:scale-105 transition-all"
+                    >
+                      {String(displayName || "MO").slice(0, 2).toUpperCase()}
+                    </div>
 
-                {!sidebarCollapsed && (
-                  <div
-                    onClick={() => setProfileModalOpen(true)}
-                    className="min-w-0 cursor-pointer flex-1"
-                    title={t("profile.editTooltip") || "Edit Profile & Password"}
-                  >
-                    <div className="text-sm font-extrabold text-white truncate hover:text-teal-300 transition-colors leading-snug drop-shadow-sm">
-                      {displayName || "motaz"}
-                    </div>
-                    <div className="text-[11px] font-bold text-slate-300 capitalize truncate mt-0.5">
-                      {t(`roles.${user?.role || "student"}`)}
-                    </div>
-                    <div className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-500/15 border border-teal-400/30 text-[9.5px] text-teal-300 font-bold max-w-full truncate shadow-xs">
-                      {equippedTag?.name?.[lang] || "Prompt Engineer"}
+                    <div
+                      onClick={() => setProfileModalOpen(true)}
+                      className="min-w-0 cursor-pointer flex-1"
+                      title={t("profile.editTooltip") || "Edit Profile & Password"}
+                    >
+                      <div className="text-sm font-extrabold text-white truncate hover:text-teal-300 transition-colors leading-snug drop-shadow-sm">
+                        {displayName || "motaz"}
+                      </div>
+                      <div className="text-[11px] font-bold text-slate-300 capitalize truncate mt-0.5">
+                        {t(`roles.${user?.role || "student"}`)}
+                      </div>
+                      <div className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-500/15 border border-teal-400/30 text-[9.5px] text-teal-300 font-bold max-w-full truncate shadow-xs">
+                        {equippedTag?.name?.[lang] || "Prompt Engineer"}
+                      </div>
                     </div>
                   </div>
-                )}
-              </div>
-            </div>
+                </div>
 
-            <button
-              onClick={handleLogout}
-              title={t("app.logout")}
-              className="w-full flex items-center justify-center gap-2 px-3 py-1.5 rounded-xl border border-white/20 bg-white/10 hover:bg-rose-500/20 hover:border-rose-400/40 text-xs text-slate-200 hover:text-rose-200 font-bold transition-all cursor-pointer shadow-xs active:scale-95"
-            >
-              <span className="text-sm font-black">→</span>
-              {!sidebarCollapsed && <span className="font-bold">{t("app.logout")}</span>}
-            </button>
+                <button
+                  onClick={handleLogout}
+                  title={t("app.logout")}
+                  className="w-full flex items-center justify-center gap-2 px-3 py-1.5 rounded-xl border border-white/20 bg-white/10 hover:bg-rose-500/20 hover:border-rose-400/40 text-xs text-slate-200 hover:text-rose-200 font-bold transition-all cursor-pointer shadow-xs active:scale-95"
+                >
+                  <span className="text-sm font-black">→</span>
+                  <span className="font-bold">{t("app.logout")}</span>
+                </button>
+              </>
+            )}
           </div>
         </aside>
 
