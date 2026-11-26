@@ -14,10 +14,11 @@ import {
   CheckCircle2,
   Clock,
   ArrowUpRight,
-  Power,
   AlertTriangle,
-  MessageCircle,
+  UserX,
+  UserCheck,
 } from "lucide-react";
+import WhatsAppIcon from "../../components/common/WhatsAppIcon";
 import { openWhatsAppSupportChat } from "../../utils/whatsappHelper";
 import {
   ResponsiveContainer,
@@ -691,7 +692,7 @@ export default function InstructorAnalyticsDashboard({
                 <th className="px-4 py-2.5 text-start">Academic</th>
                 <th className="px-4 py-2.5 text-start">{lang === "ar" ? "حالة الحساب" : "Account"}</th>
                 {showManageLinks && (
-                  <th className="px-4 py-2.5 text-end">{lang === "ar" ? "إجراءات" : "Actions"}</th>
+                  <th className="px-4 py-2.5 text-end whitespace-nowrap min-w-[220px]">{lang === "ar" ? "إجراءات" : "Actions"}</th>
                 )}
               </tr>
             </thead>
@@ -757,8 +758,8 @@ export default function InstructorAnalyticsDashboard({
                       </span>
                     </td>
                     {showManageLinks && (
-                      <td className="px-4 py-2.5 text-end">
-                        <div className="inline-flex items-center gap-1.5 justify-end flex-wrap">
+                      <td className="px-4 py-2.5 text-end whitespace-nowrap">
+                        <div className="inline-flex items-center gap-1.5 justify-end">
                           {st.needsSupport && (
                             <button
                               type="button"
@@ -772,12 +773,20 @@ export default function InstructorAnalyticsDashboard({
                                     ? "لم يسجل الطالب رقم هاتف بعد"
                                     : "Student has no registered phone number"
                               }
-                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-bold text-[11px] bg-[#25D366]/15 hover:bg-[#25D366]/25 text-[#128C7E] dark:text-[#25D366] border border-[#25D366]/40 shadow-sm transition-all active:scale-95 cursor-pointer"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl font-bold text-xs bg-[#25D366]/15 hover:bg-[#25D366]/25 text-[#128C7E] dark:text-[#25D366] border border-[#25D366]/40 shadow-xs transition-all hover:scale-[1.02] active:scale-95 cursor-pointer shrink-0"
                             >
-                              <MessageCircle className="h-3.5 w-3.5 shrink-0 text-[#25D366]" />
-                              <span>{lang === "ar" ? "تواصل عبر واتساب" : "Contact on WhatsApp"}</span>
+                              <WhatsAppIcon className="h-3.5 w-3.5 shrink-0 text-[#25D366]" />
+                              <span>{lang === "ar" ? "واتساب" : "WhatsApp"}</span>
                             </button>
                           )}
+                          <Link
+                            to={`/instructor/progress-tracker?studentId=${st.uid}`}
+                            title={lang === "ar" ? "عرض تقرير ومخطط تقدم الطالب" : "View Student Progress Tracker & Reports"}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-teal-500/15 hover:bg-teal-500/25 text-teal-700 dark:text-teal-300 border border-teal-400/30 font-bold text-xs shadow-xs transition-all hover:scale-[1.02] active:scale-95 shrink-0"
+                          >
+                            <TrendingUp className="h-3.5 w-3.5 shrink-0" />
+                            <span>{lang === "ar" ? "تقرير" : "Track"}</span>
+                          </Link>
                           <button
                             type="button"
                             onClick={() => handleToggleStudentActive(st.rawStudent || st)}
@@ -790,30 +799,24 @@ export default function InstructorAnalyticsDashboard({
                                   ? "تفعيل حساب الطالب"
                                   : "Activate student account"
                             }
-                            className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg font-bold text-[11px] border transition-all active:scale-95 ${
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl font-bold text-xs border transition-all hover:scale-[1.02] active:scale-95 shadow-xs cursor-pointer shrink-0 ${
                               st.active
-                                ? "border-amber-300/80 bg-amber-50 hover:bg-amber-100 text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
-                                : "border-emerald-300/80 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
+                                ? "border-amber-300/80 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-300"
+                                : "border-emerald-300/80 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300"
                             }`}
                           >
-                            <Power className="h-3 w-3" />
-                            <span>
-                              {st.active
-                                ? lang === "ar"
-                                  ? "تعطيل"
-                                  : "Deactivate"
-                                : lang === "ar"
-                                  ? "تفعيل"
-                                  : "Activate"}
-                            </span>
+                            {st.active ? (
+                              <>
+                                <UserX className="h-3.5 w-3.5 shrink-0 text-amber-600 dark:text-amber-400" />
+                                <span>{lang === "ar" ? "تعطيل" : "Deactivate"}</span>
+                              </>
+                            ) : (
+                              <>
+                                <UserCheck className="h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                                <span>{lang === "ar" ? "تفعيل" : "Activate"}</span>
+                              </>
+                            )}
                           </button>
-                          <Link
-                            to={`/instructor/progress-tracker?studentId=${st.uid}`}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-teal-500/15 hover:bg-teal-500/25 text-teal-700 dark:text-teal-300 border border-teal-400/25 font-bold"
-                          >
-                            {lang === "ar" ? "تقرير" : "Track"}
-                            <ArrowUpRight className="h-3 w-3" />
-                          </Link>
                         </div>
                       </td>
                     )}
