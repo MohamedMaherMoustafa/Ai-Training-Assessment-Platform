@@ -88,7 +88,7 @@ export default function LoginPage() {
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     typingTimeoutRef.current = setTimeout(() => {
       setIsTyping(false);
-    }, 900);
+    }, 1500);
   };
 
   const handleIdentifierChange = (e) => {
@@ -416,10 +416,10 @@ export default function LoginPage() {
 
         {/* Right Floating Frosted Liquid-Glass Login Card Container with Edge-Peeking Mascot */}
         <div className="relative w-full max-w-[430px] ms-auto me-auto lg:me-16 xl:me-24">
-          {/* Peeking Robot Mascot Behind the Card - Head and Hands Only Outside */}
+          {/* Peeking Robot Mascot Behind the Card - Head and Hands Outside */}
           <div
             aria-hidden="true"
-            className={`absolute end-6 -top-10 sm:top-28 sm:-right-11 md:-right-13 lg:-right-14 sm:end-auto z-0 pointer-events-none transition-all duration-500 ease-out select-none origin-center ${
+            className={`absolute end-3 -top-16 sm:top-24 sm:-right-22 md:-right-26 lg:-right-28 sm:end-auto z-0 pointer-events-none transition-all duration-500 ease-out select-none origin-bottom-left ${
               isFieldFocused
                 ? "opacity-100 translate-x-0 scale-100 rotate-12"
                 : "opacity-0 -translate-x-8 scale-75 rotate-0"
@@ -433,7 +433,7 @@ export default function LoginPage() {
                 showSign={false}
                 width={130}
                 height={138}
-                className="w-[110px] h-[118px] sm:w-[130px] sm:h-[138px] overflow-visible"
+                className="w-[110px] h-[118px] sm:w-[130px] sm:h-[138px] overflow-visible filter contrast-105"
                 idPrefix="login_edge_bot"
               />
             </div>
