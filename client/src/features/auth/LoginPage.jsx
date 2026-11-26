@@ -159,9 +159,8 @@ export default function LoginPage() {
 
   return (
     <div
-      className={`relative min-h-screen w-full overflow-hidden flex flex-col justify-between p-3 sm:p-5 select-none transition-colors duration-300 ${
-        isDark ? "bg-[#040d14] text-white" : "bg-[#f3f0e8] text-slate-900"
-      }`}
+      className={`relative min-h-screen w-full overflow-hidden flex flex-col justify-between p-3 sm:p-5 select-none transition-colors duration-300 ${isDark ? "bg-[#040d14] text-white" : "bg-[#f3f0e8] text-slate-900"
+        }`}
     >
       {/* Full-Screen High-Resolution Digital Library Backdrops (2560x1440 YCbCr-Deblocked & Mitchell-Restored) */}
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 overflow-hidden z-0">
@@ -170,18 +169,16 @@ export default function LoginPage() {
           alt=""
           decoding="async"
           fetchPriority="high"
-          className={`absolute inset-0 w-full h-full object-cover object-center scale-[1.03] origin-[50%_30%] transition-opacity duration-700 brightness-[1.03] contrast-[1.02] saturate-[1.02] ${
-            isDark ? "opacity-0" : "opacity-100"
-          }`}
+          className={`absolute inset-0 w-full h-full object-cover object-center scale-[1.03] origin-[50%_30%] transition-opacity duration-700 brightness-[1.03] contrast-[1.02] saturate-[1.02] ${isDark ? "opacity-0" : "opacity-100"
+            }`}
         />
         <img
           src="/login-library-dark-bg.jpg?v=clean"
           alt=""
           decoding="async"
           fetchPriority="high"
-          className={`absolute inset-0 w-full h-full object-cover object-center scale-[1.03] origin-[50%_30%] transition-opacity duration-700 ${
-            isDark ? "opacity-100" : "opacity-0"
-          }`}
+          className={`absolute inset-0 w-full h-full object-cover object-center scale-[1.03] origin-[50%_30%] transition-opacity duration-700 ${isDark ? "opacity-100" : "opacity-0"
+            }`}
         />
       </div>
 
@@ -263,25 +260,23 @@ export default function LoginPage() {
 
       {/* Top Floating Glass Bar (Matching Screenshot) */}
       <header
-        className={`relative z-50 shrink-0 max-w-7xl w-full mx-auto rounded-2xl backdrop-blur-2xl backdrop-saturate-150 px-4 sm:px-5 py-2.5 flex items-center justify-between gap-3 border transition-all ${
-          isDark
-            ? "bg-[#0b1f2c]/40 border-white/25 text-white shadow-[0_12px_36px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.22)]"
-            : "border-white/80 text-slate-900 shadow-[0_12px_36px_rgba(15,23,42,0.12),inset_0_1px_0_rgba(255,255,255,0.9)]"
-        }`}
+        className={`relative z-50 shrink-0 max-w-7xl w-full mx-auto rounded-2xl backdrop-blur-2xl backdrop-saturate-150 px-4 sm:px-5 py-2.5 flex items-center justify-between gap-3 border transition-all ${isDark
+          ? "bg-[#0b1f2c]/40 border-white/25 text-white shadow-[0_12px_36px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.22)]"
+          : "border-white/80 text-slate-900 shadow-[0_12px_36px_rgba(15,23,42,0.12),inset_0_1px_0_rgba(255,255,255,0.9)]"
+          }`}
         style={
           !isDark
             ? {
-                background:
-                  "linear-gradient(90deg, rgba(249, 248, 245, 0.92) 0%, rgba(235, 232, 226, 0.80) 60%, rgba(214, 210, 205, 0.72) 100%)",
-              }
+              background:
+                "linear-gradient(90deg, rgba(249, 248, 245, 0.92) 0%, rgba(235, 232, 226, 0.80) 60%, rgba(214, 210, 205, 0.72) 100%)",
+            }
             : undefined
         }
       >
         <div className="flex items-center gap-3 min-w-0">
           <div
-            className={`h-9 w-9 sm:h-10 sm:w-10 rounded-xl p-1 shrink-0 flex items-center justify-center shadow-inner border ${
-              isDark ? "bg-white/15 border-white/30" : "bg-white/75 border-slate-900/10"
-            }`}
+            className={`h-9 w-9 sm:h-10 sm:w-10 rounded-xl p-1 shrink-0 flex items-center justify-center shadow-inner border ${isDark ? "bg-white/15 border-white/30" : "bg-white/75 border-slate-900/10"
+              }`}
           >
             <img
               src={logoSrc}
@@ -312,11 +307,10 @@ export default function LoginPage() {
             type="button"
             onClick={toggleTheme}
             aria-label="Toggle theme"
-            className={`h-8 flex items-center gap-1.5 px-3 rounded-full border text-xs font-bold transition-all cursor-pointer ${
-              isDark
-                ? "border-white/20 bg-white/[0.1] hover:bg-white/[0.18] hover:border-teal-300/60 text-slate-100"
-                : "border-slate-900/10 bg-white/65 hover:bg-white/90 text-slate-800 shadow-xs"
-            }`}
+            className={`h-8 flex items-center gap-1.5 px-3 rounded-full border text-xs font-bold transition-all cursor-pointer ${isDark
+              ? "border-white/20 bg-white/[0.1] hover:bg-white/[0.18] hover:border-teal-300/60 text-slate-100"
+              : "border-slate-900/10 bg-white/65 hover:bg-white/90 text-slate-800 shadow-xs"
+              }`}
           >
             {isDark ? (
               <>
@@ -335,11 +329,10 @@ export default function LoginPage() {
             type="button"
             onClick={toggleSound}
             aria-label="Toggle sound"
-            className={`h-8 flex items-center gap-1.5 px-3 rounded-full border text-xs font-bold transition-all cursor-pointer ${
-              isDark
-                ? "border-white/20 bg-white/[0.1] hover:bg-white/[0.18] hover:border-teal-300/60 text-slate-100"
-                : "border-slate-900/10 bg-white/65 hover:bg-white/90 text-slate-800 shadow-xs"
-            }`}
+            className={`h-8 flex items-center gap-1.5 px-3 rounded-full border text-xs font-bold transition-all cursor-pointer ${isDark
+              ? "border-white/20 bg-white/[0.1] hover:bg-white/[0.18] hover:border-teal-300/60 text-slate-100"
+              : "border-slate-900/10 bg-white/65 hover:bg-white/90 text-slate-800 shadow-xs"
+              }`}
           >
             {soundOn ? (
               <Volume2 className={`h-3.5 w-3.5 shrink-0 ${isDark ? "text-teal-300" : "text-slate-700"}`} />
@@ -350,11 +343,10 @@ export default function LoginPage() {
           </button>
 
           <div
-            className={`hidden md:flex h-8 items-center gap-1.5 px-3 rounded-full border text-xs font-bold ${
-              isDark
-                ? "border-white/20 bg-white/[0.1] text-slate-100"
-                : "border-slate-900/10 bg-white/65 text-slate-800 shadow-xs"
-            }`}
+            className={`hidden md:flex h-8 items-center gap-1.5 px-3 rounded-full border text-xs font-bold ${isDark
+              ? "border-white/20 bg-white/[0.1] text-slate-100"
+              : "border-slate-900/10 bg-white/65 text-slate-800 shadow-xs"
+              }`}
           >
             <Lock className={`h-3 w-3 shrink-0 ${isDark ? "text-teal-300" : "text-slate-700"}`} />
             <span>{lang === "ar" ? "بيئة آمنة" : "Secure Workspace"}</span>
@@ -424,293 +416,272 @@ export default function LoginPage() {
 
         {/* Right Floating Frosted Liquid-Glass Login Card Container with Edge-Peeking Mascot */}
         <div className="relative w-full max-w-[430px] ms-auto me-auto lg:me-16 xl:me-24">
-          {/* Angled Interactive Robot Mascot with Feet Resting on Card Edge & Left-to-Right Tilt */}
+          {/* Peeking Robot Mascot Behind the Card - Head and Hands Only Outside */}
           <div
             aria-hidden="true"
-            className={`absolute end-4 -top-20 sm:top-20 sm:-right-16 md:-right-20 lg:-right-20 sm:end-auto z-20 pointer-events-none transition-all duration-500 ease-out select-none origin-bottom-left ${
+            className={`absolute end-6 -top-10 sm:top-28 sm:-right-11 md:-right-13 lg:-right-14 sm:end-auto z-0 pointer-events-none transition-all duration-500 ease-out select-none origin-center ${
               isFieldFocused
                 ? "opacity-100 translate-x-0 scale-100 rotate-12"
-                : "opacity-0 translate-x-6 scale-75 rotate-0"
+                : "opacity-0 -translate-x-8 scale-75 rotate-0"
             }`}
           >
-            {/* Robot Mascot Body & Head with feet resting on the card edge */}
-            <div className="drop-shadow-[0_18px_36px_rgba(20,184,166,0.55)]">
+            {/* Robot Mascot Head & Hands Peeking from Behind the Card */}
+            <div className="drop-shadow-[0_16px_32px_rgba(20,184,166,0.5)]">
               <RobotMascotSvg
                 isCoveringEyes={isCoveringEyes}
                 isPeeking={isPeeking}
                 showSign={false}
                 width={130}
                 height={138}
-                className="w-[110px] h-[118px] sm:w-[130px] sm:h-[138px] overflow-visible filter contrast-105"
+                className="w-[110px] h-[118px] sm:w-[130px] sm:h-[138px] overflow-visible"
                 idPrefix="login_edge_bot"
               />
             </div>
           </div>
 
           <section
-            className={`relative z-10 w-full rounded-[28px] backdrop-blur-2xl backdrop-saturate-150 border p-6 sm:p-8 transition-all ${
-            isDark
+            className={`relative z-10 w-full rounded-[28px] backdrop-blur-2xl backdrop-saturate-150 border p-6 sm:p-8 transition-all ${isDark
               ? "border-white/30 shadow-[0_24px_80px_rgba(0,0,0,0.55),inset_0_1px_1px_rgba(255,255,255,0.32),inset_0_-1px_0_rgba(255,255,255,0.08)]"
               : "border-white/75 shadow-[0_24px_80px_rgba(15,23,42,0.18),inset_0_1px_1px_rgba(255,255,255,0.9),inset_0_-1px_0_rgba(255,255,255,0.25)]"
-          }`}
-          style={{
-            background: isDark
-              ? "linear-gradient(155deg, rgba(168, 214, 226, 0.22) 0%, rgba(28, 66, 82, 0.30) 48%, rgba(15, 42, 54, 0.38) 100%)"
-              : "linear-gradient(180deg, rgba(248, 246, 243, 0.90) 0%, rgba(218, 214, 208, 0.74) 42%, rgba(162, 158, 154, 0.62) 74%, rgba(136, 132, 128, 0.66) 100%)",
-          }}
-        >
-          {/* Card Header */}
-          <div className="text-center mb-6">
-            <h2
-              className={`text-2xl sm:text-3xl font-black tracking-tight flex items-center justify-center gap-2 drop-shadow-sm ${
-                isDark ? "text-white" : "text-slate-900"
               }`}
-            >
-              <Sparkles className={`h-6 w-6 shrink-0 ${isDark ? "text-cyan-300" : "text-slate-800"}`} />
-              <span>{t("auth.welcomeBack")}</span>
-            </h2>
-            <p className={`text-xs sm:text-sm mt-1.5 font-medium ${isDark ? "text-white/80" : "text-slate-700"}`}>
-              {lang === "ar" ? t("auth.welcomeDesc") : "Sign in to your learning workspace"}
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4">
-            {/* Username or Email */}
-            <div>
-              <label
-                className={`block text-xs sm:text-[13px] font-bold mb-1.5 ${
-                  isDark ? "text-white/95" : "text-slate-800"
-                }`}
+            style={{
+              background: isDark
+                ? "linear-gradient(155deg, rgba(168, 214, 226, 0.22) 0%, rgba(28, 66, 82, 0.30) 48%, rgba(15, 42, 54, 0.38) 100%)"
+                : "linear-gradient(180deg, rgba(248, 246, 243, 0.90) 0%, rgba(218, 214, 208, 0.74) 42%, rgba(162, 158, 154, 0.62) 74%, rgba(136, 132, 128, 0.66) 100%)",
+            }}
+          >
+            {/* Card Header */}
+            <div className="text-center mb-6">
+              <h2
+                className={`text-2xl sm:text-3xl font-black tracking-tight flex items-center justify-center gap-2 drop-shadow-sm ${isDark ? "text-white" : "text-slate-900"
+                  }`}
               >
-                {t("auth.identifier")}
-              </label>
-              <div className="relative flex items-center">
-                <User
-                  className={`h-4 w-4 absolute start-3.5 pointer-events-none ${
-                    isDark ? "text-white/75" : "text-slate-600"
-                  }`}
-                />
-                <input
-                  type="text"
-                  name="platform_login_id"
-                  autoComplete="off"
-                  required
-                  value={identifier}
-                  onChange={handleIdentifierChange}
-                  onFocus={() => setIsIdentifierFocused(true)}
-                  onBlur={() => {
-                    setIsIdentifierFocused(false);
-                    setIsTyping(false);
-                  }}
-                  placeholder="e.g., student@athar.edu"
-                  className={`w-full ps-10 pe-3.5 py-3 rounded-xl backdrop-blur-md border text-xs sm:text-sm focus:outline-none focus:ring-2 transition-all ${
-                    isDark
-                      ? "bg-white/[0.14] hover:bg-white/[0.17] focus:bg-white/[0.20] border-white/25 text-white placeholder-white/55 shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] focus:ring-cyan-300/60 focus:border-white/45"
-                      : "bg-[#f4f2ef]/80 hover:bg-[#f7f5f2]/90 focus:bg-white/95 border-white/85 text-slate-900 placeholder-slate-700/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] focus:ring-stone-500/30 focus:border-white"
-                  }`}
-                />
-              </div>
+                <Sparkles className={`h-6 w-6 shrink-0 ${isDark ? "text-cyan-300" : "text-slate-800"}`} />
+                <span>{t("auth.welcomeBack")}</span>
+              </h2>
+              <p className={`text-xs sm:text-sm mt-1.5 font-medium ${isDark ? "text-white/80" : "text-slate-700"}`}>
+                {lang === "ar" ? t("auth.welcomeDesc") : "Sign in to your learning workspace"}
+              </p>
             </div>
 
-            {/* Password */}
-            <div>
-              <label
-                className={`block text-xs sm:text-[13px] font-bold mb-1.5 ${
-                  isDark ? "text-white/95" : "text-slate-800"
-                }`}
-              >
-                {t("auth.password")}
-              </label>
-              <div className="relative flex items-center">
-                <Lock
-                  className={`h-4 w-4 absolute start-3.5 pointer-events-none ${
-                    isDark ? "text-white/75" : "text-slate-600"
-                  }`}
-                />
-                <input
-                  type={showPass ? "text" : "password"}
-                  name="platform_login_pw"
-                  autoComplete="new-password"
-                  required
-                  value={password}
-                  onChange={handlePasswordChange}
-                  onFocus={() => setIsPasswordFocused(true)}
-                  onBlur={() => {
-                    setIsPasswordFocused(false);
-                    setIsTyping(false);
-                  }}
-                  placeholder={t("auth.passwordPlaceholder")}
-                  className={`w-full ps-10 pe-10 py-3 rounded-xl backdrop-blur-md border text-xs sm:text-sm focus:outline-none focus:ring-2 transition-all ${
-                    isDark
+            <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4">
+              {/* Username or Email */}
+              <div>
+                <label
+                  className={`block text-xs sm:text-[13px] font-bold mb-1.5 ${isDark ? "text-white/95" : "text-slate-800"
+                    }`}
+                >
+                  {t("auth.identifier")}
+                </label>
+                <div className="relative flex items-center">
+                  <User
+                    className={`h-4 w-4 absolute start-3.5 pointer-events-none ${isDark ? "text-white/75" : "text-slate-600"
+                      }`}
+                  />
+                  <input
+                    type="text"
+                    name="platform_login_id"
+                    autoComplete="off"
+                    required
+                    value={identifier}
+                    onChange={handleIdentifierChange}
+                    onFocus={() => setIsIdentifierFocused(true)}
+                    onBlur={() => {
+                      setIsIdentifierFocused(false);
+                      setIsTyping(false);
+                    }}
+                    placeholder="e.g., student@athar.edu"
+                    className={`w-full ps-10 pe-3.5 py-3 rounded-xl backdrop-blur-md border text-xs sm:text-sm focus:outline-none focus:ring-2 transition-all ${isDark
                       ? "bg-white/[0.14] hover:bg-white/[0.17] focus:bg-white/[0.20] border-white/25 text-white placeholder-white/55 shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] focus:ring-cyan-300/60 focus:border-white/45"
                       : "bg-[#f4f2ef]/80 hover:bg-[#f7f5f2]/90 focus:bg-white/95 border-white/85 text-slate-900 placeholder-slate-700/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] focus:ring-stone-500/30 focus:border-white"
-                  }`}
-                />
+                      }`}
+                  />
+                </div>
+              </div>
+
+              {/* Password */}
+              <div>
+                <label
+                  className={`block text-xs sm:text-[13px] font-bold mb-1.5 ${isDark ? "text-white/95" : "text-slate-800"
+                    }`}
+                >
+                  {t("auth.password")}
+                </label>
+                <div className="relative flex items-center">
+                  <Lock
+                    className={`h-4 w-4 absolute start-3.5 pointer-events-none ${isDark ? "text-white/75" : "text-slate-600"
+                      }`}
+                  />
+                  <input
+                    type={showPass ? "text" : "password"}
+                    name="platform_login_pw"
+                    autoComplete="new-password"
+                    required
+                    value={password}
+                    onChange={handlePasswordChange}
+                    onFocus={() => setIsPasswordFocused(true)}
+                    onBlur={() => {
+                      setIsPasswordFocused(false);
+                      setIsTyping(false);
+                    }}
+                    placeholder={t("auth.passwordPlaceholder")}
+                    className={`w-full ps-10 pe-10 py-3 rounded-xl backdrop-blur-md border text-xs sm:text-sm focus:outline-none focus:ring-2 transition-all ${isDark
+                      ? "bg-white/[0.14] hover:bg-white/[0.17] focus:bg-white/[0.20] border-white/25 text-white placeholder-white/55 shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] focus:ring-cyan-300/60 focus:border-white/45"
+                      : "bg-[#f4f2ef]/80 hover:bg-[#f7f5f2]/90 focus:bg-white/95 border-white/85 text-slate-900 placeholder-slate-700/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] focus:ring-stone-500/30 focus:border-white"
+                      }`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPass((p) => !p)}
+                    aria-label="Toggle password visibility"
+                    className={`absolute end-3 transition-colors p-1 cursor-pointer ${isDark ? "text-slate-300 hover:text-white" : "text-slate-600 hover:text-slate-900"
+                      }`}
+                  >
+                    {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Remember Me Switch & Forgot Password */}
+              <div className="flex items-center justify-between text-xs pt-0.5">
                 <button
                   type="button"
-                  onClick={() => setShowPass((p) => !p)}
-                  aria-label="Toggle password visibility"
-                  className={`absolute end-3 transition-colors p-1 cursor-pointer ${
-                    isDark ? "text-slate-300 hover:text-white" : "text-slate-600 hover:text-slate-900"
-                  }`}
+                  role="switch"
+                  aria-checked={rememberMe}
+                  onClick={() => setRememberMe((r) => !r)}
+                  className={`flex items-center gap-2 cursor-pointer select-none font-semibold ${isDark ? "text-slate-200" : "text-white drop-shadow-xs"
+                    }`}
                 >
-                  {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-            </div>
-
-            {/* Remember Me Switch & Forgot Password */}
-            <div className="flex items-center justify-between text-xs pt-0.5">
-              <button
-                type="button"
-                role="switch"
-                aria-checked={rememberMe}
-                onClick={() => setRememberMe((r) => !r)}
-                className={`flex items-center gap-2 cursor-pointer select-none font-semibold ${
-                  isDark ? "text-slate-200" : "text-white drop-shadow-xs"
-                }`}
-              >
-                <span
-                  className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border transition-colors ${
-                    rememberMe
+                  <span
+                    className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border transition-colors ${rememberMe
                       ? isDark
                         ? "bg-teal-400/80 border-teal-300"
                         : "bg-slate-800 border-slate-700"
                       : isDark
-                      ? "bg-white/15 border-white/25"
-                      : "bg-slate-800/75 border-slate-700/60"
-                  }`}
-                >
-                  <span
-                    className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${
-                      rememberMe ? "translate-x-4 rtl:-translate-x-4" : "translate-x-0.5 rtl:-translate-x-0.5"
+                        ? "bg-white/15 border-white/25"
+                        : "bg-slate-800/75 border-slate-700/60"
+                      }`}
+                  >
+                    <span
+                      className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${rememberMe ? "translate-x-4 rtl:-translate-x-4" : "translate-x-0.5 rtl:-translate-x-0.5"
+                        }`}
+                    />
+                  </span>
+                  <span>{t("auth.rememberMe")}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    showPopup({
+                      title: t("auth.forgotPassword"),
+                      message: t("auth.forgotPasswordHint"),
+                      type: "info",
+                    })
+                  }
+                  className={`font-bold hover:underline cursor-pointer ${isDark ? "text-cyan-300 hover:text-cyan-200" : "text-white/95 hover:text-white drop-shadow-xs"
                     }`}
-                  />
-                </span>
-                <span>{t("auth.rememberMe")}</span>
-              </button>
+                >
+                  {t("auth.forgotPassword")}
+                </button>
+              </div>
 
+              {/* Sign In Button (Theme-Matched: Cyan-to-Violet in Dark, Frosted White Pearl in Light) */}
               <button
-                type="button"
-                onClick={() =>
-                  showPopup({
-                    title: t("auth.forgotPassword"),
-                    message: t("auth.forgotPasswordHint"),
-                    type: "info",
-                  })
-                }
-                className={`font-bold hover:underline cursor-pointer ${
-                  isDark ? "text-cyan-300 hover:text-cyan-200" : "text-white/95 hover:text-white drop-shadow-xs"
-                }`}
-              >
-                {t("auth.forgotPassword")}
-              </button>
-            </div>
-
-            {/* Sign In Button (Theme-Matched: Cyan-to-Violet in Dark, Frosted White Pearl in Light) */}
-            <button
-              type="submit"
-              disabled={submitting}
-              className={`w-full mt-2 py-3.5 px-5 rounded-xl font-black text-sm hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer ${
-                isDark
+                type="submit"
+                disabled={submitting}
+                className={`w-full mt-2 py-3.5 px-5 rounded-xl font-black text-sm hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer ${isDark
                   ? "bg-gradient-to-r from-[#2dd4bf] via-[#38bdf8] to-[#a855f7] hover:brightness-110 text-white shadow-[0_10px_30px_rgba(56,189,248,0.35)]"
                   : "bg-[#f8f7f4]/95 hover:bg-white text-slate-900 border border-white shadow-[0_8px_24px_rgba(0,0,0,0.14)]"
-              }`}
-            >
-              <span>{submitting ? t("auth.signingIn") : t("auth.signIn")}</span>
-              <ArrowRight className="h-4 w-4 rtl:rotate-180" />
-            </button>
-          </form>
+                  }`}
+              >
+                <span>{submitting ? t("auth.signingIn") : t("auth.signIn")}</span>
+                <ArrowRight className="h-4 w-4 rtl:rotate-180" />
+              </button>
+            </form>
 
-          {/* Divider */}
-          <div className="relative my-5 flex items-center justify-center">
-            <div className={`w-full border-t ${isDark ? "border-white/15" : "border-white/30"}`} />
-            <span
-              className={`px-3 text-[11px] font-semibold whitespace-nowrap ${
-                isDark ? "text-slate-300/85" : "text-white/95 drop-shadow-xs"
-              }`}
-            >
-              {t("auth.noAccount")}
-            </span>
-            <div className={`w-full border-t ${isDark ? "border-white/15" : "border-white/30"}`} />
-          </div>
+            {/* Divider */}
+            <div className="relative my-5 flex items-center justify-center">
+              <div className={`w-full border-t ${isDark ? "border-white/15" : "border-white/30"}`} />
+              <span
+                className={`px-3 text-[11px] font-semibold whitespace-nowrap ${isDark ? "text-slate-300/85" : "text-white/95 drop-shadow-xs"
+                  }`}
+              >
+                {t("auth.noAccount")}
+              </span>
+              <div className={`w-full border-t ${isDark ? "border-white/15" : "border-white/30"}`} />
+            </div>
 
-          {/* Register Secondary Glass Button with Smooth Expand Transition */}
-          <button
-            type="button"
-            onClick={handleGoToRegister}
-            className={`w-full py-3 px-4 rounded-xl backdrop-blur-md border font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer group ${
-              isDark
+            {/* Register Secondary Glass Button with Smooth Expand Transition */}
+            <button
+              type="button"
+              onClick={handleGoToRegister}
+              className={`w-full py-3 px-4 rounded-xl backdrop-blur-md border font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer group ${isDark
                 ? "bg-white/[0.12] hover:bg-white/[0.20] border-white/25 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]"
                 : "bg-white/25 hover:bg-white/35 border-white/50 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.45)] drop-shadow-xs"
-            } ${isTransitioningToRegister ? "scale-105 opacity-60 duration-200" : ""}`}
-          >
-            <UserPlus
-              className={`h-4 w-4 group-hover:scale-110 transition-transform ${
-                isDark ? "text-cyan-300" : "text-white"
-              }`}
-            />
-            <span>{t("auth.registerAction")}</span>
-          </button>
+                } ${isTransitioningToRegister ? "scale-105 opacity-60 duration-200" : ""}`}
+            >
+              <UserPlus
+                className={`h-4 w-4 group-hover:scale-110 transition-transform ${isDark ? "text-cyan-300" : "text-white"
+                  }`}
+              />
+              <span>{t("auth.registerAction")}</span>
+            </button>
 
-          {/* Temporary UI Preview Buttons (Shown only while VITE_FIREBASE_API_KEY is unset) */}
-          {!isFirebaseConfigured && (
-            <div className="mt-3 pt-3 border-t border-white/25 space-y-2">
-              <div
-                className={`text-center text-[10.5px] font-semibold ${
-                  isDark ? "text-teal-200/80" : "text-white/90 drop-shadow-xs"
-                }`}
-              >
-                {lang === "ar"
-                  ? "معاينة سريعة للواجهات (بدون VITE_FIREBASE_API_KEY)"
-                  : "Temporary UI Preview (Firebase key not set)"}
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    enterPreviewMode("student");
-                    navigate("/student");
-                  }}
-                  className={`py-2 px-3 rounded-xl backdrop-blur-md border text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                    isDark
+            {/* Temporary UI Preview Buttons (Shown only while VITE_FIREBASE_API_KEY is unset) */}
+            {!isFirebaseConfigured && (
+              <div className="mt-3 pt-3 border-t border-white/25 space-y-2">
+                <div
+                  className={`text-center text-[10.5px] font-semibold ${isDark ? "text-teal-200/80" : "text-white/90 drop-shadow-xs"
+                    }`}
+                >
+                  {lang === "ar"
+                    ? "معاينة سريعة للواجهات (بدون VITE_FIREBASE_API_KEY)"
+                    : "Temporary UI Preview (Firebase key not set)"}
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      enterPreviewMode("student");
+                      navigate("/student");
+                    }}
+                    className={`py-2 px-3 rounded-xl backdrop-blur-md border text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${isDark
                       ? "bg-teal-500/15 hover:bg-teal-500/25 border-teal-300/30 text-teal-100"
                       : "bg-white/25 hover:bg-white/35 border-white/45 text-white drop-shadow-xs"
-                  }`}
-                >
-                  <GraduationCap className="h-3.5 w-3.5 shrink-0" />
-                  <span>{lang === "ar" ? "معاينة الطالب" : "Preview Student UI"}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    enterPreviewMode("instructor");
-                    navigate("/instructor");
-                  }}
-                  className={`py-2 px-3 rounded-xl backdrop-blur-md border text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                    isDark
+                      }`}
+                  >
+                    <GraduationCap className="h-3.5 w-3.5 shrink-0" />
+                    <span>{lang === "ar" ? "معاينة الطالب" : "Preview Student UI"}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      enterPreviewMode("instructor");
+                      navigate("/instructor");
+                    }}
+                    className={`py-2 px-3 rounded-xl backdrop-blur-md border text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${isDark
                       ? "bg-sky-500/15 hover:bg-sky-500/25 border-sky-300/30 text-sky-100"
                       : "bg-white/25 hover:bg-white/35 border-white/45 text-white drop-shadow-xs"
-                  }`}
-                >
-                  <Briefcase className="h-3.5 w-3.5 shrink-0" />
-                  <span>{lang === "ar" ? "معاينة المحاضر" : "Preview Instructor UI"}</span>
-                </button>
+                      }`}
+                  >
+                    <Briefcase className="h-3.5 w-3.5 shrink-0" />
+                    <span>{lang === "ar" ? "معاينة المحاضر" : "Preview Instructor UI"}</span>
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Trust Footer Badge */}
-          <div
-            className={`mt-5 flex items-center justify-center gap-2 text-[11px] font-medium ${
-              isDark ? "text-slate-300/80" : "text-white/90 drop-shadow-xs"
-            }`}
-          >
-            <ShieldCheck className={`h-3.5 w-3.5 ${isDark ? "text-teal-300" : "text-white/90"}`} />
-            <span>{t("auth.trustBadge")}</span>
-          </div>
-        </section>
-      </div>
+            {/* Trust Footer Badge */}
+            <div
+              className={`mt-5 flex items-center justify-center gap-2 text-[11px] font-medium ${isDark ? "text-slate-300/80" : "text-white/90 drop-shadow-xs"
+                }`}
+            >
+              <ShieldCheck className={`h-3.5 w-3.5 ${isDark ? "text-teal-300" : "text-white/90"}`} />
+              <span>{t("auth.trustBadge")}</span>
+            </div>
+          </section>
+        </div>
       </main>
     </div>
   );
