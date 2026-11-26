@@ -61,7 +61,6 @@ function StudentInstructorSelector({
   const scrollContainerRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(0);
 
   const approvedIds = user?.instructorIds || [];
   const requestsMap = user?.instructorRequests || {};
@@ -98,11 +97,7 @@ function StudentInstructorSelector({
 
     setCanScrollLeft(absScroll > 8);
     setCanScrollRight(absScroll < maxScroll - 8);
-
-    const cardWidth = 340;
-    const idx = Math.round(absScroll / cardWidth);
-    setActiveIndex(Math.min(Math.max(idx, 0), Math.max(0, realInstructors.length - 1)));
-  }, [realInstructors.length]);
+  }, []);
 
   useEffect(() => {
     const el = scrollContainerRef.current;
@@ -127,15 +122,6 @@ function StudentInstructorSelector({
       delta = -delta;
     }
     el.scrollBy({ left: delta, behavior: "smooth" });
-  };
-
-  const scrollToCard = (index) => {
-    const el = scrollContainerRef.current;
-    if (!el) return;
-    const cardWidth = 360;
-    const isRtl = lang === "ar" || document.documentElement.dir === "rtl";
-    const targetLeft = isRtl ? -(index * cardWidth) : index * cardWidth;
-    el.scrollTo({ left: targetLeft, behavior: "smooth" });
   };
 
   // Drag-to-scroll support for mouse users
@@ -461,25 +447,6 @@ function StudentInstructorSelector({
               <ChevronRight className="h-6 w-6 rtl:rotate-180" />
             </button>
           )}
-        </div>
-      )}
-
-      {/* Dynamic Scroll Indicators */}
-      {realInstructors.length > 1 && (
-        <div className="flex items-center justify-center gap-2 pt-2 eduera-stagger-4">
-          {realInstructors.map((_, idx) => (
-            <button
-              key={idx}
-              type="button"
-              onClick={() => scrollToCard(idx)}
-              aria-label={`Instructor ${idx + 1}`}
-              className={`rounded-full transition-all duration-300 cursor-pointer ${
-                activeIndex === idx
-                  ? "w-8 h-2 bg-gradient-to-r from-teal-400 to-emerald-400 shadow-[0_0_12px_rgba(45,212,191,0.8)]"
-                  : "w-2 h-2 bg-slate-400/40 dark:bg-slate-700 hover:bg-slate-500"
-              }`}
-            />
-          ))}
         </div>
       )}
     </div>
