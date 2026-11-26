@@ -366,23 +366,14 @@ export default function LoginPage() {
       <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto flex flex-col lg:flex-row items-center justify-between gap-6 py-4 sm:py-6 px-1 sm:px-4">
         {/* Left Floating Hero Brand & Mascot Showcase (Matching Official Athar Design) */}
         <div className="hidden lg:flex flex-col items-start justify-center max-w-lg xl:max-w-xl space-y-5 select-none my-auto ps-2 pe-4">
-          {/* Top Brand Logo & Platform Title (Matching Image 1) */}
+          {/* Top Brand Platform Title (Platform Name Only) */}
           <div className="space-y-3">
-            <div className="flex items-center gap-3.5">
-              <div className="h-14 w-14 xl:h-16 xl:w-16 rounded-2xl bg-white/10 dark:bg-white/[0.06] backdrop-blur-md border border-white/25 flex items-center justify-center p-2 shadow-lg">
-                <img
-                  src={logoSrc}
-                  alt="Athar Educational Platform"
-                  className="h-full w-full object-contain filter drop-shadow-[0_4px_12px_rgba(45,212,191,0.4)]"
-                />
+            <div className="min-w-0">
+              <div className="text-3xl xl:text-4xl font-extrabold tracking-tight text-white drop-shadow-md flex items-center gap-2">
+                <span>{lang === "ar" ? "أثـر" : "Athar"}</span>
               </div>
-              <div className="min-w-0">
-                <div className="text-3xl xl:text-4xl font-extrabold tracking-tight text-white drop-shadow-md flex items-center gap-2">
-                  <span>{lang === "ar" ? "أثـر" : "Athar"}</span>
-                </div>
-                <div className="text-xs xl:text-sm font-bold text-teal-300 tracking-wider uppercase drop-shadow-xs">
-                  {lang === "ar" ? "منصة أثر التعليمية" : "Educational Platform"}
-                </div>
+              <div className="text-xs xl:text-sm font-bold text-teal-300 tracking-wider uppercase drop-shadow-xs">
+                {lang === "ar" ? "منصة أثر التعليمية" : "Educational Platform"}
               </div>
             </div>
 
