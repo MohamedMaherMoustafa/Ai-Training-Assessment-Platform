@@ -43,12 +43,14 @@ import { ref, onValue } from "firebase/database";
 import { rtdb } from "../../lib/firebase";
 import {
   listActiveInstructors,
+  listCourses,
   requestAdditionalInstructor,
   checkAndDispatchAutomatedWeeklyReports,
 } from "../../services/platformService";
 
 function StudentInstructorSelector({
   instructors,
+  courses = [],
   activeInstructorId,
   onSelectInstructor,
 }) {
@@ -320,10 +322,12 @@ function StudentInstructorSelector({
                   ? "المقررات التدريبية، الواجبات التفاعلية، بنك الأسئلة"
                   : "Curriculum modules, interactive assignments, and quizzes");
 
-              const ratingDisplay = inst.rating ? `${inst.rating} ★` : "4.9 ★";
-              const statLectures = inst.coursesCount || inst.stats?.lectures || (inst.specialization ? 18 : 12);
-              const statQuizzes = inst.quizzesCount || inst.stats?.quizzes || 16;
-              const statStudents = inst.studentsCount || inst.stats?.students || "1.2k";
+              const instCourses = (courses || []).filter((c) => c.instructorId === inst.uid);
+              const coursesCount = instCourses.length;
+              const lessonsCount = instCourses.reduce(
+                (acc, c) => acc + (Array.isArray(c.lessons) ? c.lessons.length : 0),
+                0
+              );
 
               return (
                 <div
@@ -364,32 +368,42 @@ function StudentInstructorSelector({
                       </span>
                     </div>
 
-                    {/* Stats Row */}
+                    {/* Stats Row: strictly actual courses & lessons count from database */}
                     <div className="flex items-center justify-center gap-3 text-xs pt-1">
-                      <div>
-                        <span className="font-bold text-slate-900 dark:text-white">{ratingDisplay}</span>
-                        <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Rating</div>
+                      <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-100/80 dark:bg-white/[0.05] border border-slate-200/60 dark:border-white/[0.06]">
+                        <BookOpen className="h-3.5 w-3.5 text-sky-500 shrink-0" />
+                        <span className="font-extrabold text-slate-900 dark:text-white">{coursesCount}</span>
+                        <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                          {lang === "ar"
+                            ? coursesCount === 1
+                              ? "مقرر"
+                              : coursesCount === 2
+                              ? "مقرران"
+                              : coursesCount > 2 && coursesCount < 11
+                              ? "مقررات"
+                              : "مقرر"
+                            : coursesCount === 1
+                            ? "Course"
+                            : "Courses"}
+                        </span>
                       </div>
                       <span className="text-slate-400 dark:text-slate-600 font-bold">·</span>
-                      <div>
-                        <span className="font-bold text-slate-900 dark:text-white">{statLectures}</span>
-                        <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
-                          {lang === "ar" ? "محاضرة" : "Lectures"}
-                        </div>
-                      </div>
-                      <span className="text-slate-400 dark:text-slate-600 font-bold">·</span>
-                      <div>
-                        <span className="font-bold text-slate-900 dark:text-white">{statQuizzes}</span>
-                        <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
-                          {lang === "ar" ? "اختبار" : "Quizzes"}
-                        </div>
-                      </div>
-                      <span className="text-slate-400 dark:text-slate-600 font-bold">·</span>
-                      <div>
-                        <span className="font-bold text-slate-900 dark:text-white">{statStudents}</span>
-                        <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
-                          {lang === "ar" ? "طالب" : "Students"}
-                        </div>
+                      <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-100/80 dark:bg-white/[0.05] border border-slate-200/60 dark:border-white/[0.06]">
+                        <FileText className="h-3.5 w-3.5 text-teal-500 shrink-0" />
+                        <span className="font-extrabold text-slate-900 dark:text-white">{lessonsCount}</span>
+                        <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                          {lang === "ar"
+                            ? lessonsCount === 1
+                              ? "درس"
+                              : lessonsCount === 2
+                              ? "درسان"
+                              : lessonsCount > 2 && lessonsCount < 11
+                              ? "دروس"
+                              : "درس"
+                            : lessonsCount === 1
+                            ? "Lesson"
+                            : "Lessons"}
+                        </span>
                       </div>
                     </div>
 
@@ -539,9 +553,37 @@ export default function StudentDashboard() {
   const storageKey = `student_active_instructor_${user?.uid}`;
   const [instructors, setInstructors] = useState([]);
   const [instructorsLoading, setInstructorsLoading] = useState(true);
+  const [courses, setCourses] = useState([]);
   const [activeInstructorId, setActiveInstructorId] = useState(
     () => localStorage.getItem(storageKey) || ""
   );
+
+  useEffect(() => {
+    // Realtime subscription to RTDB courses for dynamic, actual course and lesson counts
+    const coursesRef = ref(rtdb, "courses");
+    const unsub = onValue(
+      coursesRef,
+      (snap) => {
+        if (!snap.exists()) {
+          setCourses([]);
+          return;
+        }
+        const arr = Object.entries(snap.val()).map(([id, data]) => ({
+          id,
+          ...data,
+          lessons: data.lessons
+            ? Object.entries(data.lessons).map(([lid, ldata]) => ({ id: lid, ...ldata }))
+            : [],
+        }));
+        setCourses(arr);
+      },
+      (err) => {
+        console.warn("RTDB courses listener note, fallback to listCourses:", err?.message);
+        listCourses().then((data) => setCourses(data || [])).catch(() => {});
+      }
+    );
+    return () => unsub();
+  }, []);
 
   useEffect(() => {
     if (user?.isPreview) {
@@ -657,6 +699,7 @@ export default function StudentDashboard() {
           element={
             <StudentInstructorSelector
               instructors={instructors}
+              courses={courses}
               activeInstructorId={activeInstructorId}
               onSelectInstructor={handleSelectInstructor}
             />
