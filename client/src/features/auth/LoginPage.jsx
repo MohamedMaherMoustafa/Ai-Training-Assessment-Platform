@@ -423,33 +423,70 @@ export default function LoginPage() {
 
       {/* Main Content Stage Over Futuristic Library Scene */}
       <main className="relative z-20 flex-1 max-w-7xl w-full mx-auto flex flex-col lg:flex-row items-center justify-between gap-6 py-4 sm:py-6 px-1 sm:px-4">
-        {/* Left/Center Floating Hero Brand Callout */}
-        <div className="hidden lg:flex flex-col items-start max-w-xs mt-[-70px]">
-          <div
-            className={`w-full rounded-2xl overflow-hidden backdrop-blur-xl border transition-all ${
-              isDark
-                ? "bg-white/[0.12] border-white/25 shadow-[0_8px_28px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.22)]"
-                : "bg-white/[0.22] border-white/50 shadow-[0_8px_28px_rgba(15,23,42,0.14)]"
-            }`}
-          >
-            <div
-              className={`px-4 py-2 text-xs font-black ${
-                isDark ? "text-white" : "bg-white/80 text-slate-900"
-              }`}
-            >
-              Athar Educational Platform | منصة أثر التعليمية
+        {/* Left Floating Hero Brand & Mascot Showcase (Matching Official Athar Design) */}
+        <div className="hidden lg:flex flex-col items-start justify-center max-w-lg xl:max-w-xl space-y-5 select-none my-auto ps-2 pe-4">
+          {/* Top Brand Logo & Platform Title (Matching Image 1) */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-3.5">
+              <div className="h-14 w-14 xl:h-16 xl:w-16 rounded-2xl bg-white/10 dark:bg-white/[0.06] backdrop-blur-md border border-white/25 flex items-center justify-center p-2 shadow-lg">
+                <img
+                  src={logoSrc}
+                  alt="Athar Educational Platform"
+                  className="h-full w-full object-contain filter drop-shadow-[0_4px_12px_rgba(45,212,191,0.4)]"
+                />
+              </div>
+              <div className="min-w-0">
+                <div className="text-3xl xl:text-4xl font-extrabold tracking-tight text-white drop-shadow-md flex items-center gap-2">
+                  <span>{lang === "ar" ? "أثـر" : "Athar"}</span>
+                </div>
+                <div className="text-xs xl:text-sm font-bold text-teal-300 tracking-wider uppercase drop-shadow-xs">
+                  {lang === "ar" ? "منصة أثر التعليمية" : "Educational Platform"}
+                </div>
+              </div>
             </div>
-            <p
-              className={`px-4 py-2.5 text-xs font-medium leading-relaxed ${
-                isDark
-                  ? "text-white/95 border-t border-white/15"
-                  : "text-white bg-slate-900/30 drop-shadow-xs"
-              }`}
-            >
-              {lang === "ar"
-                ? "رفيقك الذكي للتعليم التقني وتطوير المهارات."
-                : "Your smart companion for technical education & skill development."}
-            </p>
+
+            {/* Slogan with Glowing Highlight (Matching Image 1) */}
+            <div className="pt-1">
+              <h1 className="text-2xl xl:text-3xl font-black italic tracking-tight text-white drop-shadow-md">
+                <span>{lang === "ar" ? "تعلّم .. تطوّر .. " : "Learn .. Develop .. "}</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 via-cyan-400 to-sky-400 drop-shadow-[0_0_18px_rgba(45,212,191,0.6)]">
+                  {lang === "ar" ? "حقّق أهدافك" : "Achieve Your Goals"}
+                </span>
+              </h1>
+              <p className="text-xs xl:text-sm font-medium text-slate-200/90 dark:text-slate-300/90 mt-2 max-w-md leading-relaxed drop-shadow-sm">
+                {lang === "ar"
+                  ? "طريقة أذكى لتعلّم المهارات التقنية، بناء مسارك المهني، وتحقيق طموحاتك مع رفيق الذكاء الاصطناعي."
+                  : "A smarter way to learn technical skills, build your career, and achieve more with your AI learning companion."}
+              </p>
+            </div>
+          </div>
+
+          {/* AI Robot Mascot Sitting on Books (Matching Image 2) */}
+          <div className="relative group pt-1">
+            <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-teal-500/30 via-cyan-500/25 to-sky-500/30 blur-xl opacity-75 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="relative rounded-2xl overflow-hidden border border-white/25 dark:border-white/15 bg-white/[0.12] dark:bg-black/[0.35] backdrop-blur-xl shadow-2xl p-3 flex items-center gap-4 max-w-md">
+              <div className="relative w-32 h-32 xl:w-36 xl:h-36 shrink-0 rounded-xl overflow-hidden border border-teal-400/40 shadow-inner bg-slate-950/70">
+                <img
+                  src="/robot-reading-books.jpg"
+                  alt="Athar AI Robot Mascot Sitting on Books"
+                  className="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+              <div className="space-y-1.5 pe-2">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-teal-500/20 border border-teal-400/40 text-[10.5px] font-black text-teal-300">
+                  <Sparkles className="h-3 w-3 text-teal-300 animate-spin" style={{ animationDuration: "6s" }} />
+                  <span>{lang === "ar" ? "رفيق دراسي ذكي" : "Smart AI Tutor"}</span>
+                </div>
+                <h4 className="text-sm font-bold text-white tracking-wide">
+                  {lang === "ar" ? "تعلّم تفاعلي ومتابعة مستمرة" : "Interactive Study & Support"}
+                </h4>
+                <p className="text-[11px] text-slate-300/85 leading-relaxed">
+                  {lang === "ar"
+                    ? "يجلس رفيقك الآلي معك خطوة بخطوة لشرح الدروس وحل الاختبارات وتقييم إجاباتك فورياً."
+                    : "Your study bot sits with you through lessons, answers questions, and guides your daily progress."}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
