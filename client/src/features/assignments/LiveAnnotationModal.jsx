@@ -715,15 +715,15 @@ export default function LiveAnnotationModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-1 sm:p-4"
+      className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-1 sm:p-4"
       onClick={onClose}
     >
       <div
-        className="glass-panel rounded-2xl sm:rounded-3xl w-full max-w-6xl h-[98dvh] sm:h-[93vh] flex flex-col overflow-hidden shadow-2xl border border-white/25"
+        className="rounded-2xl sm:rounded-3xl w-full max-w-6xl h-[98dvh] sm:h-[93vh] flex flex-col overflow-hidden shadow-[0_25px_80px_rgba(0,0,0,0.7)] border border-slate-200/90 dark:border-teal-500/30 bg-slate-50/95 dark:bg-[#071724]/95 backdrop-blur-2xl text-slate-900 dark:text-white"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Modal Header */}
-        <div className="px-3 sm:px-6 py-2.5 sm:py-3 border-b border-white/30 dark:border-white/10 flex flex-col gap-1.5 bg-white/40 dark:bg-slate-900/50">
+        <div className="px-3 sm:px-6 py-2.5 sm:py-3 border-b border-slate-200/80 dark:border-white/10 flex flex-col gap-1.5 bg-white/90 dark:bg-[#0b1f2e]/90 backdrop-blur-xl shrink-0">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0">
               <h2 className="text-xs sm:text-base font-extrabold truncate max-w-[200px] sm:max-w-md">
@@ -743,11 +743,11 @@ export default function LiveAnnotationModal({
 
             <div className="flex items-center gap-1.5 shrink-0">
               {/* Zoom & View Mode Controls */}
-              <div className="flex items-center gap-0.5 sm:gap-1 glass-subtle px-1 sm:px-1.5 py-0.5 rounded-xl text-xs font-bold">
+              <div className="flex items-center gap-0.5 sm:gap-1 bg-slate-100 dark:bg-white/[0.07] border border-slate-200 dark:border-white/15 px-1 sm:px-1.5 py-0.5 rounded-xl text-xs font-bold shadow-xs">
                 <button
                   type="button"
                   onClick={() => setZoomScale((z) => Math.max(0.5, Math.round((z - 0.15) * 100) / 100))}
-                  className="p-1 rounded-lg hover:bg-white/50 text-slate-700 dark:text-slate-200 transition-colors"
+                  className="p-1 rounded-lg hover:bg-white dark:hover:bg-white/15 text-slate-700 dark:text-slate-200 transition-colors"
                   title={lang === "ar" ? "تصغير (-)" : "Zoom Out (-)"}
                 >
                   <ZoomOut className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -763,7 +763,7 @@ export default function LiveAnnotationModal({
                 <button
                   type="button"
                   onClick={() => setZoomScale((z) => Math.min(2.0, Math.round((z + 0.15) * 100) / 100))}
-                  className="p-1 rounded-lg hover:bg-white/50 text-slate-700 dark:text-slate-200 transition-colors"
+                  className="p-1 rounded-lg hover:bg-white dark:hover:bg-white/15 text-slate-700 dark:text-slate-200 transition-colors"
                   title={lang === "ar" ? "تكبير (+)" : "Zoom In (+)"}
                 >
                   <ZoomIn className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -775,7 +775,7 @@ export default function LiveAnnotationModal({
                   className={`px-1.5 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-bold flex items-center gap-1 transition-all ${
                     viewMode === "fit-page"
                       ? "bg-sky-600 text-white shadow-sm"
-                      : "text-slate-700 dark:text-slate-200 hover:bg-white/50"
+                      : "text-slate-700 dark:text-slate-200 hover:bg-white dark:hover:bg-white/15"
                   }`}
                   title={
                     viewMode === "fit-page"
@@ -803,12 +803,12 @@ export default function LiveAnnotationModal({
 
               {/* Multi-Page Controls */}
               {pages.length > 1 && (
-                <div className="flex items-center gap-0.5 sm:gap-1 glass-subtle px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-xl text-xs font-bold">
+                <div className="flex items-center gap-0.5 sm:gap-1 bg-slate-100 dark:bg-white/[0.07] border border-slate-200 dark:border-white/15 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-xl text-xs font-bold shadow-xs">
                   <button
                     type="button"
                     disabled={pageIdx === 0}
                     onClick={() => goToPage(pageIdx - 1)}
-                    className="p-1 rounded-lg hover:bg-white/50 disabled:opacity-30 transition-colors"
+                    className="p-1 rounded-lg hover:bg-white dark:hover:bg-white/15 disabled:opacity-30 transition-colors"
                     title={lang === "ar" ? "الصفحة السابقة" : "Previous Page"}
                   >
                     <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -829,7 +829,7 @@ export default function LiveAnnotationModal({
                     type="button"
                     disabled={pageIdx >= pages.length - 1}
                     onClick={() => goToPage(pageIdx + 1)}
-                    className="p-1 rounded-lg hover:bg-white/50 disabled:opacity-30 transition-colors"
+                    className="p-1 rounded-lg hover:bg-white dark:hover:bg-white/15 disabled:opacity-30 transition-colors"
                     title={lang === "ar" ? "الصفحة التالية" : "Next Page"}
                   >
                     <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -840,7 +840,7 @@ export default function LiveAnnotationModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="glass-btn-secondary p-1.5 sm:p-2 rounded-xl text-slate-600 dark:text-slate-200"
+                className="p-1.5 sm:p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.15] border border-slate-200 dark:border-white/15 text-slate-600 dark:text-slate-200 transition-colors"
                 aria-label="Close"
               >
                 <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -866,7 +866,7 @@ export default function LiveAnnotationModal({
         </div>
 
         {/* Mobile View Switcher (lg:hidden) */}
-        <div className="lg:hidden px-2.5 py-1.5 bg-slate-100/90 dark:bg-slate-800/80 border-b border-slate-200 dark:border-white/10 flex items-center gap-1.5 shrink-0">
+        <div className="lg:hidden px-2.5 py-1.5 bg-slate-100/95 dark:bg-[#0a1e2c]/95 border-b border-slate-200/80 dark:border-white/10 flex items-center gap-1.5 shrink-0">
           <button
             type="button"
             onClick={() => setMobileTab("canvas")}
@@ -912,7 +912,7 @@ export default function LiveAnnotationModal({
           <>
             {/* Mobile Toolbar (md:hidden, visible only when on canvas) */}
             <div
-              className={`md:hidden px-2.5 py-1.5 border-b border-white/25 dark:border-white/10 flex flex-col gap-1.5 bg-slate-900/5 dark:bg-white/5 shrink-0 ${mobileTab === "notes" ? "hidden" : "flex"
+              className={`md:hidden px-2.5 py-1.5 border-b border-slate-200/80 dark:border-white/10 flex flex-col gap-1.5 bg-slate-50/95 dark:bg-[#091b28]/95 backdrop-blur-xl shrink-0 ${mobileTab === "notes" ? "hidden" : "flex"
                 }`}
             >
               {/* Row 1: Tools + Actions */}
@@ -934,7 +934,7 @@ export default function LiveAnnotationModal({
                         onClick={() => setTool(item.id)}
                         className={`px-2 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-all ${active
                           ? "bg-sky-600 text-white shadow-sm"
-                          : "glass-subtle text-slate-700 dark:text-slate-200"
+                          : "bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-200 border border-slate-200/70 dark:border-white/10"
                           }`}
                       >
                         <Icon className="h-3 w-3" />
@@ -948,7 +948,7 @@ export default function LiveAnnotationModal({
                   <button
                     type="button"
                     onClick={handleUndo}
-                    className="glass-btn-secondary p-1.5 rounded-lg text-slate-600 dark:text-slate-200"
+                    className="p-1.5 rounded-lg bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.12] border border-slate-200/70 dark:border-white/10 text-slate-700 dark:text-slate-200 transition-colors"
                     title="Undo"
                   >
                     <RotateCcw className="h-3 w-3" />
@@ -956,7 +956,7 @@ export default function LiveAnnotationModal({
                   <button
                     type="button"
                     onClick={handleRedo}
-                    className="glass-btn-secondary p-1.5 rounded-lg text-slate-600 dark:text-slate-200"
+                    className="p-1.5 rounded-lg bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.12] border border-slate-200/70 dark:border-white/10 text-slate-700 dark:text-slate-200 transition-colors"
                     title="Redo"
                   >
                     <Redo2 className="h-3 w-3" />
@@ -1000,7 +1000,7 @@ export default function LiveAnnotationModal({
                       onClick={() => setSize(s.px)}
                       className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${size === s.px
                         ? "bg-teal-500 text-white"
-                        : "glass-subtle text-slate-600 dark:text-slate-300"
+                        : "bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-300 border border-slate-200/70 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/[0.12]"
                         }`}
                     >
                       {s.label}
@@ -1011,7 +1011,7 @@ export default function LiveAnnotationModal({
             </div>
 
             {/* Desktop Toolbar (md:flex) */}
-            <div className="hidden md:flex px-4 py-2.5 border-b border-white/25 dark:border-white/10 items-center justify-between gap-2 bg-slate-900/5 dark:bg-white/5 shrink-0">
+            <div className="hidden md:flex px-4 py-2.5 border-b border-slate-200/80 dark:border-white/10 items-center justify-between gap-2 bg-slate-50/95 dark:bg-[#091b28]/95 backdrop-blur-xl shrink-0">
               <div className="flex flex-wrap items-center gap-1.5">
                 {[
                   { id: "pen", icon: Pen, en: "Pen", ar: "قلم" },
@@ -1029,7 +1029,7 @@ export default function LiveAnnotationModal({
                       onClick={() => setTool(item.id)}
                       className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${active
                         ? "bg-sky-600 text-white shadow-md shadow-sky-500/25"
-                        : "glass-subtle text-slate-700 dark:text-slate-200 hover:bg-white/60"
+                        : "bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-200 border border-slate-200/70 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/[0.12]"
                         }`}
                     >
                       <Icon className="h-3.5 w-3.5" />
@@ -1071,7 +1071,7 @@ export default function LiveAnnotationModal({
                       onClick={() => setSize(s.px)}
                       className={`px-2 py-1 rounded-lg text-[11px] font-bold ${size === s.px
                         ? "bg-teal-500 text-white"
-                        : "glass-subtle text-slate-600 dark:text-slate-300"
+                        : "bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-300 border border-slate-200/70 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/[0.12]"
                         }`}
                     >
                       {s.label}
@@ -1084,7 +1084,7 @@ export default function LiveAnnotationModal({
                 <button
                   type="button"
                   onClick={handleUndo}
-                  className="glass-btn-secondary px-2.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1"
+                  className="px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.12] border border-slate-200/70 dark:border-white/10 text-slate-700 dark:text-slate-200 text-xs font-semibold flex items-center gap-1 transition-colors"
                   title="Undo"
                 >
                   <RotateCcw className="h-3.5 w-3.5" />
@@ -1093,7 +1093,7 @@ export default function LiveAnnotationModal({
                 <button
                   type="button"
                   onClick={handleRedo}
-                  className="glass-btn-secondary px-2.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1"
+                  className="px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.12] border border-slate-200/70 dark:border-white/10 text-slate-700 dark:text-slate-200 text-xs font-semibold flex items-center gap-1 transition-colors"
                   title="Redo"
                 >
                   <Redo2 className="h-3.5 w-3.5" />
@@ -1116,7 +1116,7 @@ export default function LiveAnnotationModal({
           {/* Scrollable Worksheet & Live Ink Canvas */}
           <div
             ref={scrollContainerRef}
-            className={`flex-1 h-full min-h-0 w-full overflow-y-auto overflow-x-auto p-2 sm:p-4 md:p-6 bg-slate-200/80 dark:bg-slate-950/80 flex flex-col justify-start items-center relative ${mobileTab === "notes" ? "hidden lg:flex" : "flex"
+            className={`flex-1 h-full min-h-0 w-full overflow-y-auto overflow-x-auto p-2 sm:p-4 md:p-6 bg-slate-200/90 dark:bg-[#040e16] flex flex-col justify-start items-center relative ${mobileTab === "notes" ? "hidden lg:flex" : "flex"
               }`}
             style={{
               scrollbarWidth: "thin",
@@ -1304,7 +1304,7 @@ export default function LiveAnnotationModal({
 
           {/* Right Panel: Student Notes / Teacher Correction & Marks / Graded View */}
           <div
-            className={`w-full lg:w-80 border-t lg:border-t-0 lg:border-s border-white/25 dark:border-white/10 p-3.5 sm:p-4 flex flex-col justify-between gap-3 sm:gap-4 bg-white/55 dark:bg-slate-900/65 overflow-y-auto ${mobileTab === "canvas" ? "hidden lg:flex" : "flex"
+            className={`w-full lg:w-80 border-t lg:border-t-0 lg:border-s border-slate-200/80 dark:border-white/10 p-3.5 sm:p-4 flex flex-col justify-between gap-3 sm:gap-4 bg-slate-50/95 dark:bg-[#0a1e2c]/95 backdrop-blur-xl overflow-y-auto ${mobileTab === "canvas" ? "hidden lg:flex" : "flex"
               }`}
           >
             <div className="space-y-3.5">
@@ -1312,14 +1312,14 @@ export default function LiveAnnotationModal({
               <button
                 type="button"
                 onClick={() => setMobileTab("canvas")}
-                className="lg:hidden w-full py-1.5 px-3 rounded-xl glass-subtle text-xs font-bold text-sky-600 dark:text-sky-300 flex items-center justify-center gap-1.5"
+                className="lg:hidden w-full py-1.5 px-3 rounded-xl bg-slate-100 dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 text-xs font-bold text-sky-600 dark:text-sky-300 flex items-center justify-center gap-1.5"
               >
                 <ChevronLeft className="h-4 w-4" />
                 <span>{lang === "ar" ? "العودة لتصفح ورقة العمل والرسم" : "Back to Worksheet & Drawing"}</span>
               </button>
 
               {assignment?.instructions && (
-                <div className="p-3 rounded-2xl glass-subtle space-y-1">
+                <div className="p-3 rounded-2xl bg-white/70 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 space-y-1">
                   <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
                     {lang === "ar" ? "تعليمات المحاضر" : "Instructions"}
                   </div>
@@ -1540,7 +1540,7 @@ export default function LiveAnnotationModal({
                     )}
 
                     {(answerText || submission?.answerText) && (
-                      <div className="p-3 rounded-2xl glass-subtle space-y-1">
+                      <div className="p-3 rounded-2xl bg-white/70 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 space-y-1">
                         <div className="text-[11px] font-bold text-slate-500">
                           {lang === "ar" ? "إجابات وملاحظات الطالب المستخرجة من الورقة" : "Student Answers Extracted from Worksheet"}
                         </div>
@@ -1625,7 +1625,7 @@ export default function LiveAnnotationModal({
                         )}
 
                         {submission?.answerText && (
-                          <div className="p-3 rounded-2xl glass-subtle text-xs space-y-1">
+                          <div className="p-3 rounded-2xl bg-white/70 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 text-xs space-y-1">
                             <div className="font-bold text-slate-500">
                               {lang === "ar" ? "ملاحظتك المرفقة مع الإجابة" : "Your Submitted Note"}
                             </div>
@@ -1661,7 +1661,7 @@ export default function LiveAnnotationModal({
                         </div>
 
                         {submission?.answerText && (
-                          <div className="p-3 rounded-2xl glass-subtle text-xs space-y-1">
+                          <div className="p-3 rounded-2xl bg-white/70 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 text-xs space-y-1">
                             <div className="font-bold text-slate-500">
                               {lang === "ar" ? "ملاحظتك المرفقة مع الإجابة" : "Your Submitted Note"}
                             </div>
@@ -1672,7 +1672,7 @@ export default function LiveAnnotationModal({
                     )
                   ) : (
                     /* When viewing unsubmitted worksheet preview */
-                    <div className="p-3.5 rounded-2xl glass-subtle space-y-2 text-xs">
+                    <div className="p-3.5 rounded-2xl bg-white/70 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 space-y-2 text-xs">
                       <div className="font-bold text-sky-700 dark:text-sky-300 flex items-center gap-1.5">
                         <FileText className="h-4 w-4" />
                         <span>{lang === "ar" ? "معاينة ورقة العمل PDF" : "Worksheet PDF Preview"}</span>
@@ -1694,7 +1694,7 @@ export default function LiveAnnotationModal({
             </div>
 
             {/* Submit / Save Action Footer */}
-            <div className="pt-2 border-t border-white/30 dark:border-white/10 flex flex-col gap-2">
+            <div className="pt-2 border-t border-slate-200/80 dark:border-white/10 flex flex-col gap-2">
               {mode === "student" && (
                 <button
                   type="button"
@@ -1752,7 +1752,7 @@ export default function LiveAnnotationModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="w-full py-2 px-4 rounded-xl glass-btn-secondary text-xs font-semibold"
+                className="w-full py-2 px-4 rounded-xl bg-slate-200/80 hover:bg-slate-300/80 dark:bg-white/[0.08] dark:hover:bg-white/[0.15] border border-slate-300/60 dark:border-white/10 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors"
               >
                 {lang === "ar" ? "إغلاق" : "Close"}
               </button>
