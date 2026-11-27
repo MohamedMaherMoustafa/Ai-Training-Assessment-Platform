@@ -20,6 +20,7 @@ import {
   Swords,
 } from "lucide-react";
 import AIBossBattleArena from "./components/AIBossBattleArena";
+import ProactiveMotivationWidget from "../student/ProactiveMotivationWidget";
 import { useAuth } from "../../context/AuthContext";
 import { useLang } from "../../context/LangContext";
 import {
@@ -185,6 +186,9 @@ export default function IQPuzzlesModule() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 sm:space-y-8 animate-fadeIn pb-16">
+      {/* Proactive Motivation Coach Widget */}
+      <ProactiveMotivationWidget />
+
       {/* Top Hero Banner */}
       <div className="relative overflow-hidden rounded-[26px] glass-panel border-teal-400/35 p-6 sm:p-7 shadow-2xl">
         {/* Glowing Ambient Background Elements */}
