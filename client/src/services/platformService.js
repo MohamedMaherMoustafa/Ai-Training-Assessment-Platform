@@ -1665,6 +1665,10 @@ export async function sendDirectChatMessage({
   const unreadField = senderRole === "instructor" ? "unreadByStudent" : "unreadByInstructor";
   const nextUnread = (currentMeta[unreadField] || 0) + 1;
 
+  // Track per-recipient unread count for reliable badges across both teacher-student & peer student chats
+  const unreadByRecipient = { ...(currentMeta.unreadByRecipient || {}) };
+  unreadByRecipient[recipientId] = (unreadByRecipient[recipientId] || 0) + 1;
+
   await set(metaRef, {
     ...currentMeta,
     instructorId: senderRole === "instructor" ? senderId : recipientId,
@@ -1675,19 +1679,32 @@ export async function sendDirectChatMessage({
     lastSenderId: senderId,
     lastMessageTimestamp: Date.now(),
     [unreadField]: nextUnread,
+    unreadByRecipient,
     updatedAt: Date.now(),
   });
 
   // Push instant notification to recipient
   try {
     const isTeacherSender = senderRole === "instructor";
+    const isPeerStudent = senderRole === "student" && !recipientName?.includes("Instructor");
+    const notifTitleEn = isTeacherSender
+      ? "New Message from Instructor"
+      : isPeerStudent
+      ? "New Message from Classmate"
+      : "New Student Message";
+    const notifTitleAr = isTeacherSender
+      ? "رسالة جديدة من المحاضر"
+      : isPeerStudent
+      ? "رسالة جديدة من زميلك"
+      : "رسالة جديدة من الطالب";
+
     await pushNotification(recipientId, {
-      titleEn: isTeacherSender ? "New Message from Instructor" : "New Student Message",
-      titleAr: isTeacherSender ? "رسالة جديدة من المحاضر" : "رسالة جديدة من الطالب",
+      titleEn: notifTitleEn,
+      titleAr: notifTitleAr,
       bodyEn: `${senderName}: ${text.slice(0, 90)}${text.length > 90 ? "..." : ""}`,
       bodyAr: `${senderName}: ${text.slice(0, 90)}${text.length > 90 ? "..." : ""}`,
       type: "info",
-      link: isTeacherSender ? "/student/chat" : "/instructor/chat",
+      link: isTeacherSender ? "/student/chat" : "/student/chat",
     });
   } catch (e) {
     console.warn("Direct chat notification note:", e.message);
@@ -1696,13 +1713,197 @@ export async function sendDirectChatMessage({
   return newMsg;
 }
 
-export async function markDirectChatRead(channelId, userRole) {
+export async function markDirectChatRead(channelId, userRole, currentUserId = null) {
   if (!channelId) return;
   const metaRef = ref(rtdb, `directChats/${channelId}/metadata`);
   const snap = await get(metaRef);
   if (!snap.exists()) return;
   const unreadField = userRole === "instructor" ? "unreadByInstructor" : "unreadByStudent";
-  await update(metaRef, { [unreadField]: 0 });
+  const patch = { [unreadField]: 0 };
+  if (currentUserId) {
+    patch[`unreadByRecipient/${currentUserId}`] = 0;
+  }
+  await update(metaRef, patch);
+}
+
+/* ==================== PEER-TO-PEER STUDENT FRIENDSHIPS & COURSE CLASSMATES ==================== */
+
+export function getFriendshipId(uidA, uidB) {
+  if (!uidA || !uidB) return null;
+  return [uidA, uidB].sort().join("__");
+}
+
+export function subscribeStudentFriendships(studentUid, callback) {
+  if (!studentUid) {
+    callback([]);
+    return () => {};
+  }
+  const friendshipsRef = ref(rtdb, "friendships");
+  return onValue(friendshipsRef, (snap) => {
+    if (!snap.exists()) {
+      callback([]);
+      return;
+    }
+    const val = snap.val();
+    const list = Object.entries(val)
+      .map(([id, data]) => ({ id, ...data }))
+      .filter((f) => f.user1 === studentUid || f.user2 === studentUid || f.senderId === studentUid || f.receiverId === studentUid);
+    callback(list);
+  });
+}
+
+export async function sendFriendRequest({
+  senderId,
+  senderName,
+  receiverId,
+  receiverName,
+  sharedCourseTitles = [],
+}) {
+  if (!senderId || !receiverId || senderId === receiverId) {
+    throw new Error("INVALID_REQUEST_PARAMETERS");
+  }
+  if (!Array.isArray(sharedCourseTitles) || sharedCourseTitles.length === 0) {
+    throw new Error("MUST_SHARE_COURSE");
+  }
+
+  const friendshipId = getFriendshipId(senderId, receiverId);
+  const data = {
+    id: friendshipId,
+    user1: [senderId, receiverId].sort()[0],
+    user2: [senderId, receiverId].sort()[1],
+    senderId,
+    senderName: senderName || "Classmate",
+    receiverId,
+    receiverName: receiverName || "Classmate",
+    sharedCourseTitles,
+    status: "pending",
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+  };
+
+  await set(ref(rtdb, `friendships/${friendshipId}`), data);
+
+  // Notify the receiver
+  try {
+    const rawCourse = sharedCourseTitles[0];
+    const courseLabel = rawCourse?.ar || rawCourse?.en || (typeof rawCourse === "string" ? rawCourse : "المقرر");
+    await pushNotification(receiverId, {
+      titleEn: "New Classmate Friend Request",
+      titleAr: "طلب صداقة جديد من زميل دراسة",
+      bodyEn: `${senderName} sent you a friend request in "${courseLabel}".`,
+      bodyAr: `أرسل لك الزميل ${senderName} طلب صداقة في مقرر "${courseLabel}".`,
+      type: "info",
+      link: "/student/chat",
+    });
+  } catch (err) {
+    console.warn("Friend request notification error:", err);
+  }
+
+  return data;
+}
+
+export async function acceptFriendRequest(friendshipId, acceptorId, acceptorName) {
+  if (!friendshipId) return;
+  const fRef = ref(rtdb, `friendships/${friendshipId}`);
+  const snap = await get(fRef);
+  if (!snap.exists()) return;
+  const current = snap.val();
+
+  await update(fRef, {
+    status: "accepted",
+    acceptedAt: Date.now(),
+    updatedAt: Date.now(),
+  });
+
+  // Notify the requester
+  const otherUid = current.senderId === acceptorId ? current.receiverId : current.senderId;
+  try {
+    await pushNotification(otherUid, {
+      titleEn: "Friend Request Accepted 🎉",
+      titleAr: "تم قبول طلب الصداقة 🎉",
+      bodyEn: `${acceptorName} accepted your friend request! You can now chat in Direct Messages.`,
+      bodyAr: `وافق ${acceptorName} على طلب الصداقة! يمكنكما الآن التحدث والتواصل المباشر.`,
+      type: "success",
+      link: "/student/chat",
+    });
+  } catch (err) {
+    console.warn("Accept friend request notification error:", err);
+  }
+}
+
+export async function declineFriendRequest(friendshipId) {
+  if (!friendshipId) return;
+  await remove(ref(rtdb, `friendships/${friendshipId}`));
+}
+
+export async function cancelFriendRequest(friendshipId) {
+  if (!friendshipId) return;
+  await remove(ref(rtdb, `friendships/${friendshipId}`));
+}
+
+export async function listCourseClassmates(studentUid) {
+  if (!studentUid) return [];
+  try {
+    const [allCourses, allStudents] = await Promise.all([
+      listCourses(),
+      listUsers("student"),
+    ]);
+
+    const currentStudent = allStudents.find((s) => s.uid === studentUid);
+    const myEnrolledCourseIds = new Set(currentStudent?.enrolledCourseIds || []);
+
+    // Also collect courses where c.enrolledStudents contains studentUid
+    const mySharedCourses = allCourses.filter(
+      (c) =>
+        (Array.isArray(c.enrolledStudents) && c.enrolledStudents.includes(studentUid)) ||
+        myEnrolledCourseIds.has(c.id)
+    );
+
+    if (mySharedCourses.length === 0) {
+      return [];
+    }
+
+    const classmatesMap = new Map();
+
+    mySharedCourses.forEach((course) => {
+      const courseEnrolled = Array.isArray(course.enrolledStudents) ? course.enrolledStudents : [];
+
+      allStudents.forEach((st) => {
+        if (st.uid === studentUid) return; // skip self
+
+        const isEnrolledInCourse =
+          courseEnrolled.includes(st.uid) || (st.enrolledCourseIds || []).includes(course.id);
+
+        if (isEnrolledInCourse) {
+          if (!classmatesMap.has(st.uid)) {
+            classmatesMap.set(st.uid, {
+              uid: st.uid,
+              name: st.name || { en: st.displayName || st.username || "Classmate", ar: st.displayName || st.username || "زميل" },
+              displayName: st.displayName || st.username || "Classmate",
+              username: st.username,
+              email: st.email,
+              avatar: st.avatar || null,
+              role: "student",
+              sharedCourses: [],
+            });
+          }
+          const classmate = classmatesMap.get(st.uid);
+          const alreadyAdded = classmate.sharedCourses.some((sc) => sc.id === course.id);
+          if (!alreadyAdded) {
+            classmate.sharedCourses.push({
+              id: course.id,
+              title: course.title,
+            });
+          }
+        }
+      });
+    });
+
+    return Array.from(classmatesMap.values());
+  } catch (err) {
+    console.error("listCourseClassmates error:", err);
+    return [];
+  }
 }
 
 // -------------------------------------------------------------
