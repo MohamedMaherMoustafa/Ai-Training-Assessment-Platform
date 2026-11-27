@@ -616,7 +616,7 @@ export default function StudentDashboard() {
     },
     {
       to: "/student/chat",
-      label: lang === "ar" ? "محادثة المحاضر" : "Teacher Chat",
+      label: lang === "ar" ? "المحادثات" : "Chat",
       icon: MessageSquare,
     },
     {
