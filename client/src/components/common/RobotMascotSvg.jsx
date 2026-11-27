@@ -33,7 +33,7 @@ export default function RobotMascotSvg({
     <svg
       width={width}
       height={height}
-      viewBox="0 0 118 104"
+      viewBox="0 0 120 104"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
@@ -66,9 +66,9 @@ export default function RobotMascotSvg({
 
         <linearGradient
           id={signGradId}
-          x1="62"
+          x1="63"
           y1="2"
-          x2="114"
+          x2="118"
           y2="25"
           gradientUnits="userSpaceOnUse"
         >
@@ -176,28 +176,36 @@ export default function RobotMascotSvg({
               {/* Sign Board */}
               <g filter={`url(#${shadowFilterId})`}>
                 <rect
-                  x="62"
+                  x="63"
                   y="2"
-                  width="52"
-                  height="23"
+                  width="54"
+                  height="22.5"
                   rx="6.5"
                   fill={`url(#${signGradId})`}
                   stroke="#ffffff"
                   strokeWidth="1.6"
                 />
-                {/* LED Status Indicator */}
-                <circle cx="69" cy="8" r="2" fill={colors.ledColor} className="animate-pulse" />
-                {/* Sign Text */}
+                {/* LED Status Indicator - moved to subtle top corner so it never collides with text */}
+                <circle cx="68" cy="6" r="1.3" fill={colors.ledColor} className="animate-pulse" opacity="0.85" />
+                {/* Sign Text & Icon Perfectly Scaled & Centered */}
                 <text
-                  x="91"
-                  y="14.5"
+                  x="90.5"
+                  y="13.5"
                   fill="#ffffff"
-                  fontSize="10.5"
+                  fontSize={
+                    String(signText).length >= 8
+                      ? "7.5"
+                      : String(signText).length >= 6
+                      ? "8.2"
+                      : String(signText).length >= 4
+                      ? "8.8"
+                      : "9.5"
+                  }
                   fontWeight="900"
                   textAnchor="middle"
                   dominantBaseline="central"
-                  fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
-                  letterSpacing="0.6"
+                  fontFamily="'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', system-ui, sans-serif"
+                  letterSpacing="0.2"
                 >
                   {signText}
                 </text>

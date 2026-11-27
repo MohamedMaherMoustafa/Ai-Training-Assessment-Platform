@@ -293,7 +293,7 @@ export default function AtharVirtualCompanion({ onOpenChatbot = () => {} }) {
       return "ZZZ...";
     }
     if (companionMood === "celebrating") {
-      return lang === "ar" ? "بطل! 🎓" : "HERO! 🎓";
+      return lang === "ar" ? "بطل 🎓" : "HERO 🎓";
     }
     return lang === "ar" ? "أثر 🤖" : "ATHAR 🤖";
   }, [companionMood, lang]);
