@@ -17,7 +17,9 @@ import {
   Compass,
   Play,
   Lightbulb,
+  Swords,
 } from "lucide-react";
+import AIBossBattleArena from "./components/AIBossBattleArena";
 import { useAuth } from "../../context/AuthContext";
 import { useLang } from "../../context/LangContext";
 import {
@@ -323,6 +325,19 @@ export default function IQPuzzlesModule() {
           <Award className="h-4 w-4" />
           <span>{lang === "ar" ? "المهارات والأوسمة" : "IQ Skills & Badges"}</span>
         </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("battle")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+            activeTab === "battle"
+              ? "glass-btn-primary ring-2 ring-rose-500/50"
+              : "glass-btn-secondary"
+          }`}
+        >
+          <Swords className="h-4 w-4 text-rose-500 animate-pulse" />
+          <span>{lang === "ar" ? "معارك الروبوتات ⚔️" : "AI Boss Battles ⚔️"}</span>
+        </button>
       </div>
 
       {/* TAB 1: Levels Roadmap */}
@@ -506,6 +521,29 @@ export default function IQPuzzlesModule() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* TAB 4: AI Boss Battles Arena */}
+      {activeTab === "battle" && (
+        <AIBossBattleArena
+          user={user}
+          lang={lang}
+          onBattleVictory={(rewardCoins, rewardXp, bossId) => {
+            playCoinSound();
+            setStats((prev) => {
+              const updatedCoins = (prev.coins || 0) + (rewardCoins || 0);
+              const updated = {
+                ...prev,
+                coins: updatedCoins,
+              };
+              if (user?.uid) {
+                saveStudentIQProgress(user.uid, updated);
+              }
+              return updated;
+            });
+          }}
+          onBackToMap={() => setActiveTab("levels")}
+        />
       )}
     </div>
   );

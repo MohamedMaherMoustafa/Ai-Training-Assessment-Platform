@@ -36,6 +36,7 @@ import ScoreboardModule from "../scoreboard/ScoreboardModule";
 import WeeklyReportsModule from "./WeeklyReportsModule";
 import IQPuzzlesModule from "../puzzles/IQPuzzlesModule";
 import StudentStoreModule from "../store/StudentStoreModule";
+import ProactiveMotivationWidget from "./ProactiveMotivationWidget";
 import { useAuth } from "../../context/AuthContext";
 import { useLang } from "../../context/LangContext";
 import { useTheme } from "../../context/ThemeContext";
@@ -658,6 +659,7 @@ export default function StudentDashboard() {
 
   return (
     <AppLayout navItems={navItems}>
+      <ProactiveMotivationWidget activeInstructorId={activeInstructorId} />
       <Routes>
         <Route
           index

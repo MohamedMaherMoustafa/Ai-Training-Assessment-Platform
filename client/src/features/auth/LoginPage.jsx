@@ -419,11 +419,10 @@ export default function LoginPage() {
           {/* Peeking Robot Mascot Behind the Card - Head and Hands Outside */}
           <div
             aria-hidden="true"
-            className={`absolute end-3 -top-16 sm:top-24 sm:-right-22 md:-right-26 lg:-right-28 sm:end-auto z-0 pointer-events-none transition-all duration-500 ease-out select-none origin-bottom-left ${
-              isFieldFocused
+            className={`absolute end-3 -top-16 sm:top-24 sm:-right-22 md:-right-26 lg:-right-28 sm:end-auto z-0 pointer-events-none transition-all duration-500 ease-out select-none origin-bottom-left ${isFieldFocused
                 ? "opacity-100 translate-x-0 scale-100 rotate-12"
                 : "opacity-0 -translate-x-8 scale-75 rotate-0"
-            }`}
+              }`}
           >
             {/* Robot Mascot Head & Hands Peeking from Behind the Card */}
             <div className="drop-shadow-[0_16px_32px_rgba(20,184,166,0.5)]">

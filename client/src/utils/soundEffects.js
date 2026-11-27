@@ -173,5 +173,113 @@ export function playCoinSound() {
   }
 }
 
+/**
+ * Energy strike sound when player hits an AI Boss.
+ */
+export function playBattleAttackSound() {
+  if (!isSoundEnabled()) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(600, now);
+    osc.frequency.exponentialRampToValueAtTime(200, now + 0.15);
+
+    gain.gain.setValueAtTime(0.12, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.16);
+  } catch {}
+}
+
+/**
+ * High-voltage critical hit sound for fast answers.
+ */
+export function playCriticalHitSound() {
+  if (!isSoundEnabled()) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    const now = ctx.currentTime;
+    [440, 880, 1320].forEach((freq, idx) => {
+      const start = now + idx * 0.04;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(freq, start);
+      osc.frequency.exponentialRampToValueAtTime(freq * 1.5, start + 0.1);
+
+      gain.gain.setValueAtTime(0.1, start);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.14);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(start);
+      osc.stop(start + 0.15);
+    });
+  } catch {}
+}
+
+/**
+ * Low impact sound when the player takes damage from the AI Boss.
+ */
+export function playPlayerHurtSound() {
+  if (!isSoundEnabled()) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "square";
+    osc.frequency.setValueAtTime(160, now);
+    osc.frequency.exponentialRampToValueAtTime(60, now + 0.2);
+
+    gain.gain.setValueAtTime(0.14, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.23);
+  } catch {}
+}
+
+/**
+ * Triumphant fanfare when the player defeats an AI Boss.
+ */
+export function playBossDefeatSound() {
+  if (!isSoundEnabled()) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    const now = ctx.currentTime;
+    const notes = [523.25, 659.25, 783.99, 1046.5]; // C5 - E5 - G5 - C6
+    notes.forEach((freq, idx) => {
+      const start = now + idx * 0.1;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq, start);
+
+      gain.gain.setValueAtTime(0.001, start);
+      gain.gain.linearRampToValueAtTime(0.14, start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.35);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(start);
+      osc.stop(start + 0.38);
+    });
+  } catch {}
+}
+
+
 
 
