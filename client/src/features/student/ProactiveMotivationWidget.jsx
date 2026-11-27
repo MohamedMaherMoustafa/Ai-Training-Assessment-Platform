@@ -285,7 +285,8 @@ export default function ProactiveMotivationWidget({ activeInstructorId = null })
             type="button"
             onClick={handleDismiss}
             title={lang === "ar" ? "إخفاء التنبيه" : "Dismiss"}
-            className="p-1.5 rounded-xl glass-subtle hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-all cursor-pointer"
+            className="p-1.5 rounded-xl bg-white/85 hover:bg-white text-slate-700 hover:text-rose-600 dark:bg-white/10 dark:hover:bg-white/20 dark:text-slate-200 dark:hover:text-rose-300 border border-slate-300/80 dark:border-white/15 shadow-sm transition-all hover:scale-105 active:scale-95 cursor-pointer"
+            aria-label={lang === "ar" ? "إخفاء التنبيه" : "Dismiss"}
           >
             <X className="h-4 w-4" />
           </button>
