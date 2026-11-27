@@ -11,7 +11,6 @@ import {
   MessageSquare,
   X,
   Minimize2,
-  Smile,
   Moon,
   ChevronRight,
   ChevronLeft,
@@ -63,38 +62,18 @@ const STUDY_TIPS = [
       en: "A 10-minute review before sleep prompts your brain to organize and consolidate neural links during deep sleep.",
     },
   },
-];
-
-// Clean, humorous developer & technology jokes
-const DEV_JOKES = [
   {
-    joke: {
-      ar: "لماذا يفضل المبرمجون الوضع الليلي (Dark Mode)؟ لأن الضوء يجذب الحشرات والـ (Bugs)! 🐛😂",
-      en: "Why do programmers prefer Dark Mode? Because light attracts bugs! 🐛😂",
+    category: { ar: "تقنية فاينمان 🗣️", en: "Feynman Technique 🗣️" },
+    text: {
+      ar: "أفضل طريقة للتأكد من فهمك لدرس معقد هي محاولة شرحه بكلمات بسيطة جداً كأنك تعلم طفلاً صغيراً.",
+      en: "The best test of true understanding is explaining a complex concept in plain, simple terms to a beginner.",
     },
   },
   {
-    joke: {
-      ar: "سألوا روبوتاً: ما هو طعامك المفضل؟ قال: الميكرو-شيبس (Microchips) مع بايتس حارة! 🍟🤖",
-      en: "They asked a robot what its favorite snack was. It replied: Microchips with extra hot bytes! 🍟🤖",
-    },
-  },
-  {
-    joke: {
-      ar: "هناك 10 أنواع من الناس في العالم: من يفهمون النظام الثنائي (Binary)، ومن لا يفهمونه! 0101 😄",
-      en: "There are 10 types of people in the world: those who understand binary, and those who don't! 0101 😄",
-    },
-  },
-  {
-    joke: {
-      ar: "المبرمج لا ينام أبداً.. هو فقط يضع دماغه في وضع الـ Standby لحين وصول كود جديد! 😴⚡",
-      en: "Programmers don't sleep—they just put their brain in standby mode awaiting the next deploy! 😴⚡",
-    },
-  },
-  {
-    joke: {
-      ar: "طرد المعلم حلقة التكرار (While Loop) من الفصل.. لأنها ظلت تتكلم إلى الأبد بدون توقف! ♾️🤣",
-      en: "The teacher expelled the While Loop from class.. because it kept talking forever without stopping! ♾️🤣",
+    category: { ar: "التكرار المتباعد 📅", en: "Spaced Repetition 📅" },
+    text: {
+      ar: "مراجعة المعلومة بعد يوم، ثم 3 أيام، ثم أسبوع تنقلها من الذاكرة اللحظية إلى الذاكرة الدائمة مدى الحياة.",
+      en: "Reviewing material after 1 day, 3 days, and 1 week locks it from short-term to permanent lifetime recall.",
     },
   },
 ];
@@ -109,8 +88,6 @@ export default function AtharVirtualCompanion({ onOpenChatbot = () => {} }) {
   });
   const [bubbleOpen, setBubbleOpen] = useState(false);
   const [tipIndex, setTipIndex] = useState(0);
-  const [jokeIndex, setJokeIndex] = useState(0);
-  const [viewMode, setViewMode] = useState("tip"); // 'tip' | 'joke' | 'status'
   const [speaking, setSpeaking] = useState(false);
 
   // Companion visual customization from Student Store
@@ -256,29 +233,16 @@ export default function AtharVirtualCompanion({ onOpenChatbot = () => {} }) {
     if (!bubbleOpen) {
       setBubbleOpen(true);
     } else {
-      // Cycle to next tip / joke
-      if (viewMode === "tip") {
-        setTipIndex((prev) => (prev + 1) % STUDY_TIPS.length);
-      } else {
-        setJokeIndex((prev) => (prev + 1) % DEV_JOKES.length);
-      }
+      setTipIndex((prev) => (prev + 1) % STUDY_TIPS.length);
     }
   };
 
   const handleNextTip = () => {
     playClickSound();
-    setViewMode("tip");
     setTipIndex((prev) => (prev + 1) % STUDY_TIPS.length);
   };
 
-  const handleNextJoke = () => {
-    playClickSound();
-    setViewMode("joke");
-    setJokeIndex((prev) => (prev + 1) % DEV_JOKES.length);
-  };
-
   const currentTip = STUDY_TIPS[tipIndex];
-  const currentJoke = DEV_JOKES[jokeIndex];
   const studentFirstName = user?.displayName?.split(" ")[0] || user?.username || "صديقي";
 
   // Effective Hat: In celebration mode, default to graduation cap if student didn't equip another hat
@@ -343,14 +307,9 @@ export default function AtharVirtualCompanion({ onOpenChatbot = () => {} }) {
               <button
                 type="button"
                 onClick={() => {
-                  const speechText =
-                    viewMode === "tip"
-                      ? `${lang === "ar" ? currentTip.category.ar : currentTip.category.en}. ${
-                          lang === "ar" ? currentTip.text.ar : currentTip.text.en
-                        }`
-                      : lang === "ar"
-                      ? currentJoke.joke.ar
-                      : currentJoke.joke.en;
+                  const speechText = `${lang === "ar" ? currentTip.category.ar : currentTip.category.en}. ${
+                    lang === "ar" ? currentTip.text.ar : currentTip.text.en
+                  }`;
                   toggleTTS(speechText);
                 }}
                 className={`p-1 rounded-lg transition-colors cursor-pointer ${
@@ -430,29 +389,15 @@ export default function AtharVirtualCompanion({ onOpenChatbot = () => {} }) {
             </div>
           )}
 
-          {/* Dynamic Content: Study Tip or Dev Joke */}
-          <div className="space-y-1.5 min-h-[72px]">
-            {viewMode === "tip" ? (
-              <>
-                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-500/15 text-[10px] font-extrabold text-teal-700 dark:text-teal-300">
-                  <Brain className="h-2.5 w-2.5 text-teal-500" />
-                  <span>{lang === "ar" ? currentTip.category.ar : currentTip.category.en}</span>
-                </div>
-                <p className="text-xs font-bold text-slate-800 dark:text-slate-100 leading-relaxed">
-                  {lang === "ar" ? currentTip.text.ar : currentTip.text.en}
-                </p>
-              </>
-            ) : (
-              <>
-                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-500/15 text-[10px] font-extrabold text-indigo-700 dark:text-indigo-300">
-                  <Smile className="h-2.5 w-2.5 text-indigo-500" />
-                  <span>{lang === "ar" ? "طرفة برمجية 🤖" : "Dev Joke 🤖"}</span>
-                </div>
-                <p className="text-xs font-bold text-slate-800 dark:text-slate-100 leading-relaxed">
-                  {lang === "ar" ? currentJoke.joke.ar : currentJoke.joke.en}
-                </p>
-              </>
-            )}
+          {/* Dynamic Content: Study Tip */}
+          <div className="space-y-1.5 min-h-[68px]">
+            <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-500/15 text-[10px] font-extrabold text-teal-700 dark:text-teal-300">
+              <Brain className="h-2.5 w-2.5 text-teal-500" />
+              <span>{lang === "ar" ? currentTip.category.ar : currentTip.category.en}</span>
+            </div>
+            <p className="text-xs font-bold text-slate-800 dark:text-slate-100 leading-relaxed">
+              {lang === "ar" ? currentTip.text.ar : currentTip.text.en}
+            </p>
           </div>
 
           {/* Action Dock Buttons */}
@@ -461,25 +406,10 @@ export default function AtharVirtualCompanion({ onOpenChatbot = () => {} }) {
               <button
                 type="button"
                 onClick={handleNextTip}
-                className={`px-2.5 py-1 rounded-xl text-[10.5px] font-bold transition-all cursor-pointer ${
-                  viewMode === "tip"
-                    ? "bg-teal-500 text-white shadow-sm"
-                    : "glass-subtle text-slate-600 dark:text-slate-300 hover:text-teal-500"
-                }`}
+                className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-teal-500 text-white text-[10.5px] font-bold shadow-sm hover:bg-teal-600 transition-all cursor-pointer"
               >
-                💡 {lang === "ar" ? "نصيحة" : "Tip"}
-              </button>
-
-              <button
-                type="button"
-                onClick={handleNextJoke}
-                className={`px-2.5 py-1 rounded-xl text-[10.5px] font-bold transition-all cursor-pointer ${
-                  viewMode === "joke"
-                    ? "bg-indigo-500 text-white shadow-sm"
-                    : "glass-subtle text-slate-600 dark:text-slate-300 hover:text-indigo-500"
-                }`}
-              >
-                😂 {lang === "ar" ? "طرفة" : "Joke"}
+                <RefreshCw className="h-3 w-3" />
+                <span>{lang === "ar" ? "نصيحة أخرى" : "Next Tip"}</span>
               </button>
             </div>
 
