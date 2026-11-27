@@ -21,6 +21,7 @@ import {
   Brain,
   ShoppingBag,
   Sparkles,
+  Swords,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -36,6 +37,7 @@ import ScoreboardModule from "../scoreboard/ScoreboardModule";
 import WeeklyReportsModule from "./WeeklyReportsModule";
 import IQPuzzlesModule from "../puzzles/IQPuzzlesModule";
 import StudentStoreModule from "../store/StudentStoreModule";
+import LiveQuizDuelModule from "../duel/LiveQuizDuelModule";
 import ProactiveMotivationWidget from "./ProactiveMotivationWidget";
 import { useAuth } from "../../context/AuthContext";
 import { useLang } from "../../context/LangContext";
@@ -625,6 +627,11 @@ export default function StudentDashboard() {
     },
     { to: "/student/quizzes", label: lang === "ar" ? "الاختبارات" : "Quizzes", icon: ClipboardCheck },
     {
+      to: "/student/duels",
+      label: lang === "ar" ? "سباق وتحديات 1v1 🏎️⚔️" : "Live 1v1 Duels 🏎️⚔️",
+      icon: Swords,
+    },
+    {
       to: "/student/scoreboard",
       label: lang === "ar" ? "لوحة المتصدرين" : "Top 3 Scoreboard",
       icon: Trophy,
@@ -706,6 +713,12 @@ export default function StudentDashboard() {
           path="quizzes"
           element={wrapFiltered(
             <QuizzesModule mode="student" activeInstructorId={activeInstructorId} />
+          )}
+        />
+        <Route
+          path="duels"
+          element={wrapFiltered(
+            <LiveQuizDuelModule activeInstructorId={activeInstructorId} />
           )}
         />
         <Route

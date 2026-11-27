@@ -308,6 +308,54 @@ export function playCompanionChirpSound() {
   } catch {}
 }
 
+/**
+ * Race countdown beep for 1v1 duels.
+ */
+export function playRaceCountdownSound(isGo = false) {
+  if (!isSoundEnabled()) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = isGo ? "triangle" : "sine";
+    osc.frequency.setValueAtTime(isGo ? 880 : 440, now);
+    if (isGo) {
+      osc.frequency.exponentialRampToValueAtTime(1760, now + 0.25);
+    }
+    gain.gain.setValueAtTime(0.12, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + (isGo ? 0.35 : 0.18));
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + (isGo ? 0.36 : 0.19));
+  } catch {}
+}
+
+/**
+ * Nitro speed boost whoosh sound when answering correctly in race duel.
+ */
+export function playNitroBoostSound() {
+  if (!isSoundEnabled()) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(220, now);
+    osc.frequency.exponentialRampToValueAtTime(880, now + 0.18);
+    gain.gain.setValueAtTime(0.08, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.23);
+  } catch {}
+}
+
 
 
 

@@ -295,6 +295,15 @@ export default function ProactiveMotivationWidget({ activeInstructorId = null })
 
           <button
             type="button"
+            onClick={() => navigate("/student/duels")}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-600 text-white text-xs font-black shadow-md shadow-amber-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+          >
+            <Swords className="h-3.5 w-3.5 text-yellow-200" />
+            <span>{lang === "ar" ? "سباق 1v1 المباشر 🏎️" : "Live 1v1 Race 🏎️"}</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => navigate("/student/puzzles")}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-rose-500 to-purple-600 text-white text-xs font-bold shadow-md shadow-rose-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
           >
