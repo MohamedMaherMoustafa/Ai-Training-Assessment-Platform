@@ -213,7 +213,7 @@ export default function PuzzleGameBoard({
         {/* Visual Puzzle Area */}
         <div className="p-6 sm:p-8 rounded-3xl glass-subtle flex flex-col items-center justify-center min-h-[180px]">
           {/* 1. Number Sequence Visual */}
-          {puzzle.type === "number_sequence" && (
+          {puzzle.type === "number_sequence" && Array.isArray(puzzle.sequenceDisplay) && (
             <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3.5">
               {puzzle.sequenceDisplay.map((item, idx) => (
                 <div
@@ -230,27 +230,27 @@ export default function PuzzleGameBoard({
           )}
 
           {/* 2. Visual Matrix Pattern */}
-          {puzzle.type === "matrix_pattern" && puzzle.visualData && (
+          {puzzle.type === "matrix_pattern" && Array.isArray(puzzle.visualData?.rows) && (
             <div className="grid grid-cols-3 gap-3 p-3 glass-card rounded-3xl shadow-inner">
               {puzzle.visualData.rows.map((row, rIdx) =>
-                row.map((cell, cIdx) => (
+                Array.isArray(row) ? row.map((cell, cIdx) => (
                   <div
                     key={`${rIdx}_${cIdx}`}
-                    className={`h-20 w-20 sm:h-24 sm:w-24 rounded-2xl flex flex-col items-center justify-center font-bold text-xs p-1 transition-all ${cell.shape === "unknown"
+                    className={`h-20 w-20 sm:h-24 sm:w-24 rounded-2xl flex flex-col items-center justify-center font-bold text-xs p-1 transition-all ${cell?.shape === "unknown"
                         ? "bg-teal-500/15 border-2 border-dashed border-teal-400 text-teal-500 text-2xl animate-pulse"
                         : "bg-slate-100 dark:bg-white/[0.06] text-slate-800 dark:text-slate-200"
                       }`}
                   >
-                    {cell.shape !== "unknown" ? (
+                    {cell?.shape !== "unknown" ? (
                       <>
                         <span
                           className="text-2xl sm:text-3xl font-black transform transition-transform"
-                          style={{ display: "inline-block", transform: `rotate(${cell.rot}deg)` }}
+                          style={{ display: "inline-block", transform: `rotate(${cell?.rot || 0}deg)` }}
                         >
                           ▲
                         </span>
                         <div className="flex gap-1 mt-1">
-                          {Array.from({ length: cell.dots }).map((_, i) => (
+                          {Array.from({ length: cell?.dots || 0 }).map((_, i) => (
                             <span key={i} className="h-1.5 w-1.5 rounded-full bg-teal-400" />
                           ))}
                         </div>
@@ -259,13 +259,13 @@ export default function PuzzleGameBoard({
                       "?"
                     )}
                   </div>
-                ))
+                )) : null
               )}
             </div>
           )}
 
           {/* 3. Cryptic Cipher Card */}
-          {puzzle.type === "cryptic_cipher" && puzzle.visualData && (
+          {puzzle.type === "cryptic_cipher" && Array.isArray(puzzle.visualData?.letters) && (
             <div className="flex flex-wrap items-center justify-center gap-3">
               {puzzle.visualData.letters.map((item, idx) => (
                 <div
@@ -284,7 +284,7 @@ export default function PuzzleGameBoard({
           )}
 
           {/* 4. Truth Teller Mystery Vaults */}
-          {puzzle.type === "truth_teller" && puzzle.visualData && (
+          {puzzle.type === "truth_teller" && Array.isArray(puzzle.visualData?.vaults) && (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full">
               {puzzle.visualData.vaults.map((v) => (
                 <div
@@ -304,7 +304,7 @@ export default function PuzzleGameBoard({
           )}
 
           {/* 5. Balance Scale Equations */}
-          {puzzle.type === "balance_scale" && puzzle.visualData && (
+          {puzzle.type === "balance_scale" && Array.isArray(puzzle.visualData?.scales) && (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full">
               {puzzle.visualData.scales.map((s, idx) => (
                 <div
@@ -346,7 +346,7 @@ export default function PuzzleGameBoard({
           )}
 
           {/* 7. Gear Mechanics Diagram */}
-          {puzzle.type === "gear_mechanics" && puzzle.visualData && (
+          {puzzle.type === "gear_mechanics" && Array.isArray(puzzle.visualData?.gears) && (
             <div className="flex flex-wrap items-center justify-center gap-3">
               {puzzle.visualData.gears.map((g) => (
                 <div
@@ -387,10 +387,10 @@ export default function PuzzleGameBoard({
           )}
 
           {/* 9. Cube Folding Net */}
-          {puzzle.type === "cube_folding" && puzzle.visualData && (
+          {puzzle.type === "cube_folding" && Array.isArray(puzzle.visualData?.layout) && (
             <div className="grid grid-cols-3 gap-1.5 font-bold text-base">
               {puzzle.visualData.layout.map((row, rIdx) =>
-                row.map((cell, cIdx) => (
+                Array.isArray(row) ? row.map((cell, cIdx) => (
                   <div
                     key={`${rIdx}_${cIdx}`}
                     className={`h-11 w-11 rounded-xl flex items-center justify-center ${cell
@@ -400,13 +400,13 @@ export default function PuzzleGameBoard({
                   >
                     {cell}
                   </div>
-                ))
+                )) : null
               )}
             </div>
           )}
 
           {/* 10. Einstein Matrix Clues */}
-          {puzzle.type === "einstein_matrix" && puzzle.visualData && (
+          {puzzle.type === "einstein_matrix" && Array.isArray(puzzle.visualData?.clues) && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs w-full">
               {puzzle.visualData.clues.map((c, i) => (
                 <div
@@ -417,6 +417,34 @@ export default function PuzzleGameBoard({
                   <span>{c}</span>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* 11. Conceptual / Default Visual Focal Card when no specific visual layout matches */}
+          {(!puzzle.type || (
+            !(puzzle.type === "number_sequence" && Array.isArray(puzzle.sequenceDisplay)) &&
+            !(puzzle.type === "matrix_pattern" && Array.isArray(puzzle.visualData?.rows)) &&
+            !(puzzle.type === "cryptic_cipher" && Array.isArray(puzzle.visualData?.letters)) &&
+            !(puzzle.type === "truth_teller" && Array.isArray(puzzle.visualData?.vaults)) &&
+            !(puzzle.type === "balance_scale" && Array.isArray(puzzle.visualData?.scales)) &&
+            !(puzzle.type === "circuit_flow") &&
+            !(puzzle.type === "gear_mechanics" && Array.isArray(puzzle.visualData?.gears)) &&
+            !(puzzle.type === "lateral_river" && puzzle.visualData) &&
+            !(puzzle.type === "cube_folding" && Array.isArray(puzzle.visualData?.layout)) &&
+            !(puzzle.type === "einstein_matrix" && Array.isArray(puzzle.visualData?.clues))
+          )) && (
+            <div className="flex flex-col items-center justify-center text-center p-4 max-w-md space-y-2 animate-fadeIn">
+              <div className="h-14 w-14 rounded-2xl bg-teal-500/15 border border-teal-400/30 flex items-center justify-center text-2xl shadow-sm">
+                🧠
+              </div>
+              <span className="text-xs font-black text-teal-600 dark:text-teal-400 uppercase tracking-wider">
+                {lang === "ar" ? "تحدي التفكير المنطقي والتحليلي" : "Cognitive & Analytical Challenge"}
+              </span>
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                {lang === "ar"
+                  ? "اقرأ معطيات المسألة أعلاه بتمعن واستنتج الإجابة المنطقية الصحيحة من الخيارات بالأسفل"
+                  : "Carefully analyze the premises stated above to deduce the correct logical option below"}
+              </p>
             </div>
           )}
         </div>

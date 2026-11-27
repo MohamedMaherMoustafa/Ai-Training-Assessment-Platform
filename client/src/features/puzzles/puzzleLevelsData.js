@@ -1210,6 +1210,7 @@ export const PUZZLE_LEVELS = [
       "en": "Non-linear Function Discovery",
       "ar": "اكتشاف الدوال غير الخطية في خانات الأرقام"
     },
+    "sequenceDisplay": ["14 ➔ 5", "27 ➔ 14", "38 ➔ 24", "56 ➔ 30", "89 ➔ ?"],
     "question": {
       "en": "If 14 -> 5, 27 -> 14, 38 -> 24, and 56 -> 30, what does 89 map to?",
       "ar": "إذا كان: 14 -> 5، و 27 -> 14، و 38 -> 24، و 56 -> 30، فإلى ماذا يشير الرقم 89؟"
@@ -1433,6 +1434,7 @@ export const PUZZLE_LEVELS = [
       "en": "Conditional Backtracking",
       "ar": "التراجع الشرطي في سلاسل الأعداد"
     },
+    "sequenceDisplay": ["0", "1", "3", "6", "2", "7", "13", "20", "12", "21", "11", "22", "10", "?"],
     "question": {
       "en": "Following Recamán's rule: a(0)=0. To find a(n), subtract n if positive and not already in sequence, otherwise add n. Sequence: 0, 1, 3, 6, 2, 7, 13, 20, 12, 21, 11, 22, 10, ?. What is the 13th term (n=13)?",
       "ar": "وفق متتالية ريكامان: نبدأ بـ 0. لإيجاد a(n) نطرح n إذا كان الناتج موجباً وغير مكرر، وإلا نضيف n. المتتالية: 0, 1, 3, 6, 2, 7, 13, 20, 12, 21, 11, 22, 10, ؟. ما هو الحد التالي عند n=13؟"
@@ -1502,6 +1504,7 @@ export const PUZZLE_LEVELS = [
       "en": "Pattern Symmetry",
       "ar": "التناظر في الأنماط الحسابية"
     },
+    "sequenceDisplay": ["(3, 4 ➔ 25)", "(5, 12 ➔ 169)", "(8, 15 ➔ 289)", "(7, 24 ➔ ?)"],
     "question": {
       "en": "What number completes the triangle relation: (3, 4 -> 25), (5, 12 -> 169), (8, 15 -> 289), (7, 24 -> ?)",
       "ar": "ما هو الرقم الذي يكمل العلاقة الرياضية: (3, 4 -> 25)، (5, 12 -> 169)، (8, 15 -> 289)، (7, 24 -> ؟)"
@@ -1556,7 +1559,7 @@ export const PUZZLE_LEVELS = [
   {
     "id": 20,
     "levelNumber": 20,
-    "type": "matrix_pattern",
+    "type": "logical_deduction",
     "difficulty": "expert",
     "coins": 200,
     "title": {
@@ -2939,7 +2942,7 @@ export const PUZZLE_LEVELS = [
   {
     "id": 40,
     "levelNumber": 40,
-    "type": "matrix_pattern",
+    "type": "spatial_3d",
     "difficulty": "expert",
     "coins": 400,
     "title": {

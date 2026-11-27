@@ -29,6 +29,19 @@ export default function RobotMascotSvg({
   const signGradId = `${idPrefix}_signGrad_${skinId}`;
   const shadowFilterId = `${idPrefix}_signShadow`;
 
+  const signContent = useMemo(() => {
+    const raw = String(signText || "").trim();
+    // Match trailing emoji if any
+    const emojiRegex = /([\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]+)$/u;
+    const match = raw.match(emojiRegex);
+    if (match) {
+      const emoji = match[1];
+      const text = raw.replace(emojiRegex, "").trim();
+      return { text, emoji };
+    }
+    return { text: raw, emoji: null };
+  }, [signText]);
+
   return (
     <svg
       width={width}
@@ -66,7 +79,7 @@ export default function RobotMascotSvg({
 
         <linearGradient
           id={signGradId}
-          x1="63"
+          x1="55"
           y1="2"
           x2="118"
           y2="25"
@@ -176,38 +189,44 @@ export default function RobotMascotSvg({
               {/* Sign Board */}
               <g filter={`url(#${shadowFilterId})`}>
                 <rect
-                  x="63"
+                  x="55"
                   y="2"
-                  width="54"
+                  width="63"
                   height="22.5"
                   rx="6.5"
                   fill={`url(#${signGradId})`}
                   stroke="#ffffff"
                   strokeWidth="1.6"
                 />
-                {/* LED Status Indicator - moved to subtle top corner so it never collides with text */}
-                <circle cx="68" cy="6" r="1.3" fill={colors.ledColor} className="animate-pulse" opacity="0.85" />
-                {/* Sign Text & Icon Perfectly Scaled & Centered */}
+                {/* LED Status Indicator - placed cleanly in top-left corner */}
+                <circle cx="60.5" cy="6.5" r="1.3" fill={colors.ledColor} className="animate-pulse" opacity="0.9" />
+                {/* Sign Text & Icon with comfortable spacing and no border clipping */}
                 <text
-                  x="90.5"
+                  x="87.5"
                   y="13.5"
                   fill="#ffffff"
-                  fontSize={
-                    String(signText).length >= 8
-                      ? "7.5"
-                      : String(signText).length >= 6
-                      ? "8.2"
-                      : String(signText).length >= 4
-                      ? "8.8"
-                      : "9.5"
-                  }
-                  fontWeight="900"
                   textAnchor="middle"
                   dominantBaseline="central"
                   fontFamily="'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', system-ui, sans-serif"
-                  letterSpacing="0.2"
                 >
-                  {signText}
+                  <tspan
+                    fontSize={
+                      signContent.text.length >= 8
+                        ? "7"
+                        : signContent.text.length >= 6
+                        ? "7.6"
+                        : "8.5"
+                    }
+                    fontWeight="900"
+                    letterSpacing="0.3"
+                  >
+                    {signContent.text}
+                  </tspan>
+                  {signContent.emoji && (
+                    <tspan dx="4" fontSize="9">
+                      {signContent.emoji}
+                    </tspan>
+                  )}
                 </text>
               </g>
             </g>
