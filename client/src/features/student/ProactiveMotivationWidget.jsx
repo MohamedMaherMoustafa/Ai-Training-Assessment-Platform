@@ -9,7 +9,6 @@ import {
   ArrowLeft,
   X,
   Flame,
-  MessageCircle,
   TrendingUp,
   Target,
   ChevronRight,
@@ -173,35 +172,6 @@ export default function ProactiveMotivationWidget({ activeInstructorId = null })
     sessionStorage.setItem("motivation_agent_dismissed", "true");
   };
 
-  const handleWhatsAppAlert = () => {
-    const studentName = user?.displayName || user?.username || "الطالب";
-    let message = "";
-    if (rivalData?.isFirst) {
-      message =
-        lang === "ar"
-          ? `🌟 رائع يا ${studentName}! أنت تحتل المركز الأول 🏆 على منصة أثر برصيد ${rivalData.points} نقطة. استمر في الحفاظ على صدارتك!`
-          : `🌟 Great job ${studentName}! You're in 1st place 🏆 on Athar with ${rivalData.points} points. Keep your streak alive!`;
-    } else {
-      const suffix =
-        rivalData?.targetRank === 1
-          ? lang === "ar" ? "المركز الأول" : "1st place"
-          : rivalData?.targetRank === 2
-          ? lang === "ar" ? "المركز الثاني" : "2nd place"
-          : rivalData?.targetRank === 3
-          ? lang === "ar" ? "المركز الثالث" : "3rd place"
-          : `${rivalData?.targetRank}`;
-
-      message =
-        lang === "ar"
-          ? `🚀 مرحباً ${studentName}! يفصلك ${rivalData?.gap || 10} نقطة فقط عن تجاوز ${rivalData?.rivalName} في لوحة الشرف واقتناص ${suffix}! أكمل تحدي اليوم الآن ⚡`
-          : `🚀 Hey ${studentName}! You're only ${rivalData?.gap || 10} points away from passing ${rivalData?.rivalName} on the Scoreboard to claim ${suffix}! Take today's quiz now ⚡`;
-    }
-
-    const encoded = encodeURIComponent(message);
-    const waUrl = `https://wa.me/?text=${encoded}`;
-    window.open(waUrl, "_blank", "noopener,noreferrer");
-  };
-
   if (dismissed || loading || !rivalData) {
     return null;
   }
@@ -309,15 +279,6 @@ export default function ProactiveMotivationWidget({ activeInstructorId = null })
           >
             <Swords className="h-3.5 w-3.5 text-yellow-300" />
             <span>{lang === "ar" ? "معركة روبوت الذكاء" : "AI Boss Duel"}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={handleWhatsAppAlert}
-            title={lang === "ar" ? "تنبيه ومشاركة عبر واتساب" : "WhatsApp study reminder"}
-            className="p-1.5 rounded-xl glass-subtle hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 transition-all cursor-pointer"
-          >
-            <MessageCircle className="h-4 w-4" />
           </button>
 
           <button
