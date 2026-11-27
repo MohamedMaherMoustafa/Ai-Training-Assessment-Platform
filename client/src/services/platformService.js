@@ -9,6 +9,58 @@ import { ref, get, set, update, remove, push, onValue } from "firebase/database"
 import { auth, rtdb, getSecondaryAuth } from "../lib/firebase";
 import { validateUsername } from "../utils/validators";
 
+/* ==================== HIGH PERFORMANCE IN-MEMORY CACHE & REQUEST DEDUPLICATION ==================== */
+const cacheStore = new Map();
+const inFlightRequests = new Map();
+
+/**
+ * Perform a cached RTDB get with automatic in-flight promise deduplication
+ * Reduces redundant network roundtrips and drops tab-switch latency to 0ms
+ * @param {string} path - RTDB node path
+ * @param {number} ttlMs - Cache duration in ms (default: 8000ms)
+ */
+export async function cachedRtdbGet(path, ttlMs = 8000) {
+  const now = Date.now();
+  const cached = cacheStore.get(path);
+
+  if (cached && now - cached.timestamp < ttlMs) {
+    return cached.data;
+  }
+
+  if (inFlightRequests.has(path)) {
+    return inFlightRequests.get(path);
+  }
+
+  const promise = (async () => {
+    try {
+      const snap = await get(ref(rtdb, path));
+      const val = snap.exists() ? snap.val() : null;
+      cacheStore.set(path, { data: val, timestamp: Date.now() });
+      return val;
+    } finally {
+      inFlightRequests.delete(path);
+    }
+  })();
+
+  inFlightRequests.set(path, promise);
+  return promise;
+}
+
+/**
+ * Invalidate cache for specified paths or prefixes
+ */
+export function invalidateRtdbCache(pathPrefix) {
+  if (!pathPrefix) {
+    cacheStore.clear();
+    return;
+  }
+  for (const key of cacheStore.keys()) {
+    if (key === pathPrefix || key.startsWith(pathPrefix + "/")) {
+      cacheStore.delete(key);
+    }
+  }
+}
+
 const normalizeKey = (value) => value.trim().toLowerCase().replace(/[^a-z0-9_@-]/g, "_");
 
 const VALID_EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -345,9 +397,8 @@ export async function requestAdditionalInstructor(studentUid, instructorUid) {
 }
 
 export async function listUsers(roleFilter = null) {
-  const snap = await get(ref(rtdb, "users"));
-  if (!snap.exists()) return [];
-  const val = snap.val();
+  const val = await cachedRtdbGet("users", 8000);
+  if (!val) return [];
   const arr = Object.entries(val).map(([uid, data]) => ({ uid, ...data }));
   const sorted = arr.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
   return roleFilter ? sorted.filter((u) => u.role === roleFilter) : sorted;
@@ -360,6 +411,7 @@ export async function listActiveInstructors() {
 
 export async function updateUserRecord(uid, patch) {
   await update(ref(rtdb, `users/${uid}`), { ...patch, updatedAt: Date.now() });
+  invalidateRtdbCache("users");
 }
 
 export async function deleteUserRecord(uid, username, email) {
@@ -370,6 +422,7 @@ export async function deleteUserRecord(uid, username, email) {
   if (email) {
     await remove(ref(rtdb, `usernames/${normalizeKey(email)}`));
   }
+  invalidateRtdbCache("users");
 }
 
 /**
@@ -475,6 +528,7 @@ export async function updateUserProfileAndCredentials(currentUser, { displayName
     }
   }
 
+  invalidateRtdbCache("users");
   return {
     ...currentUser,
     ...userUpdates,
@@ -483,9 +537,9 @@ export async function updateUserProfileAndCredentials(currentUser, { displayName
 
 /* ==================== ASSIGNMENTS ==================== */
 export async function listAssignments() {
-  const snap = await get(ref(rtdb, "assignments"));
-  if (!snap.exists()) return [];
-  return Object.entries(snap.val())
+  const val = await cachedRtdbGet("assignments", 8000);
+  if (!val) return [];
+  return Object.entries(val)
     .map(([id, data]) => ({
       id,
       ...data,
@@ -531,6 +585,7 @@ export async function createAssignment({
     createdAt: Date.now(),
   };
   await set(newRef, doc);
+  invalidateRtdbCache("assignments");
 
   await pushNotification("admin_123", {
     titleEn: "New Assignment Created",
@@ -557,10 +612,12 @@ export async function updateAssignment(assignmentId, patch) {
     ...patch,
     updatedAt: Date.now(),
   });
+  invalidateRtdbCache("assignments");
 }
 
 export async function deleteAssignment(assignmentId) {
   await remove(ref(rtdb, `assignments/${assignmentId}`));
+  invalidateRtdbCache("assignments");
 }
 
 export async function submitAssignmentWork(
@@ -623,6 +680,9 @@ export async function submitAssignmentWork(
       link: "/instructor/assignments",
     });
   }
+  invalidateRtdbCache("assignments");
+  invalidateRtdbCache("assignmentSubmissions");
+  invalidateRtdbCache("results");
 }
 
 export async function gradeAssignmentSubmission(
@@ -677,13 +737,16 @@ export async function gradeAssignmentSubmission(
     type: "info",
     link: "/admin/scoreboard",
   });
+  invalidateRtdbCache("assignments");
+  invalidateRtdbCache("assignmentSubmissions");
+  invalidateRtdbCache("results");
 }
 
 /* ==================== COURSES & LESSONS ==================== */
 export async function listCourses(instructorId = null) {
-  const snap = await get(ref(rtdb, "courses"));
-  if (!snap.exists()) return [];
-  const arr = Object.entries(snap.val()).map(([id, data]) => ({
+  const val = await cachedRtdbGet("courses", 8000);
+  if (!val) return [];
+  const arr = Object.entries(val).map(([id, data]) => ({
     id,
     ...data,
     lessons: data.lessons
@@ -707,6 +770,7 @@ export async function createCourse({ titleEn, titleAr, descEn, descAr, instructo
     createdAt: Date.now(),
   };
   await set(newRef, course);
+  invalidateRtdbCache("courses");
 
   await pushNotification("admin_123", {
     titleEn: "New Course Created",
@@ -730,6 +794,7 @@ export async function createCourse({ titleEn, titleAr, descEn, descAr, instructo
 
 export async function deleteCourse(courseId) {
   await remove(ref(rtdb, `courses/${courseId}`));
+  invalidateRtdbCache("courses");
 }
 
 export async function addLessonToCourse(courseId, { titleEn, titleAr, content, fileUrl }) {
@@ -742,6 +807,7 @@ export async function addLessonToCourse(courseId, { titleEn, titleAr, content, f
     createdAt: Date.now(),
   };
   await set(lessonRef, lesson);
+  invalidateRtdbCache("courses");
 
   const courseSnap = await get(ref(rtdb, `courses/${courseId}`));
   if (courseSnap.exists()) {
@@ -770,13 +836,15 @@ export async function enrolStudentInCourse(courseId, studentId) {
   if (!userCourses.includes(courseId)) {
     await set(ref(rtdb, `users/${studentId}/enrolledCourseIds`), [...userCourses, courseId]);
   }
+  invalidateRtdbCache("courses");
+  invalidateRtdbCache("users");
 }
 
 /* ==================== QUIZZES & RESULTS ==================== */
 export async function listQuizzes() {
-  const snap = await get(ref(rtdb, "quizzes"));
-  if (!snap.exists()) return [];
-  return Object.entries(snap.val())
+  const val = await cachedRtdbGet("quizzes", 8000);
+  if (!val) return [];
+  return Object.entries(val)
     .map(([id, data]) => ({ id, ...data }))
     .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 }
@@ -803,11 +871,13 @@ export async function createQuiz({
     createdAt: Date.now(),
   };
   await set(quizRef, quiz);
+  invalidateRtdbCache("quizzes");
   return quiz;
 }
 
 export async function updateQuiz(quizId, patch) {
   await update(ref(rtdb, `quizzes/${quizId}`), { ...patch, updatedAt: Date.now() });
+  invalidateRtdbCache("quizzes");
   if (patch.status === "published") {
     const snap = await get(ref(rtdb, `quizzes/${quizId}`));
     if (snap.exists()) {
@@ -834,6 +904,7 @@ export async function updateQuiz(quizId, patch) {
 
 export async function deleteQuiz(quizId) {
   await remove(ref(rtdb, `quizzes/${quizId}`));
+  invalidateRtdbCache("quizzes");
 }
 
 /* ==================== QUIZ ENTRY LOCK & RETAKE REQUESTS ==================== */
@@ -963,9 +1034,9 @@ export async function rejectQuizRetake(quizId, studentId) {
 }
 
 export async function listResults() {
-  const snap = await get(ref(rtdb, "results"));
-  if (!snap.exists()) return [];
-  return Object.entries(snap.val())
+  const val = await cachedRtdbGet("results", 6000);
+  if (!val) return [];
+  return Object.entries(val)
     .map(([id, data]) => ({ id, ...data }))
     .sort((a, b) => (b.submittedAt || 0) - (a.submittedAt || 0));
 }
@@ -1004,6 +1075,7 @@ export async function submitQuizAttempt({
     submittedAt: Date.now(),
   };
   await set(resRef, result);
+  invalidateRtdbCache("results");
 
   await pushNotification("admin_123", {
     titleEn: "Quiz Submitted",
@@ -1985,6 +2057,7 @@ export async function saveStudentIQProgress(studentUid, stats) {
       coins: updatedCust.availableCoins,
       totalEarnedCoins: updatedCust.totalEarnedCoins,
     });
+    invalidateRtdbCache("users");
 
     if (typeof window !== "undefined") {
       window.dispatchEvent(
@@ -2040,86 +2113,88 @@ export async function getStudentCustomizationAndCoins(studentUid) {
     };
   }
 
+  // Concurrently fetch all dependencies in parallel via cached RTDB lookups
+  let allResults = [];
+  let allAssignments = [];
+  let allSubs = {};
+  let iqRemoteData = null;
+  let remoteCust = null;
+
+  try {
+    const [resultsVal, assignmentsVal, assignmentSubsVal, iqVal, custVal] = await Promise.all([
+      cachedRtdbGet("results", 5000).catch(() => null),
+      cachedRtdbGet("assignments", 6000).catch(() => null),
+      cachedRtdbGet("assignmentSubmissions", 6000).catch(() => null),
+      cachedRtdbGet(`users/${studentUid}/iqStats`, 3000).catch(() => null),
+      cachedRtdbGet(`users/${studentUid}/customization`, 3000).catch(() => null),
+    ]);
+
+    if (resultsVal) allResults = Object.values(resultsVal);
+    if (assignmentsVal) allAssignments = Object.values(assignmentsVal);
+    if (assignmentSubsVal) allSubs = assignmentSubsVal;
+    iqRemoteData = iqVal;
+    remoteCust = custVal;
+  } catch (err) {
+    console.warn("Could not fetch data for coins calculation in parallel:", err.message);
+  }
+
   // 1. Calculate Academic Points (Quiz Points + Assignment Points)
   let academicPoints = 0;
-  try {
-    const resultsSnap = await get(ref(rtdb, "results"));
-    if (resultsSnap.exists()) {
-      const allResults = Object.values(resultsSnap.val() || {});
-      allResults.forEach((r) => {
-        if (r && r.studentId === studentUid) {
-          if (r.points !== undefined && r.points !== null) {
-            academicPoints += Number(r.points) || 0;
-          } else {
-            const totalQ = Number(r.total) || 1;
-            const pct = Number(r.score) || 0;
-            academicPoints += Math.round((pct / 100) * totalQ);
-          }
-        }
-      });
+  allResults.forEach((r) => {
+    if (r && r.studentId === studentUid) {
+      if (r.points !== undefined && r.points !== null) {
+        academicPoints += Number(r.points) || 0;
+      } else {
+        const totalQ = Number(r.total) || 1;
+        const pct = Number(r.score) || 0;
+        academicPoints += Math.round((pct / 100) * totalQ);
+      }
     }
+  });
 
-    const assignmentsSnap = await get(ref(rtdb, "assignments"));
-    if (assignmentsSnap.exists()) {
-      const allAssignments = Object.values(assignmentsSnap.val() || {});
-      allAssignments.forEach((a) => {
-        if (a && a.submissions) {
-          const subs = Array.isArray(a.submissions)
-            ? a.submissions
-            : Object.values(a.submissions || {});
-          subs.forEach((sub) => {
-            if (
-              sub &&
-              (sub.studentId === studentUid || sub.id === studentUid) &&
-              sub.score !== undefined &&
-              sub.score !== null &&
-              sub.score !== ""
-            ) {
-              academicPoints += Number(sub.score) || 0;
-            }
-          });
+  allAssignments.forEach((a) => {
+    if (a && a.submissions) {
+      const subs = Array.isArray(a.submissions)
+        ? a.submissions
+        : Object.values(a.submissions || {});
+      subs.forEach((sub) => {
+        if (
+          sub &&
+          (sub.studentId === studentUid || sub.id === studentUid) &&
+          sub.score !== undefined &&
+          sub.score !== null &&
+          sub.score !== ""
+        ) {
+          academicPoints += Number(sub.score) || 0;
         }
       });
     }
+  });
 
-    const assignmentSubsSnap = await get(ref(rtdb, "assignmentSubmissions"));
-    if (assignmentSubsSnap.exists()) {
-      const allSubs = assignmentSubsSnap.val() || {};
-      Object.values(allSubs).forEach((studentMap) => {
-        if (studentMap && typeof studentMap === "object") {
-          const sub = studentMap[studentUid];
-          if (sub && sub.score !== undefined && sub.score !== null && sub.score !== "") {
-            academicPoints += Number(sub.score) || 0;
-          }
+  if (allSubs && typeof allSubs === "object") {
+    Object.values(allSubs).forEach((studentMap) => {
+      if (studentMap && typeof studentMap === "object") {
+        const sub = studentMap[studentUid];
+        if (sub && sub.score !== undefined && sub.score !== null && sub.score !== "") {
+          academicPoints += Number(sub.score) || 0;
         }
-      });
-    }
-  } catch (err) {
-    console.warn("Could not calculate academic points for coins:", err.message);
+      }
+    });
   }
 
   // 2. Fetch IQ Puzzle Coins
-  let iqCoins = 0;
-  try {
-    const iqSnap = await get(ref(rtdb, `users/${studentUid}/iqStats`));
-    if (iqSnap.exists()) {
-      iqCoins = Number(iqSnap.val()?.coins) || 0;
-    }
-    if (!iqCoins && typeof window !== "undefined") {
-      try {
-        const localIQ = localStorage.getItem(`iq_stats_${studentUid}`);
-        if (localIQ) {
-          const parsed = JSON.parse(localIQ);
-          iqCoins = Number(parsed?.coins) || 0;
-        }
-      } catch {}
-    }
-  } catch (err) {
-    console.warn("Could not fetch IQ coins:", err.message);
+  let iqCoins = Number(iqRemoteData?.coins) || 0;
+  if (!iqCoins && typeof window !== "undefined") {
+    try {
+      const localIQ = localStorage.getItem(`iq_stats_${studentUid}`);
+      if (localIQ) {
+        const parsed = JSON.parse(localIQ);
+        iqCoins = Number(parsed?.coins) || 0;
+      }
+    } catch {}
   }
 
   // 3. Fetch Customization & Spent Coins
-  let customization = {};
   const localKey = `customization_${studentUid}`;
   let localData = null;
   try {
@@ -2127,18 +2202,9 @@ export async function getStudentCustomizationAndCoins(studentUid) {
     if (raw) localData = JSON.parse(raw);
   } catch {}
 
-  try {
-    const custSnap = await get(ref(rtdb, `users/${studentUid}/customization`));
-    if (custSnap.exists()) {
-      customization = custSnap.val() || {};
-    }
-  } catch (err) {
-    console.warn("Could not fetch user customization:", err.message);
-  }
-
   const mergedCust = {
     ...localData,
-    ...customization,
+    ...(remoteCust || {}),
   };
 
   const spentCoins = Number(mergedCust.spentCoins) || 0;
@@ -2211,6 +2277,8 @@ export async function buyStoreItem(studentUid, item) {
   } catch {}
 
   await update(ref(rtdb, `users/${studentUid}/customization`), payload);
+  invalidateRtdbCache(`users/${studentUid}/customization`);
+  invalidateRtdbCache("users");
 
   // Dispatch custom window event so AppLayout, Chatbot, and Dashboard update in real-time
   if (typeof window !== "undefined") {
@@ -2252,6 +2320,8 @@ export async function equipStoreItem(studentUid, itemType, itemId) {
   } catch {}
 
   await update(ref(rtdb, `users/${studentUid}/customization`), payload);
+  invalidateRtdbCache(`users/${studentUid}/customization`);
+  invalidateRtdbCache("users");
 
   if (typeof window !== "undefined") {
     window.dispatchEvent(

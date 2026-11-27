@@ -8,6 +8,25 @@ const PREFERRED_MODEL = process.env.OLLAMA_MODEL || "academy-tutor";
 const getGeminiApiKey = () => process.env.GEMINI_API_KEY || "";
 const getGeminiModel = () => process.env.GEMINI_MODEL || "gemini-flash-lite-latest";
 
+const chatResponseCache = new Map();
+const CHAT_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+function getCachedChat(key) {
+  const item = chatResponseCache.get(key);
+  if (!item) return null;
+  if (Date.now() - item.timestamp > CHAT_CACHE_TTL) {
+    chatResponseCache.delete(key);
+    return null;
+  }
+  return item.payload;
+}
+function setCachedChat(key, payload) {
+  if (chatResponseCache.size > 200) {
+    const oldestKey = chatResponseCache.keys().next().value;
+    chatResponseCache.delete(oldestKey);
+  }
+  chatResponseCache.set(key, { payload, timestamp: Date.now() });
+}
+
 const STOP_WORDS = new Set([
   "the", "is", "are", "was", "were", "a", "an", "in", "on", "at", "to", "for", "of",
   "and", "or", "what", "who", "where", "when", "how", "can", "you", "me", "my", "i",
@@ -312,6 +331,25 @@ router.post("/", async (req, res) => {
     .filter(Boolean)
     .join("\n\n");
 
+  const hasNoAttachments = !attachments || attachments.length === 0;
+  const cacheKey = `${role}:${lang}:${mode}:${(message || "").trim().toLowerCase()}:${historyBlock.slice(-120)}`;
+  if (hasNoAttachments && message && message.trim()) {
+    const cached = getCachedChat(cacheKey);
+    if (cached) {
+      return res.json({
+        ...cached,
+        cached: true,
+      });
+    }
+  }
+
+  const replyJson = (payload) => {
+    if (hasNoAttachments && payload?.reply && message && message.trim()) {
+      setCachedChat(cacheKey, payload);
+    }
+    return res.json(payload);
+  };
+
   const geminiKey = getGeminiApiKey();
   const geminiModel = getGeminiModel();
 
@@ -327,7 +365,7 @@ router.post("/", async (req, res) => {
       });
 
       if (geminiResult?.text) {
-        return res.json({
+        return replyJson({
           model: "AI Assistant",
           provider: "ai",
           reply: geminiResult.text,
@@ -355,7 +393,7 @@ router.post("/", async (req, res) => {
 
       const text = String(ollamaRes.data?.response || "").trim();
       if (text) {
-        return res.json({
+        return replyJson({
           model,
           provider: "ollama",
           reply: text,
@@ -367,7 +405,7 @@ router.post("/", async (req, res) => {
   }
 
   // Priority 3: Platform Grounded Fallback
-  return res.json({
+  return replyJson({
     model: "platform-ai-grounded",
     provider: "grounded-fallback",
     reply: buildFallbackReply({ lang, mode, message, contextSummary, lessonText, lessonTitle }),
