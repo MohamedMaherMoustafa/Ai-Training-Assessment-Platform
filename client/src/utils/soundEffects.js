@@ -280,6 +280,34 @@ export function playBossDefeatSound() {
   } catch {}
 }
 
+/**
+ * Cute, friendly robotic chirp for the Athar Virtual Companion.
+ */
+export function playCompanionChirpSound() {
+  if (!isSoundEnabled()) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    const now = ctx.currentTime;
+    // Pleasant arpeggio: 659Hz (E5) -> 880Hz (A5) -> 1318Hz (E6)
+    const notes = [659.25, 880, 1318.51];
+    notes.forEach((freq, idx) => {
+      const start = now + idx * 0.055;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq, start);
+      gain.gain.setValueAtTime(0.001, start);
+      gain.gain.linearRampToValueAtTime(0.09, start + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.12);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(start);
+      osc.stop(start + 0.13);
+    });
+  } catch {}
+}
+
 
 
 

@@ -33,6 +33,7 @@ import { useLang } from "../../context/LangContext";
 import { useTheme } from "../../context/ThemeContext";
 import { processChatbotMessage } from "../../utils/platformChatbotEngine";
 import RobotMascotSvg from "./RobotMascotSvg";
+import AtharVirtualCompanion from "./AtharVirtualCompanion";
 import { getStudentCustomizationAndCoins } from "../../services/platformService";
 
 // Lightweight beautiful markdown formatter for AI responses
@@ -870,33 +871,37 @@ export default function PlatformChatbotWidget() {
         }`}
     >
       {!open ? (
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="group relative flex flex-col items-center pb-0 focus:outline-none cursor-pointer select-none transition-transform hover:scale-105 active:scale-95"
-          title={lang === "ar" ? "اضغط للتحدث مع المساعد الذكي أثر AI" : "Click to open Athar AI Assistant"}
-          aria-label="Open AI Robot Chatbot"
-        >
-          {/* Robot Mascot Launcher */}
-          <div className="flex flex-col items-center relative">
-            <div className="drop-shadow-[0_8px_18px_rgba(20,184,166,0.38)] -mb-2">
-              <RobotMascotSvg
-                skinId={botCustomization.botColor || "skin_classic_blue"}
-                hatId={botCustomization.botHat || "hat_none"}
-                glassesId={botCustomization.botGlasses || "glasses_none"}
-                shoesId={botCustomization.botShoes || "shoes_none"}
-                width={82}
-                height={88}
-                className="w-[74px] h-[80px] sm:w-[82px] sm:h-[88px] overflow-visible"
-                signText={lang === "ar" ? "مساعدة!" : "HELP!"}
-                idPrefix="widget"
-              />
+        user?.role === "student" ? (
+          <AtharVirtualCompanion onOpenChatbot={() => setOpen(true)} />
+        ) : (
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="group relative flex flex-col items-center pb-0 focus:outline-none cursor-pointer select-none transition-transform hover:scale-105 active:scale-95"
+            title={lang === "ar" ? "اضغط للتحدث مع المساعد الذكي أثر AI" : "Click to open Athar AI Assistant"}
+            aria-label="Open AI Robot Chatbot"
+          >
+            {/* Robot Mascot Launcher */}
+            <div className="flex flex-col items-center relative">
+              <div className="drop-shadow-[0_8px_18px_rgba(20,184,166,0.38)] -mb-2">
+                <RobotMascotSvg
+                  skinId={botCustomization.botColor || "skin_classic_blue"}
+                  hatId={botCustomization.botHat || "hat_none"}
+                  glassesId={botCustomization.botGlasses || "glasses_none"}
+                  shoesId={botCustomization.botShoes || "shoes_none"}
+                  width={82}
+                  height={88}
+                  className="w-[74px] h-[80px] sm:w-[82px] sm:h-[88px] overflow-visible"
+                  signText={lang === "ar" ? "مساعدة!" : "HELP!"}
+                  idPrefix="widget"
+                />
+              </div>
+              <div className="inline-flex items-center justify-center px-3.5 py-1 rounded-full bg-white/90 dark:bg-[#0c1a26]/90 backdrop-blur-xl border border-slate-200/80 dark:border-teal-500/35 shadow-[0_8px_22px_rgba(0,0,0,0.35)] text-[11px] font-bold text-slate-900 dark:text-white">
+                <span>{lang === "ar" ? "أثر AI" : "Athar AI"}</span>
+              </div>
             </div>
-            <div className="inline-flex items-center justify-center px-3.5 py-1 rounded-full bg-white/90 dark:bg-[#0c1a26]/90 backdrop-blur-xl border border-slate-200/80 dark:border-teal-500/35 shadow-[0_8px_22px_rgba(0,0,0,0.35)] text-[11px] font-bold text-slate-900 dark:text-white">
-              <span>{lang === "ar" ? "أثر AI" : "Athar AI"}</span>
-            </div>
-          </div>
-        </button>
+          </button>
+        )
       ) : (
         <div
           className={`chatbot-pop-in bg-white/95 dark:bg-[#091620]/95 backdrop-blur-2xl rounded-[28px] shadow-2xl border border-slate-200/80 dark:border-teal-400/20 flex flex-col overflow-hidden transition-all duration-200 ${expanded
