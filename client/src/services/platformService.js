@@ -1977,6 +1977,44 @@ export async function saveStudentIQProgress(studentUid, stats) {
   } catch (err) {
     console.warn("RTDB IQ stats save warning:", err.message);
   }
+
+  // Recalculate total coins & sync immediately to user record and all UI components
+  try {
+    const updatedCust = await getStudentCustomizationAndCoins(studentUid);
+    await update(ref(rtdb, `users/${studentUid}`), {
+      coins: updatedCust.availableCoins,
+      totalEarnedCoins: updatedCust.totalEarnedCoins,
+    });
+
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("athar_customization_updated", {
+          detail: {
+            equipped: updatedCust.equipped,
+            availableCoins: updatedCust.availableCoins,
+            totalEarnedCoins: updatedCust.totalEarnedCoins,
+            iqCoins: Number(stats.coins) || 0,
+          },
+        })
+      );
+    }
+  } catch (err) {
+    console.warn("Could not sync coins after IQ progress:", err.message);
+  }
+}
+
+export async function resetStudentIQProgress(studentUid) {
+  if (!studentUid) return null;
+  const resetStats = {
+    coins: 0,
+    solvedLevels: [],
+    unlockedLevel: 1,
+    hintsUsed: 0,
+    dailyStreak: 0,
+    lastPlayedDate: null,
+  };
+  await saveStudentIQProgress(studentUid, resetStats);
+  return resetStats;
 }
 
 // -------------------------------------------------------------

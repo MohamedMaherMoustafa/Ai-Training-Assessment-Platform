@@ -74,14 +74,13 @@ export default function AppLayout({ navItems, children }) {
       .catch(() => {});
 
     const handleUpdate = (e) => {
-      if (e.detail?.equipped) {
+      if (e.detail) {
         setCustomization((prev) => ({
-          ...prev,
-          equipped: e.detail.equipped,
+          equipped: e.detail.equipped || prev?.equipped || {},
           availableCoins:
             e.detail.availableCoins !== undefined
               ? e.detail.availableCoins
-              : prev.availableCoins,
+              : prev?.availableCoins || 0,
         }));
       }
     };
@@ -464,7 +463,7 @@ export default function AppLayout({ navItems, children }) {
                 >
                   <span className="text-amber-500 text-xs">🟡</span>
                   <span className="font-mono">
-                    {(customization?.availableCoins || 702).toLocaleString()}
+                    {(Number(customization?.availableCoins) || 0).toLocaleString()}
                   </span>
                   <span className="hidden sm:inline">Coins</span>
                 </NavLink>

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import toast from "react-hot-toast";
 import {
   Brain,
   Coins,
@@ -33,6 +34,7 @@ import PuzzleGameBoard from "./components/PuzzleGameBoard";
 import {
   getStudentIQStats,
   saveStudentIQProgress,
+  resetStudentIQProgress,
 } from "../../services/platformService";
 import { playClickSound, playCoinSound } from "../../utils/soundEffects";
 
@@ -49,24 +51,33 @@ export default function IQPuzzlesModule() {
     lastPlayedDate: null,
   });
 
-  const [activeTab, setActiveTab] = useState("levels"); // 'levels' | 'daily' | 'profile'
+  const [activeTab, setActiveTab] = useState("levels"); // 'levels' | 'daily' | 'profile' | 'battle'
   const [activePuzzle, setActivePuzzle] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
-  // Load student IQ progress from RTDB and localStorage
+  // Load student IQ progress from RTDB and localStorage & sync to main account
   useEffect(() => {
     let mounted = true;
     if (user?.uid) {
-      getStudentIQStats(user.uid).then((res) => {
+      getStudentIQStats(user.uid).then(async (res) => {
         if (mounted && res) {
-          setStats((prev) => ({
-            ...prev,
-            ...res,
+          const loadedStats = {
+            coins: Math.max(0, Number(res.coins) || 0),
             solvedLevels: Array.isArray(res.solvedLevels) ? res.solvedLevels : [],
             unlockedLevel: Math.max(1, Number(res.unlockedLevel) || 1),
-            coins: Math.max(0, Number(res.coins) || 0),
-          }));
+            hintsUsed: Number(res.hintsUsed) || 0,
+            dailyStreak: Number(res.dailyStreak) || 0,
+            lastPlayedDate: res.lastPlayedDate || null,
+          };
+          setStats(loadedStats);
           setLoading(false);
+
+          // Force instant sync with platform customization & navbar coins!
+          try {
+            await saveStudentIQProgress(user.uid, loadedStats);
+          } catch {}
         }
       });
     } else {
@@ -76,6 +87,30 @@ export default function IQPuzzlesModule() {
       mounted = false;
     };
   }, [user?.uid]);
+
+  const handleConfirmReset = async () => {
+    if (!user?.uid || resetting) return;
+    setResetting(true);
+    playClickSound();
+    try {
+      const resetStats = await resetStudentIQProgress(user.uid);
+      if (resetStats) {
+        setStats(resetStats);
+      }
+      setActivePuzzle(null);
+      setShowResetModal(false);
+      toast.success(
+        lang === "ar"
+          ? "تمت إعادة ضبط المستويات والبدء من المستوى الأول بنجاح! 🚀"
+          : "Levels reset successfully! Starting from Level 1 🚀"
+      );
+    } catch (err) {
+      console.error("Failed to reset levels:", err);
+      toast.error(lang === "ar" ? "تعذر إعادة ضبط المستويات" : "Failed to reset levels");
+    } finally {
+      setResetting(false);
+    }
+  };
 
   const currentRank = useMemo(() => getRankByCoins(stats.coins), [stats.coins]);
 
@@ -289,58 +324,71 @@ export default function IQPuzzlesModule() {
         </div>
       </div>
 
-      {/* Navigation Tab Selector */}
-      <div className="flex flex-wrap items-center gap-2 pb-1">
-        <button
-          type="button"
-          onClick={() => setActiveTab("levels")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-            activeTab === "levels"
-              ? "glass-btn-primary"
-              : "glass-btn-secondary"
-          }`}
-        >
-          <Compass className="h-4 w-4" />
-          <span>{lang === "ar" ? "خريطة المراحل (50 مستوى)" : "Levels Roadmap (50 Puzzles)"}</span>
-        </button>
+      {/* Navigation Tab Selector & Reset Action */}
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setActiveTab("levels")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+              activeTab === "levels"
+                ? "glass-btn-primary"
+                : "glass-btn-secondary"
+            }`}
+          >
+            <Compass className="h-4 w-4" />
+            <span>{lang === "ar" ? "خريطة المراحل (50 مستوى)" : "Levels Roadmap (50 Puzzles)"}</span>
+          </button>
 
-        <button
-          type="button"
-          onClick={() => setActiveTab("daily")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-            activeTab === "daily"
-              ? "glass-btn-primary"
-              : "glass-btn-secondary"
-          }`}
-        >
-          <CalendarCheck className="h-4 w-4 text-amber-400" />
-          <span>{lang === "ar" ? "التحدي اليومي المكافأ" : "Daily Brain Teaser"}</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("daily")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+              activeTab === "daily"
+                ? "glass-btn-primary"
+                : "glass-btn-secondary"
+            }`}
+          >
+            <CalendarCheck className="h-4 w-4 text-amber-400" />
+            <span>{lang === "ar" ? "التحدي اليومي المكافأ" : "Daily Brain Teaser"}</span>
+          </button>
 
-        <button
-          type="button"
-          onClick={() => setActiveTab("profile")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-            activeTab === "profile"
-              ? "glass-btn-primary"
-              : "glass-btn-secondary"
-          }`}
-        >
-          <Award className="h-4 w-4" />
-          <span>{lang === "ar" ? "المهارات والأوسمة" : "IQ Skills & Badges"}</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("profile")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+              activeTab === "profile"
+                ? "glass-btn-primary"
+                : "glass-btn-secondary"
+            }`}
+          >
+            <Award className="h-4 w-4" />
+            <span>{lang === "ar" ? "المهارات والأوسمة" : "IQ Skills & Badges"}</span>
+          </button>
 
+          <button
+            type="button"
+            onClick={() => setActiveTab("battle")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+              activeTab === "battle"
+                ? "glass-btn-primary ring-2 ring-rose-500/50"
+                : "glass-btn-secondary"
+            }`}
+          >
+            <Swords className="h-4 w-4 text-rose-500 animate-pulse" />
+            <span>{lang === "ar" ? "معارك الروبوتات ⚔️" : "AI Boss Battles ⚔️"}</span>
+          </button>
+        </div>
+
+        {/* Reset Levels & Start from 1 Button */}
         <button
           type="button"
-          onClick={() => setActiveTab("battle")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-            activeTab === "battle"
-              ? "glass-btn-primary ring-2 ring-rose-500/50"
-              : "glass-btn-secondary"
-          }`}
+          onClick={() => setShowResetModal(true)}
+          className="flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-rose-400/50 dark:border-rose-500/30 bg-rose-50/90 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 text-xs font-bold hover:bg-rose-100 dark:hover:bg-rose-900/50 hover:border-rose-500 transition-all hover:scale-105 active:scale-95 shadow-sm cursor-pointer"
+          title={lang === "ar" ? "إعادة ضبط مستويات الألغاز والبدء من المستوى الأول مجدداً" : "Reset puzzle levels and start from Level 1 again"}
         >
-          <Swords className="h-4 w-4 text-rose-500 animate-pulse" />
-          <span>{lang === "ar" ? "معارك الروبوتات ⚔️" : "AI Boss Battles ⚔️"}</span>
+          <RotateCcw className="h-3.5 w-3.5 text-rose-500" />
+          <span>{lang === "ar" ? "إعادة ضبط المستويات (البدء من 1) 🔄" : "Reset Levels (Start from 1) 🔄"}</span>
         </button>
       </div>
 
@@ -548,6 +596,53 @@ export default function IQPuzzlesModule() {
           }}
           onBackToMap={() => setActiveTab("levels")}
         />
+      )}
+
+      {/* Reset Confirmation Modal */}
+      {showResetModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+          <div className="w-full max-w-md rounded-3xl glass-panel border-rose-500/40 p-6 shadow-2xl space-y-4 animate-scaleUp">
+            <div className="flex items-center gap-3 text-rose-600 dark:text-rose-400">
+              <div className="h-12 w-12 rounded-2xl bg-rose-500/15 border border-rose-400/30 flex items-center justify-center text-xl">
+                ⚠️
+              </div>
+              <div>
+                <h3 className="text-base font-black text-slate-900 dark:text-white">
+                  {lang === "ar" ? "إعادة ضبط المستويات والبدء من 1؟" : "Reset Levels & Start from 1?"}
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {lang === "ar" ? "بدء رحلة الألغاز من جديد" : "Start your puzzle journey fresh"}
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+              {lang === "ar"
+                ? "سيتم قفل جميع المستويات المحلولة السابقة والبدء مجدداً من المستوى الأول (Level 1)، لتتمكن من حلها وجمع عملات المستويات كاملة لحسابك من جديد!"
+                : "All previous solved levels will be locked so you can start fresh from Level 1, solve all 50 brain teasers, and earn their coins to your account from the beginning!"}
+            </p>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-200/60 dark:border-white/10">
+              <button
+                type="button"
+                onClick={() => setShowResetModal(false)}
+                className="px-4 py-2 rounded-xl glass-subtle text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 transition-all cursor-pointer"
+              >
+                {lang === "ar" ? "إلغاء والاحتفاظ بتقدمي" : "Cancel & Keep Progress"}
+              </button>
+
+              <button
+                type="button"
+                disabled={resetting}
+                onClick={handleConfirmReset}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white text-xs font-extrabold shadow-md shadow-rose-600/25 transition-all hover:scale-105 active:scale-95 cursor-pointer disabled:opacity-50"
+              >
+                <RotateCcw className={`h-3.5 w-3.5 ${resetting ? "animate-spin" : ""}`} />
+                <span>{lang === "ar" ? "نعم، ابدأ من المستوى 1 🚀" : "Yes, Reset to Level 1 🚀"}</span>
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
